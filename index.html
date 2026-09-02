@@ -41,7 +41,6 @@ header {
 .logo {
     font-size: 32px;
     font-weight: bold;
-    color: #172033;
 }
 
 .logo span {
@@ -75,11 +74,11 @@ header {
     color: #64748b;
     line-height: 1.8;
     margin: 0 auto 35px;
-    max-width: 700px;
+    max-width: 750px;
 }
 
 
-/* الأزرار الرئيسية */
+/* الأزرار */
 
 .buttons {
     display: flex;
@@ -91,8 +90,8 @@ header {
 button {
     border: none;
     border-radius: 15px;
-    padding: 16px 27px;
-    font-size: 17px;
+    padding: 15px 25px;
+    font-size: 16px;
     font-weight: bold;
     cursor: pointer;
 
@@ -108,15 +107,16 @@ button:hover {
 }
 
 .primary {
-    color: white;
-
     background: linear-gradient(
         135deg,
         #2563eb,
         #4f46e5
     );
 
-    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
+    color: white;
+
+    box-shadow:
+        0 10px 25px rgba(37, 99, 235, 0.25);
 }
 
 .secondary {
@@ -124,11 +124,12 @@ button:hover {
     color: #334155;
     border: 1px solid #e2e8f0;
 
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+    box-shadow:
+        0 8px 20px rgba(15, 23, 42, 0.06);
 }
 
 
-/* البطاقات */
+/* البطاقات الرئيسية */
 
 .cards {
     display: grid;
@@ -138,7 +139,7 @@ button:hover {
 }
 
 .card {
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.95);
 
     border-radius: 22px;
 
@@ -151,16 +152,11 @@ button:hover {
     box-shadow:
         0 12px 35px rgba(15, 23, 42, 0.07);
 
-    transition:
-        transform 0.25s,
-        box-shadow 0.25s;
+    transition: transform 0.25s;
 }
 
 .card:hover {
     transform: translateY(-7px);
-
-    box-shadow:
-        0 18px 45px rgba(15, 23, 42, 0.12);
 }
 
 .icon {
@@ -186,22 +182,20 @@ button:hover {
 
 .card h3 {
     margin: 18px 0 10px;
-    font-size: 21px;
 }
 
 .card p {
     color: #64748b;
     line-height: 1.8;
-    margin: 0;
 }
 
 
-/* الأقسام الداخلية */
+/* الأقسام */
 
 .section {
     display: none;
 
-    background: rgba(255, 255, 255, 0.96);
+    background: rgba(255,255,255,0.96);
 
     border-radius: 22px;
 
@@ -212,18 +206,12 @@ button:hover {
     border: 1px solid #e2e8f0;
 
     box-shadow:
-        0 15px 45px rgba(15, 23, 42, 0.08);
+        0 15px 45px rgba(15,23,42,0.08);
 }
 
 .section h2 {
     margin-top: 0;
-    font-size: 28px;
-    color: #334155;
-}
-
-.section > p {
-    color: #64748b;
-    line-height: 1.8;
+    font-size: 29px;
 }
 
 
@@ -254,10 +242,11 @@ textarea {
     background: #f8fafc;
 
     outline: none;
+}
 
-    transition:
-        border-color 0.2s,
-        box-shadow 0.2s;
+textarea {
+    min-height: 130px;
+    resize: vertical;
 }
 
 input:focus,
@@ -265,14 +254,7 @@ textarea:focus {
     border-color: #6366f1;
 
     box-shadow:
-        0 0 0 4px rgba(99, 102, 241, 0.10);
-
-    background: white;
-}
-
-textarea {
-    min-height: 130px;
-    resize: vertical;
+        0 0 0 4px rgba(99,102,241,0.10);
 }
 
 
@@ -286,9 +268,6 @@ textarea {
     );
 
     color: white;
-
-    box-shadow:
-        0 8px 20px rgba(37, 99, 235, 0.20);
 }
 
 .back-button {
@@ -298,10 +277,75 @@ textarea {
 }
 
 
+/* عنوان تصفح الفرص */
+
+.market-intro {
+    background: linear-gradient(
+        135deg,
+        #eff6ff,
+        #f5f3ff
+    );
+
+    padding: 20px;
+
+    border-radius: 18px;
+
+    margin-bottom: 25px;
+}
+
+.market-intro p {
+    color: #64748b;
+    line-height: 1.8;
+}
+
+
+/* شبكة المجالات */
+
+.categories {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 12px;
+
+    margin-bottom: 30px;
+}
+
+.category {
+    background: white;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 15px;
+
+    padding: 16px 10px;
+
+    text-align: center;
+
+    cursor: pointer;
+
+    font-weight: bold;
+
+    transition:
+        transform 0.2s,
+        background 0.2s;
+}
+
+.category:hover {
+    transform: translateY(-3px);
+    background: #f8fafc;
+}
+
+
 /* الفرص */
 
+.opportunities-title {
+    margin: 25px 0 15px;
+}
+
 .opportunity {
-    background: #ffffff;
+    background: white;
 
     border: 1px solid #e2e8f0;
 
@@ -312,21 +356,55 @@ textarea {
     margin-bottom: 16px;
 
     box-shadow:
-        0 7px 22px rgba(15, 23, 42, 0.05);
+        0 7px 22px rgba(15,23,42,0.05);
 }
 
 .opportunity h3 {
     margin-top: 0;
+
     color: #4f46e5;
 }
 
 .opportunity p {
     color: #64748b;
+
     line-height: 1.8;
 }
 
-.opportunity strong {
+.opportunity-info {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    margin: 15px 0;
+}
+
+.tag {
+    background: #f1f5f9;
+
+    color: #475569;
+
+    padding: 7px 12px;
+
+    border-radius: 10px;
+
+    font-size: 14px;
+}
+
+.price {
     color: #16a34a;
+
+    font-weight: bold;
+}
+
+.apply-button {
+    background: #4f46e5;
+
+    color: white;
+
+    padding: 11px 18px;
 }
 
 
@@ -362,14 +440,15 @@ footer {
 
 /* الهاتف */
 
-@media (max-width: 700px) {
+@media (max-width: 800px) {
 
-    .container {
-        padding: 14px;
+    .cards {
+        grid-template-columns: 1fr;
     }
 
-    .hero {
-        padding-top: 50px;
+    .categories {
+        grid-template-columns:
+            repeat(2, 1fr);
     }
 
     .hero h1 {
@@ -379,13 +458,21 @@ footer {
     .hero p {
         font-size: 19px;
     }
+}
 
-    .cards {
-        grid-template-columns: 1fr;
+
+@media (max-width: 500px) {
+
+    .container {
+        padding: 14px;
     }
 
     .section {
         padding: 22px;
+    }
+
+    .categories {
+        grid-template-columns: 1fr 1fr;
     }
 
     button {
@@ -416,7 +503,7 @@ footer {
 </header>
 
 
-<!-- الصفحة الرئيسية -->
+<!-- الرئيسية -->
 
 <section class="hero" id="home">
 
@@ -523,7 +610,6 @@ footer {
 
     </div>
 
-
 </section>
 
 
@@ -536,16 +622,13 @@ footer {
     </h2>
 
     <p>
-        أنشئ ملفك وأخبرنا بالمهارات التي
-        تستطيع تقديمها.
+        أنشئ ملفك وأخبرنا بالمهارات التي تستطيع تقديمها.
     </p>
 
 
     <div class="form-group">
 
-        <label>
-            الاسم
-        </label>
+        <label>الاسم</label>
 
         <input
             id="workerName"
@@ -557,23 +640,19 @@ footer {
 
     <div class="form-group">
 
-        <label>
-            المهارة
-        </label>
+        <label>المهارة</label>
 
         <input
             id="workerSkill"
             type="text"
-            placeholder="مثال: كتابة، تصميم، ترجمة">
+            placeholder="مثال: تفريغ صوتي، برمجة، كتابة">
 
     </div>
 
 
     <div class="form-group">
 
-        <label>
-            نبذة عنك
-        </label>
+        <label>نبذة عنك</label>
 
         <textarea
             id="workerDescription"
@@ -620,16 +699,13 @@ footer {
     </h2>
 
     <p>
-        أرسل تفاصيل مشروعك ليتمكن الأشخاص
-        المناسبون من التقدم إليه.
+        أرسل تفاصيل مشروعك ليتمكن الأشخاص المناسبون من التقدم إليه.
     </p>
 
 
     <div class="form-group">
 
-        <label>
-            اسم المشروع
-        </label>
+        <label>اسم المشروع</label>
 
         <input
             id="projectName"
@@ -641,23 +717,19 @@ footer {
 
     <div class="form-group">
 
-        <label>
-            نوع العمل
-        </label>
+        <label>نوع العمل</label>
 
         <input
             id="projectType"
             type="text"
-            placeholder="مثال: تصميم شعار">
+            placeholder="مثال: تفريغ صوتي، برمجة، تصميم">
 
     </div>
 
 
     <div class="form-group">
 
-        <label>
-            تفاصيل المشروع
-        </label>
+        <label>تفاصيل المشروع</label>
 
         <textarea
             id="projectDescription"
@@ -704,20 +776,171 @@ footer {
     </h2>
 
 
-    <div class="opportunity">
+    <div class="market-intro">
 
         <h3>
-            ✍️ كتابة المحتوى
+            🚀 اكتشف فرص العمل المناسبة لك
         </h3>
 
         <p>
-            مطلوب شخص لديه مهارة في كتابة
-            المقالات والمحتوى الإلكتروني.
+            اختر المجال الذي تملك مهارة فيه،
+            واستكشف المشاريع والطلبات المتاحة.
+            لاحقًا ستظهر هنا الفرص الحقيقية التي ينشرها أصحاب المشاريع.
         </p>
 
-        <strong>
-            💰 الأجر: يحدد مع صاحب المشروع
-        </strong>
+    </div>
+
+
+    <!-- المجالات -->
+
+    <h3>
+        🧩 المجالات
+    </h3>
+
+
+    <div class="categories">
+
+
+        <div class="category">
+            🎙️ التفريغ الصوتي
+        </div>
+
+
+        <div class="category">
+            💻 البرمجة
+        </div>
+
+
+        <div class="category">
+            ✍️ كتابة المقالات
+        </div>
+
+
+        <div class="category">
+            🌐 الترجمة
+        </div>
+
+
+        <div class="category">
+            🎨 التصميم
+        </div>
+
+
+        <div class="category">
+            🎬 المونتاج
+        </div>
+
+
+        <div class="category">
+            📱 التواصل الاجتماعي
+        </div>
+
+
+        <div class="category">
+            📢 التسويق الإلكتروني
+        </div>
+
+
+        <div class="category">
+            📝 إدخال البيانات
+        </div>
+
+
+        <div class="category">
+            📊 Excel والبيانات
+        </div>
+
+
+        <div class="category">
+            🎧 التعليق الصوتي
+        </div>
+
+
+        <div class="category">
+            📚 التعليم
+        </div>
+
+
+        <div class="category">
+            📖 التدقيق اللغوي
+        </div>
+
+
+        <div class="category">
+            🛍️ المتاجر الإلكترونية
+        </div>
+
+
+        <div class="category">
+            🤖 الذكاء الاصطناعي
+        </div>
+
+
+        <div class="category">
+            📸 تحرير الصور
+        </div>
+
+
+        <div class="category">
+            🗂️ المساعدة الافتراضية
+        </div>
+
+
+        <div class="category">
+            🧾 المحاسبة
+        </div>
+
+
+        <div class="category">
+            🔧 خدمات أخرى
+        </div>
+
+
+    </div>
+
+
+    <!-- الفرص التجريبية -->
+
+    <h3 class="opportunities-title">
+        🔥 فرص متاحة الآن
+    </h3>
+
+
+    <div class="opportunity">
+
+        <h3>
+            🎙️ تفريغ تسجيل صوتي
+        </h3>
+
+        <p>
+            مطلوب شخص لتفريغ تسجيل صوتي وتحويله
+            إلى نص عربي مرتب.
+        </p>
+
+        <div class="opportunity-info">
+
+            <span class="tag">
+                🎙️ تفريغ صوتي
+            </span>
+
+            <span class="tag">
+                ⏱️ مشروع واحد
+            </span>
+
+            <span class="price">
+                💰 الميزانية: 20$
+            </span>
+
+        </div>
+
+        <button
+            type="button"
+            class="apply-button"
+            onclick="applyOpportunity('تفريغ تسجيل صوتي')">
+
+            📩 التقدم للفرصة
+
+        </button>
 
     </div>
 
@@ -725,16 +948,38 @@ footer {
     <div class="opportunity">
 
         <h3>
-            🎨 تصميم
+            💻 إنشاء موقع إلكتروني
         </h3>
 
         <p>
-            فرصة لمصمم لإنجاز تصاميم إلكترونية.
+            مطلوب مبرمج لإنشاء موقع إلكتروني
+            بسيط ومتجاوب مع الهاتف.
         </p>
 
-        <strong>
-            💰 الأجر: يحدد مع صاحب المشروع
-        </strong>
+        <div class="opportunity-info">
+
+            <span class="tag">
+                💻 برمجة
+            </span>
+
+            <span class="tag">
+                🌐 مواقع
+            </span>
+
+            <span class="price">
+                💰 الميزانية: 100$
+            </span>
+
+        </div>
+
+        <button
+            type="button"
+            class="apply-button"
+            onclick="applyOpportunity('إنشاء موقع إلكتروني')">
+
+            📩 التقدم للفرصة
+
+        </button>
 
     </div>
 
@@ -742,151 +987,97 @@ footer {
     <div class="opportunity">
 
         <h3>
-            🌐 ترجمة
+            ✍️ كتابة مقالات
         </h3>
 
         <p>
-            مطلوب مترجم للعمل على مشاريع إلكترونية.
+            مطلوب كاتب لكتابة مقالات عربية
+            أصلية ومنظمة لموقع إلكتروني.
         </p>
 
-        <strong>
-            💰 الأجر: يحدد مع صاحب المشروع
-        </strong>
+        <div class="opportunity-info">
+
+            <span class="tag">
+                ✍️ كتابة
+            </span>
+
+            <span class="tag">
+                📝 مقالات
+            </span>
+
+            <span class="price">
+                💰 الميزانية: 30$
+            </span>
+
+        </div>
+
+        <button
+            type="button"
+            class="apply-button"
+            onclick="applyOpportunity('كتابة مقالات')">
+
+            📩 التقدم للفرصة
+
+        </button>
 
     </div>
 
 
-    <button
-        type="button"
-        class="back-button"
-        onclick="goHome()">
+    <div class="opportunity">
 
-        🔙 العودة
+        <h3>
+            🎨 تصميم شعار
+        </h3>
 
-    </button>
+        <p>
+            مطلوب مصمم لإنشاء شعار احترافي
+            لمشروع جديد.
+        </p>
 
-</section>
+        <div class="opportunity-info">
 
+            <span class="tag">
+                🎨 تصميم
+            </span>
 
-<footer>
+            <span class="tag">
+                🖼️ شعار
+            </span>
 
-    © 2026 مَدخَل — جميع الحقوق محفوظة
+            <span class="price">
+                💰 الميزانية: 40$
+            </span>
 
-</footer>
+        </div>
 
+        <button
+            type="button"
+            class="apply-button"
+            onclick="applyOpportunity('تصميم شعار')">
 
-</div>
+            📩 التقدم للفرصة
 
+        </button>
 
-<script>
-
-
-/* إخفاء جميع الأقسام */
-
-function hideSections() {
-
-    document.getElementById("home").style.display = "none";
-
-    document.getElementById("homeCards").style.display = "none";
-
-    document.getElementById("worker").style.display = "none";
-
-    document.getElementById("project").style.display = "none";
-
-    document.getElementById("opportunities").style.display = "none";
-}
+    </div>
 
 
-/* فتح قسم */
+    <div class="opportunity">
 
-function showSection(sectionId) {
+        <h3>
+            🌐 ترجمة نصوص
+        </h3>
 
-    hideSections();
+        <p>
+            مطلوب مترجم لترجمة مجموعة من النصوص
+            من الإنجليزية إلى العربية.
+        </p>
 
-    document.getElementById(sectionId).style.display = "block";
+        <div class="opportunity-info">
 
-    window.scrollTo(0, 0);
-}
+            <span class="tag">
+                🌐 ترجمة
+            </span>
 
-
-/* العودة إلى الرئيسية */
-
-function goHome() {
-
-    hideSections();
-
-    document.getElementById("home").style.display = "block";
-
-    document.getElementById("homeCards").style.display = "grid";
-
-    window.scrollTo(0, 0);
-}
-
-
-/* حفظ ملف العامل */
-
-function saveWorker() {
-
-    var name =
-        document.getElementById("workerName").value.trim();
-
-    var skill =
-        document.getElementById("workerSkill").value.trim();
-
-    var message =
-        document.getElementById("workerMessage");
-
-
-    if (name === "" || skill === "") {
-
-        message.innerText =
-            "⚠️ يرجى كتابة الاسم والمهارة أولًا.";
-
-        return;
-    }
-
-
-    message.innerText =
-        "✅ تم تسجيل بياناتك مبدئيًا. سنربطها بقاعدة البيانات في الخطوة التالية.";
-}
-
-
-/* نشر المشروع */
-
-function saveProject() {
-
-    var name =
-        document.getElementById("projectName").value.trim();
-
-    var type =
-        document.getElementById("projectType").value.trim();
-
-    var description =
-        document.getElementById("projectDescription").value.trim();
-
-    var message =
-        document.getElementById("projectMessage");
-
-
-    if (
-        name === "" ||
-        type === "" ||
-        description === ""
-    ) {
-
-        message.innerText =
-            "⚠️ يرجى تعبئة جميع البيانات.";
-
-        return;
-    }
-
-
-    message.innerText =
-        "✅ تم تجهيز المشروع. سنربطه بقاعدة البيانات في الخطوة التالية.";
-}
-
-
-</script>
-
-</body>
-</html>
+            <span class="tag">
+                🇬🇧 عربي
