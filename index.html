@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>مَدخَل - المدخل إلى سوق العمل الإلكتروني</title>
 
 <style>
@@ -83,6 +84,10 @@ button {
     border: 1px solid #dce2ec;
 }
 
+button:hover {
+    opacity: 0.9;
+}
+
 .cards {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -111,6 +116,70 @@ button {
     line-height: 1.7;
 }
 
+.section {
+    display: none;
+    background: white;
+    border-radius: 18px;
+    padding: 30px;
+    margin-bottom: 40px;
+    border: 1px solid #e4e8f0;
+}
+
+.section h2 {
+    margin-top: 0;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+input,
+textarea,
+select {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #dce2ec;
+    border-radius: 10px;
+    font-size: 16px;
+    margin-top: 7px;
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.action-button {
+    background: #2563eb;
+    color: white;
+    margin-top: 10px;
+}
+
+.back-button {
+    background: #eef2f7;
+    color: #172033;
+    margin-top: 10px;
+}
+
+.opportunity {
+    border: 1px solid #e4e8f0;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 15px;
+}
+
+.opportunity h3 {
+    margin-top: 0;
+}
+
+.message {
+    display: none;
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 10px;
+    background: #eef6ff;
+}
+
 footer {
     text-align: center;
     color: #7b8494;
@@ -130,6 +199,10 @@ footer {
     .hero p {
         font-size: 19px;
     }
+
+    .section {
+        padding: 20px;
+    }
 }
 </style>
 </head>
@@ -144,7 +217,7 @@ footer {
     </div>
 </header>
 
-<section class="hero">
+<section class="hero" id="home">
 
     <h1>مَدخَل</h1>
 
@@ -154,15 +227,15 @@ footer {
 
     <div class="buttons">
 
-        <button class="primary" onclick="alert('قسم الباحثين عن العمل سيكون متاحًا قريبًا')">
+        <button class="primary" onclick="showSection('worker')">
             💼 أبحث عن عمل
         </button>
 
-        <button class="secondary" onclick="alert('قسم أصحاب المشاريع سيكون متاحًا قريبًا')">
+        <button class="secondary" onclick="showSection('project')">
             📋 لدي مشروع
         </button>
 
-        <button class="secondary" onclick="alert('تصفح الفرص سيكون متاحًا قريبًا')">
+        <button class="secondary" onclick="showSection('opportunities')">
             🔍 تصفح الفرص
         </button>
 
@@ -198,11 +271,175 @@ footer {
 
 </section>
 
+<!-- قسم الباحث عن عمل -->
+
+<section class="section" id="worker">
+
+    <h2>💼 أبحث عن عمل</h2>
+
+    <p>
+        أنشئ ملفك وأخبرنا بالمهارات التي تستطيع تقديمها.
+    </p>
+
+    <div class="form-group">
+        <label>الاسم</label>
+        <input id="workerName" type="text" placeholder="اكتب اسمك">
+    </div>
+
+    <div class="form-group">
+        <label>المهارة</label>
+        <input id="workerSkill" type="text" placeholder="مثال: كتابة، تصميم، ترجمة">
+    </div>
+
+    <div class="form-group">
+        <label>نبذة عنك</label>
+        <textarea id="workerDescription" placeholder="اكتب نبذة قصيرة عن مهاراتك"></textarea>
+    </div>
+
+    <button class="action-button" onclick="saveWorker()">
+        ✅ حفظ ملفي
+    </button>
+
+    <button class="back-button" onclick="goHome()">
+        🔙 العودة
+    </button>
+
+    <div class="message" id="workerMessage"></div>
+
+</section>
+
+<!-- قسم صاحب المشروع -->
+
+<section class="section" id="project">
+
+    <h2>📋 لدي مشروع</h2>
+
+    <p>
+        أرسل تفاصيل مشروعك ليتمكن الأشخاص المناسبون من التقدم إليه.
+    </p>
+
+    <div class="form-group">
+        <label>اسم المشروع</label>
+        <input id="projectName" type="text" placeholder="اكتب اسم المشروع">
+    </div>
+
+    <div class="form-group">
+        <label>نوع العمل</label>
+        <input id="projectType" type="text" placeholder="مثال: تصميم شعار">
+    </div>
+
+    <div class="form-group">
+        <label>تفاصيل المشروع</label>
+        <textarea id="projectDescription" placeholder="اشرح المطلوب"></textarea>
+    </div>
+
+    <button class="action-button" onclick="saveProject()">
+        📤 نشر المشروع
+    </button>
+
+    <button class="back-button" onclick="goHome()">
+        🔙 العودة
+    </button>
+
+    <div class="message" id="projectMessage"></div>
+
+</section>
+
+<!-- قسم الفرص -->
+
+<section class="section" id="opportunities">
+
+    <h2>🔍 تصفح الفرص</h2>
+
+    <div class="opportunity">
+
+        <h3>✍️ كتابة المحتوى</h3>
+
+        <p>
+            مطلوب شخص لديه مهارة في كتابة المقالات والمحتوى الإلكتروني.
+        </p>
+
+        <strong>
+            💰 الأجر: يحدد مع صاحب المشروع
+        </strong>
+
+    </div>
+
+    <div class="opportunity">
+
+        <h3>🎨 تصميم</h3>
+
+        <p>
+            فرصة لمصمم لإنجاز تصاميم إلكترونية.
+        </p>
+
+        <strong>
+            💰 الأجر: يحدد مع صاحب المشروع
+        </strong>
+
+    </div>
+
+    <div class="opportunity">
+
+        <h3>🌐 ترجمة</h3>
+
+        <p>
+            مطلوب مترجم للعمل على مشاريع إلكترونية.
+        </p>
+
+        <strong>
+            💰 الأجر: يحدد مع صاحب المشروع
+        </strong>
+
+    </div>
+
+    <button class="back-button" onclick="goHome()">
+        🔙 العودة
+    </button>
+
+</section>
+
 <footer>
     © 2026 مَدخَل — جميع الحقوق محفوظة
 </footer>
 
 </div>
 
-</body>
-</html>
+<script>
+
+function hideSections() {
+
+    document.getElementById("home").style.display = "none";
+
+    document.getElementById("worker").style.display = "none";
+
+    document.getElementById("project").style.display = "none";
+
+    document.getElementById("opportunities").style.display = "none";
+}
+
+function showSection(sectionId) {
+
+    hideSections();
+
+    document.getElementById(sectionId).style.display = "block";
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+}
+
+function goHome() {
+
+    hideSections();
+
+    document.getElementById("home").style.display = "block";
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+}
+
+function saveWorker
