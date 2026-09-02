@@ -15,197 +15,397 @@
 body {
     margin: 0;
     font-family: Arial, Tahoma, sans-serif;
-    background: #f5f7fb;
     color: #172033;
+
+    background:
+        radial-gradient(circle at top right, #dbeafe 0%, transparent 35%),
+        radial-gradient(circle at bottom left, #ede9fe 0%, transparent 35%),
+        #f8fafc;
+
+    min-height: 100vh;
 }
 
 .container {
-    max-width: 1100px;
+    max-width: 1150px;
     margin: auto;
     padding: 20px;
 }
+
+
+/* الشعار */
 
 header {
     padding: 15px 0;
 }
 
 .logo {
-    font-size: 30px;
+    font-size: 32px;
     font-weight: bold;
+    color: #172033;
 }
 
 .logo span {
-    color: #2563eb;
+    color: #6366f1;
 }
+
+
+/* الصفحة الرئيسية */
 
 .hero {
     text-align: center;
-    padding: 65px 15px 50px;
+    padding: 70px 15px 45px;
 }
 
 .hero h1 {
-    font-size: 58px;
+    font-size: 68px;
     margin: 0 0 15px;
+
+    background: linear-gradient(
+        135deg,
+        #2563eb,
+        #7c3aed
+    );
+
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .hero p {
-    font-size: 22px;
-    color: #5d6678;
+    font-size: 23px;
+    color: #64748b;
     line-height: 1.8;
-    margin-bottom: 35px;
+    margin: 0 auto 35px;
+    max-width: 700px;
 }
+
+
+/* الأزرار الرئيسية */
 
 .buttons {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 14px;
+    gap: 15px;
 }
 
 button {
     border: none;
-    border-radius: 14px;
-    padding: 16px 25px;
+    border-radius: 15px;
+    padding: 16px 27px;
     font-size: 17px;
     font-weight: bold;
     cursor: pointer;
+
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s,
+        opacity 0.2s;
+}
+
+button:hover {
+    transform: translateY(-3px);
+    opacity: 0.95;
 }
 
 .primary {
-    background: #2563eb;
     color: white;
+
+    background: linear-gradient(
+        135deg,
+        #2563eb,
+        #4f46e5
+    );
+
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
 }
 
 .secondary {
     background: white;
-    color: #172033;
-    border: 1px solid #dce2ec;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
 }
 
-button:hover {
-    opacity: 0.9;
-}
 
-/* المربعات الثلاثة */
+/* البطاقات */
 
 .cards {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
-    margin-bottom: 55px;
+    gap: 22px;
+    margin: 25px 0 60px;
 }
 
 .card {
-    background: white;
-    border-radius: 18px;
-    padding: 25px;
+    background: rgba(255, 255, 255, 0.9);
+
+    border-radius: 22px;
+
+    padding: 30px 25px;
+
     text-align: center;
-    border: 1px solid #e4e8f0;
+
+    border: 1px solid #e2e8f0;
+
+    box-shadow:
+        0 12px 35px rgba(15, 23, 42, 0.07);
+
+    transition:
+        transform 0.25s,
+        box-shadow 0.25s;
+}
+
+.card:hover {
+    transform: translateY(-7px);
+
+    box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.12);
 }
 
 .icon {
+    width: 70px;
+    height: 70px;
+
+    margin: auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 20px;
+
     font-size: 35px;
+
+    background: linear-gradient(
+        135deg,
+        #dbeafe,
+        #ede9fe
+    );
 }
 
 .card h3 {
-    margin: 12px 0 8px;
+    margin: 18px 0 10px;
+    font-size: 21px;
 }
 
 .card p {
-    color: #687286;
-    line-height: 1.7;
+    color: #64748b;
+    line-height: 1.8;
+    margin: 0;
 }
 
-/* الأقسام */
+
+/* الأقسام الداخلية */
 
 .section {
     display: none;
-    background: white;
-    border-radius: 18px;
-    padding: 30px;
-    margin: 20px 0 40px;
-    border: 1px solid #e4e8f0;
+
+    background: rgba(255, 255, 255, 0.96);
+
+    border-radius: 22px;
+
+    padding: 35px;
+
+    margin: 30px 0 50px;
+
+    border: 1px solid #e2e8f0;
+
+    box-shadow:
+        0 15px 45px rgba(15, 23, 42, 0.08);
 }
 
 .section h2 {
     margin-top: 0;
+    font-size: 28px;
+    color: #334155;
 }
 
+.section > p {
+    color: #64748b;
+    line-height: 1.8;
+}
+
+
+/* الحقول */
+
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    font-weight: bold;
 }
 
 input,
 textarea {
     width: 100%;
-    padding: 13px;
-    border: 1px solid #dce2ec;
-    border-radius: 10px;
+
+    padding: 14px;
+
+    border: 1px solid #dbe2ea;
+
+    border-radius: 12px;
+
     font-size: 16px;
-    margin-top: 7px;
+
+    margin-top: 8px;
+
+    background: #f8fafc;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+}
+
+input:focus,
+textarea:focus {
+    border-color: #6366f1;
+
+    box-shadow:
+        0 0 0 4px rgba(99, 102, 241, 0.10);
+
+    background: white;
 }
 
 textarea {
-    min-height: 120px;
+    min-height: 130px;
     resize: vertical;
 }
 
+
+/* أزرار الأقسام */
+
 .action-button {
-    background: #2563eb;
+    background: linear-gradient(
+        135deg,
+        #2563eb,
+        #4f46e5
+    );
+
     color: white;
+
+    box-shadow:
+        0 8px 20px rgba(37, 99, 235, 0.20);
 }
 
 .back-button {
-    background: #eef2f7;
-    color: #172033;
+    background: #f1f5f9;
+    color: #334155;
+    margin-right: 8px;
 }
+
+
+/* الفرص */
 
 .opportunity {
-    border: 1px solid #e4e8f0;
-    border-radius: 14px;
-    padding: 18px;
-    margin-bottom: 15px;
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 18px;
+
+    padding: 22px;
+
+    margin-bottom: 16px;
+
+    box-shadow:
+        0 7px 22px rgba(15, 23, 42, 0.05);
 }
 
-.message {
-    margin-top: 15px;
-    padding: 12px;
-    border-radius: 10px;
-    background: #eef6ff;
+.opportunity h3 {
+    margin-top: 0;
+    color: #4f46e5;
 }
+
+.opportunity p {
+    color: #64748b;
+    line-height: 1.8;
+}
+
+.opportunity strong {
+    color: #16a34a;
+}
+
+
+/* الرسائل */
+
+.message {
+    margin-top: 18px;
+
+    padding: 14px;
+
+    border-radius: 12px;
+
+    background: #eff6ff;
+
+    color: #1e40af;
+}
+
+
+/* الفوتر */
 
 footer {
     text-align: center;
-    color: #7b8494;
-    border-top: 1px solid #e2e6ee;
-    padding: 25px 0;
+
+    color: #94a3b8;
+
+    border-top: 1px solid #e2e8f0;
+
+    padding: 28px 0;
+
+    margin-top: 30px;
 }
+
+
+/* الهاتف */
 
 @media (max-width: 700px) {
 
-    .cards {
-        grid-template-columns: 1fr;
+    .container {
+        padding: 14px;
+    }
+
+    .hero {
+        padding-top: 50px;
     }
 
     .hero h1 {
-        font-size: 45px;
+        font-size: 52px;
     }
 
     .hero p {
         font-size: 19px;
     }
 
+    .cards {
+        grid-template-columns: 1fr;
+    }
+
     .section {
-        padding: 20px;
+        padding: 22px;
+    }
+
+    button {
+        width: 100%;
+    }
+
+    .back-button {
+        margin-right: 0;
+        margin-top: 10px;
     }
 }
 
 </style>
 </head>
 
+
 <body>
 
 <div class="container">
+
 
 <header>
 
@@ -224,7 +424,10 @@ footer {
 
     <p>
         المدخل إلى سوق العمل الإلكتروني
+        <br>
+        نساعدك على الوصول إلى الفرصة المناسبة
     </p>
+
 
     <div class="buttons">
 
@@ -232,21 +435,29 @@ footer {
             type="button"
             class="primary"
             onclick="showSection('worker')">
+
             💼 أبحث عن عمل
+
         </button>
+
 
         <button
             type="button"
             class="secondary"
             onclick="showSection('project')">
+
             📋 لدي مشروع
+
         </button>
+
 
         <button
             type="button"
             class="secondary"
             onclick="showSection('opportunities')">
+
             🔍 تصفح الفرص
+
         </button>
 
     </div>
@@ -254,20 +465,24 @@ footer {
 </section>
 
 
-<!-- المربعات الثلاثة -->
+<!-- البطاقات -->
 
 <section class="cards" id="homeCards">
 
+
     <div class="card">
 
-        <div class="icon">💼</div>
+        <div class="icon">
+            💼
+        </div>
 
         <h3>
             فرص عمل
         </h3>
 
         <p>
-            اكتشف فرصًا ومشاريع إلكترونية تناسب مهاراتك.
+            اكتشف فرصًا ومشاريع إلكترونية
+            تناسب مهاراتك.
         </p>
 
     </div>
@@ -275,14 +490,17 @@ footer {
 
     <div class="card">
 
-        <div class="icon">📋</div>
+        <div class="icon">
+            📋
+        </div>
 
         <h3>
             أصحاب المشاريع
         </h3>
 
         <p>
-            اعرض مشروعك وابحث عن الشخص المناسب لإنجازه.
+            اعرض مشروعك وابحث عن الشخص
+            المناسب لإنجازه.
         </p>
 
     </div>
@@ -290,17 +508,21 @@ footer {
 
     <div class="card">
 
-        <div class="icon">🤝</div>
+        <div class="icon">
+            🤝
+        </div>
 
         <h3>
             تواصل مباشر
         </h3>
 
         <p>
-            منصة واحدة تجمع صاحب المشروع بمن يستطيع تنفيذ العمل.
+            منصة واحدة تجمع صاحب المشروع
+            بمن يستطيع تنفيذ العمل.
         </p>
 
     </div>
+
 
 </section>
 
@@ -314,7 +536,8 @@ footer {
     </h2>
 
     <p>
-        أنشئ ملفك وأخبرنا بالمهارات التي تستطيع تقديمها.
+        أنشئ ملفك وأخبرنا بالمهارات التي
+        تستطيع تقديمها.
     </p>
 
 
@@ -397,7 +620,8 @@ footer {
     </h2>
 
     <p>
-        أرسل تفاصيل مشروعك ليتمكن الأشخاص المناسبون من التقدم إليه.
+        أرسل تفاصيل مشروعك ليتمكن الأشخاص
+        المناسبون من التقدم إليه.
     </p>
 
 
@@ -487,7 +711,8 @@ footer {
         </h3>
 
         <p>
-            مطلوب شخص لديه مهارة في كتابة المقالات والمحتوى الإلكتروني.
+            مطلوب شخص لديه مهارة في كتابة
+            المقالات والمحتوى الإلكتروني.
         </p>
 
         <strong>
@@ -549,10 +774,12 @@ footer {
 
 </footer>
 
+
 </div>
 
 
 <script>
+
 
 /* إخفاء جميع الأقسام */
 
@@ -582,7 +809,7 @@ function showSection(sectionId) {
 }
 
 
-/* العودة إلى الصفحة الرئيسية */
+/* العودة إلى الرئيسية */
 
 function goHome() {
 
@@ -657,6 +884,7 @@ function saveProject() {
     message.innerText =
         "✅ تم تجهيز المشروع. سنربطه بقاعدة البيانات في الخطوة التالية.";
 }
+
 
 </script>
 
