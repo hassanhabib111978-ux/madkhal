@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مَدخَل - المدخل إلى سوق العمل الإلكتروني</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Tahoma, sans-serif;
+    background: #f5f7fb;
+    color: #172033;
+}
+
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+}
+
+.logo {
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.logo span {
+    color: #2563eb;
+}
+
+.hero {
+    text-align: center;
+    padding: 65px 15px 50px;
+}
+
+.hero h1 {
+    font-size: 58px;
+    margin: 0 0 15px;
+}
+
+.hero p {
+    font-size: 22px;
+    color: #5d6678;
+    line-height: 1.8;
+    margin-bottom: 35px;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+button {
+    border: none;
+    border-radius: 14px;
+    padding: 16px 25px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.primary {
+    background: #2563eb;
+    color: white;
+}
+
+.secondary {
+    background: white;
+    color: #172033;
+    border: 1px solid #dce2ec;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 55px;
+}
+
+.card {
+    background: white;
+    border-radius: 18px;
+    padding: 25px;
+    text-align: center;
+    border: 1px solid #e4e8f0;
+}
+
+.icon {
+    font-size: 35px;
+}
+
+.card h3 {
+    margin: 12px 0 8px;
+}
+
+.card p {
+    color: #687286;
+    line-height: 1.7;
+}
+
+footer {
+    text-align: center;
+    color: #7b8494;
+    border-top: 1px solid #e2e6ee;
+    padding: 25px 0;
+}
+
+@media (max-width: 700px) {
+    .cards {
+        grid-template-columns: 1fr;
+    }
+
+    .hero h1 {
+        font-size: 45px;
+    }
+
+    .hero p {
+        font-size: 19px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+    <div class="logo">
+        مَدخَل<span>.</span>
+    </div>
+</header>
+
+<section class="hero">
+
+    <h1>مَدخَل</h1>
+
+    <p>
+        المدخل إلى سوق العمل الإلكتروني
+    </p>
+
+    <div class="buttons">
+
+        <button class="primary" onclick="alert('قسم الباحثين عن العمل سيكون متاحًا قريبًا')">
+            💼 أبحث عن عمل
+        </button>
+
+        <button class="secondary" onclick="alert('قسم أصحاب المشاريع سيكون متاحًا قريبًا')">
+            📋 لدي مشروع
+        </button>
+
+        <button class="secondary" onclick="alert('تصفح الفرص سيكون متاحًا قريبًا')">
+            🔍 تصفح الفرص
+        </button>
+
+    </div>
+
+</section>
+
+<section class="cards">
+
+    <div class="card">
+        <div class="icon">💼</div>
+        <h3>فرص عمل</h3>
+        <p>
+            اكتشف فرصًا ومشاريع إلكترونية تناسب مهاراتك.
+        </p>
+    </div>
+
+    <div class="card">
+        <div class="icon">📋</div>
+        <h3>أصحاب المشاريع</h3>
+        <p>
+            اعرض مشروعك وابحث عن الشخص المناسب لإنجازه.
+        </p>
+    </div>
+
+    <div class="card">
+        <div class="icon">🤝</div>
+        <h3>تواصل مباشر</h3>
+        <p>
+            منصة واحدة تجمع صاحب المشروع بمن يستطيع تنفيذ العمل.
+        </p>
+    </div>
+
+</section>
+
+<footer>
+    © 2026 مَدخَل — جميع الحقوق محفوظة
+</footer>
+
+</div>
+
+</body>
+</html>
