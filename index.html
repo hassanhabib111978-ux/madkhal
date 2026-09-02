@@ -31,7 +31,6 @@ body {
     padding: 20px;
 }
 
-
 /* الشعار */
 
 header {
@@ -46,7 +45,6 @@ header {
 .logo span {
     color: #6366f1;
 }
-
 
 /* الصفحة الرئيسية */
 
@@ -76,7 +74,6 @@ header {
     margin: 0 auto 35px;
     max-width: 750px;
 }
-
 
 /* الأزرار */
 
@@ -127,7 +124,6 @@ button:hover {
     box-shadow:
         0 8px 20px rgba(15, 23, 42, 0.06);
 }
-
 
 /* البطاقات الرئيسية */
 
@@ -189,7 +185,6 @@ button:hover {
     line-height: 1.8;
 }
 
-
 /* الأقسام */
 
 .section {
@@ -213,7 +208,6 @@ button:hover {
     margin-top: 0;
     font-size: 29px;
 }
-
 
 /* الحقول */
 
@@ -257,7 +251,6 @@ textarea:focus {
         0 0 0 4px rgba(99,102,241,0.10);
 }
 
-
 /* أزرار الأقسام */
 
 .action-button {
@@ -275,7 +268,6 @@ textarea:focus {
     color: #334155;
     margin-right: 8px;
 }
-
 
 /* عنوان تصفح الفرص */
 
@@ -297,7 +289,6 @@ textarea:focus {
     color: #64748b;
     line-height: 1.8;
 }
-
 
 /* شبكة المجالات */
 
@@ -329,14 +320,19 @@ textarea:focus {
 
     transition:
         transform 0.2s,
-        background 0.2s;
+        background 0.2s,
+        border-color 0.2s,
+        box-shadow 0.2s;
 }
 
 .category:hover {
     transform: translateY(-3px);
     background: #f8fafc;
-}
+    border-color: #6366f1;
 
+    box-shadow:
+        0 8px 20px rgba(99,102,241,0.10);
+}
 
 /* الفرص */
 
@@ -407,6 +403,27 @@ textarea:focus {
     padding: 11px 18px;
 }
 
+/* رسالة المجال */
+
+.category-message {
+    display: none;
+
+    margin-bottom: 20px;
+
+    padding: 16px;
+
+    border-radius: 15px;
+
+    background: linear-gradient(
+        135deg,
+        #eff6ff,
+        #f5f3ff
+    );
+
+    color: #3730a3;
+
+    font-weight: bold;
+}
 
 /* الرسائل */
 
@@ -420,8 +437,9 @@ textarea:focus {
     background: #eff6ff;
 
     color: #1e40af;
-}
 
+    min-height: 20px;
+}
 
 /* الفوتر */
 
@@ -436,7 +454,6 @@ footer {
 
     margin-top: 30px;
 }
-
 
 /* الهاتف */
 
@@ -459,7 +476,6 @@ footer {
         font-size: 19px;
     }
 }
-
 
 @media (max-width: 500px) {
 
@@ -488,11 +504,9 @@ footer {
 </style>
 </head>
 
-
 <body>
 
 <div class="container">
-
 
 <header>
 
@@ -501,7 +515,6 @@ footer {
     </div>
 
 </header>
-
 
 <!-- الرئيسية -->
 
@@ -515,7 +528,6 @@ footer {
         نساعدك على الوصول إلى الفرصة المناسبة
     </p>
 
-
     <div class="buttons">
 
         <button
@@ -527,7 +539,6 @@ footer {
 
         </button>
 
-
         <button
             type="button"
             class="secondary"
@@ -536,7 +547,6 @@ footer {
             📋 لدي مشروع
 
         </button>
-
 
         <button
             type="button"
@@ -551,11 +561,9 @@ footer {
 
 </section>
 
-
 <!-- البطاقات -->
 
 <section class="cards" id="homeCards">
-
 
     <div class="card">
 
@@ -572,8 +580,16 @@ footer {
             تناسب مهاراتك.
         </p>
 
-    </div>
+        <button
+            type="button"
+            class="secondary"
+            onclick="showSection('opportunities')">
 
+            🔍 اكتشف الفرص
+
+        </button>
+
+    </div>
 
     <div class="card">
 
@@ -590,8 +606,16 @@ footer {
             المناسب لإنجازه.
         </p>
 
-    </div>
+        <button
+            type="button"
+            class="secondary"
+            onclick="showSection('project')">
 
+            📋 أضف مشروعك
+
+        </button>
+
+    </div>
 
     <div class="card">
 
@@ -608,10 +632,18 @@ footer {
             بمن يستطيع تنفيذ العمل.
         </p>
 
+        <button
+            type="button"
+            class="secondary"
+            onclick="showSection('worker')">
+
+            🤝 ابدأ الآن
+
+        </button>
+
     </div>
 
 </section>
-
 
 <!-- أبحث عن عمل -->
 
@@ -625,7 +657,6 @@ footer {
         أنشئ ملفك وأخبرنا بالمهارات التي تستطيع تقديمها.
     </p>
 
-
     <div class="form-group">
 
         <label>الاسم</label>
@@ -636,7 +667,6 @@ footer {
             placeholder="اكتب اسمك">
 
     </div>
-
 
     <div class="form-group">
 
@@ -649,18 +679,15 @@ footer {
 
     </div>
 
-
     <div class="form-group">
 
         <label>نبذة عنك</label>
 
         <textarea
             id="workerDescription"
-            placeholder="اكتب نبذة قصيرة عن مهاراتك">
-        </textarea>
+            placeholder="اكتب نبذة قصيرة عن مهاراتك"></textarea>
 
     </div>
-
 
     <button
         type="button"
@@ -671,7 +698,6 @@ footer {
 
     </button>
 
-
     <button
         type="button"
         class="back-button"
@@ -681,14 +707,12 @@ footer {
 
     </button>
 
-
     <div
         class="message"
         id="workerMessage">
     </div>
 
 </section>
-
 
 <!-- لدي مشروع -->
 
@@ -702,7 +726,6 @@ footer {
         أرسل تفاصيل مشروعك ليتمكن الأشخاص المناسبون من التقدم إليه.
     </p>
 
-
     <div class="form-group">
 
         <label>اسم المشروع</label>
@@ -713,7 +736,6 @@ footer {
             placeholder="اكتب اسم المشروع">
 
     </div>
-
 
     <div class="form-group">
 
@@ -726,18 +748,15 @@ footer {
 
     </div>
 
-
     <div class="form-group">
 
         <label>تفاصيل المشروع</label>
 
         <textarea
             id="projectDescription"
-            placeholder="اشرح المطلوب">
-        </textarea>
+            placeholder="اشرح المطلوب"></textarea>
 
     </div>
-
 
     <button
         type="button"
@@ -748,7 +767,6 @@ footer {
 
     </button>
 
-
     <button
         type="button"
         class="back-button"
@@ -758,14 +776,12 @@ footer {
 
     </button>
 
-
     <div
         class="message"
         id="projectMessage">
     </div>
 
 </section>
-
 
 <!-- تصفح الفرص -->
 
@@ -774,7 +790,6 @@ footer {
     <h2>
         🔍 تصفح الفرص
     </h2>
-
 
     <div class="market-intro">
 
@@ -785,126 +800,125 @@ footer {
         <p>
             اختر المجال الذي تملك مهارة فيه،
             واستكشف المشاريع والطلبات المتاحة.
-            لاحقًا ستظهر هنا الفرص الحقيقية التي ينشرها أصحاب المشاريع.
         </p>
 
     </div>
-
-
-    <!-- المجالات -->
 
     <h3>
         🧩 المجالات
     </h3>
 
+    <!-- رسالة المجال المختار -->
+
+    <div
+        class="category-message"
+        id="categoryMessage">
+    </div>
 
     <div class="categories">
 
-
-        <div class="category">
+        <button class="category" type="button"
+            onclick="filterCategory('التفريغ الصوتي')">
             🎙️ التفريغ الصوتي
-        </div>
+        </button>
 
-
-        <div class="category">
+        <button class="category" type="button"
+            onclick="filterCategory('البرمجة')">
             💻 البرمجة
-        </div>
+        </button>
 
-
-        <div class="category">
+        <button class="category" type="button"
+            onclick="filterCategory('كتابة المقالات')">
             ✍️ كتابة المقالات
-        </div>
+        </button>
 
-
-        <div class="category">
+        <button class="category" type="button"
+            onclick="filterCategory('الترجمة')">
             🌐 الترجمة
-        </div>
+        </button>
 
-
-        <div class="category">
+        <button class="category" type="button"
+            onclick="filterCategory('التصميم')">
             🎨 التصميم
-        </div>
+        </button>
 
-
-        <div class="category">
+        <button class="category" type="button"
+            onclick="filterCategory('المونتاج')">
             🎬 المونتاج
-        </div>
+        </button>
 
-
-        <div class="category">
+        <button class="category" type="button"
+            onclick="filterCategory('التواصل الاجتماعي')">
             📱 التواصل الاجتماعي
-        </div>
+        </button>
 
-
-        <div class="category">
+        <button class="category" type="button"
+            onclick="filterCategory('التسويق الإلكتروني')">
             📢 التسويق الإلكتروني
-        </div>
+        </button>
 
-
-        <div class="category">
+        <button class="category" type="button"
+            onclick="filterCategory('إدخال البيانات')">
             📝 إدخال البيانات
-        </div>
+        </button>
 
-
-        <div class="category">
+        <button class="category" type="button"
+            onclick="filterCategory('Excel والبيانات')">
             📊 Excel والبيانات
-        </div>
+        </button>
 
-
-        <div class="category">
+        <button class="category" type="button"
+            onclick="filterCategory('التعليق الصوتي')">
             🎧 التعليق الصوتي
-        </div>
+        </button>
 
-
-        <div class="category">
+        <button class="category" type="button"
+            onclick="filterCategory('التعليم')">
             📚 التعليم
-        </div>
+        </button>
 
-
-        <div class="category">
+        <button class="category" type="button"
+            onclick="filterCategory('التدقيق اللغوي')">
             📖 التدقيق اللغوي
-        </div>
+        </button>
 
-
-        <div class="category">
+        <button class="category" type="button"
+            onclick="filterCategory('المتاجر الإلكترونية')">
             🛍️ المتاجر الإلكترونية
-        </div>
+        </button>
 
-
-        <div class="category">
+        <button class="category" type="button"
+            onclick="filterCategory('الذكاء الاصطناعي')">
             🤖 الذكاء الاصطناعي
-        </div>
+        </button>
 
-
-        <div class="category">
+        <button class="category" type="button"
+            onclick="filterCategory('تحرير الصور')">
             📸 تحرير الصور
-        </div>
+        </button>
 
-
-        <div class="category">
+        <button class="category" type="button"
+            onclick="filterCategory('المساعدة الافتراضية')">
             🗂️ المساعدة الافتراضية
-        </div>
+        </button>
 
-
-        <div class="category">
+        <button class="category" type="button"
+            onclick="filterCategory('المحاسبة')">
             🧾 المحاسبة
-        </div>
+        </button>
 
-
-        <div class="category">
+        <button class="category" type="button"
+            onclick="filterCategory('خدمات أخرى')">
             🔧 خدمات أخرى
-        </div>
-
+        </button>
 
     </div>
-
-
-    <!-- الفرص التجريبية -->
 
     <h3 class="opportunities-title">
         🔥 فرص متاحة الآن
     </h3>
 
+    <!-- فرصة 1 -->
 
     <div class="opportunity">
 
@@ -944,6 +958,7 @@ footer {
 
     </div>
 
+    <!-- فرصة 2 -->
 
     <div class="opportunity">
 
@@ -983,6 +998,7 @@ footer {
 
     </div>
 
+    <!-- فرصة 3 -->
 
     <div class="opportunity">
 
@@ -1022,6 +1038,7 @@ footer {
 
     </div>
 
+    <!-- فرصة 4 -->
 
     <div class="opportunity">
 
@@ -1061,6 +1078,7 @@ footer {
 
     </div>
 
+    <!-- فرصة 5 -->
 
     <div class="opportunity">
 
@@ -1080,4 +1098,259 @@ footer {
             </span>
 
             <span class="tag">
-                🇬🇧 عربي
+                🇬🇧 عربي / إنجليزي
+            </span>
+
+            <span class="price">
+                💰 الميزانية: 25$
+            </span>
+
+        </div>
+
+        <button
+            type="button"
+            class="apply-button"
+            onclick="applyOpportunity('ترجمة نصوص')">
+
+            📩 التقدم للفرصة
+
+        </button>
+
+    </div>
+
+    <!-- فرصة 6 -->
+
+    <div class="opportunity">
+
+        <h3>
+            🎬 تحرير فيديو
+        </h3>
+
+        <p>
+            مطلوب مونتير لتحرير فيديوهات قصيرة
+            للنشر على وسائل التواصل الاجتماعي.
+        </p>
+
+        <div class="opportunity-info">
+
+            <span class="tag">
+                🎬 مونتاج
+            </span>
+
+            <span class="tag">
+                📱 فيديو قصير
+            </span>
+
+            <span class="price">
+                💰 الميزانية: 35$
+            </span>
+
+        </div>
+
+        <button
+            type="button"
+            class="apply-button"
+            onclick="applyOpportunity('تحرير فيديو')">
+
+            📩 التقدم للفرصة
+
+        </button>
+
+    </div>
+
+    <button
+        type="button"
+        class="back-button"
+        onclick="goHome()">
+
+        🔙 العودة
+
+    </button>
+
+    <div
+        class="message"
+        id="opportunityMessage">
+    </div>
+
+</section>
+
+<footer>
+
+    © 2026 مَدخَل — جميع الحقوق محفوظة
+
+</footer>
+
+</div>
+
+<script>
+
+/* إخفاء جميع الأقسام */
+
+function hideSections() {
+
+    document.getElementById("home").style.display = "none";
+
+    document.getElementById("homeCards").style.display = "none";
+
+    document.getElementById("worker").style.display = "none";
+
+    document.getElementById("project").style.display = "none";
+
+    document.getElementById("opportunities").style.display = "none";
+}
+
+/* فتح قسم */
+
+function showSection(sectionId) {
+
+    hideSections();
+
+    var section = document.getElementById(sectionId);
+
+    if (section) {
+
+        section.style.display = "block";
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }
+}
+
+/* العودة للرئيسية */
+
+function goHome() {
+
+    hideSections();
+
+    document.getElementById("home").style.display = "block";
+
+    document.getElementById("homeCards").style.display = "grid";
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+}
+
+/* حفظ ملف العامل */
+
+function saveWorker() {
+
+    var name =
+        document.getElementById("workerName").value.trim();
+
+    var skill =
+        document.getElementById("workerSkill").value.trim();
+
+    var description =
+        document.getElementById("workerDescription").value.trim();
+
+    var message =
+        document.getElementById("workerMessage");
+
+    if (name === "" || skill === "") {
+
+        message.innerText =
+            "⚠️ يرجى كتابة الاسم والمهارة أولًا.";
+
+        return;
+    }
+
+    message.innerText =
+        "✅ تم تسجيل بياناتك مبدئيًا. سيتم ربط ملفك بقاعدة البيانات في الخطوة التالية.";
+
+}
+
+/* نشر المشروع */
+
+function saveProject() {
+
+    var name =
+        document.getElementById("projectName").value.trim();
+
+    var type =
+        document.getElementById("projectType").value.trim();
+
+    var description =
+        document.getElementById("projectDescription").value.trim();
+
+    var message =
+        document.getElementById("projectMessage");
+
+    if (
+        name === "" ||
+        type === "" ||
+        description === ""
+    ) {
+
+        message.innerText =
+            "⚠️ يرجى تعبئة جميع البيانات.";
+
+        return;
+    }
+
+    message.innerText =
+        "✅ تم تجهيز المشروع بنجاح. سيتم ربطه بقاعدة البيانات في الخطوة التالية.";
+
+}
+
+/* اختيار مجال */
+
+function filterCategory(categoryName) {
+
+    var message =
+        document.getElementById("categoryMessage");
+
+    message.style.display = "block";
+
+    message.innerText =
+        "🔎 اخترت مجال: " +
+        categoryName +
+        " — يتم الآن عرض الفرص المتعلقة بهذا المجال.";
+
+    window.scrollTo({
+        top: message.getBoundingClientRect().top +
+             window.pageYOffset -
+             20,
+        behavior: "smooth"
+    });
+
+}
+
+/* التقدم للفرصة */
+
+function applyOpportunity(opportunityName) {
+
+    var message =
+        document.getElementById("opportunityMessage");
+
+    message.style.display = "block";
+
+    message.innerText =
+        "📩 اخترت فرصة: " +
+        opportunityName +
+        " — سيتم إضافة نظام التقدم الحقيقي وربطه بحسابك وقاعدة البيانات في الخطوة التالية.";
+
+    window.scrollTo({
+        top: message.getBoundingClientRect().top +
+             window.pageYOffset -
+             20,
+        behavior: "smooth"
+    });
+
+}
+
+/* تشغيل الرئيسية عند فتح الموقع */
+
+window.addEventListener("load", function() {
+
+    goHome();
+
+});
+
+</script>
+
+</body>
+</html>
