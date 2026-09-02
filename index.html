@@ -84,6 +84,34 @@ button:hover {
     opacity: 0.9;
 }
 
+.cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 55px;
+}
+
+.card {
+    background: white;
+    border-radius: 18px;
+    padding: 25px;
+    text-align: center;
+    border: 1px solid #e4e8f0;
+}
+
+.icon {
+    font-size: 35px;
+}
+
+.card h3 {
+    margin: 12px 0 8px;
+}
+
+.card p {
+    color: #687286;
+    line-height: 1.7;
+}
+
 .section {
     display: none;
     background: white;
@@ -148,6 +176,10 @@ footer {
 }
 
 @media (max-width: 700px) {
+    .cards {
+        grid-template-columns: 1fr;
+    }
+
     .hero h1 {
         font-size: 45px;
     }
@@ -195,6 +227,34 @@ footer {
             🔍 تصفح الفرص
         </button>
 
+    </div>
+
+</section>
+
+<section class="cards">
+
+    <div class="card">
+        <div class="icon">💼</div>
+        <h3>فرص عمل</h3>
+        <p>
+            اكتشف فرصًا ومشاريع إلكترونية تناسب مهاراتك.
+        </p>
+    </div>
+
+    <div class="card">
+        <div class="icon">📋</div>
+        <h3>أصحاب المشاريع</h3>
+        <p>
+            اعرض مشروعك وابحث عن الشخص المناسب لإنجازه.
+        </p>
+    </div>
+
+    <div class="card">
+        <div class="icon">🤝</div>
+        <h3>تواصل مباشر</h3>
+        <p>
+            منصة واحدة تجمع صاحب المشروع بمن يستطيع تنفيذ العمل.
+        </p>
     </div>
 
 </section>
@@ -274,80 +334,32 @@ footer {
     <h2>🔍 تصفح الفرص</h2>
 
     <div class="opportunity">
-
         <h3>✍️ كتابة المحتوى</h3>
-
         <p>
             مطلوب شخص لديه مهارة في كتابة المقالات والمحتوى الإلكتروني.
         </p>
-
-        <strong>
-            💰 الأجر: يحدد مع صاحب المشروع
-        </strong>
-
+        <strong>💰 الأجر: يحدد مع صاحب المشروع</strong>
     </div>
 
     <div class="opportunity">
-
         <h3>🎨 تصميم</h3>
-
         <p>
             فرصة لمصمم لإنجاز تصاميم إلكترونية.
         </p>
-
-        <strong>
-            💰 الأجر: يحدد مع صاحب المشروع
-        </strong>
-
+        <strong>💰 الأجر: يحدد مع صاحب المشروع</strong>
     </div>
 
     <div class="opportunity">
-
         <h3>🌐 ترجمة</h3>
-
         <p>
             مطلوب مترجم للعمل على مشاريع إلكترونية.
         </p>
-
-        <strong>
-            💰 الأجر: يحدد مع صاحب المشروع
-        </strong>
-
+        <strong>💰 الأجر: يحدد مع صاحب المشروع</strong>
     </div>
 
     <button type="button" class="back-button" onclick="goHome()">
         🔙 العودة
     </button>
-
-</section>
-
-<section class="section" id="contact">
-
-    <h2>💬 تواصل معنا</h2>
-
-    <p>
-        يمكنك التواصل معنا للاستفسار عن المنصة أو طلب المساعدة.
-    </p>
-
-    <div class="form-group">
-        <label>الاسم</label>
-        <input id="contactName" type="text" placeholder="اكتب اسمك">
-    </div>
-
-    <div class="form-group">
-        <label>الرسالة</label>
-        <textarea id="contactMessage" placeholder="اكتب رسالتك"></textarea>
-    </div>
-
-    <button type="button" class="action-button" onclick="sendContact()">
-        📩 إرسال
-    </button>
-
-    <button type="button" class="back-button" onclick="goHome()">
-        🔙 العودة
-    </button>
-
-    <div class="message" id="contactResult"></div>
 
 </section>
 
@@ -358,27 +370,25 @@ footer {
 </div>
 
 <script>
+
 function hideSections() {
     document.getElementById("home").style.display = "none";
     document.getElementById("worker").style.display = "none";
     document.getElementById("project").style.display = "none";
     document.getElementById("opportunities").style.display = "none";
-    document.getElementById("contact").style.display = "none";
 }
 
 function showSection(sectionId) {
+
     hideSections();
 
-    var section = document.getElementById(sectionId);
-
-    if (section) {
-        section.style.display = "block";
-    }
+    document.getElementById(sectionId).style.display = "block";
 
     window.scrollTo(0, 0);
 }
 
 function goHome() {
+
     hideSections();
 
     document.getElementById("home").style.display = "block";
@@ -387,12 +397,16 @@ function goHome() {
 }
 
 function saveWorker() {
+
     var name = document.getElementById("workerName").value.trim();
     var skill = document.getElementById("workerSkill").value.trim();
     var message = document.getElementById("workerMessage");
 
     if (name === "" || skill === "") {
-        message.innerText = "⚠️ يرجى كتابة الاسم والمهارة أولًا.";
+
+        message.innerText =
+            "⚠️ يرجى كتابة الاسم والمهارة أولًا.";
+
         return;
     }
 
@@ -401,13 +415,17 @@ function saveWorker() {
 }
 
 function saveProject() {
+
     var name = document.getElementById("projectName").value.trim();
     var type = document.getElementById("projectType").value.trim();
     var description = document.getElementById("projectDescription").value.trim();
     var message = document.getElementById("projectMessage");
 
     if (name === "" || type === "" || description === "") {
-        message.innerText = "⚠️ يرجى تعبئة جميع البيانات.";
+
+        message.innerText =
+            "⚠️ يرجى تعبئة جميع البيانات.";
+
         return;
     }
 
@@ -415,19 +433,6 @@ function saveProject() {
         "✅ تم تجهيز المشروع. سنربطه بقاعدة البيانات في الخطوة التالية.";
 }
 
-function sendContact() {
-    var name = document.getElementById("contactName").value.trim();
-    var messageText = document.getElementById("contactMessage").value.trim();
-    var result = document.getElementById("contactResult");
-
-    if (name === "" || messageText === "") {
-        result.innerText = "⚠️ يرجى كتابة الاسم والرسالة.";
-        return;
-    }
-
-    result.innerText =
-        "✅ تم تجهيز رسالتك. سنربط التواصل بقاعدة البيانات في الخطوة التالية.";
-}
 </script>
 
 </body>
