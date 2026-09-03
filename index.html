@@ -1214,7 +1214,7 @@ const SUPABASE_URL =
     "https://qbufsdpdobuicpljnssr.supabase.co";
 
 const SUPABASE_PUBLISHABLE_KEY =
-    "  sb_publishable_GcFtvWWmnkVzcwCFNqPBRg_ldpfH_yv   ضع مفتاح Supabase Publishable هنا";
+    " ضع مفتاح Supabase Publishable هنا"sb_publishable_GcFtvWWmnkVzcwCFNqPBRg_ldpfH_yv ;
 
 
 /* =========================
@@ -1599,4 +1599,98 @@ function saveProject() {
         description === ""
     ) {
 
-        message
+        message.innerText =
+            "⚠️ يرجى تعبئة جميع البيانات.";
+
+        return;
+    }
+
+
+    message.innerText =
+        "✅ تم تجهيز المشروع بنجاح. سيتم ربطه بقاعدة البيانات في الخطوة التالية.";
+}
+
+
+/* =========================
+   اختيار مجال
+========================= */
+
+function filterCategory(categoryName) {
+
+    var message =
+        document.getElementById("categoryMessage");
+
+
+    message.style.display =
+        "block";
+
+
+    message.innerText =
+        "🔎 اخترت مجال: " +
+        categoryName +
+        " — يتم الآن عرض الفرص المتعلقة بهذا المجال.";
+
+
+    window.scrollTo({
+
+        top:
+            message.getBoundingClientRect().top +
+            window.pageYOffset -
+            20,
+
+        behavior:
+            "smooth"
+    });
+}
+
+
+/* =========================
+   التقدم للفرصة
+========================= */
+
+function applyOpportunity(opportunityName) {
+
+    var message =
+        document.getElementById("opportunityMessage");
+
+
+    message.style.display =
+        "block";
+
+
+    message.innerText =
+        "📩 اخترت فرصة: " +
+        opportunityName +
+        " — سيتم إضافة نظام التقدم الحقيقي وربطه بحسابك وقاعدة البيانات في الخطوة التالية.";
+
+
+    window.scrollTo({
+
+        top:
+            message.getBoundingClientRect().top +
+            window.pageYOffset -
+            20,
+
+        behavior:
+            "smooth"
+    });
+}
+
+
+/* =========================
+   تشغيل الرئيسية عند فتح الموقع
+========================= */
+
+window.addEventListener(
+    "load",
+    function() {
+
+        goHome();
+
+    }
+);
+
+</script>
+
+</body>
+</html>
