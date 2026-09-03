@@ -510,675 +510,820 @@ footer {
 
 <header>
 
-    <div class="logo">
-        مَدخَل<span>.</span>
-    </div>
+<div class="logo">
+مَدخَل<span>.</span>
+</div>
 
 </header>
 
-<!-- الرئيسية -->
+
+<!-- الصفحة الرئيسية -->
 
 <section class="hero" id="home">
 
-    <h1>مَدخَل</h1>
+<h1>مَدخَل</h1>
 
-    <p>
-        المدخل إلى سوق العمل الإلكتروني
-        <br>
-        نساعدك على الوصول إلى الفرصة المناسبة
-    </p>
+<p>
+المدخل إلى سوق العمل الإلكتروني
+<br>
+نساعدك على الوصول إلى الفرصة المناسبة
+</p>
 
-    <div class="buttons">
+<div class="buttons">
 
-        <button
-            type="button"
-            class="primary"
-            onclick="showSection('worker')">
+<button
+type="button"
+class="primary"
+onclick="showSection('worker')">
 
-            💼 أبحث عن عمل
+💼 أبحث عن عمل
 
-        </button>
+</button>
 
-        <button
-            type="button"
-            class="secondary"
-            onclick="showSection('project')">
 
-            📋 لدي مشروع
+<button
+type="button"
+class="secondary"
+onclick="showSection('project')">
 
-        </button>
+📋 لدي مشروع
 
-        <button
-            type="button"
-            class="secondary"
-            onclick="showSection('opportunities')">
+</button>
 
-            🔍 تصفح الفرص
 
-        </button>
+<button
+type="button"
+class="secondary"
+onclick="showSection('opportunities')">
 
-    </div>
+🔍 تصفح الفرص
+
+</button>
+
+</div>
 
 </section>
+
 
 <!-- البطاقات -->
 
 <section class="cards" id="homeCards">
 
-    <div class="card">
+<div class="card">
 
-        <div class="icon">
-            💼
-        </div>
+<div class="icon">
+💼
+</div>
 
-        <h3>
-            فرص عمل
-        </h3>
+<h3>
+فرص عمل
+</h3>
 
-        <p>
-            اكتشف فرصًا ومشاريع إلكترونية
-            تناسب مهاراتك.
-        </p>
+<p>
+اكتشف فرصًا ومشاريع إلكترونية
+تناسب مهاراتك.
+</p>
 
-        <button
-            type="button"
-            class="secondary"
-            onclick="showSection('opportunities')">
+<button
+type="button"
+class="secondary"
+onclick="showSection('opportunities')">
 
-            🔍 اكتشف الفرص
+🔍 اكتشف الفرص
 
-        </button>
+</button>
 
-    </div>
+</div>
 
-    <div class="card">
 
-        <div class="icon">
-            📋
-        </div>
+<div class="card">
 
-        <h3>
-            أصحاب المشاريع
-        </h3>
+<div class="icon">
+📋
+</div>
 
-        <p>
-            اعرض مشروعك وابحث عن الشخص
-            المناسب لإنجازه.
-        </p>
+<h3>
+أصحاب المشاريع
+</h3>
 
-        <button
-            type="button"
-            class="secondary"
-            onclick="showSection('project')">
+<p>
+اعرض مشروعك وابحث عن الشخص
+المناسب لإنجازه.
+</p>
 
-            📋 أضف مشروعك
+<button
+type="button"
+class="secondary"
+onclick="showSection('project')">
 
-        </button>
+📋 أضف مشروعك
 
-    </div>
+</button>
 
-    <div class="card">
+</div>
 
-        <div class="icon">
-            🤝
-        </div>
 
-        <h3>
-            تواصل مباشر
-        </h3>
+<div class="card">
 
-        <p>
-            منصة واحدة تجمع صاحب المشروع
-            بمن يستطيع تنفيذ العمل.
-        </p>
+<div class="icon">
+🤝
+</div>
 
-        <button
-            type="button"
-            class="secondary"
-            onclick="showSection('worker')">
+<h3>
+تواصل مباشر
+</h3>
 
-            🤝 ابدأ الآن
+<p>
+منصة واحدة تجمع صاحب المشروع
+بمن يستطيع تنفيذ العمل.
+</p>
 
-        </button>
+<button
+type="button"
+class="secondary"
+onclick="showSection('worker')">
 
-    </div>
+🤝 ابدأ الآن
+
+</button>
+
+</div>
 
 </section>
+
 
 <!-- أبحث عن عمل -->
 
 <section class="section" id="worker">
 
-    <h2>
-        💼 أبحث عن عمل
-    </h2>
+<h2>
+💼 أبحث عن عمل
+</h2>
 
-    <p>
-        أنشئ ملفك وأخبرنا بالمهارات التي تستطيع تقديمها.
-    </p>
+<p>
+أنشئ ملفك وأخبرنا بالمهارات التي تستطيع تقديمها.
+</p>
 
-    <div class="form-group">
 
-        <label>الاسم</label>
+<div class="form-group">
 
-        <input
-            id="workerName"
-            type="text"
-            placeholder="اكتب اسمك">
+<label>
+الاسم
+</label>
 
-    </div>
+<input
+id="workerName"
+type="text"
+placeholder="اكتب اسمك">
 
-    <div class="form-group">
+</div>
 
-        <label>المهارة</label>
 
-        <input
-            id="workerSkill"
-            type="text"
-            placeholder="مثال: تفريغ صوتي، برمجة، كتابة">
+<div class="form-group">
 
-    </div>
+<label>
+المهارة
+</label>
 
-    <div class="form-group">
+<input
+id="workerSkill"
+type="text"
+placeholder="مثال: تفريغ صوتي، برمجة، كتابة">
 
-        <label>نبذة عنك</label>
+</div>
 
-        <textarea
-            id="workerDescription"
-            placeholder="اكتب نبذة قصيرة عن مهاراتك"></textarea>
 
-    </div>
+<div class="form-group">
 
-    <button
-        type="button"
-        class="action-button"
-        onclick="saveWorker()">
+<label>
+نبذة عنك
+</label>
 
-        ✅ حفظ ملفي
+<textarea
+id="workerDescription"
+placeholder="اكتب نبذة قصيرة عن مهاراتك"></textarea>
 
-    </button>
+</div>
 
-    <button
-        type="button"
-        class="back-button"
-        onclick="goHome()">
 
-        🔙 العودة
+<button
+type="button"
+class="action-button"
+onclick="saveWorker()">
 
-    </button>
+✅ حفظ ملفي
 
-    <div
-        class="message"
-        id="workerMessage">
-    </div>
+</button>
+
+
+<button
+type="button"
+class="back-button"
+onclick="goHome()">
+
+🔙 العودة
+
+</button>
+
+
+<div
+class="message"
+id="workerMessage">
+</div>
 
 </section>
+
 
 <!-- لدي مشروع -->
 
 <section class="section" id="project">
 
-    <h2>
-        📋 لدي مشروع
-    </h2>
+<h2>
+📋 لدي مشروع
+</h2>
 
-    <p>
-        أرسل تفاصيل مشروعك ليتمكن الأشخاص المناسبون من التقدم إليه.
-    </p>
+<p>
+أرسل تفاصيل مشروعك ليتمكن الأشخاص المناسبون من التقدم إليه.
+</p>
 
-    <div class="form-group">
 
-        <label>اسم المشروع</label>
+<div class="form-group">
 
-        <input
-            id="projectName"
-            type="text"
-            placeholder="اكتب اسم المشروع">
+<label>
+اسم المشروع
+</label>
 
-    </div>
+<input
+id="projectName"
+type="text"
+placeholder="اكتب اسم المشروع">
 
-    <div class="form-group">
+</div>
 
-        <label>نوع العمل</label>
 
-        <input
-            id="projectType"
-            type="text"
-            placeholder="مثال: تفريغ صوتي، برمجة، تصميم">
+<div class="form-group">
 
-    </div>
+<label>
+نوع العمل
+</label>
 
-    <div class="form-group">
+<input
+id="projectType"
+type="text"
+placeholder="مثال: تفريغ صوتي، برمجة، تصميم">
 
-        <label>تفاصيل المشروع</label>
+</div>
 
-        <textarea
-            id="projectDescription"
-            placeholder="اشرح المطلوب"></textarea>
 
-    </div>
+<div class="form-group">
 
-    <button
-        type="button"
-        class="action-button"
-        onclick="saveProject()">
+<label>
+تفاصيل المشروع
+</label>
 
-        📤 نشر المشروع
+<textarea
+id="projectDescription"
+placeholder="اشرح المطلوب"></textarea>
 
-    </button>
+</div>
 
-    <button
-        type="button"
-        class="back-button"
-        onclick="goHome()">
 
-        🔙 العودة
+<button
+type="button"
+class="action-button"
+onclick="saveProject()">
 
-    </button>
+📤 نشر المشروع
 
-    <div
-        class="message"
-        id="projectMessage">
-    </div>
+</button>
+
+
+<button
+type="button"
+class="back-button"
+onclick="goHome()">
+
+🔙 العودة
+
+</button>
+
+
+<div
+class="message"
+id="projectMessage">
+</div>
 
 </section>
+
 
 <!-- تصفح الفرص -->
 
 <section class="section" id="opportunities">
 
-    <h2>
-        🔍 تصفح الفرص
-    </h2>
-
-    <div class="market-intro">
-
-        <h3>
-            🚀 اكتشف فرص العمل المناسبة لك
-        </h3>
-
-        <p>
-            اختر المجال الذي تملك مهارة فيه،
-            واستكشف المشاريع والطلبات المتاحة.
-        </p>
-
-    </div>
-
-    <h3>
-        🧩 المجالات
-    </h3>
-
-    <div
-        class="category-message"
-        id="categoryMessage">
-    </div>
-
-    <div class="categories">
-
-        <button class="category" type="button"
-            onclick="filterCategory('التفريغ الصوتي')">
-            🎙️ التفريغ الصوتي
-        </button>
-
-        <button class="category" type="button"
-            onclick="filterCategory('البرمجة')">
-            💻 البرمجة
-        </button>
-
-        <button class="category" type="button"
-            onclick="filterCategory('كتابة المقالات')">
-            ✍️ كتابة المقالات
-        </button>
-
-        <button class="category" type="button"
-            onclick="filterCategory('الترجمة')">
-            🌐 الترجمة
-        </button>
-
-        <button class="category" type="button"
-            onclick="filterCategory('التصميم')">
-            🎨 التصميم
-        </button>
-
-        <button class="category" type="button"
-            onclick="filterCategory('المونتاج')">
-            🎬 المونتاج
-        </button>
-
-        <button class="category" type="button"
-            onclick="filterCategory('التواصل الاجتماعي')">
-            📱 التواصل الاجتماعي
-        </button>
-
-        <button class="category" type="button"
-            onclick="filterCategory('التسويق الإلكتروني')">
-            📢 التسويق الإلكتروني
-        </button>
-
-        <button class="category" type="button"
-            onclick="filterCategory('إدخال البيانات')">
-            📝 إدخال البيانات
-        </button>
+<h2>
+🔍 تصفح الفرص
+</h2>
 
-        <button class="category" type="button"
-            onclick="filterCategory('Excel والبيانات')">
-            📊 Excel والبيانات
-        </button>
 
-        <button class="category" type="button"
-            onclick="filterCategory('التعليق الصوتي')">
-            🎧 التعليق الصوتي
-        </button>
+<div class="market-intro">
 
-        <button class="category" type="button"
-            onclick="filterCategory('التعليم')">
-            📚 التعليم
-        </button>
+<h3>
+🚀 اكتشف فرص العمل المناسبة لك
+</h3>
 
-        <button class="category" type="button"
-            onclick="filterCategory('التدقيق اللغوي')">
-            📖 التدقيق اللغوي
-        </button>
+<p>
+اختر المجال الذي تملك مهارة فيه،
+واستكشف المشاريع والطلبات المتاحة.
+</p>
 
-        <button class="category" type="button"
-            onclick="filterCategory('المتاجر الإلكترونية')">
-            🛍️ المتاجر الإلكترونية
-        </button>
+</div>
 
-        <button class="category" type="button"
-            onclick="filterCategory('الذكاء الاصطناعي')">
-            🤖 الذكاء الاصطناعي
-        </button>
 
-        <button class="category" type="button"
-            onclick="filterCategory('تحرير الصور')">
-            📸 تحرير الصور
-        </button>
+<h3>
+🧩 المجالات
+</h3>
 
-        <button class="category" type="button"
-            onclick="filterCategory('المساعدة الافتراضية')">
-            🗂️ المساعدة الافتراضية
-        </button>
 
-        <button class="category" type="button"
-            onclick="filterCategory('المحاسبة')">
-            🧾 المحاسبة
-        </button>
+<div
+class="category-message"
+id="categoryMessage">
+</div>
 
-        <button class="category" type="button"
-            onclick="filterCategory('خدمات أخرى')">
-            🔧 خدمات أخرى
-        </button>
 
-    </div>
+<div class="categories">
 
-    <h3 class="opportunities-title">
-        🔥 فرص متاحة الآن
-    </h3>
 
-    <!-- فرصة 1 -->
+<button
+class="category"
+type="button"
+onclick="filterCategory('التفريغ الصوتي')">
 
-    <div class="opportunity">
+🎙️ التفريغ الصوتي
 
-        <h3>
-            🎙️ تفريغ تسجيل صوتي
-        </h3>
+</button>
 
-        <p>
-            مطلوب شخص لتفريغ تسجيل صوتي وتحويله
-            إلى نص عربي مرتب.
-        </p>
 
-        <div class="opportunity-info">
+<button
+class="category"
+type="button"
+onclick="filterCategory('البرمجة')">
 
-            <span class="tag">
-                🎙️ تفريغ صوتي
-            </span>
+💻 البرمجة
 
-            <span class="tag">
-                ⏱️ مشروع واحد
-            </span>
+</button>
 
-            <span class="price">
-                💰 الميزانية: 20$
-            </span>
 
-        </div>
+<button
+class="category"
+type="button"
+onclick="filterCategory('كتابة المقالات')">
 
-        <button
-            type="button"
-            class="apply-button"
-            onclick="applyOpportunity('تفريغ تسجيل صوتي')">
+✍️ كتابة المقالات
 
-            📩 التقدم للفرصة
+</button>
 
-        </button>
 
-    </div>
+<button
+class="category"
+type="button"
+onclick="filterCategory('الترجمة')">
 
-    <!-- فرصة 2 -->
+🌐 الترجمة
 
-    <div class="opportunity">
+</button>
 
-        <h3>
-            💻 إنشاء موقع إلكتروني
-        </h3>
 
-        <p>
-            مطلوب مبرمج لإنشاء موقع إلكتروني
-            بسيط ومتجاوب مع الهاتف.
-        </p>
+<button
+class="category"
+type="button"
+onclick="filterCategory('التصميم')">
 
-        <div class="opportunity-info">
+🎨 التصميم
 
-            <span class="tag">
-                💻 برمجة
-            </span>
+</button>
 
-            <span class="tag">
-                🌐 مواقع
-            </span>
 
-            <span class="price">
-                💰 الميزانية: 100$
-            </span>
+<button
+class="category"
+type="button"
+onclick="filterCategory('المونتاج')">
 
-        </div>
+🎬 المونتاج
 
-        <button
-            type="button"
-            class="apply-button"
-            onclick="applyOpportunity('إنشاء موقع إلكتروني')">
+</button>
 
-            📩 التقدم للفرصة
 
-        </button>
+<button
+class="category"
+type="button"
+onclick="filterCategory('التواصل الاجتماعي')">
 
-    </div>
+📱 التواصل الاجتماعي
 
-    <!-- فرصة 3 -->
+</button>
 
-    <div class="opportunity">
 
-        <h3>
-            ✍️ كتابة مقالات
-        </h3>
+<button
+class="category"
+type="button"
+onclick="filterCategory('التسويق الإلكتروني')">
 
-        <p>
-            مطلوب كاتب لكتابة مقالات عربية
-            أصلية ومنظمة لموقع إلكتروني.
-        </p>
+📢 التسويق الإلكتروني
 
-        <div class="opportunity-info">
+</button>
 
-            <span class="tag">
-                ✍️ كتابة
-            </span>
 
-            <span class="tag">
-                📝 مقالات
-            </span>
+<button
+class="category"
+type="button"
+onclick="filterCategory('إدخال البيانات')">
 
-            <span class="price">
-                💰 الميزانية: 30$
-            </span>
+📝 إدخال البيانات
 
-        </div>
+</button>
 
-        <button
-            type="button"
-            class="apply-button"
-            onclick="applyOpportunity('كتابة مقالات')">
 
-            📩 التقدم للفرصة
+<button
+class="category"
+type="button"
+onclick="filterCategory('Excel والبيانات')">
 
-        </button>
+📊 Excel والبيانات
 
-    </div>
+</button>
 
-    <!-- فرصة 4 -->
 
-    <div class="opportunity">
+<button
+class="category"
+type="button"
+onclick="filterCategory('التعليق الصوتي')">
 
-        <h3>
-            🎨 تصميم شعار
-        </h3>
+🎧 التعليق الصوتي
 
-        <p>
-            مطلوب مصمم لإنشاء شعار احترافي
-            لمشروع جديد.
-        </p>
+</button>
 
-        <div class="opportunity-info">
 
-            <span class="tag">
-                🎨 تصميم
-            </span>
+<button
+class="category"
+type="button"
+onclick="filterCategory('التعليم')">
 
-            <span class="tag">
-                🖼️ شعار
-            </span>
+📚 التعليم
 
-            <span class="price">
-                💰 الميزانية: 40$
-            </span>
+</button>
 
-        </div>
 
-        <button
-            type="button"
-            class="apply-button"
-            onclick="applyOpportunity('تصميم شعار')">
+<button
+class="category"
+type="button"
+onclick="filterCategory('التدقيق اللغوي')">
 
-            📩 التقدم للفرصة
+📖 التدقيق اللغوي
 
-        </button>
+</button>
 
-    </div>
 
-    <!-- فرصة 5 -->
+<button
+class="category"
+type="button"
+onclick="filterCategory('المتاجر الإلكترونية')">
 
-    <div class="opportunity">
+🛍️ المتاجر الإلكترونية
 
-        <h3>
-            🌐 ترجمة نصوص
-        </h3>
+</button>
 
-        <p>
-            مطلوب مترجم لترجمة مجموعة من النصوص
-            من الإنجليزية إلى العربية.
-        </p>
 
-        <div class="opportunity-info">
+<button
+class="category"
+type="button"
+onclick="filterCategory('الذكاء الاصطناعي')">
 
-            <span class="tag">
-                🌐 ترجمة
-            </span>
+🤖 الذكاء الاصطناعي
 
-            <span class="tag">
-                🇬🇧 عربي / إنجليزي
-            </span>
+</button>
 
-            <span class="price">
-                💰 الميزانية: 25$
-            </span>
 
-        </div>
+<button
+class="category"
+type="button"
+onclick="filterCategory('تحرير الصور')">
 
-        <button
-            type="button"
-            class="apply-button"
-            onclick="applyOpportunity('ترجمة نصوص')">
+📸 تحرير الصور
 
-            📩 التقدم للفرصة
+</button>
 
-        </button>
 
-    </div>
+<button
+class="category"
+type="button"
+onclick="filterCategory('المساعدة الافتراضية')">
 
-    <!-- فرصة 6 -->
+🗂️ المساعدة الافتراضية
 
-    <div class="opportunity">
+</button>
 
-        <h3>
-            🎬 تحرير فيديو
-        </h3>
 
-        <p>
-            مطلوب مونتير لتحرير فيديوهات قصيرة
-            للنشر على وسائل التواصل الاجتماعي.
-        </p>
+<button
+class="category"
+type="button"
+onclick="filterCategory('المحاسبة')">
 
-        <div class="opportunity-info">
+🧾 المحاسبة
 
-            <span class="tag">
-                🎬 مونتاج
-            </span>
+</button>
 
-            <span class="tag">
-                📱 فيديو قصير
-            </span>
 
-            <span class="price">
-                💰 الميزانية: 35$
-            </span>
+<button
+class="category"
+type="button"
+onclick="filterCategory('خدمات أخرى')">
 
-        </div>
+🔧 خدمات أخرى
 
-        <button
-            type="button"
-            class="apply-button"
-            onclick="applyOpportunity('تحرير فيديو')">
+</button>
 
-            📩 التقدم للفرصة
+</div>
 
-        </button>
 
-    </div>
+<h3 class="opportunities-title">
 
-    <button
-        type="button"
-        class="back-button"
-        onclick="goHome()">
+🔥 فرص متاحة الآن
 
-        🔙 العودة
+</h3>
 
-    </button>
 
-    <div
-        class="message"
-        id="opportunityMessage">
-    </div>
+<!-- فرصة 1 -->
+
+<div class="opportunity">
+
+<h3>
+🎙️ تفريغ تسجيل صوتي
+</h3>
+
+<p>
+مطلوب شخص لتفريغ تسجيل صوتي وتحويله
+إلى نص عربي مرتب.
+</p>
+
+<div class="opportunity-info">
+
+<span class="tag">
+🎙️ تفريغ صوتي
+</span>
+
+<span class="tag">
+⏱️ مشروع واحد
+</span>
+
+<span class="price">
+💰 الميزانية: 20$
+</span>
+
+</div>
+
+<button
+type="button"
+class="apply-button"
+onclick="applyOpportunity('تفريغ تسجيل صوتي')">
+
+📩 التقدم للفرصة
+
+</button>
+
+</div>
+
+
+<!-- فرصة 2 -->
+
+<div class="opportunity">
+
+<h3>
+💻 إنشاء موقع إلكتروني
+</h3>
+
+<p>
+مطلوب مبرمج لإنشاء موقع إلكتروني
+بسيط ومتجاوب مع الهاتف.
+</p>
+
+<div class="opportunity-info">
+
+<span class="tag">
+💻 برمجة
+</span>
+
+<span class="tag">
+🌐 مواقع
+</span>
+
+<span class="price">
+💰 الميزانية: 100$
+</span>
+
+</div>
+
+<button
+type="button"
+class="apply-button"
+onclick="applyOpportunity('إنشاء موقع إلكتروني')">
+
+📩 التقدم للفرصة
+
+</button>
+
+</div>
+
+
+<!-- فرصة 3 -->
+
+<div class="opportunity">
+
+<h3>
+✍️ كتابة مقالات
+</h3>
+
+<p>
+مطلوب كاتب لكتابة مقالات عربية
+أصلية ومنظمة لموقع إلكتروني.
+</p>
+
+<div class="opportunity-info">
+
+<span class="tag">
+✍️ كتابة
+</span>
+
+<span class="tag">
+📝 مقالات
+</span>
+
+<span class="price">
+💰 الميزانية: 30$
+</span>
+
+</div>
+
+<button
+type="button"
+class="apply-button"
+onclick="applyOpportunity('كتابة مقالات')">
+
+📩 التقدم للفرصة
+
+</button>
+
+</div>
+
+
+<!-- فرصة 4 -->
+
+<div class="opportunity">
+
+<h3>
+🎨 تصميم شعار
+</h3>
+
+<p>
+مطلوب مصمم لإنشاء شعار احترافي
+لمشروع جديد.
+</p>
+
+<div class="opportunity-info">
+
+<span class="tag">
+🎨 تصميم
+</span>
+
+<span class="tag">
+🖼️ شعار
+</span>
+
+<span class="price">
+💰 الميزانية: 40$
+</span>
+
+</div>
+
+<button
+type="button"
+class="apply-button"
+onclick="applyOpportunity('تصميم شعار')">
+
+📩 التقدم للفرصة
+
+</button>
+
+</div>
+
+
+<!-- فرصة 5 -->
+
+<div class="opportunity">
+
+<h3>
+🌐 ترجمة نصوص
+</h3>
+
+<p>
+مطلوب مترجم لترجمة مجموعة من النصوص
+من الإنجليزية إلى العربية.
+</p>
+
+<div class="opportunity-info">
+
+<span class="tag">
+🌐 ترجمة
+</span>
+
+<span class="tag">
+🇬🇧 عربي / إنجليزي
+</span>
+
+<span class="price">
+💰 الميزانية: 25$
+</span>
+
+</div>
+
+<button
+type="button"
+class="apply-button"
+onclick="applyOpportunity('ترجمة نصوص')">
+
+📩 التقدم للفرصة
+
+</button>
+
+</div>
+
+
+<!-- فرصة 6 -->
+
+<div class="opportunity">
+
+<h3>
+🎬 تحرير فيديو
+</h3>
+
+<p>
+مطلوب مونتير لتحرير فيديوهات قصيرة
+للنشر على وسائل التواصل الاجتماعي.
+</p>
+
+<div class="opportunity-info">
+
+<span class="tag">
+🎬 مونتاج
+</span>
+
+<span class="tag">
+📱 فيديو قصير
+</span>
+
+<span class="price">
+💰 الميزانية: 35$
+</span>
+
+</div>
+
+<button
+type="button"
+class="apply-button"
+onclick="applyOpportunity('تحرير فيديو')">
+
+📩 التقدم للفرصة
+
+</button>
+
+</div>
+
+
+<button
+type="button"
+class="back-button"
+onclick="goHome()">
+
+🔙 العودة
+
+</button>
+
+
+<div
+class="message"
+id="opportunityMessage">
+</div>
 
 </section>
 
+
 <footer>
 
-    © 2026 مَدخَل — جميع الحقوق محفوظة
+© 2026 مَدخَل — جميع الحقوق محفوظة
 
 </footer>
 
 </div>
+
 
 <script>
 
@@ -1272,8 +1417,6 @@ async function saveWorker() {
         document.getElementById("workerMessage");
 
 
-    /* التحقق من البيانات */
-
     if (name === "" || skill === "") {
 
         message.innerText =
@@ -1283,21 +1426,15 @@ async function saveWorker() {
     }
 
 
-    /* إظهار حالة الحفظ */
-
     message.innerText =
         "⏳ جارٍ حفظ ملفك المهني...";
 
 
     try {
 
-        /* إنشاء معرف للملف */
-
         var profileId =
             crypto.randomUUID();
 
-
-        /* إرسال البيانات إلى Supabase */
 
         var response =
             await fetch(
@@ -1344,8 +1481,6 @@ async function saveWorker() {
             );
 
 
-        /* فحص النتيجة */
-
         if (!response.ok) {
 
             var errorText =
@@ -1363,12 +1498,11 @@ async function saveWorker() {
         }
 
 
-        /* حفظ هوية الملف في الهاتف */
-
         localStorage.setItem(
             "madkhal_profile_id",
             profileId
         );
+
 
         localStorage.setItem(
             "madkhal_profile_name",
@@ -1376,11 +1510,8 @@ async function saveWorker() {
         );
 
 
-        /* رسالة النجاح */
-
         message.innerText =
             "🎉 تم إنشاء ملفك المهني وحفظه بنجاح في مَدخَل.";
-
 
     } catch (error) {
 
