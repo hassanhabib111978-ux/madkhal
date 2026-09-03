@@ -308,11 +308,6 @@ textarea:focus {
     min-height: 20px;
 }
 
-
-/* =========================
-   شاشة اكتشاف المهارات
-========================= */
-
 .skills-intro {
     background: linear-gradient(135deg, #eff6ff, #f5f3ff);
     padding: 22px;
@@ -370,11 +365,6 @@ textarea:focus {
     line-height: 1.8;
     margin-top: 18px;
 }
-
-
-/* =========================
-   شاشة تقييم المستوى
-========================= */
 
 .assessment-box {
     background: linear-gradient(135deg, #eff6ff, #f5f3ff);
@@ -459,7 +449,6 @@ footer {
 </div>
 </header>
 
-
 <section class="hero" id="home">
 
 <h1>مَدخَل</h1>
@@ -491,7 +480,6 @@ onclick="showSection('opportunities')">
 
 </section>
 
-
 <section class="cards" id="homeCards">
 
 <div class="card">
@@ -512,7 +500,6 @@ onclick="showSection('opportunities')">
 
 </div>
 
-
 <div class="card">
 
 <div class="icon">📋</div>
@@ -530,7 +517,6 @@ onclick="showSection('project')">
 </button>
 
 </div>
-
 
 <div class="card">
 
@@ -551,7 +537,6 @@ onclick="showSection('worker')">
 </div>
 
 </section>
-
 
 <section class="section" id="worker">
 
@@ -609,7 +594,6 @@ onclick="goHome()">
 
 </section>
 
-
 <section class="section" id="project">
 
 <h2>📋 لدي مشروع</h2>
@@ -665,7 +649,6 @@ onclick="goHome()">
 <div class="message" id="projectMessage"></div>
 
 </section>
-
 
 <section class="section" id="discoverSkillsSection">
 
@@ -776,7 +759,6 @@ onclick="goHome()">
 
 </section>
 
-
 <section class="section" id="assessmentSection">
 
 <h2>📊 تقييم مستواك</h2>
@@ -831,7 +813,6 @@ onclick="openDiscoverSkills()">
 </button>
 
 </section>
-
 
 <section class="section" id="opportunities">
 
@@ -961,7 +942,6 @@ onclick="applyOpportunity('تفريغ تسجيل صوتي')">
 
 </div>
 
-
 <div class="opportunity">
 
 <h3>💻 إنشاء موقع إلكتروني</h3>
@@ -986,7 +966,6 @@ onclick="applyOpportunity('إنشاء موقع إلكتروني')">
 </button>
 
 </div>
-
 
 <div class="opportunity">
 
@@ -1013,7 +992,6 @@ onclick="applyOpportunity('كتابة مقالات')">
 
 </div>
 
-
 <div class="opportunity">
 
 <h3>🎨 تصميم شعار</h3>
@@ -1038,7 +1016,6 @@ onclick="applyOpportunity('تصميم شعار')">
 </button>
 
 </div>
-
 
 <div class="opportunity">
 
@@ -1065,7 +1042,6 @@ onclick="applyOpportunity('ترجمة نصوص')">
 
 </div>
 
-
 <div class="opportunity">
 
 <h3>🎬 تحرير فيديو</h3>
@@ -1091,7 +1067,6 @@ onclick="applyOpportunity('تحرير فيديو')">
 
 </div>
 
-
 <button type="button"
 class="back-button"
 onclick="goHome()">
@@ -1102,13 +1077,11 @@ onclick="goHome()">
 
 </section>
 
-
 <footer>
 © 2026 مَدخَل — جميع الحقوق محفوظة
 </footer>
 
 </div>
-
 
 <script>
 
@@ -1119,8 +1092,13 @@ onclick="goHome()">
 const SUPABASE_URL =
     "https://qbufsdpdobuicpljnssr.supabase.co";
 
+/*
+   مهم:
+   اترك هنا مفتاح Supabase الحالي الموجود لديك
+   ولا تغيّره.
+*/
 const SUPABASE_PUBLISHABLE_KEY =
-    "sb_publishable_GcFtWBRg_lpfH_yv";
+    "sb_publishable_GcFtvWWmnkVzcwCFNqPBRg_ldpfH_yv";
 
 
 /* =========================
@@ -1421,7 +1399,8 @@ async function saveWorker() {
             );
 
             message.innerText =
-                "❌ حدث خطأ أثناء حفظ الملف. حاول مرة أخرى.";
+                "❌ خطأ Supabase: " +
+                errorText;
 
             return;
         }
@@ -1447,7 +1426,8 @@ async function saveWorker() {
         );
 
         message.innerText =
-            "❌ تعذر الاتصال بقاعدة البيانات. حاول مرة أخرى.";
+            "❌ خطأ في الاتصال: " +
+            error.message;
     }
 }
 
