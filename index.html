@@ -1,28 +1,4 @@
-<script>
 
-/* ⭐ إعداد Supabase ⭐ */
-
-const SUPABASE_URL =
-    "https://qbufsdpdobuicpljnssr.supabase.co";
-
-const SUPABASE_PUBLISHABLE_KEY =
-    "⭐";
-
-
-/* إخفاء جميع الأقسام */
-
-function hideSections() {
-
-    document.getElementById("home").style.display = "none";
-
-    document.getElementById("homeCards").style.display = "none";
-
-    document.getElementById("worker").style.display = "none";
-
-    document.getElementById("project").style.display = "none";
-
-    document.getElementById("opportunities").style.display = "none";
-}
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -34,496 +10,468 @@ function hideSections() {
 <style>
 
 * {
-    box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 body {
-    margin: 0;
-    font-family: Arial, Tahoma, sans-serif;
-    color: #172033;
+    margin: 0;
+    font-family: Arial, Tahoma, sans-serif;
+    color: #172033;
 
-    background:
-        radial-gradient(circle at top right, #dbeafe 0%, transparent 35%),
-        radial-gradient(circle at bottom left, #ede9fe 0%, transparent 35%),
-        #f8fafc;
+    background:
+        radial-gradient(circle at top right, #dbeafe 0%, transparent 35%),
+        radial-gradient(circle at bottom left, #ede9fe 0%, transparent 35%),
+        #f8fafc;
 
-    min-height: 100vh;
+    min-height: 100vh;
 }
 
 .container {
-    max-width: 1150px;
-    margin: auto;
-    padding: 20px;
+    max-width: 1150px;
+    margin: auto;
+    padding: 20px;
 }
 
-/* الشعار */
-
 header {
-    padding: 15px 0;
+    padding: 15px 0;
 }
 
 .logo {
-    font-size: 32px;
-    font-weight: bold;
+    font-size: 32px;
+    font-weight: bold;
 }
 
 .logo span {
-    color: #6366f1;
+    color: #6366f1;
 }
 
-/* الصفحة الرئيسية */
-
 .hero {
-    text-align: center;
-    padding: 70px 15px 45px;
+    text-align: center;
+    padding: 70px 15px 45px;
 }
 
 .hero h1 {
-    font-size: 68px;
-    margin: 0 0 15px;
+    font-size: 68px;
+    margin: 0 0 15px;
 
-    background: linear-gradient(
-        135deg,
-        #2563eb,
-        #7c3aed
-    );
+    background: linear-gradient(
+        135deg,
+        #2563eb,
+        #7c3aed
+    );
 
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .hero p {
-    font-size: 23px;
-    color: #64748b;
-    line-height: 1.8;
-    margin: 0 auto 35px;
-    max-width: 750px;
+    font-size: 23px;
+    color: #64748b;
+    line-height: 1.8;
+    margin: 0 auto 35px;
+    max-width: 750px;
 }
 
-/* الأزرار */
-
 .buttons {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 15px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 button {
-    border: none;
-    border-radius: 15px;
-    padding: 15px 25px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
+    border: none;
+    border-radius: 15px;
+    padding: 15px 25px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
 
-    transition:
-        transform 0.2s,
-        box-shadow 0.2s,
-        opacity 0.2s;
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s,
+        opacity 0.2s;
 }
 
 button:hover {
-    transform: translateY(-3px);
-    opacity: 0.95;
+    transform: translateY(-3px);
+    opacity: 0.95;
 }
 
 .primary {
-    background: linear-gradient(
-        135deg,
-        #2563eb,
-        #4f46e5
-    );
+    background: linear-gradient(
+        135deg,
+        #2563eb,
+        #4f46e5
+    );
 
-    color: white;
+    color: white;
 
-    box-shadow:
-        0 10px 25px rgba(37, 99, 235, 0.25);
+    box-shadow:
+        0 10px 25px rgba(37, 99, 235, 0.25);
 }
 
 .secondary {
-    background: white;
-    color: #334155;
-    border: 1px solid #e2e8f0;
+    background: white;
+    color: #334155;
+    border: 1px solid #e2e8f0;
 
-    box-shadow:
-        0 8px 20px rgba(15, 23, 42, 0.06);
+    box-shadow:
+        0 8px 20px rgba(15, 23, 42, 0.06);
 }
 
-/* البطاقات الرئيسية */
-
 .cards {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 22px;
-    margin: 25px 0 60px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+    margin: 25px 0 60px;
 }
 
 .card {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.95);
 
-    border-radius: 22px;
+    border-radius: 22px;
 
-    padding: 30px 25px;
+    padding: 30px 25px;
 
-    text-align: center;
+    text-align: center;
 
-    border: 1px solid #e2e8f0;
+    border: 1px solid #e2e8f0;
 
-    box-shadow:
-        0 12px 35px rgba(15, 23, 42, 0.07);
+    box-shadow:
+        0 12px 35px rgba(15, 23, 42, 0.07);
 
-    transition: transform 0.25s;
+    transition: transform 0.25s;
 }
 
 .card:hover {
-    transform: translateY(-7px);
+    transform: translateY(-7px);
 }
 
 .icon {
-    width: 70px;
-    height: 70px;
+    width: 70px;
+    height: 70px;
 
-    margin: auto;
+    margin: auto;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    border-radius: 20px;
+    border-radius: 20px;
 
-    font-size: 35px;
+    font-size: 35px;
 
-    background: linear-gradient(
-        135deg,
-        #dbeafe,
-        #ede9fe
-    );
+    background: linear-gradient(
+        135deg,
+        #dbeafe,
+        #ede9fe
+    );
 }
 
 .card h3 {
-    margin: 18px 0 10px;
+    margin: 18px 0 10px;
 }
 
 .card p {
-    color: #64748b;
-    line-height: 1.8;
+    color: #64748b;
+    line-height: 1.8;
 }
 
-/* الأقسام */
-
 .section {
-    display: none;
+    display: none;
 
-    background: rgba(255,255,255,0.96);
+    background: rgba(255,255,255,0.96);
 
-    border-radius: 22px;
+    border-radius: 22px;
 
-    padding: 35px;
+    padding: 35px;
 
-    margin: 30px 0 50px;
+    margin: 30px 0 50px;
 
-    border: 1px solid #e2e8f0;
+    border: 1px solid #e2e8f0;
 
-    box-shadow:
-        0 15px 45px rgba(15,23,42,0.08);
+    box-shadow:
+        0 15px 45px rgba(15,23,42,0.08);
 }
 
 .section h2 {
-    margin-top: 0;
-    font-size: 29px;
+    margin-top: 0;
+    font-size: 29px;
 }
 
-/* الحقول */
-
 .form-group {
-    margin-bottom: 18px;
+    margin-bottom: 18px;
 }
 
 .form-group label {
-    font-weight: bold;
+    font-weight: bold;
 }
 
 input,
 textarea {
-    width: 100%;
+    width: 100%;
 
-    padding: 14px;
+    padding: 14px;
 
-    border: 1px solid #dbe2ea;
+    border: 1px solid #dbe2ea;
 
-    border-radius: 12px;
+    border-radius: 12px;
 
-    font-size: 16px;
+    font-size: 16px;
 
-    margin-top: 8px;
+    margin-top: 8px;
 
-    background: #f8fafc;
+    background: #f8fafc;
 
-    outline: none;
+    outline: none;
 }
 
 textarea {
-    min-height: 130px;
-    resize: vertical;
+    min-height: 130px;
+    resize: vertical;
 }
 
 input:focus,
 textarea:focus {
-    border-color: #6366f1;
+    border-color: #6366f1;
 
-    box-shadow:
-        0 0 0 4px rgba(99,102,241,0.10);
+    box-shadow:
+        0 0 0 4px rgba(99,102,241,0.10);
 }
 
-/* أزرار الأقسام */
-
 .action-button {
-    background: linear-gradient(
-        135deg,
-        #2563eb,
-        #4f46e5
-    );
+    background: linear-gradient(
+        135deg,
+        #2563eb,
+        #4f46e5
+    );
 
-    color: white;
+    color: white;
 }
 
 .back-button {
-    background: #f1f5f9;
-    color: #334155;
-    margin-right: 8px;
+    background: #f1f5f9;
+    color: #334155;
+    margin-right: 8px;
 }
 
-/* عنوان تصفح الفرص */
-
 .market-intro {
-    background: linear-gradient(
-        135deg,
-        #eff6ff,
-        #f5f3ff
-    );
+    background: linear-gradient(
+        135deg,
+        #eff6ff,
+        #f5f3ff
+    );
 
-    padding: 20px;
+    padding: 20px;
 
-    border-radius: 18px;
+    border-radius: 18px;
 
-    margin-bottom: 25px;
+    margin-bottom: 25px;
 }
 
 .market-intro p {
-    color: #64748b;
-    line-height: 1.8;
+    color: #64748b;
+    line-height: 1.8;
 }
 
-/* شبكة المجالات */
-
 .categories {
-    display: grid;
+    display: grid;
 
-    grid-template-columns:
-        repeat(4, 1fr);
+    grid-template-columns:
+        repeat(4, 1fr);
 
-    gap: 12px;
+    gap: 12px;
 
-    margin-bottom: 30px;
+    margin-bottom: 30px;
 }
 
 .category {
-    background: white;
+    background: white;
 
-    border: 1px solid #e2e8f0;
+    border: 1px solid #e2e8f0;
 
-    border-radius: 15px;
+    border-radius: 15px;
 
-    padding: 16px 10px;
+    padding: 16px 10px;
 
-    text-align: center;
+    text-align: center;
 
-    cursor: pointer;
+    cursor: pointer;
 
-    font-weight: bold;
+    font-weight: bold;
 
-    transition:
-        transform 0.2s,
-        background 0.2s,
-        border-color 0.2s,
-        box-shadow 0.2s;
+    transition:
+        transform 0.2s,
+        background 0.2s,
+        border-color 0.2s,
+        box-shadow 0.2s;
 }
 
 .category:hover {
-    transform: translateY(-3px);
-    background: #f8fafc;
-    border-color: #6366f1;
+    transform: translateY(-3px);
+    background: #f8fafc;
+    border-color: #6366f1;
 
-    box-shadow:
-        0 8px 20px rgba(99,102,241,0.10);
+    box-shadow:
+        0 8px 20px rgba(99,102,241,0.10);
 }
 
-/* الفرص */
-
 .opportunities-title {
-    margin: 25px 0 15px;
+    margin: 25px 0 15px;
 }
 
 .opportunity {
-    background: white;
+    background: white;
 
-    border: 1px solid #e2e8f0;
+    border: 1px solid #e2e8f0;
 
-    border-radius: 18px;
+    border-radius: 18px;
 
-    padding: 22px;
+    padding: 22px;
 
-    margin-bottom: 16px;
+    margin-bottom: 16px;
 
-    box-shadow:
-        0 7px 22px rgba(15,23,42,0.05);
+    box-shadow:
+        0 7px 22px rgba(15,23,42,0.05);
 }
 
 .opportunity h3 {
-    margin-top: 0;
+    margin-top: 0;
 
-    color: #4f46e5;
+    color: #4f46e5;
 }
 
 .opportunity p {
-    color: #64748b;
+    color: #64748b;
 
-    line-height: 1.8;
+    line-height: 1.8;
 }
 
 .opportunity-info {
-    display: flex;
+    display: flex;
 
-    flex-wrap: wrap;
+    flex-wrap: wrap;
 
-    gap: 10px;
+    gap: 10px;
 
-    margin: 15px 0;
+    margin: 15px 0;
 }
 
 .tag {
-    background: #f1f5f9;
+    background: #f1f5f9;
 
-    color: #475569;
+    color: #475569;
 
-    padding: 7px 12px;
+    padding: 7px 12px;
 
-    border-radius: 10px;
+    border-radius: 10px;
 
-    font-size: 14px;
+    font-size: 14px;
 }
 
 .price {
-    color: #16a34a;
+    color: #16a34a;
 
-    font-weight: bold;
+    font-weight: bold;
 }
 
 .apply-button {
-    background: #4f46e5;
+    background: #4f46e5;
 
-    color: white;
+    color: white;
 
-    padding: 11px 18px;
+    padding: 11px 18px;
 }
-
-/* رسالة المجال */
 
 .category-message {
-    display: none;
+    display: none;
 
-    margin-bottom: 20px;
+    margin-bottom: 20px;
 
-    padding: 16px;
+    padding: 16px;
 
-    border-radius: 15px;
+    border-radius: 15px;
 
-    background: linear-gradient(
-        135deg,
-        #eff6ff,
-        #f5f3ff
-    );
+    background: linear-gradient(
+        135deg,
+        #eff6ff,
+        #f5f3ff
+    );
 
-    color: #3730a3;
+    color: #3730a3;
 
-    font-weight: bold;
+    font-weight: bold;
 }
-
-/* الرسائل */
 
 .message {
-    margin-top: 18px;
+    margin-top: 18px;
 
-    padding: 14px;
+    padding: 14px;
 
-    border-radius: 12px;
+    border-radius: 12px;
 
-    background: #eff6ff;
+    background: #eff6ff;
 
-    color: #1e40af;
+    color: #1e40af;
 
-    min-height: 20px;
+    min-height: 20px;
 }
-
-/* الفوتر */
 
 footer {
-    text-align: center;
+    text-align: center;
 
-    color: #94a3b8;
+    color: #94a3b8;
 
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid #e2e8f0;
 
-    padding: 28px 0;
+    padding: 28px 0;
 
-    margin-top: 30px;
+    margin-top: 30px;
 }
-
-/* الهاتف */
 
 @media (max-width: 800px) {
 
-    .cards {
-        grid-template-columns: 1fr;
-    }
+    .cards {
+        grid-template-columns: 1fr;
+    }
 
-    .categories {
-        grid-template-columns:
-            repeat(2, 1fr);
-    }
+    .categories {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
 
-    .hero h1 {
-        font-size: 52px;
-    }
+    .hero h1 {
+        font-size: 52px;
+    }
 
-    .hero p {
-        font-size: 19px;
-    }
+    .hero p {
+        font-size: 19px;
+    }
 }
 
 @media (max-width: 500px) {
 
-    .container {
-        padding: 14px;
-    }
+    .container {
+        padding: 14px;
+    }
 
-    .section {
-        padding: 22px;
-    }
+    .section {
+        padding: 22px;
+    }
 
-    .categories {
-        grid-template-columns: 1fr 1fr;
-    }
+    .categories {
+        grid-template-columns: 1fr 1fr;
+    }
 
-    button {
-        width: 100%;
-    }
+    button {
+        width: 100%;
+    }
 
-    .back-button {
-        margin-right: 0;
-        margin-top: 10px;
-    }
+    .back-button {
+        margin-right: 0;
+        margin-top: 10px;
+    }
 }
 
 </style>
@@ -535,847 +483,477 @@ footer {
 
 <header>
 
-    <div class="logo">
-        مَدخَل<span>.</span>
-    </div>
+    <div class="logo">
+        مَدخَل<span>.</span>
+    </div>
 
 </header>
 
-<!-- الرئيسية -->
-
 <section class="hero" id="home">
 
-    <h1>مَدخَل</h1>
+    <h1>مَدخَل</h1>
 
-    <p>
-        المدخل إلى سوق العمل الإلكتروني
-        <br>
-        نساعدك على الوصول إلى الفرصة المناسبة
-    </p>
+    <p>
+        المدخل إلى سوق العمل الإلكتروني
+        <br>
+        نساعدك على الوصول إلى الفرصة المناسبة
+    </p>
 
-    <div class="buttons">
+    <div class="buttons">
 
-        <button
-            type="button"
-            class="primary"
-            onclick="showSection('worker')">
+        <button
+            type="button"
+            class="primary"
+            onclick="showSection('worker')">
 
-            💼 أبحث عن عمل
+            💼 أبحث عن عمل
 
-        </button>
+        </button>
 
-        <button
-            type="button"
-            class="secondary"
-            onclick="showSection('project')">
+        <button
+            type="button"
+            class="secondary"
+            onclick="showSection('project')">
 
-            📋 لدي مشروع
+            📋 لدي مشروع
 
-        </button>
+        </button>
 
-        <button
-            type="button"
-            class="secondary"
-            onclick="showSection('opportunities')">
+        <button
+            type="button"
+            class="secondary"
+            onclick="showSection('opportunities')">
 
-            🔍 تصفح الفرص
+            🔍 تصفح الفرص
 
-        </button>
+        </button>
 
-    </div>
+    </div>
 
 </section>
-
-<!-- البطاقات -->
 
 <section class="cards" id="homeCards">
 
-    <div class="card">
+    <div class="card">
 
-        <div class="icon">
-            💼
-        </div>
+        <div class="icon">
+            💼
+        </div>
 
-        <h3>
-            فرص عمل
-        </h3>
+        <h3>
+            فرص عمل
+        </h3>
 
-        <p>
-            اكتشف فرصًا ومشاريع إلكترونية
-            تناسب مهاراتك.
-        </p>
+        <p>
+            اكتشف فرصًا ومشاريع إلكترونية
+            تناسب مهاراتك.
+        </p>
 
-        <button
-            type="button"
-            class="secondary"
-            onclick="showSection('opportunities')">
+        <button
+            type="button"
+            class="secondary"
+            onclick="showSection('opportunities')">
 
-            🔍 اكتشف الفرص
+            🔍 اكتشف الفرص
 
-        </button>
+        </button>
 
-    </div>
+    </div>
 
-    <div class="card">
+    <div class="card">
 
-        <div class="icon">
-            📋
-        </div>
+        <div class="icon">
+            📋
+        </div>
 
-        <h3>
-            أصحاب المشاريع
-        </h3>
+        <h3>
+            أصحاب المشاريع
+        </h3>
 
-        <p>
-            اعرض مشروعك وابحث عن الشخص
-            المناسب لإنجازه.
-        </p>
+        <p>
+            اعرض مشروعك وابحث عن الشخص
+            المناسب لإنجازه.
+        </p>
 
-        <button
-            type="button"
-            class="secondary"
-            onclick="showSection('project')">
+        <button
+            type="button"
+            class="secondary"
+            onclick="showSection('project')">
 
-            📋 أضف مشروعك
+            📋 أضف مشروعك
 
-        </button>
+        </button>
 
-    </div>
+    </div>
 
-    <div class="card">
+    <div class="card">
 
-        <div class="icon">
-            🤝
-        </div>
+        <div class="icon">
+            🤝
+        </div>
 
-        <h3>
-            تواصل مباشر
-        </h3>
+        <h3>
+            تواصل مباشر
+        </h3>
 
-        <p>
-            منصة واحدة تجمع صاحب المشروع
-            بمن يستطيع تنفيذ العمل.
-        </p>
+        <p>
+            منصة واحدة تجمع صاحب المشروع
+            بمن يستطيع تنفيذ العمل.
+        </p>
 
-        <button
-            type="button"
-            class="secondary"
-            onclick="showSection('worker')">
+        <button
+            type="button"
+            class="secondary"
+            onclick="showSection('worker')">
 
-            🤝 ابدأ الآن
+            🤝 ابدأ الآن
 
-        </button>
+        </button>
 
-    </div>
+    </div>
 
 </section>
-
-<!-- أبحث عن عمل -->
 
 <section class="section" id="worker">
 
-    <h2>
-        💼 أبحث عن عمل
-    </h2>
+    <h2>
+        💼 أبحث عن عمل
+    </h2>
 
-    <p>
-        أنشئ ملفك وأخبرنا بالمهارات التي تستطيع تقديمها.
-    </p>
+    <p>
+        أنشئ ملفك وأخبرنا بالمهارات التي تستطيع تقديمها.
+    </p>
 
-    <div class="form-group">
+    <div class="form-group">
 
-        <label>الاسم</label>
+        <label>الاسم</label>
 
-        <input
-            id="workerName"
-            type="text"
-            placeholder="اكتب اسمك">
+        <input
+            id="workerName"
+            type="text"
+            placeholder="اكتب اسمك">
 
-    </div>
+    </div>
 
-    <div class="form-group">
+    <div class="form-group">
 
-        <label>المهارة</label>
+        <label>المهارة</label>
 
-        <input
-            id="workerSkill"
-            type="text"
-            placeholder="مثال: تفريغ صوتي، برمجة، كتابة">
+        <input
+            id="workerSkill"
+            type="text"
+            placeholder="مثال: تفريغ صوتي، برمجة، كتابة">
 
-    </div>
+    </div>
 
-    <div class="form-group">
+    <div class="form-group">
 
-        <label>نبذة عنك</label>
+        <label>نبذة عنك</label>
 
-        <textarea
-            id="workerDescription"
-            placeholder="اكتب نبذة قصيرة عن مهاراتك"></textarea>
+        <textarea
+            id="workerDescription"
+            placeholder="اكتب نبذة قصيرة عن مهاراتك"></textarea>
 
-    </div>
+    </div>
 
-    <button
-        type="button"
-        class="action-button"
-        onclick="saveWorker()">
+    <button
+        type="button"
+        class="action-button"
+        onclick="saveWorker()">
 
-        ✅ حفظ ملفي
+        ✅ حفظ ملفي
 
-    </button>
+    </button>
 
-    <button
-        type="button"
-        class="back-button"
-        onclick="goHome()">
+    <button
+        type="button"
+        class="back-button"
+        onclick="goHome()">
 
-        🔙 العودة
+        🔙 العودة
 
-    </button>
+    </button>
 
-    <div
-        class="message"
-        id="workerMessage">
-    </div>
+    <div
+        class="message"
+        id="workerMessage">
+    </div>
 
 </section>
-
-<!-- لدي مشروع -->
 
 <section class="section" id="project">
 
-    <h2>
-        📋 لدي مشروع
-    </h2>
+    <h2>
+        📋 لدي مشروع
+    </h2>
 
-    <p>
-        أرسل تفاصيل مشروعك ليتمكن الأشخاص المناسبون من التقدم إليه.
-    </p>
+    <p>
+        أرسل تفاصيل مشروعك ليتمكن الأشخاص المناسبون من التقدم إليه.
+    </p>
 
-    <div class="form-group">
+    <div class="form-group">
 
-        <label>اسم المشروع</label>
+        <label>اسم المشروع</label>
 
-        <input
-            id="projectName"
-            type="text"
-            placeholder="اكتب اسم المشروع">
+        <input
+            id="projectName"
+            type="text"
+            placeholder="اكتب اسم المشروع">
 
-    </div>
+    </div>
 
-    <div class="form-group">
+    <div class="form-group">
 
-        <label>نوع العمل</label>
+        <label>نوع العمل</label>
 
-        <input
-            id="projectType"
-            type="text"
-            placeholder="مثال: تفريغ صوتي، برمجة، تصميم">
+        <input
+            id="projectType"
+            type="text"
+            placeholder="مثال: تفريغ صوتي، برمجة، تصميم">
 
-    </div>
+    </div>
 
-    <div class="form-group">
+    <div class="form-group">
 
-        <label>تفاصيل المشروع</label>
+        <label>تفاصيل المشروع</label>
 
-        <textarea
-            id="projectDescription"
-            placeholder="اشرح المطلوب"></textarea>
+        <textarea
+            id="projectDescription"
+            placeholder="اشرح المطلوب"></textarea>
 
-    </div>
+    </div>
 
-    <button
-        type="button"
-        class="action-button"
-        onclick="saveProject()">
+    <button
+        type="button"
+        class="action-button"
+        onclick="saveProject()">
 
-        📤 نشر المشروع
+        📤 نشر المشروع
 
-    </button>
+    </button>
 
-    <button
-        type="button"
-        class="back-button"
-        onclick="goHome()">
+    <button
+        type="button"
+        class="back-button"
+        onclick="goHome()">
 
-        🔙 العودة
+        🔙 العودة
 
-    </button>
+    </button>
 
-    <div
-        class="message"
-        id="projectMessage">
-    </div>
+    <div
+        class="message"
+        id="projectMessage">
+    </div>
 
 </section>
-
-<!-- تصفح الفرص -->
 
 <section class="section" id="opportunities">
 
-    <h2>
-        🔍 تصفح الفرص
-    </h2>
-
-    <div class="market-intro">
-
-        <h3>
-            🚀 اكتشف فرص العمل المناسبة لك
-        </h3>
-
-        <p>
-            اختر المجال الذي تملك مهارة فيه،
-            واستكشف المشاريع والطلبات المتاحة.
-        </p>
-
-    </div>
-
-    <h3>
-        🧩 المجالات
-    </h3>
-
-    <!-- رسالة المجال المختار -->
-
-    <div
-        class="category-message"
-        id="categoryMessage">
-    </div>
-
-    <div class="categories">
-
-        <button class="category" type="button"
-            onclick="filterCategory('التفريغ الصوتي')">
-            🎙️ التفريغ الصوتي
-        </button>
-
-        <button class="category" type="button"
-            onclick="filterCategory('البرمجة')">
-            💻 البرمجة
-        </button>
-
-        <button class="category" type="button"
-            onclick="filterCategory('كتابة المقالات')">
-            ✍️ كتابة المقالات
-        </button>
-
-        <button class="category" type="button"
-            onclick="filterCategory('الترجمة')">
-            🌐 الترجمة
-        </button>
-
-        <button class="category" type="button"
-            onclick="filterCategory('التصميم')">
-            🎨 التصميم
-        </button>
-
-        <button class="category" type="button"
-            onclick="filterCategory('المونتاج')">
-            🎬 المونتاج
-        </button>
-
-        <button class="category" type="button"
-            onclick="filterCategory('التواصل الاجتماعي')">
-            📱 التواصل الاجتماعي
-        </button>
-
-        <button class="category" type="button"
-            onclick="filterCategory('التسويق الإلكتروني')">
-            📢 التسويق الإلكتروني
-        </button>
-
-        <button class="category" type="button"
-            onclick="filterCategory('إدخال البيانات')">
-            📝 إدخال البيانات
-        </button>
+    <h2>
+        🔍 تصفح الفرص
+    </h2>
+
+    <div class="market-intro">
+
+        <h3>
+            🚀 اكتشف فرص العمل المناسبة لك
+        </h3>
+
+        <p>
+            اختر المجال الذي تملك مهارة فيه،
+            واستكشف المشاريع والطلبات المتاحة.
+        </p>
+
+    </div>
+
+    <h3>
+        🧩 المجالات
+    </h3>
+
+    <div
+        class="category-message"
+        id="categoryMessage">
+    </div>
+
+    <div class="categories">
+
+        <button class="category" type="button"
+            onclick="filterCategory('التفريغ الصوتي')">
+            🎙️ التفريغ الصوتي
+        </button>
+
+        <button class="category" type="button"
+            onclick="filterCategory('البرمجة')">
+            💻 البرمجة
+        </button>
+
+        <button class="category" type="button"
+            onclick="filterCategory('كتابة المقالات')">
+            ✍️ كتابة المقالات
+        </button>
+
+        <button class="category" type="button"
+            onclick="filterCategory('الترجمة')">
+            🌐 الترجمة
+        </button>
+
+        <button class="category" type="button"
+            onclick="filterCategory('التصميم')">
+            🎨 التصميم
+        </button>
+
+        <button class="category" type="button"
+            onclick="filterCategory('المونتاج')">
+            🎬 المونتاج
+        </button>
+
+        <button class="category" type="button"
+            onclick="filterCategory('التواصل الاجتماعي')">
+            📱 التواصل الاجتماعي
+        </button>
+
+        <button class="category" type="button"
+            onclick="filterCategory('التسويق الإلكتروني')">
+            📢 التسويق الإلكتروني
+        </button>
+
+        <button class="category" type="button"
+            onclick="filterCategory('إدخال البيانات')">
+            📝 إدخال البيانات
+        </button>
+
+        <button class="category" type="button"
+            onclick="filterCategory('Excel والبيانات')">
+            📊 Excel والبيانات
+        </button>
+
+        <button class="category" type="button"
+            onclick="filterCategory('التعليق الصوتي')">
+            🎧 التعليق الصوتي
+        </button>
+
+        <button class="category" type="button"
+            onclick="filterCategory('التعليم')">
+            📚 التعليم
+        </button>
+
+        <button class="category" type="button"
+            onclick="filterCategory('التدقيق اللغوي')">
+            📖 التدقيق اللغوي
+        </button>
 
-        <button class="category" type="button"
-            onclick="filterCategory('Excel والبيانات')">
-            📊 Excel والبيانات
-        </button>
+        <button class="category" type="button"
+            onclick="filterCategory('المتاجر الإلكترونية')">
+            🛍️ المتاجر الإلكترونية
+        </button>
+
+        <button class="category" type="button"
+            onclick="filterCategory('الذكاء الاصطناعي')">
+            🤖 الذكاء الاصطناعي
+        </button>
 
-        <button class="category" type="button"
-            onclick="filterCategory('التعليق الصوتي')">
-            🎧 التعليق الصوتي
-        </button>
+        <button class="category" type="button"
+            onclick="filterCategory('تحرير الصور')">
+            📸 تحرير الصور
+        </button>
 
-        <button class="category" type="button"
-            onclick="filterCategory('التعليم')">
-            📚 التعليم
-        </button>
+        <button class="category" type="button"
+            onclick="filterCategory('المساعدة الافتراضية')">
+            🗂️ المساعدة الافتراضية
+        </button>
 
-        <button class="category" type="button"
-            onclick="filterCategory('التدقيق اللغوي')">
-            📖 التدقيق اللغوي
-        </button>
+        <button class="category" type="button"
+            onclick="filterCategory('المحاسبة')">
+            🧾 المحاسبة
+        </button>
 
-        <button class="category" type="button"
-            onclick="filterCategory('المتاجر الإلكترونية')">
-            🛍️ المتاجر الإلكترونية
-        </button>
+        <button class="category" type="button"
+            onclick="filterCategory('خدمات أخرى')">
+            🔧 خدمات أخرى
+        </button>
 
-        <button class="category" type="button"
-            onclick="filterCategory('الذكاء الاصطناعي')">
-            🤖 الذكاء الاصطناعي
-        </button>
+    </div>
 
-        <button class="category" type="button"
-            onclick="filterCategory('تحرير الصور')">
-            📸 تحرير الصور
-        </button>
+    <h3 class="opportunities-title">
+        🔥 فرص متاحة الآن
+    </h3>
 
-        <button class="category" type="button"
-            onclick="filterCategory('المساعدة الافتراضية')">
-            🗂️ المساعدة الافتراضية
-        </button>
+    <div class="opportunity">
 
-        <button class="category" type="button"
-            onclick="filterCategory('المحاسبة')">
-            🧾 المحاسبة
-        </button>
+        <h3>
+            🎙️ تفريغ تسجيل صوتي
+        </h3>
 
-        <button class="category" type="button"
-            onclick="filterCategory('خدمات أخرى')">
-            🔧 خدمات أخرى
-        </button>
+        <p>
+            مطلوب شخص لتفريغ تسجيل صوتي وتحويله
+            إلى نص عربي مرتب.
+        </p>
 
-    </div>
+        <div class="opportunity-info">
 
-    <h3 class="opportunities-title">
-        🔥 فرص متاحة الآن
-    </h3>
+            <span class="tag">
+                🎙️ تفريغ صوتي
+            </span>
 
-    <!-- فرصة 1 -->
+            <span class="tag">
+                ⏱️ مشروع واحد
+            </span>
 
-    <div class="opportunity">
+            <span class="price">
+                💰 الميزانية: 20$
+            </span>
 
-        <h3>
-            🎙️ تفريغ تسجيل صوتي
-        </h3>
+        </div>
 
-        <p>
-            مطلوب شخص لتفريغ تسجيل صوتي وتحويله
-            إلى نص عربي مرتب.
-        </p>
+        <button
+            type="button"
+            class="apply-button"
+            onclick="applyOpportunity('تفريغ تسجيل صوتي')">
 
-        <div class="opportunity-info">
+            📩 التقدم للفرصة
 
-            <span class="tag">
-                🎙️ تفريغ صوتي
-            </span>
+        </button>
 
-            <span class="tag">
-                ⏱️ مشروع واحد
-            </span>
+    </div>
 
-            <span class="price">
-                💰 الميزانية: 20$
-            </span>
+    <div class="opportunity">
 
-        </div>
+        <h3>
+            💻 إنشاء موقع إلكتروني
+        </h3>
 
-        <button
-            type="button"
-            class="apply-button"
-            onclick="applyOpportunity('تفريغ تسجيل صوتي')">
+        <p>
+            مطلوب مبرمج لإنشاء موقع إلكتروني
+            بسيط ومتجاوب مع الهاتف.
+        </p>
 
-            📩 التقدم للفرصة
+        <div class="opportunity-info">
 
-        </button>
+            <span class="tag">
+                💻 برمجة
+            </span>
 
-    </div>
+            <span class="tag">
+                🌐 مواقع
+            </span>
 
-    <!-- فرصة 2 -->
+            <span class="price">
+                💰 الميزانية: 100$
+            </span>
 
-    <div class="opportunity">
+        </div>
 
-        <h3>
-            💻 إنشاء موقع إلكتروني
-        </h3>
+        <button
+            type="button"
+            class="apply-button"
+            onclick="applyOpportunity('إنشاء موقع إلكتروني')">
 
-        <p>
-            مطلوب مبرمج لإنشاء موقع إلكتروني
-            بسيط ومتجاوب مع الهاتف.
-        </p>
+            📩 التقدم للفرصة
 
-        <div class="opportunity-info">
+        </button>
 
-            <span class="tag">
-                💻 برمجة
-            </span>
+    </div>
 
-            <span class="tag">
-                🌐 مواقع
-            </span>
+    <div class="
 
-            <span class="price">
-                💰 الميزانية: 100$
-            </span>
-
-        </div>
-
-        <button
-            type="button"
-            class="apply-button"
-            onclick="applyOpportunity('إنشاء موقع إلكتروني')">
-
-            📩 التقدم للفرصة
-
-        </button>
-
-    </div>
-
-    <!-- فرصة 3 -->
-
-    <div class="opportunity">
-
-        <h3>
-            ✍️ كتابة مقالات
-        </h3>
-
-        <p>
-            مطلوب كاتب لكتابة مقالات عربية
-            أصلية ومنظمة لموقع إلكتروني.
-        </p>
-
-        <div class="opportunity-info">
-
-            <span class="tag">
-                ✍️ كتابة
-            </span>
-
-            <span class="tag">
-                📝 مقالات
-            </span>
-
-            <span class="price">
-                💰 الميزانية: 30$
-            </span>
-
-        </div>
-
-        <button
-            type="button"
-            class="apply-button"
-            onclick="applyOpportunity('كتابة مقالات')">
-
-            📩 التقدم للفرصة
-
-        </button>
-
-    </div>
-
-    <!-- فرصة 4 -->
-
-    <div class="opportunity">
-
-        <h3>
-            🎨 تصميم شعار
-        </h3>
-
-        <p>
-            مطلوب مصمم لإنشاء شعار احترافي
-            لمشروع جديد.
-        </p>
-
-        <div class="opportunity-info">
-
-            <span class="tag">
-                🎨 تصميم
-            </span>
-
-            <span class="tag">
-                🖼️ شعار
-            </span>
-
-            <span class="price">
-                💰 الميزانية: 40$
-            </span>
-
-        </div>
-
-        <button
-            type="button"
-            class="apply-button"
-            onclick="applyOpportunity('تصميم شعار')">
-
-            📩 التقدم للفرصة
-
-        </button>
-
-    </div>
-
-    <!-- فرصة 5 -->
-
-    <div class="opportunity">
-
-        <h3>
-            🌐 ترجمة نصوص
-        </h3>
-
-        <p>
-            مطلوب مترجم لترجمة مجموعة من النصوص
-            من الإنجليزية إلى العربية.
-        </p>
-
-        <div class="opportunity-info">
-
-            <span class="tag">
-                🌐 ترجمة
-            </span>
-
-            <span class="tag">
-                🇬🇧 عربي / إنجليزي
-            </span>
-
-            <span class="price">
-                💰 الميزانية: 25$
-            </span>
-
-        </div>
-
-        <button
-            type="button"
-            class="apply-button"
-            onclick="applyOpportunity('ترجمة نصوص')">
-
-            📩 التقدم للفرصة
-
-        </button>
-
-    </div>
-
-    <!-- فرصة 6 -->
-
-    <div class="opportunity">
-
-        <h3>
-            🎬 تحرير فيديو
-        </h3>
-
-        <p>
-            مطلوب مونتير لتحرير فيديوهات قصيرة
-            للنشر على وسائل التواصل الاجتماعي.
-        </p>
-
-        <div class="opportunity-info">
-
-            <span class="tag">
-                🎬 مونتاج
-            </span>
-
-            <span class="tag">
-                📱 فيديو قصير
-            </span>
-
-            <span class="price">
-                💰 الميزانية: 35$
-            </span>
-
-        </div>
-
-        <button
-            type="button"
-            class="apply-button"
-            onclick="applyOpportunity('تحرير فيديو')">
-
-            📩 التقدم للفرصة
-
-        </button>
-
-    </div>
-
-    <button
-        type="button"
-        class="back-button"
-        onclick="goHome()">
-
-        🔙 العودة
-
-    </button>
-
-    <div
-        class="message"
-        id="opportunityMessage">
-    </div>
-
-</section>
-
-<footer>
-
-    © 2026 مَدخَل — جميع الحقوق محفوظة
-
-</footer>
-
-</div>
-
-<script>
-
-/* إخفاء جميع الأقسام */
-
-function hideSections() {
-
-    document.getElementById("home").style.display = "none";
-
-    document.getElementById("homeCards").style.display = "none";
-
-    document.getElementById("worker").style.display = "none";
-
-    document.getElementById("project").style.display = "none";
-
-    document.getElementById("opportunities").style.display = "none";
-}
-
-/* فتح قسم */
-
-function showSection(sectionId) {
-
-    hideSections();
-
-    var section = document.getElementById(sectionId);
-
-    if (section) {
-
-        section.style.display = "block";
-
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-        });
-    }
-}
-
-/* العودة للرئيسية */
-
-function goHome() {
-
-    hideSections();
-
-    document.getElementById("home").style.display = "block";
-
-    document.getElementById("homeCards").style.display = "grid";
-
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
-}
-
-/* حفظ ملف العامل */
-
-function saveWorker() {
-
-    var name =
-        document.getElementById("workerName").value.trim();
-
-    var skill =
-        document.getElementById("workerSkill").value.trim();
-
-    var description =
-        document.getElementById("workerDescription").value.trim();
-
-    var message =
-        document.getElementById("workerMessage");
-
-    if (name === "" || skill === "") {
-
-        message.innerText =
-            "⚠️ يرجى كتابة الاسم والمهارة أولًا.";
-
-        return;
-    }
-
-    message.innerText =
-        "✅ تم تسجيل بياناتك مبدئيًا. سيتم ربط ملفك بقاعدة البيانات في الخطوة التالية.";
-
-}
-
-/* نشر المشروع */
-
-function saveProject() {
-
-    var name =
-        document.getElementById("projectName").value.trim();
-
-    var type =
-        document.getElementById("projectType").value.trim();
-
-    var description =
-        document.getElementById("projectDescription").value.trim();
-
-    var message =
-        document.getElementById("projectMessage");
-
-    if (
-        name === "" ||
-        type === "" ||
-        description === ""
-    ) {
-
-        message.innerText =
-            "⚠️ يرجى تعبئة جميع البيانات.";
-
-        return;
-    }
-
-    message.innerText =
-        "✅ تم تجهيز المشروع بنجاح. سيتم ربطه بقاعدة البيانات في الخطوة التالية.";
-
-}
-
-/* اختيار مجال */
-
-function filterCategory(categoryName) {
-
-    var message =
-        document.getElementById("categoryMessage");
-
-    message.style.display = "block";
-
-    message.innerText =
-        "🔎 اخترت مجال: " +
-        categoryName +
-        " — يتم الآن عرض الفرص المتعلقة بهذا المجال.";
-
-    window.scrollTo({
-        top: message.getBoundingClientRect().top +
-             window.pageYOffset -
-             20,
-        behavior: "smooth"
-    });
-
-}
-
-/* التقدم للفرصة */
-
-function applyOpportunity(opportunityName) {
-
-    var message =
-        document.getElementById("opportunityMessage");
-
-    message.style.display = "block";
-
-    message.innerText =
-        "📩 اخترت فرصة: " +
-        opportunityName +
-        " — سيتم إضافة نظام التقدم الحقيقي وربطه بحسابك وقاعدة البيانات في الخطوة التالية.";
-
-    window.scrollTo({
-        top: message.getBoundingClientRect().top +
-             window.pageYOffset -
-             20,
-        behavior: "smooth"
-    });
-
-}
-
-/* تشغيل الرئيسية عند فتح الموقع */
-
-window.addEventListener("load", function() {
-
-    goHome();
-
-});
-
-</script>
-
-</body>
-</html>
