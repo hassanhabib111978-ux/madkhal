@@ -308,6 +308,86 @@ textarea:focus {
     min-height: 20px;
 }
 
+
+/* =========================
+   شاشة اكتشاف المهارات
+========================= */
+
+.skills-intro {
+    background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+    padding: 22px;
+    border-radius: 18px;
+    margin-bottom: 25px;
+}
+
+.skills-intro p {
+    color: #64748b;
+    line-height: 1.9;
+    margin-bottom: 0;
+}
+
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 13px;
+    margin: 20px 0 25px;
+}
+
+.skill-button {
+    background: white;
+    color: #334155;
+    border: 2px solid #e2e8f0;
+    border-radius: 15px;
+    padding: 16px 12px;
+    min-height: 58px;
+}
+
+.skill-button:hover {
+    border-color: #6366f1;
+}
+
+.skill-button.selected {
+    background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+    border-color: #6366f1;
+    color: #3730a3;
+    box-shadow: 0 8px 20px rgba(99,102,241,0.12);
+}
+
+.selected-skills {
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 15px;
+    padding: 17px;
+    line-height: 1.9;
+    margin-bottom: 22px;
+}
+
+.discover-note {
+    background: #f8fafc;
+    border-radius: 15px;
+    padding: 16px;
+    color: #64748b;
+    line-height: 1.8;
+    margin-top: 18px;
+}
+
+
+/* =========================
+   شاشة تقييم المستوى
+========================= */
+
+.assessment-box {
+    background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+    padding: 22px;
+    border-radius: 18px;
+    margin-bottom: 25px;
+}
+
+.assessment-box p {
+    color: #64748b;
+    line-height: 1.9;
+}
+
 footer {
     text-align: center;
     color: #94a3b8;
@@ -317,11 +397,16 @@ footer {
 }
 
 @media (max-width: 800px) {
+
     .cards {
         grid-template-columns: 1fr;
     }
 
     .categories {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .skills-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 
@@ -335,6 +420,7 @@ footer {
 }
 
 @media (max-width: 500px) {
+
     .container {
         padding: 14px;
     }
@@ -344,6 +430,10 @@ footer {
     }
 
     .categories {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .skills-grid {
         grid-template-columns: 1fr 1fr;
     }
 
@@ -368,6 +458,11 @@ footer {
 مَدخَل<span>.</span>
 </div>
 </header>
+
+
+<!-- =========================
+     الصفحة الرئيسية
+========================= -->
 
 <section class="hero" id="home">
 
@@ -397,7 +492,13 @@ onclick="showSection('opportunities')">
 </button>
 
 </div>
+
 </section>
+
+
+<!-- =========================
+     البطاقات الرئيسية
+========================= -->
 
 <section class="cards" id="homeCards">
 
@@ -419,6 +520,7 @@ onclick="showSection('opportunities')">
 
 </div>
 
+
 <div class="card">
 
 <div class="icon">📋</div>
@@ -436,6 +538,7 @@ onclick="showSection('project')">
 </button>
 
 </div>
+
 
 <div class="card">
 
@@ -456,6 +559,11 @@ onclick="showSection('worker')">
 </div>
 
 </section>
+
+
+<!-- =========================
+     طالب العمل
+========================= -->
 
 <section class="section" id="worker">
 
@@ -513,6 +621,11 @@ onclick="goHome()">
 
 </section>
 
+
+<!-- =========================
+     صاحب المشروع
+========================= -->
+
 <section class="section" id="project">
 
 <h2>📋 لدي مشروع</h2>
@@ -568,6 +681,213 @@ onclick="goHome()">
 <div class="message" id="projectMessage"></div>
 
 </section>
+
+
+<!-- =========================
+     شاشة اكتشاف المهارات
+========================= -->
+
+<section class="section" id="discoverSkillsSection">
+
+<h2>🧠 اكتشف مهاراتك</h2>
+
+<div class="skills-intro">
+
+<p>
+لا تعرف المجال المناسب لك؟ لا مشكلة.
+سنساعدك على اكتشاف ما تستطيع فعله،
+ثم نرشح لك المجالات الأقرب إليك.
+</p>
+
+</div>
+
+
+<h3>1️⃣ ماذا تستطيع أن تفعل؟</h3>
+
+<p>
+اختر كل المهارات التي لديك أو سبق أن جربتها:
+</p>
+
+
+<div class="skills-grid">
+
+<button type="button"
+class="skill-button"
+onclick="toggleSkill(this, '✍️ الكتابة')">
+✍️ الكتابة
+</button>
+
+<button type="button"
+class="skill-button"
+onclick="toggleSkill(this, '🌐 الترجمة')">
+🌐 الترجمة
+</button>
+
+<button type="button"
+class="skill-button"
+onclick="toggleSkill(this, '🎨 التصميم')">
+🎨 التصميم
+</button>
+
+<button type="button"
+class="skill-button"
+onclick="toggleSkill(this, '💻 البرمجة')">
+💻 البرمجة
+</button>
+
+<button type="button"
+class="skill-button"
+onclick="toggleSkill(this, '🎬 تحرير الفيديو')">
+🎬 تحرير الفيديو
+</button>
+
+<button type="button"
+class="skill-button"
+onclick="toggleSkill(this, '🎙️ التفريغ الصوتي')">
+🎙️ التفريغ الصوتي
+</button>
+
+<button type="button"
+class="skill-button"
+onclick="toggleSkill(this, '📱 إدارة حسابات التواصل')">
+📱 إدارة حسابات التواصل
+</button>
+
+<button type="button"
+class="skill-button"
+onclick="toggleSkill(this, '📊 إدخال البيانات')">
+📊 إدخال البيانات
+</button>
+
+<button type="button"
+class="skill-button"
+onclick="toggleSkill(this, '🗣️ التواصل مع العملاء')">
+🗣️ التواصل مع العملاء
+</button>
+
+<button type="button"
+class="skill-button"
+onclick="toggleSkill(this, '📚 التعليم والشرح')">
+📚 التعليم والشرح
+</button>
+
+<button type="button"
+class="skill-button"
+onclick="toggleSkill(this, '🔍 البحث وجمع المعلومات')">
+🔍 البحث وجمع المعلومات
+</button>
+
+<button type="button"
+class="skill-button"
+onclick="toggleSkill(this, '🤷 لا أعرف بعد')">
+🤷 لا أعرف بعد
+</button>
+
+</div>
+
+
+<div class="selected-skills"
+id="selectedSkillsBox">
+لم تختر أي مهارة بعد.
+</div>
+
+
+<button type="button"
+class="action-button"
+onclick="startSkillAssessment()">
+📊 متابعة إلى تقييم المستوى
+</button>
+
+
+<button type="button"
+class="back-button"
+onclick="goHome()">
+🔙 العودة
+</button>
+
+
+<div class="discover-note">
+💡 لا نريد منك أن تعرف مستواك مسبقًا.
+سنطرح عليك أسئلة عملية بسيطة لنحدد مستواك بأنفسنا.
+</div>
+
+
+<div class="message" id="discoverMessage"></div>
+
+</section>
+
+
+<!-- =========================
+     شاشة تقييم المستوى
+========================= -->
+
+<section class="section" id="assessmentSection">
+
+<h2>📊 تقييم مستواك</h2>
+
+<div class="assessment-box">
+
+<h3>خطوة بسيطة لمعرفة مستواك</h3>
+
+<p>
+سنستخدم أسئلة عملية مرتبطة بالمهارات التي اخترتها،
+بدل الاعتماد على وصف عام مثل مبتدئ أو محترف.
+</p>
+
+</div>
+
+
+<h3>مثال على السؤال:</h3>
+
+<p>
+هل سبق أن قمت بهذا العمل؟
+</p>
+
+
+<div class="buttons">
+
+<button type="button"
+class="secondary"
+onclick="chooseAssessment('نعم، وأتقنه')">
+✅ نعم، وأتقنه
+</button>
+
+<button type="button"
+class="secondary"
+onclick="chooseAssessment('نعم، لكنني ما زلت أتعلم')">
+📚 نعم، لكنني ما زلت أتعلم
+</button>
+
+<button type="button"
+class="secondary"
+onclick="chooseAssessment('جربته قليلًا')">
+🔰 جربته قليلًا
+</button>
+
+<button type="button"
+class="secondary"
+onclick="chooseAssessment('لم أجربه')">
+🤷 لم أجربه
+</button>
+
+</div>
+
+
+<div class="message" id="assessmentMessage"></div>
+
+
+<button type="button"
+class="back-button"
+onclick="openDiscoverSkills()">
+⬅️ العودة إلى اكتشاف المهارات
+</button>
+
+</section>
+
+
+<!-- =========================
+     الفرص
+========================= -->
 
 <section class="section" id="opportunities">
 
@@ -687,9 +1007,11 @@ onclick="filterCategory('خدمات أخرى')">
 
 </div>
 
+
 <h3 class="opportunities-title">
 🔥 فرص متاحة الآن
 </h3>
+
 
 <div class="opportunity">
 
@@ -718,6 +1040,7 @@ onclick="applyOpportunity('تفريغ تسجيل صوتي')">
 
 </div>
 
+
 <div class="opportunity">
 
 <h3>💻 إنشاء موقع إلكتروني</h3>
@@ -744,6 +1067,7 @@ onclick="applyOpportunity('إنشاء موقع إلكتروني')">
 </button>
 
 </div>
+
 
 <div class="opportunity">
 
@@ -772,6 +1096,7 @@ onclick="applyOpportunity('كتابة مقالات')">
 
 </div>
 
+
 <div class="opportunity">
 
 <h3>🎨 تصميم شعار</h3>
@@ -798,6 +1123,7 @@ onclick="applyOpportunity('تصميم شعار')">
 </button>
 
 </div>
+
 
 <div class="opportunity">
 
@@ -826,6 +1152,7 @@ onclick="applyOpportunity('ترجمة نصوص')">
 
 </div>
 
+
 <div class="opportunity">
 
 <h3>🎬 تحرير فيديو</h3>
@@ -853,6 +1180,7 @@ onclick="applyOpportunity('تحرير فيديو')">
 
 </div>
 
+
 <button type="button"
 class="back-button"
 onclick="goHome()">
@@ -863,24 +1191,30 @@ onclick="goHome()">
 
 </section>
 
+
 <footer>
 © 2026 مَدخَل — جميع الحقوق محفوظة
 </footer>
 
 </div>
 
+
 <script>
 
 /* =========================
    إعداد Supabase
 ========================= */
-" sb_publishable_GcFtvWWmnkVzcwCFNqPBRg_ldpfH_yv "
+
+/*
+   ⭐ ضع مفتاح Supabase Publishable هنا
+   مكان النجمة هو المكان المخصص للمفتاح.
+*/
 
 const SUPABASE_URL =
     "https://qbufsdpdobuicpljnssr.supabase.co";
 
 const SUPABASE_PUBLISHABLE_KEY =
-    "ضع_هنا_Publishable_key_الخاص_بك";
+    "  sb_publishable_GcFtvWWmnkVzcwCFNqPBRg_ldpfH_yv   ضع مفتاح Supabase Publishable هنا";
 
 
 /* =========================
@@ -898,6 +1232,20 @@ function hideSections() {
     document.getElementById("project").style.display = "none";
 
     document.getElementById("opportunities").style.display = "none";
+
+    var discover =
+        document.getElementById("discoverSkillsSection");
+
+    if (discover) {
+        discover.style.display = "none";
+    }
+
+    var assessment =
+        document.getElementById("assessmentSection");
+
+    if (assessment) {
+        assessment.style.display = "none";
+    }
 }
 
 
@@ -940,6 +1288,161 @@ function goHome() {
         top: 0,
         behavior: "smooth"
     });
+}
+
+
+/* =========================
+   فتح اكتشاف المهارات
+========================= */
+
+function openDiscoverSkills() {
+
+    hideSections();
+
+    var section =
+        document.getElementById("discoverSkillsSection");
+
+    if (section) {
+
+        section.style.display = "block";
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }
+}
+
+
+/* =========================
+   المهارات المختارة
+========================= */
+
+var selectedSkills = [];
+
+
+function toggleSkill(button, skill) {
+
+    if (selectedSkills.includes(skill)) {
+
+        selectedSkills =
+            selectedSkills.filter(function(item) {
+
+                return item !== skill;
+
+            });
+
+        button.classList.remove("selected");
+
+    } else {
+
+        selectedSkills.push(skill);
+
+        button.classList.add("selected");
+    }
+
+
+    updateSelectedSkills();
+}
+
+
+function updateSelectedSkills() {
+
+    var box =
+        document.getElementById("selectedSkillsBox");
+
+
+    if (selectedSkills.length === 0) {
+
+        box.innerText =
+            "لم تختر أي مهارة بعد.";
+
+        return;
+    }
+
+
+    box.innerHTML =
+        "<strong>مهاراتك المختارة:</strong><br>" +
+        selectedSkills.join(" • ");
+}
+
+
+/* =========================
+   بدء تقييم المهارات
+========================= */
+
+function startSkillAssessment() {
+
+    var message =
+        document.getElementById("discoverMessage");
+
+
+    if (selectedSkills.length === 0) {
+
+        message.innerText =
+            "⚠️ اختر مهارة واحدة على الأقل للمتابعة.";
+
+        return;
+    }
+
+
+    localStorage.setItem(
+        "madkhal_selected_skills",
+        JSON.stringify(selectedSkills)
+    );
+
+
+    message.innerText =
+        "✅ تم حفظ مهاراتك. سننتقل الآن إلى تقييم مستواك.";
+
+
+    setTimeout(function() {
+
+        openAssessmentScreen();
+
+    }, 500);
+}
+
+
+/* =========================
+   فتح شاشة التقييم
+========================= */
+
+function openAssessmentScreen() {
+
+    hideSections();
+
+    var assessment =
+        document.getElementById("assessmentSection");
+
+
+    if (assessment) {
+
+        assessment.style.display = "block";
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+    }
+}
+
+
+/* =========================
+   اختيار إجابة التقييم
+========================= */
+
+function chooseAssessment(answer) {
+
+    var message =
+        document.getElementById("assessmentMessage");
+
+
+    message.innerText =
+        "✅ تم تسجيل إجابتك: " +
+        answer +
+        " — سيتم بناء التقييم العملي الكامل في الخطوة التالية.";
 }
 
 
@@ -1096,98 +1599,4 @@ function saveProject() {
         description === ""
     ) {
 
-        message.innerText =
-            "⚠️ يرجى تعبئة جميع البيانات.";
-
-        return;
-    }
-
-
-    message.innerText =
-        "✅ تم تجهيز المشروع بنجاح. سيتم ربطه بقاعدة البيانات في الخطوة التالية.";
-}
-
-
-/* =========================
-   اختيار مجال
-========================= */
-
-function filterCategory(categoryName) {
-
-    var message =
-        document.getElementById("categoryMessage");
-
-
-    message.style.display =
-        "block";
-
-
-    message.innerText =
-        "🔎 اخترت مجال: " +
-        categoryName +
-        " — يتم الآن عرض الفرص المتعلقة بهذا المجال.";
-
-
-    window.scrollTo({
-
-        top:
-            message.getBoundingClientRect().top +
-            window.pageYOffset -
-            20,
-
-        behavior:
-            "smooth"
-    });
-}
-
-
-/* =========================
-   التقدم للفرصة
-========================= */
-
-function applyOpportunity(opportunityName) {
-
-    var message =
-        document.getElementById("opportunityMessage");
-
-
-    message.style.display =
-        "block";
-
-
-    message.innerText =
-        "📩 اخترت فرصة: " +
-        opportunityName +
-        " — سيتم إضافة نظام التقدم الحقيقي وربطه بحسابك وقاعدة البيانات في الخطوة التالية.";
-
-
-    window.scrollTo({
-
-        top:
-            message.getBoundingClientRect().top +
-            window.pageYOffset -
-            20,
-
-        behavior:
-            "smooth"
-    });
-}
-
-
-/* =========================
-   تشغيل الرئيسية عند فتح الموقع
-========================= */
-
-window.addEventListener(
-    "load",
-    function() {
-
-        goHome();
-
-    }
-);
-
-</script>
-
-</body>
-</html>
+        message
