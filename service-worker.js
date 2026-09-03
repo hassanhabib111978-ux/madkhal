@@ -1,4 +1,4 @@
-const CACHE_NAME = "madkhal-v1";
+const CACHE_NAME = "madkhal-v2";
 
 const FILES_TO_CACHE = [
   "/",
