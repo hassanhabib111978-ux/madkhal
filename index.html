@@ -460,10 +460,6 @@ footer {
 </header>
 
 
-<!-- =========================
-     الصفحة الرئيسية
-========================= -->
-
 <section class="hero" id="home">
 
 <h1>مَدخَل</h1>
@@ -495,10 +491,6 @@ onclick="showSection('opportunities')">
 
 </section>
 
-
-<!-- =========================
-     البطاقات الرئيسية
-========================= -->
 
 <section class="cards" id="homeCards">
 
@@ -561,10 +553,6 @@ onclick="showSection('worker')">
 </section>
 
 
-<!-- =========================
-     طالب العمل
-========================= -->
-
 <section class="section" id="worker">
 
 <h2>💼 أبحث عن عمل</h2>
@@ -621,10 +609,6 @@ onclick="goHome()">
 
 </section>
 
-
-<!-- =========================
-     صاحب المشروع
-========================= -->
 
 <section class="section" id="project">
 
@@ -683,10 +667,6 @@ onclick="goHome()">
 </section>
 
 
-<!-- =========================
-     شاشة اكتشاف المهارات
-========================= -->
-
 <section class="section" id="discoverSkillsSection">
 
 <h2>🧠 اكتشف مهاراتك</h2>
@@ -701,96 +681,79 @@ onclick="goHome()">
 
 </div>
 
-
 <h3>1️⃣ ماذا تستطيع أن تفعل؟</h3>
 
 <p>
 اختر كل المهارات التي لديك أو سبق أن جربتها:
 </p>
 
-
 <div class="skills-grid">
 
-<button type="button"
-class="skill-button"
+<button type="button" class="skill-button"
 onclick="toggleSkill(this, '✍️ الكتابة')">
 ✍️ الكتابة
 </button>
 
-<button type="button"
-class="skill-button"
+<button type="button" class="skill-button"
 onclick="toggleSkill(this, '🌐 الترجمة')">
 🌐 الترجمة
 </button>
 
-<button type="button"
-class="skill-button"
+<button type="button" class="skill-button"
 onclick="toggleSkill(this, '🎨 التصميم')">
 🎨 التصميم
 </button>
 
-<button type="button"
-class="skill-button"
+<button type="button" class="skill-button"
 onclick="toggleSkill(this, '💻 البرمجة')">
 💻 البرمجة
 </button>
 
-<button type="button"
-class="skill-button"
+<button type="button" class="skill-button"
 onclick="toggleSkill(this, '🎬 تحرير الفيديو')">
 🎬 تحرير الفيديو
 </button>
 
-<button type="button"
-class="skill-button"
+<button type="button" class="skill-button"
 onclick="toggleSkill(this, '🎙️ التفريغ الصوتي')">
 🎙️ التفريغ الصوتي
 </button>
 
-<button type="button"
-class="skill-button"
+<button type="button" class="skill-button"
 onclick="toggleSkill(this, '📱 إدارة حسابات التواصل')">
 📱 إدارة حسابات التواصل
 </button>
 
-<button type="button"
-class="skill-button"
+<button type="button" class="skill-button"
 onclick="toggleSkill(this, '📊 إدخال البيانات')">
 📊 إدخال البيانات
 </button>
 
-<button type="button"
-class="skill-button"
+<button type="button" class="skill-button"
 onclick="toggleSkill(this, '🗣️ التواصل مع العملاء')">
 🗣️ التواصل مع العملاء
 </button>
 
-<button type="button"
-class="skill-button"
+<button type="button" class="skill-button"
 onclick="toggleSkill(this, '📚 التعليم والشرح')">
 📚 التعليم والشرح
 </button>
 
-<button type="button"
-class="skill-button"
+<button type="button" class="skill-button"
 onclick="toggleSkill(this, '🔍 البحث وجمع المعلومات')">
 🔍 البحث وجمع المعلومات
 </button>
 
-<button type="button"
-class="skill-button"
+<button type="button" class="skill-button"
 onclick="toggleSkill(this, '🤷 لا أعرف بعد')">
 🤷 لا أعرف بعد
 </button>
 
 </div>
 
-
-<div class="selected-skills"
-id="selectedSkillsBox">
+<div class="selected-skills" id="selectedSkillsBox">
 لم تختر أي مهارة بعد.
 </div>
-
 
 <button type="button"
 class="action-button"
@@ -798,28 +761,21 @@ onclick="startSkillAssessment()">
 📊 متابعة إلى تقييم المستوى
 </button>
 
-
 <button type="button"
 class="back-button"
 onclick="goHome()">
 🔙 العودة
 </button>
 
-
 <div class="discover-note">
 💡 لا نريد منك أن تعرف مستواك مسبقًا.
 سنطرح عليك أسئلة عملية بسيطة لنحدد مستواك بأنفسنا.
 </div>
 
-
 <div class="message" id="discoverMessage"></div>
 
 </section>
 
-
-<!-- =========================
-     شاشة تقييم المستوى
-========================= -->
 
 <section class="section" id="assessmentSection">
 
@@ -836,45 +792,37 @@ onclick="goHome()">
 
 </div>
 
-
 <h3>مثال على السؤال:</h3>
 
 <p>
 هل سبق أن قمت بهذا العمل؟
 </p>
 
-
 <div class="buttons">
 
-<button type="button"
-class="secondary"
+<button type="button" class="secondary"
 onclick="chooseAssessment('نعم، وأتقنه')">
 ✅ نعم، وأتقنه
 </button>
 
-<button type="button"
-class="secondary"
+<button type="button" class="secondary"
 onclick="chooseAssessment('نعم، لكنني ما زلت أتعلم')">
 📚 نعم، لكنني ما زلت أتعلم
 </button>
 
-<button type="button"
-class="secondary"
+<button type="button" class="secondary"
 onclick="chooseAssessment('جربته قليلًا')">
 🔰 جربته قليلًا
 </button>
 
-<button type="button"
-class="secondary"
+<button type="button" class="secondary"
 onclick="chooseAssessment('لم أجربه')">
 🤷 لم أجربه
 </button>
 
 </div>
 
-
 <div class="message" id="assessmentMessage"></div>
-
 
 <button type="button"
 class="back-button"
@@ -884,10 +832,6 @@ onclick="openDiscoverSkills()">
 
 </section>
 
-
-<!-- =========================
-     الفرص
-========================= -->
 
 <section class="section" id="opportunities">
 
@@ -910,108 +854,87 @@ onclick="openDiscoverSkills()">
 
 <div class="categories">
 
-<button class="category" type="button"
-onclick="filterCategory('التفريغ الصوتي')">
+<button class="category" type="button" onclick="filterCategory('التفريغ الصوتي')">
 🎙️ التفريغ الصوتي
 </button>
 
-<button class="category" type="button"
-onclick="filterCategory('البرمجة')">
+<button class="category" type="button" onclick="filterCategory('البرمجة')">
 💻 البرمجة
 </button>
 
-<button class="category" type="button"
-onclick="filterCategory('كتابة المقالات')">
+<button class="category" type="button" onclick="filterCategory('كتابة المقالات')">
 ✍️ كتابة المقالات
 </button>
 
-<button class="category" type="button"
-onclick="filterCategory('الترجمة')">
+<button class="category" type="button" onclick="filterCategory('الترجمة')">
 🌐 الترجمة
 </button>
 
-<button class="category" type="button"
-onclick="filterCategory('التصميم')">
+<button class="category" type="button" onclick="filterCategory('التصميم')">
 🎨 التصميم
 </button>
 
-<button class="category" type="button"
-onclick="filterCategory('المونتاج')">
+<button class="category" type="button" onclick="filterCategory('المونتاج')">
 🎬 المونتاج
 </button>
 
-<button class="category" type="button"
-onclick="filterCategory('التواصل الاجتماعي')">
+<button class="category" type="button" onclick="filterCategory('التواصل الاجتماعي')">
 📱 التواصل الاجتماعي
 </button>
 
-<button class="category" type="button"
-onclick="filterCategory('التسويق الإلكتروني')">
+<button class="category" type="button" onclick="filterCategory('التسويق الإلكتروني')">
 📢 التسويق الإلكتروني
 </button>
 
-<button class="category" type="button"
-onclick="filterCategory('إدخال البيانات')">
+<button class="category" type="button" onclick="filterCategory('إدخال البيانات')">
 📝 إدخال البيانات
 </button>
 
-<button class="category" type="button"
-onclick="filterCategory('Excel والبيانات')">
+<button class="category" type="button" onclick="filterCategory('Excel والبيانات')">
 📊 Excel والبيانات
 </button>
 
-<button class="category" type="button"
-onclick="filterCategory('التعليق الصوتي')">
+<button class="category" type="button" onclick="filterCategory('التعليق الصوتي')">
 🎧 التعليق الصوتي
 </button>
 
-<button class="category" type="button"
-onclick="filterCategory('التعليم')">
+<button class="category" type="button" onclick="filterCategory('التعليم')">
 📚 التعليم
 </button>
 
-<button class="category" type="button"
-onclick="filterCategory('التدقيق اللغوي')">
+<button class="category" type="button" onclick="filterCategory('التدقيق اللغوي')">
 📖 التدقيق اللغوي
 </button>
 
-<button class="category" type="button"
-onclick="filterCategory('المتاجر الإلكترونية')">
+<button class="category" type="button" onclick="filterCategory('المتاجر الإلكترونية')">
 🛍️ المتاجر الإلكترونية
 </button>
 
-<button class="category" type="button"
-onclick="filterCategory('الذكاء الاصطناعي')">
+<button class="category" type="button" onclick="filterCategory('الذكاء الاصطناعي')">
 🤖 الذكاء الاصطناعي
 </button>
 
-<button class="category" type="button"
-onclick="filterCategory('تحرير الصور')">
+<button class="category" type="button" onclick="filterCategory('تحرير الصور')">
 📸 تحرير الصور
 </button>
 
-<button class="category" type="button"
-onclick="filterCategory('المساعدة الافتراضية')">
+<button class="category" type="button" onclick="filterCategory('المساعدة الافتراضية')">
 🗂️ المساعدة الافتراضية
 </button>
 
-<button class="category" type="button"
-onclick="filterCategory('المحاسبة')">
+<button class="category" type="button" onclick="filterCategory('المحاسبة')">
 🧾 المحاسبة
 </button>
 
-<button class="category" type="button"
-onclick="filterCategory('خدمات أخرى')">
+<button class="category" type="button" onclick="filterCategory('خدمات أخرى')">
 🔧 خدمات أخرى
 </button>
 
 </div>
 
-
 <h3 class="opportunities-title">
 🔥 فرص متاحة الآن
 </h3>
-
 
 <div class="opportunity">
 
@@ -1025,9 +948,7 @@ onclick="filterCategory('خدمات أخرى')">
 <div class="opportunity-info">
 
 <span class="tag">🎙️ تفريغ صوتي</span>
-
 <span class="tag">⏱️ مشروع واحد</span>
-
 <span class="price">💰 الميزانية: 20$</span>
 
 </div>
@@ -1053,9 +974,7 @@ onclick="applyOpportunity('تفريغ تسجيل صوتي')">
 <div class="opportunity-info">
 
 <span class="tag">💻 برمجة</span>
-
 <span class="tag">🌐 مواقع</span>
-
 <span class="price">💰 الميزانية: 100$</span>
 
 </div>
@@ -1081,9 +1000,7 @@ onclick="applyOpportunity('إنشاء موقع إلكتروني')">
 <div class="opportunity-info">
 
 <span class="tag">✍️ كتابة</span>
-
 <span class="tag">📝 مقالات</span>
-
 <span class="price">💰 الميزانية: 30$</span>
 
 </div>
@@ -1109,9 +1026,7 @@ onclick="applyOpportunity('كتابة مقالات')">
 <div class="opportunity-info">
 
 <span class="tag">🎨 تصميم</span>
-
 <span class="tag">🖼️ شعار</span>
-
 <span class="price">💰 الميزانية: 40$</span>
 
 </div>
@@ -1137,9 +1052,7 @@ onclick="applyOpportunity('تصميم شعار')">
 <div class="opportunity-info">
 
 <span class="tag">🌐 ترجمة</span>
-
 <span class="tag">🇬🇧 عربي / إنجليزي</span>
-
 <span class="price">💰 الميزانية: 25$</span>
 
 </div>
@@ -1165,9 +1078,7 @@ onclick="applyOpportunity('ترجمة نصوص')">
 <div class="opportunity-info">
 
 <span class="tag">🎬 مونتاج</span>
-
 <span class="tag">📱 فيديو قصير</span>
-
 <span class="price">💰 الميزانية: 35$</span>
 
 </div>
@@ -1205,16 +1116,11 @@ onclick="goHome()">
    إعداد Supabase
 ========================= */
 
-/*
-   ⭐ ضع مفتاح Supabase Publishable هنا
-   مكان النجمة هو المكان المخصص للمفتاح.
-*/
-
 const SUPABASE_URL =
     "https://qbufsdpdobuicpljnssr.supabase.co";
 
 const SUPABASE_PUBLISHABLE_KEY =
-    " ضع مفتاح Supabase Publishable هنا"sb_publishable_GcFtvWWmnkVzcwCFNqPBRg_ldpfH_yv ;
+    "sb_publishable_GcFtvWWmnkVzcwCFNqPBRg_ldpfH_yv";
 
 
 /* =========================
@@ -1224,13 +1130,9 @@ const SUPABASE_PUBLISHABLE_KEY =
 function hideSections() {
 
     document.getElementById("home").style.display = "none";
-
     document.getElementById("homeCards").style.display = "none";
-
     document.getElementById("worker").style.display = "none";
-
     document.getElementById("project").style.display = "none";
-
     document.getElementById("opportunities").style.display = "none";
 
     var discover =
@@ -1281,7 +1183,6 @@ function goHome() {
     hideSections();
 
     document.getElementById("home").style.display = "block";
-
     document.getElementById("homeCards").style.display = "grid";
 
     window.scrollTo({
@@ -1327,9 +1228,7 @@ function toggleSkill(button, skill) {
 
         selectedSkills =
             selectedSkills.filter(function(item) {
-
                 return item !== skill;
-
             });
 
         button.classList.remove("selected");
@@ -1337,10 +1236,8 @@ function toggleSkill(button, skill) {
     } else {
 
         selectedSkills.push(skill);
-
         button.classList.add("selected");
     }
-
 
     updateSelectedSkills();
 }
@@ -1351,7 +1248,6 @@ function updateSelectedSkills() {
     var box =
         document.getElementById("selectedSkillsBox");
 
-
     if (selectedSkills.length === 0) {
 
         box.innerText =
@@ -1359,7 +1255,6 @@ function updateSelectedSkills() {
 
         return;
     }
-
 
     box.innerHTML =
         "<strong>مهاراتك المختارة:</strong><br>" +
@@ -1376,7 +1271,6 @@ function startSkillAssessment() {
     var message =
         document.getElementById("discoverMessage");
 
-
     if (selectedSkills.length === 0) {
 
         message.innerText =
@@ -1385,21 +1279,16 @@ function startSkillAssessment() {
         return;
     }
 
-
     localStorage.setItem(
         "madkhal_selected_skills",
         JSON.stringify(selectedSkills)
     );
 
-
     message.innerText =
         "✅ تم حفظ مهاراتك. سننتقل الآن إلى تقييم مستواك.";
 
-
     setTimeout(function() {
-
         openAssessmentScreen();
-
     }, 500);
 }
 
@@ -1415,7 +1304,6 @@ function openAssessmentScreen() {
     var assessment =
         document.getElementById("assessmentSection");
 
-
     if (assessment) {
 
         assessment.style.display = "block";
@@ -1424,7 +1312,6 @@ function openAssessmentScreen() {
             top: 0,
             behavior: "smooth"
         });
-
     }
 }
 
@@ -1437,7 +1324,6 @@ function chooseAssessment(answer) {
 
     var message =
         document.getElementById("assessmentMessage");
-
 
     message.innerText =
         "✅ تم تسجيل إجابتك: " +
@@ -1464,7 +1350,6 @@ async function saveWorker() {
     var message =
         document.getElementById("workerMessage");
 
-
     if (name === "" || skill === "") {
 
         message.innerText =
@@ -1473,16 +1358,13 @@ async function saveWorker() {
         return;
     }
 
-
     message.innerText =
         "⏳ جارٍ حفظ ملفك المهني...";
-
 
     try {
 
         var profileId =
             crypto.randomUUID();
-
 
         var response =
             await fetch(
@@ -1528,7 +1410,6 @@ async function saveWorker() {
                 }
             );
 
-
         if (!response.ok) {
 
             var errorText =
@@ -1545,18 +1426,15 @@ async function saveWorker() {
             return;
         }
 
-
         localStorage.setItem(
             "madkhal_profile_id",
             profileId
         );
 
-
         localStorage.setItem(
             "madkhal_profile_name",
             name
         );
-
 
         message.innerText =
             "🎉 تم إنشاء ملفك المهني وحفظه بنجاح في مَدخَل.";
@@ -1592,7 +1470,6 @@ function saveProject() {
     var message =
         document.getElementById("projectMessage");
 
-
     if (
         name === "" ||
         type === "" ||
@@ -1604,7 +1481,6 @@ function saveProject() {
 
         return;
     }
-
 
     message.innerText =
         "✅ تم تجهيز المشروع بنجاح. سيتم ربطه بقاعدة البيانات في الخطوة التالية.";
@@ -1620,16 +1496,13 @@ function filterCategory(categoryName) {
     var message =
         document.getElementById("categoryMessage");
 
-
     message.style.display =
         "block";
-
 
     message.innerText =
         "🔎 اخترت مجال: " +
         categoryName +
         " — يتم الآن عرض الفرص المتعلقة بهذا المجال.";
-
 
     window.scrollTo({
 
@@ -1653,16 +1526,13 @@ function applyOpportunity(opportunityName) {
     var message =
         document.getElementById("opportunityMessage");
 
-
     message.style.display =
         "block";
-
 
     message.innerText =
         "📩 اخترت فرصة: " +
         opportunityName +
         " — سيتم إضافة نظام التقدم الحقيقي وربطه بحسابك وقاعدة البيانات في الخطوة التالية.";
-
 
     window.scrollTo({
 
