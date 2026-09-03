@@ -2,20 +2,20 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>مَدخَل - إلى سوق العمل الإلكتروني</title>
-
-  <meta name="description"
-        content="مَدخَل يساعدك على اكتشاف مهاراتك وتقييم مستواك والوصول إلى فرص العمل الإلكتروني.">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#0f766e">
+  <meta name="description" content="مَدخَل - المدخل إلى سوق العمل الإلكتروني">
 
   <link rel="manifest" href="/manifest.json">
+
+  <title>مَدخَل 🚪</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     * {
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
     html {
@@ -24,284 +24,240 @@
 
     body {
       margin: 0;
-      font-family: Arial, Tahoma, sans-serif;
-      background:
-        radial-gradient(circle at top right, #dff7f3 0, transparent 35%),
-        linear-gradient(180deg, #f8fffe 0%, #eefaf8 100%);
-      color: #173b38;
-      min-height: 100vh;
+      font-family: Arial, "Tahoma", sans-serif;
+      background: #f6f8f8;
+      color: #172121;
+      padding-bottom: 82px;
     }
 
     button,
     input,
     textarea,
     select {
-      font-family: inherit;
+      font: inherit;
     }
 
-    header {
+    button {
+      cursor: pointer;
+      border: 0;
+    }
+
+    .app {
+      max-width: 700px;
+      margin: auto;
+      min-height: 100vh;
+      background: #f6f8f8;
+    }
+
+    /* Header */
+    .header {
       position: sticky;
       top: 0;
-      z-index: 100;
+      z-index: 50;
       background: rgba(255,255,255,.94);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid #d8eeeb;
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid #e5eaea;
+      padding: 13px 16px;
     }
 
     .header-inner {
-      max-width: 1100px;
-      margin: auto;
-      padding: 14px 20px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 15px;
+      justify-content: space-between;
+      gap: 10px;
     }
 
     .logo {
-      font-size: 25px;
+      font-size: 23px;
       font-weight: 900;
       color: #0f766e;
-      cursor: pointer;
     }
 
-    .badge {
-      background: #e4f7f4;
+    .pilot {
+      background: #e7f6f3;
       color: #0f766e;
-      padding: 7px 12px;
-      border-radius: 30px;
-      font-size: 13px;
-      font-weight: bold;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
     }
 
-    .container {
-      max-width: 1100px;
-      margin: auto;
-      padding: 0 20px;
+    /* Main */
+    main {
+      padding: 16px;
     }
 
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+      animation: fade .2s ease;
+    }
+
+    @keyframes fade {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Hero */
     .hero {
-      min-height: 650px;
-      display: grid;
-      grid-template-columns: 1.1fr .9fr;
-      align-items: center;
-      gap: 40px;
-      padding: 70px 0;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(145deg, #e9f8f5, #ffffff);
+      border-radius: 28px;
+      padding: 25px 20px;
+      margin-bottom: 18px;
+      border: 1px solid #dcefeb;
     }
 
     .hero h1 {
-      font-size: clamp(38px, 6vw, 70px);
-      line-height: 1.05;
-      margin: 0 0 20px;
-      color: #123c38;
-    }
-
-    .hero h1 span {
-      color: #0f766e;
+      margin: 0 0 9px;
+      font-size: 30px;
+      line-height: 1.25;
     }
 
     .hero p {
-      font-size: 20px;
-      line-height: 1.9;
-      color: #52706c;
-      margin-bottom: 28px;
-    }
-
-    .hero-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .btn {
-      border: 0;
-      border-radius: 14px;
-      padding: 14px 20px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: bold;
-      transition: .2s;
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-    }
-
-    .primary {
-      background: #0f766e;
-      color: white;
-      box-shadow: 0 8px 20px rgba(15,118,110,.18);
-    }
-
-    .secondary {
-      background: white;
-      color: #0f766e;
-      border: 1px solid #bde2dd;
-    }
-
-    .danger {
-      background: #fff1f1;
-      color: #b42318;
-      border: 1px solid #ffd2d2;
-    }
-
-    .door-wrapper {
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      margin: 0;
+      color: #5b6767;
+      line-height: 1.8;
+      font-size: 14px;
     }
 
     .door {
-      width: 250px;
-      height: 360px;
-      border-radius: 125px 125px 18px 18px;
-      background: linear-gradient(145deg, #0f766e, #155e75);
+      margin: 22px auto 18px;
+      width: 130px;
+      height: 155px;
+      background: #0f766e;
+      border-radius: 65px 65px 8px 8px;
       position: relative;
-      box-shadow: 0 30px 70px rgba(15,118,110,.25);
-      padding: 18px;
+      box-shadow: 0 15px 35px rgba(15,118,110,.22);
     }
 
-    .door::before {
+    .door::after {
       content: "";
       position: absolute;
-      inset: 18px;
-      border: 2px solid rgba(255,255,255,.25);
-      border-radius: 108px 108px 10px 10px;
+      width: 70px;
+      height: 90px;
+      background: #fff;
+      left: 30px;
+      bottom: 0;
+      border-radius: 45px 45px 0 0;
+      opacity: .95;
     }
 
     .door-light {
       position: absolute;
-      width: 100px;
-      height: 100px;
+      width: 25px;
+      height: 25px;
       border-radius: 50%;
-      background: #fff;
-      left: 50%;
-      top: 105px;
-      transform: translateX(-50%);
-      box-shadow:
-        0 0 30px rgba(255,255,255,.8),
-        0 0 80px rgba(255,255,255,.55);
+      background: #f6c453;
+      left: 52px;
+      top: 67px;
+      z-index: 3;
+      box-shadow: 0 0 30px #f6c453;
     }
 
-    .door-text {
-      position: absolute;
-      bottom: 45px;
-      left: 0;
-      right: 0;
-      text-align: center;
+    .hero-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+      padding: 14px 12px;
+      border-radius: 16px;
+      font-weight: 800;
+      transition: .15s;
+    }
+
+    .primary-btn {
+      background: #0f766e;
       color: white;
-      font-weight: bold;
-      font-size: 21px;
     }
 
-    section {
-      padding: 65px 0;
+    .secondary-btn {
+      background: white;
+      color: #0f766e;
+      border: 1px solid #cfe4e1;
     }
 
+    .primary-btn:active,
+    .secondary-btn:active,
+    .option:active,
+    .nav-item:active {
+      transform: scale(.97);
+    }
+
+    /* Cards */
     .section-title {
-      text-align: center;
-      margin-bottom: 40px;
+      font-size: 19px;
+      margin: 24px 2px 12px;
     }
 
-    .section-title h2 {
-      font-size: 34px;
-      margin: 0 0 10px;
+    .card {
+      background: white;
+      border: 1px solid #e5eaea;
+      border-radius: 20px;
+      padding: 17px;
+      margin-bottom: 12px;
+      box-shadow: 0 5px 18px rgba(20,40,40,.035);
     }
 
-    .section-title p {
-      color: #66807c;
-      line-height: 1.8;
+    .card h3 {
+      margin: 0 0 7px;
+      font-size: 17px;
     }
 
+    .card p {
+      margin: 0;
+      color: #657070;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    /* Journey */
     .journey {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 10px;
-      margin-top: 25px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
     }
 
     .journey-item {
       background: white;
-      border: 1px solid #d9eeeb;
-      padding: 18px 8px;
+      border: 1px solid #e4eaea;
+      border-radius: 17px;
+      padding: 13px 5px;
       text-align: center;
-      border-radius: 15px;
-      font-weight: bold;
-      font-size: 14px;
+      font-size: 12px;
+      font-weight: 700;
     }
 
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-    }
-
-    .card {
-      background: rgba(255,255,255,.92);
-      border: 1px solid #d9eeeb;
-      border-radius: 20px;
-      padding: 28px;
-      box-shadow: 0 12px 35px rgba(15,118,110,.06);
-    }
-
-    .card h3 {
-      margin-top: 0;
-      font-size: 21px;
-    }
-
-    .card p {
-      line-height: 1.8;
-      color: #627d79;
-    }
-
-    .trust-section {
-      background: #123c38;
-      color: white;
-      border-radius: 28px;
-      padding: 50px;
-      margin: 30px 0;
-    }
-
-    .trust-section p {
-      color: #d5ece8;
-      line-height: 1.9;
-    }
-
-    .plus-section {
-      background: linear-gradient(135deg, #e8f8f5, #ffffff);
-      border: 1px solid #cfeae6;
-      border-radius: 25px;
-      padding: 35px;
-    }
-
-    .internal {
-      display: none;
-      min-height: 650px;
-      padding-top: 45px;
-    }
-
-    .internal.active {
+    .journey-item span {
       display: block;
+      font-size: 23px;
+      margin-bottom: 6px;
     }
 
-    .back-btn {
-      margin-bottom: 25px;
+    /* Forms */
+    .form-group {
+      margin-bottom: 14px;
     }
 
-    .form-box {
-      max-width: 700px;
-      margin: auto;
-      background: white;
-      padding: 30px;
-      border-radius: 22px;
-      border: 1px solid #d8eeeb;
-      box-shadow: 0 15px 40px rgba(15,118,110,.06);
-    }
-
-    label {
+    .form-group label {
       display: block;
-      margin: 17px 0 7px;
-      font-weight: bold;
+      margin-bottom: 7px;
+      font-size: 13px;
+      font-weight: 800;
     }
 
     input,
@@ -309,286 +265,306 @@
     select {
       width: 100%;
       padding: 14px;
-      border: 1px solid #c9e3df;
-      border-radius: 12px;
+      border: 1px solid #d8e1e1;
+      border-radius: 14px;
       outline: none;
-      font-size: 16px;
-      background: #fbfffe;
-    }
-
-    textarea {
-      min-height: 140px;
-      resize: vertical;
-      line-height: 1.8;
+      background: white;
+      color: #172121;
     }
 
     input:focus,
     textarea:focus,
     select:focus {
       border-color: #0f766e;
-      box-shadow: 0 0 0 3px rgba(15,118,110,.08);
     }
 
-    .message {
-      margin-top: 15px;
-      padding: 13px;
-      border-radius: 12px;
-      display: none;
-      line-height: 1.7;
+    textarea {
+      min-height: 130px;
+      resize: vertical;
+      line-height: 1.8;
     }
 
-    .message.success {
-      display: block;
-      background: #eaf9f1;
-      color: #17663d;
-    }
-
-    .message.error {
-      display: block;
-      background: #fff0f0;
-      color: #a52626;
-    }
-
-    .path-buttons {
+    /* Options */
+    .options {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-      margin-top: 25px;
+      gap: 9px;
+      margin-top: 14px;
     }
 
-    .path-btn {
+    .option {
+      text-align: right;
       background: white;
-      border: 1px solid #d4ebe7;
-      border-radius: 18px;
-      padding: 24px 15px;
-      cursor: pointer;
-      text-align: center;
-      font-size: 16px;
-      font-weight: bold;
-      color: #234d49;
-      transition: .2s;
+      border: 1px solid #dfe7e7;
+      border-radius: 15px;
+      padding: 14px;
+      font-weight: 700;
     }
 
-    .path-btn:hover {
+    .option.selected {
       border-color: #0f766e;
-      transform: translateY(-3px);
+      background: #eaf8f5;
+      color: #0f766e;
     }
 
+    /* Skills */
     .skills-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-top: 25px;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
     }
 
-    .skill-btn {
-      padding: 17px 12px;
-      border: 1px solid #d5eae7;
+    .skill {
       background: white;
-      border-radius: 14px;
-      cursor: pointer;
-      font-weight: bold;
-      color: #315a55;
+      border: 1px solid #dfe7e7;
+      border-radius: 15px;
+      padding: 13px 8px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
     }
 
-    .skill-btn.selected {
+    .skill.selected {
+      background: #e9f8f5;
+      border-color: #0f766e;
+      color: #0f766e;
+    }
+
+    .selected-box {
+      margin: 14px 0;
+      background: #f0f8f7;
+      padding: 12px;
+      border-radius: 14px;
+      font-size: 12px;
+      color: #0f766e;
+    }
+
+    /* Opportunities */
+    .category-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 5px;
+      margin-bottom: 15px;
+      scrollbar-width: none;
+    }
+
+    .category-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .category {
+      white-space: nowrap;
+      background: white;
+      border: 1px solid #dfe7e7;
+      padding: 10px 13px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .category.active {
       background: #0f766e;
       color: white;
       border-color: #0f766e;
     }
 
-    .selected-skills {
-      margin-top: 18px;
-      padding: 15px;
-      background: #edf9f7;
-      border-radius: 13px;
-      color: #245650;
-      line-height: 1.8;
-    }
-
-    .assessment-intro {
-      background: #edf9f7;
-      border: 1px solid #cfeae6;
-      border-radius: 18px;
-      padding: 22px;
-      line-height: 1.9;
-      margin-bottom: 25px;
-    }
-
-    .assessment-question {
-      background: white;
-      border: 1px solid #d7ece9;
-      border-radius: 20px;
-      padding: 25px;
-      margin-bottom: 20px;
-    }
-
-    .assessment-question h3 {
-      margin-top: 0;
-    }
-
-    .assessment-options {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    .assessment-option {
-      border: 1px solid #d2e9e5;
-      background: white;
-      padding: 16px;
-      border-radius: 13px;
-      cursor: pointer;
-      text-align: center;
-      font-weight: bold;
-    }
-
-    .assessment-option:hover {
-      border-color: #0f766e;
-      background: #f1fbf9;
-    }
-
-    .practical-test {
-      display: none;
-      margin-top: 30px;
-    }
-
-    .word-counter {
-      margin-top: 8px;
-      color: #68817d;
-      font-size: 14px;
-    }
-
-    .result-box {
-      display: none;
-      margin-top: 25px;
-      background: linear-gradient(135deg, #f0fbf9, #ffffff);
-      border: 1px solid #bfe2dc;
-      border-radius: 22px;
-      padding: 28px;
-    }
-
-    .score {
-      font-size: 48px;
-      font-weight: 900;
-      color: #0f766e;
-      text-align: center;
-    }
-
-    .level {
-      text-align: center;
-      font-size: 23px;
-      font-weight: bold;
-      margin: 10px 0 25px;
-    }
-
-    .result-list {
-      line-height: 2;
-    }
-
-    .categories {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-bottom: 30px;
-    }
-
-    .category {
-      background: white;
-      border: 1px solid #d8ece9;
-      border-radius: 14px;
-      padding: 14px;
-      cursor: pointer;
-      text-align: center;
-      font-weight: bold;
-    }
-
-    .category:hover {
-      border-color: #0f766e;
-    }
-
-    .opportunities {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 18px;
-    }
-
     .opportunity {
       background: white;
-      border: 1px solid #d8ece9;
-      border-radius: 18px;
-      padding: 22px;
+      border: 1px solid #e3e9e9;
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 11px;
+    }
+
+    .opportunity-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
     }
 
     .opportunity h3 {
-      margin-top: 0;
+      margin: 0 0 6px;
+      font-size: 16px;
     }
 
     .price {
-      color: #0f766e;
-      font-size: 22px;
       font-weight: 900;
-      margin: 15px 0;
+      color: #0f766e;
+      white-space: nowrap;
     }
 
-    footer {
-      margin-top: 50px;
-      padding: 35px 20px;
-      background: #123c38;
-      color: white;
+    .tag {
+      display: inline-block;
+      background: #f0f4f4;
+      color: #596565;
+      padding: 5px 8px;
+      border-radius: 7px;
+      font-size: 10px;
+      margin-top: 8px;
+    }
+
+    /* Result */
+    .result {
       text-align: center;
+      background: white;
+      border-radius: 24px;
+      padding: 25px 18px;
+      border: 1px solid #e4eaea;
     }
 
-    footer p {
-      color: #cce4e0;
+    .score {
+      font-size: 55px;
+      font-weight: 900;
+      color: #0f766e;
     }
 
-    @media(max-width: 800px) {
-      .hero {
-        grid-template-columns: 1fr;
-        text-align: center;
-      }
-
-      .hero-buttons {
-        justify-content: center;
-      }
-
-      .journey {
-        grid-template-columns: repeat(3, 1fr);
-      }
-
-      .cards,
-      .path-buttons,
-      .skills-grid,
-      .opportunities {
-        grid-template-columns: 1fr;
-      }
-
-      .categories {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .assessment-options {
-        grid-template-columns: 1fr;
-      }
-
-      .trust-section {
-        padding: 30px 20px;
-      }
+    .level {
+      font-size: 19px;
+      font-weight: 900;
+      margin-bottom: 15px;
     }
 
-    @media(max-width: 500px) {
-      .journey {
-        grid-template-columns: repeat(2, 1fr);
+    .result-list {
+      text-align: right;
+      margin-top: 18px;
+    }
+
+    .result-list div {
+      padding: 11px;
+      background: #f7f9f9;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    /* Owner */
+    .owner-box {
+      background: linear-gradient(145deg, #172121, #263333);
+      color: white;
+      border-radius: 24px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .owner-badge {
+      display: inline-block;
+      background: #f6c453;
+      color: #302600;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .admin-card {
+      background: white;
+      border: 1px solid #e3e9e9;
+      border-radius: 17px;
+      padding: 16px 10px;
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .admin-card span {
+      display: block;
+      font-size: 25px;
+      margin-bottom: 6px;
+    }
+
+    /* Bottom navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(700px, 100%);
+      height: 72px;
+      background: rgba(255,255,255,.97);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid #e0e7e7;
+      z-index: 100;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .nav-item {
+      background: transparent;
+      color: #718080;
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-item span {
+      font-size: 22px;
+    }
+
+    .nav-item.active {
+      color: #0f766e;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      left: 15px;
+      right: 15px;
+      bottom: 88px;
+      max-width: 650px;
+      margin: auto;
+      background: #172121;
+      color: white;
+      padding: 14px 16px;
+      border-radius: 15px;
+      text-align: center;
+      z-index: 200;
+      display: none;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .toast.show {
+      display: block;
+      animation: fade .2s ease;
+    }
+
+    .back {
+      margin-bottom: 15px;
+      background: transparent;
+      color: #0f766e;
+      font-weight: 800;
+      padding: 5px 0;
+    }
+
+    .word-count {
+      text-align: left;
+      color: #718080;
+      font-size: 11px;
+      margin-top: 5px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (min-width: 701px) {
+      body {
+        background: #e9eeee;
       }
 
-      .hero {
-        padding-top: 45px;
-      }
-
-      .door {
-        width: 205px;
-        height: 300px;
+      .app {
+        box-shadow: 0 0 50px rgba(0,0,0,.08);
       }
     }
   </style>
@@ -596,1673 +572,1635 @@
 
 <body>
 
-<header>
-  <div class="header-inner">
-    <div class="logo" onclick="goHome()">مَدخَل 🚪</div>
-    <div class="badge">الإطلاق التجريبي 🚀</div>
-  </div>
-</header>
+<div class="app">
 
-<main class="container">
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">مَدخَل 🚪</div>
+      <div class="pilot">🚀 إطلاق تجريبي</div>
+    </div>
+  </header>
 
-  <!-- ================= HOME ================= -->
+  <main>
 
-  <div id="homeArea">
+    <!-- الرئيسية -->
+    <section id="homeScreen" class="screen active">
 
-    <section class="hero" id="home">
-
-      <div>
-        <div class="badge" style="display:inline-block;margin-bottom:18px;">
-          🚀 مَدخَل الآن في مرحلة الإطلاق التجريبي
-        </div>
-
-        <h1>
-          المدخل إلى
-          <span>سوق العمل الإلكتروني</span>
-        </h1>
+      <div class="hero">
+        <h1>المدخل إلى سوق العمل الإلكتروني</h1>
 
         <p>
-          لا نبحث عن وظيفة فقط؛
-          نساعدك على الوصول إليها.
-          اكتشف مهاراتك، قيّم مستواك، طوّر نفسك،
-          ثم ابحث عن الفرصة المناسبة وقدّم عليها.
+          لا تعرف ماذا تستطيع أن تعمل؟
+          اكتشف مهاراتك، قيّم مستواك، ثم اعثر على الفرصة المناسبة.
         </p>
 
-        <div class="hero-buttons">
-          <button class="btn primary" onclick="openWorker()">
+        <div class="door">
+          <div class="door-light"></div>
+        </div>
+
+        <div class="hero-actions">
+          <button class="primary-btn" onclick="openWorker()">
             💼 أبحث عن عمل
           </button>
 
-          <button class="btn secondary" onclick="openProject()">
+          <button class="secondary-btn" onclick="openProject()">
             📋 لدي مشروع
           </button>
-
-          <button class="btn secondary" onclick="openOpportunities()">
-            🔍 تصفح الفرص
-          </button>
         </div>
       </div>
 
-      <div class="door-wrapper">
-        <div class="door">
-          <div class="door-light"></div>
-          <div class="door-text">افتح باب الفرصة</div>
-        </div>
-      </div>
-
-    </section>
-
-    <section>
-      <div class="section-title">
-        <h2>رحلة مَدخَل</h2>
-        <p>من الحيرة إلى فرصة حقيقية</p>
-      </div>
+      <h2 class="section-title">رحلتك في مَدخَل</h2>
 
       <div class="journey">
-        <div class="journey-item">اكتشف 🧠</div>
-        <div class="journey-item">قيّم 📊</div>
-        <div class="journey-item">تأهّل 📚</div>
-        <div class="journey-item">طابق 🎯</div>
-        <div class="journey-item">ابحث 🔎</div>
-        <div class="journey-item">قدّم 📩</div>
-      </div>
-    </section>
-
-    <section id="homeCards">
-
-      <div class="cards">
-
-        <div class="card">
-          <h3>🧠 لا تعرف المجال المناسب؟</h3>
-          <p>
-            نساعدك على اكتشاف المجالات التي قد تناسب مهاراتك
-            ثم نوجّهك إلى التقييم المناسب.
-          </p>
-          <button class="btn primary" onclick="openDiscoverSkills()">
-            اكتشف مهاراتي
-          </button>
+        <div class="journey-item">
+          <span>🧠</span>
+          اكتشف
         </div>
 
-        <div class="card">
-          <h3>📊 تعرف مهارتك؟</h3>
-          <p>
-            لا تعتمد على وصفك لنفسك فقط.
-            اختبر مهارتك عمليًا واحصل على نتيجة واضحة.
-          </p>
-          <button class="btn primary" onclick="openAssessmentScreen()">
-            ابدأ التقييم
-          </button>
+        <div class="journey-item">
+          <span>📊</span>
+          قيّم
         </div>
 
-        <div class="card">
-          <h3>🔎 تريد فرصة؟</h3>
-          <p>
-            تصفح فرصًا تجريبية حسب المجال والمهارة،
-            ثم قدّم على الفرصة المناسبة.
-          </p>
-          <button class="btn primary" onclick="openOpportunities()">
-            تصفح الفرص
-          </button>
+        <div class="journey-item">
+          <span>📚</span>
+          تأهّل
         </div>
 
+        <div class="journey-item">
+          <span>🎯</span>
+          طابق
+        </div>
+
+        <div class="journey-item">
+          <span>🔎</span>
+          ابحث
+        </div>
+
+        <div class="journey-item">
+          <span>📩</span>
+          قدّم
+        </div>
       </div>
 
-    </section>
+      <h2 class="section-title">لماذا مَدخَل؟</h2>
 
-    <section>
-
-      <div class="trust-section">
-
-        <h2>🛡️ نبني الثقة قبل كل شيء</h2>
-
+      <div class="card">
+        <h3>🧠 اكتشف ما تستطيع فعله</h3>
         <p>
-          هدف مَدخَل ليس جمع أكبر عدد من الحسابات،
-          بل بناء نظام يجعل صاحب المشروع يعرف مستوى من يتقدم إليه،
-          ويجعل الباحث عن العمل يعرف نقاط قوته وما يحتاج إلى تطويره.
+          حتى لو لم تكن تعرف المجال المناسب لك، نساعدك على استكشاف المهارات التي قد تناسبك.
         </p>
+      </div>
 
+      <div class="card">
+        <h3>📊 اعرف مستواك الحقيقي</h3>
         <p>
-          🚀 نعمل حاليًا على بناء أول مجتمع من الباحثين عن العمل
-          وأصحاب المشاريع، ونرحب بانضمامك منذ البداية.
+          اختبارات عملية أولية تساعدك على معرفة نقاط قوتك وما تحتاج إلى تطويره.
         </p>
+      </div>
 
-        <strong>⭐ كن من أوائل المنضمين إلى مَدخَل</strong>
+      <div class="card">
+        <h3>🎯 اقترب من الفرصة المناسبة</h3>
+        <p>
+          الهدف النهائي هو ربط المهارة المثبتة بفرصة عمل حقيقية.
+        </p>
+      </div>
 
+      <div class="card">
+        <h3>🚀 الإطلاق التجريبي</h3>
+        <p>
+          تعمل مَدخَل حاليًا على بناء أول مجتمع من الباحثين عن العمل وأصحاب المشاريع.
+        </p>
       </div>
 
     </section>
 
-    <section>
 
-      <div class="plus-section">
+    <!-- الباحث عن عمل -->
+    <section id="workerScreen" class="screen">
 
-        <h2>✨ مَدخَل+</h2>
+      <button class="back" onclick="showScreen('homeScreen')">→ العودة</button>
 
-        <p style="line-height:1.9;color:#55716d;">
-          ستتطور المنصة لاحقًا لتقديم خدمات إضافية للباحثين عن العمل
-          وأصحاب المشاريع، مع إبقاء الأساس متاحًا للمستخدم الذي يبدأ رحلته.
+      <div class="card">
+        <h2>💼 أبحث عن عمل</h2>
+        <p>
+          اختر الطريق الذي يناسب وضعك الآن.
         </p>
+      </div>
 
+      <div class="options">
+
+        <button class="option" onclick="openDiscoverSkills()">
+          🧠 لا أعرف المجال المناسب لي
+          <br>
+          <small>اكتشف مهاراتي</small>
+        </button>
+
+        <button class="option" onclick="openAssessmentScreen()">
+          📊 أعرف مجالي وأريد تقييم مستواي
+        </button>
+
+        <button class="option" onclick="openOpportunities()">
+          🔎 أعرف مهارتي وأريد فرصة
+        </button>
+
+      </div>
+
+      <div class="card" style="margin-top:15px;">
+        <h3>💡 هدف مَدخَل</h3>
+        <p>
+          نريد أن تنتقل من "لا أعرف ماذا أستطيع أن أعمل"
+          إلى "أعرف مهارتي ومستواي وهذه فرصة مناسبة لي".
+        </p>
       </div>
 
     </section>
 
-  </div>
 
+    <!-- الملف المهني -->
+    <section id="profileScreen" class="screen">
 
-  <!-- ================= WORKER ================= -->
+      <button class="back" onclick="showScreen('workerScreen')">→ العودة</button>
 
-  <section id="worker" class="internal">
+      <div class="card">
+        <h2>👤 أنشئ ملفك المهني</h2>
+        <p>
+          نحتاج هذه المعلومات حتى تستطيع التقديم على الفرص.
+        </p>
+      </div>
 
-    <button class="btn secondary back-btn" onclick="goHome()">
-      ← العودة للرئيسية
-    </button>
+      <div class="form-group">
+        <label>الاسم</label>
+        <input id="workerName" type="text" placeholder="اكتب اسمك">
+      </div>
 
-    <div class="section-title">
-      <h2>💼 الباحث عن العمل</h2>
-      <p>اختر المرحلة التي أنت فيها الآن</p>
-    </div>
+      <div class="form-group">
+        <label>المهارة أو المجال</label>
+        <input id="workerSkill" type="text" placeholder="مثال: الكتابة">
+      </div>
 
-    <div class="path-buttons">
+      <div class="form-group">
+        <label>نبذة عنك</label>
+        <textarea id="workerDescription"
+          placeholder="اكتب نبذة قصيرة عن خبرتك ومهاراتك"></textarea>
+      </div>
 
-      <button class="path-btn" onclick="openDiscoverSkills()">
-        🧠
-        <br><br>
-        لا أعرف المجال المناسب لي
-      </button>
-
-      <button class="path-btn" onclick="openAssessmentScreen()">
-        📊
-        <br><br>
-        أعرف مجالي وأريد تقييم مستواي
-      </button>
-
-      <button class="path-btn" onclick="openOpportunities()">
-        🔎
-        <br><br>
-        أعرف مهارتي وأريد فرصة
-      </button>
-
-    </div>
-
-    <div class="form-box" style="margin-top:35px;">
-
-      <h3>إنشاء ملفك المهني</h3>
-
-      <label for="workerName">الاسم</label>
-      <input id="workerName" type="text" placeholder="اكتب اسمك">
-
-      <label for="workerSkill">المهارة الرئيسية</label>
-      <input id="workerSkill" type="text"
-             placeholder="مثال: كتابة المقالات">
-
-      <label for="workerDescription">نبذة عنك</label>
-      <textarea id="workerDescription"
-                placeholder="اكتب نبذة مختصرة عن خبرتك ومهاراتك"></textarea>
-
-      <button class="btn primary" onclick="saveWorker()"
-              style="margin-top:18px;">
+      <button class="primary-btn" style="width:100%;" onclick="saveWorker()">
         💾 حفظ الملف المهني
       </button>
 
-      <div id="workerMessage" class="message"></div>
+    </section>
 
-    </div>
 
-  </section>
+    <!-- صاحب المشروع -->
+    <section id="projectScreen" class="screen">
 
+      <button class="back" onclick="showScreen('homeScreen')">→ العودة</button>
 
-  <!-- ================= PROJECT ================= -->
-
-  <section id="project" class="internal">
-
-    <button class="btn secondary back-btn" onclick="goHome()">
-      ← العودة للرئيسية
-    </button>
-
-    <div class="section-title">
-      <h2>📋 لدي مشروع</h2>
-      <p>أخبرنا عن العمل الذي تريد إنجازه</p>
-    </div>
-
-    <div class="form-box">
-
-      <label for="projectName">اسم المشروع</label>
-      <input id="projectName"
-             type="text"
-             placeholder="مثال: كتابة محتوى لموقع">
-
-      <label for="projectType">نوع المشروع</label>
-      <select id="projectType">
-
-        <option value="">اختر المجال</option>
-
-        <option>🎙️ التفريغ الصوتي</option>
-        <option>🌐 الترجمة</option>
-        <option>🎨 التصميم</option>
-        <option>💻 البرمجة</option>
-        <option>✍️ كتابة المقالات</option>
-        <option>🎬 المونتاج وتحرير الفيديو</option>
-        <option>📱 إدارة حسابات التواصل</option>
-        <option>📢 التسويق الإلكتروني</option>
-        <option>📊 إدخال البيانات</option>
-        <option>📈 Excel والبيانات</option>
-        <option>🎤 التعليق الصوتي</option>
-        <option>📚 التعليم والشرح</option>
-        <option>📝 التدقيق اللغوي</option>
-        <option>🛒 المتاجر الإلكترونية</option>
-        <option>🤖 الذكاء الاصطناعي</option>
-        <option>🖼️ تحرير الصور</option>
-        <option>💼 المساعدة الافتراضية</option>
-        <option>🧮 المحاسبة</option>
-        <option>🔧 خدمات أخرى</option>
-
-      </select>
-
-      <label for="projectDescription">وصف المشروع</label>
-
-      <textarea id="projectDescription"
-                placeholder="اشرح المطلوب بالتفصيل"></textarea>
-
-      <button class="btn primary"
-              onclick="saveProject()"
-              style="margin-top:18px;">
-        📩 إرسال المشروع
-      </button>
-
-      <div id="projectMessage" class="message"></div>
-
-    </div>
-
-  </section>
-
-
-  <!-- ================= DISCOVER SKILLS ================= -->
-
-  <section id="discoverSkillsSection" class="internal">
-
-    <button class="btn secondary back-btn" onclick="goHome()">
-      ← العودة للرئيسية
-    </button>
-
-    <div class="section-title">
-
-      <h2>🧠 اكتشف مهاراتك</h2>
-
-      <p>
-        اختر المجالات التي سبق أن مارستها أو تشعر أن لديك قابلية للعمل فيها.
-      </p>
-
-    </div>
-
-    <div class="skills-grid">
-
-      <button class="skill-btn" onclick="toggleSkill(this,'✍️ الكتابة')">
-        ✍️ الكتابة
-      </button>
-
-      <button class="skill-btn" onclick="toggleSkill(this,'🌐 الترجمة')">
-        🌐 الترجمة
-      </button>
-
-      <button class="skill-btn" onclick="toggleSkill(this,'🎨 التصميم')">
-        🎨 التصميم
-      </button>
-
-      <button class="skill-btn" onclick="toggleSkill(this,'💻 البرمجة')">
-        💻 البرمجة
-      </button>
-
-      <button class="skill-btn" onclick="toggleSkill(this,'🎬 تحرير الفيديو')">
-        🎬 تحرير الفيديو
-      </button>
-
-      <button class="skill-btn" onclick="toggleSkill(this,'🎙️ التفريغ الصوتي')">
-        🎙️ التفريغ الصوتي
-      </button>
-
-      <button class="skill-btn" onclick="toggleSkill(this,'📱 إدارة حسابات التواصل')">
-        📱 إدارة حسابات التواصل
-      </button>
-
-      <button class="skill-btn" onclick="toggleSkill(this,'📊 إدخال البيانات')">
-        📊 إدخال البيانات
-      </button>
-
-      <button class="skill-btn" onclick="toggleSkill(this,'🗣️ التواصل مع العملاء')">
-        🗣️ التواصل مع العملاء
-      </button>
-
-      <button class="skill-btn" onclick="toggleSkill(this,'📚 التعليم والشرح')">
-        📚 التعليم والشرح
-      </button>
-
-      <button class="skill-btn" onclick="toggleSkill(this,'🔍 البحث وجمع المعلومات')">
-        🔍 البحث وجمع المعلومات
-      </button>
-
-      <button class="skill-btn" onclick="toggleSkill(this,'🤷 لا أعرف بعد')">
-        🤷 لا أعرف بعد
-      </button>
-
-    </div>
-
-    <div id="selectedSkillsBox" class="selected-skills">
-      لم تختر أي مهارة بعد.
-    </div>
-
-    <div style="text-align:center;margin-top:25px;">
-
-      <button class="btn primary"
-              onclick="startSkillAssessment()">
-        📊 ابدأ التقييم
-      </button>
-
-    </div>
-
-  </section>
-
-
-  <!-- ================= ASSESSMENT ================= -->
-
-  <section id="assessmentSection" class="internal">
-
-    <button class="btn secondary back-btn" onclick="goHome()">
-      ← العودة للرئيسية
-    </button>
-
-    <div class="section-title">
-
-      <h2>📊 تقييم المهارة</h2>
-
-      <p>
-        التقييم الحقيقي لا يعتمد فقط على ما تقوله عن نفسك.
-        نريد اختبار ما تستطيع فعله فعليًا.
-      </p>
-
-    </div>
-
-    <div class="assessment-intro">
-
-      <strong>كيف يعمل التقييم؟</strong>
-
-      <p>
-        يبدأ التقييم بأسئلة أولية، ثم ينتقل إلى اختبار عملي مناسب
-        للمهارة. لاحقًا سنضيف تحليلًا آليًا وذكاءً اصطناعيًا وفق معايير
-        واضحة، ثم نحصل على نتيجة من 100 ومستوى مهني.
-      </p>
-
-    </div>
-
-
-    <div class="assessment-question">
-
-      <h3>هل سبق أن عملت في المجال الذي تريد تقييمه؟</h3>
-
-      <div class="assessment-options">
-
-        <button class="assessment-option"
-                onclick="chooseAssessment('نعم، وأتقنه')">
-          ✅ نعم، وأتقنه
-        </button>
-
-        <button class="assessment-option"
-                onclick="chooseAssessment('نعم، لكنني ما زلت أتعلم')">
-          📚 نعم، لكنني ما زلت أتعلم
-        </button>
-
-        <button class="assessment-option"
-                onclick="chooseAssessment('جربته قليلًا')">
-          🧪 جربته قليلًا
-        </button>
-
-        <button class="assessment-option"
-                onclick="chooseAssessment('لم أجربه')">
-          🌱 لم أجربه
-        </button>
-
-      </div>
-
-    </div>
-
-
-    <!-- الاختبار العملي للكتابة -->
-
-    <div id="writingTest" class="practical-test">
-
-      <div class="assessment-question">
-
-        <h3>✍️ الاختبار العملي — الكتابة</h3>
-
-        <p style="line-height:1.9;color:#5d7773;">
-          اكتب فقرة من <strong>120 إلى 180 كلمة</strong>
-          تشرح فيها:
-          <br><br>
-          <strong>
-            لماذا يجب على الشركات الصغيرة استخدام وسائل التواصل الاجتماعي
-            للوصول إلى العملاء؟
-          </strong>
+      <div class="card">
+        <h2>🏢 لدي مشروع</h2>
+        <p>
+          أخبرنا بما تحتاج، وسنجهز لك مسار المشروع.
         </p>
-
-        <textarea id="writingAnswer"
-                  oninput="updateWordCount()"
-                  placeholder="اكتب إجابتك هنا..."></textarea>
-
-        <div id="wordCounter" class="word-counter">
-          عدد الكلمات: 0
-        </div>
-
-        <button class="btn primary"
-                onclick="submitWritingTest()"
-                style="margin-top:18px;">
-          📩 إرسال الاختبار
-        </button>
-
-        <div id="writingMessage" class="message"></div>
-
       </div>
 
+      <div class="form-group">
+        <label>اسم المشروع</label>
+        <input id="projectName" type="text" placeholder="مثال: تصميم موقع">
+      </div>
 
-      <div id="writingResult" class="result-box">
+      <div class="form-group">
+        <label>نوع المشروع</label>
+        <select id="projectType">
+          <option value="">اختر نوع المشروع</option>
+          <option>💻 البرمجة</option>
+          <option>✍️ الكتابة</option>
+          <option>🌐 الترجمة</option>
+          <option>🎨 التصميم</option>
+          <option>🎬 تحرير الفيديو</option>
+          <option>📱 التواصل الاجتماعي</option>
+          <option>📊 إدخال البيانات</option>
+          <option>🤖 الذكاء الاصطناعي</option>
+          <option>🔧 خدمات أخرى</option>
+        </select>
+      </div>
 
-        <div class="score" id="writingScore">
-          0/100
+      <div class="form-group">
+        <label>وصف المشروع</label>
+        <textarea id="projectDescription"
+          placeholder="اشرح ما الذي تحتاجه"></textarea>
+      </div>
+
+      <button class="primary-btn" style="width:100%;" onclick="saveProject()">
+        📩 إرسال طلب المشروع
+      </button>
+
+    </section>
+
+
+    <!-- اكتشاف المهارات -->
+    <section id="discoverSkillsSection" class="screen">
+
+      <button class="back" onclick="showScreen('workerScreen')">→ العودة</button>
+
+      <div class="card">
+        <h2>🧠 اكتشف مهاراتك</h2>
+        <p>
+          اختر كل المهارات التي جربتها أو تشعر أنك قد تستطيع القيام بها.
+        </p>
+      </div>
+
+      <div id="skillsGrid" class="skills-grid"></div>
+
+      <div id="selectedSkillsBox" class="selected-box">
+        لم تختر أي مهارة بعد.
+      </div>
+
+      <button class="primary-btn" style="width:100%;" onclick="startSkillAssessment()">
+        📊 انتقل إلى التقييم
+      </button>
+
+    </section>
+
+
+    <!-- التقييم -->
+    <section id="assessmentSection" class="screen">
+
+      <button class="back" onclick="showScreen('workerScreen')">→ العودة</button>
+
+      <div id="assessmentIntro">
+
+        <div class="card">
+          <h2>📊 تقييم المستوى</h2>
+          <p>
+            سنبدأ بسؤال تمهيدي ثم ننتقل إلى اختبار عملي عندما يكون متاحًا.
+          </p>
         </div>
 
-        <div class="level" id="writingLevel">
-          -
-        </div>
+        <div class="card">
+          <h3>هل سبق أن عملت في المجال الذي تريد تقييمه؟</h3>
 
-        <hr>
+          <div class="options">
 
-        <div class="result-list">
+            <button class="option" onclick="selectExperience(this,'expert')">
+              🏆 نعم، وأتقنه
+            </button>
 
-          <h3>💪 نقاط القوة</h3>
-          <ul id="writingStrengths"></ul>
+            <button class="option" onclick="selectExperience(this,'learning')">
+              ⭐ نعم، لكنني ما زلت أتعلم
+            </button>
 
-          <h3>📚 ما يحتاج إلى تطوير</h3>
-          <ul id="writingWeaknesses"></ul>
+            <button class="option" onclick="selectExperience(this,'little')">
+              👍 جربته قليلًا
+            </button>
 
-          <h3>📊 تفاصيل التقييم</h3>
-          <ul id="writingDetails"></ul>
+            <button class="option" onclick="selectExperience(this,'none')">
+              🌱 لم أجربه
+            </button>
 
+          </div>
         </div>
 
       </div>
 
-    </div>
 
-  </section>
+      <div id="writingTest" class="hidden">
+
+        <div class="card">
+
+          <h2>✍️ اختبار الكتابة</h2>
+
+          <p>
+            اكتب فقرة من 120 إلى 180 كلمة تشرح فيها:
+          </p>
+
+          <p style="font-weight:800;margin-top:10px;">
+            لماذا يجب على الشركات الصغيرة استخدام وسائل التواصل الاجتماعي للوصول إلى العملاء؟
+          </p>
+
+        </div>
+
+        <div class="form-group">
+
+          <textarea id="writingAnswer"
+            oninput="updateWordCount()"
+            placeholder="اكتب إجابتك هنا..."></textarea>
+
+          <div id="wordCount" class="word-count">
+            عدد الكلمات: 0
+          </div>
+
+        </div>
+
+        <button class="primary-btn"
+          style="width:100%;"
+          onclick="submitWritingTest()">
+          📊 تقييم إجابتي
+        </button>
+
+      </div>
 
 
-  <!-- ================= OPPORTUNITIES ================= -->
+      <div id="assessmentResult" class="hidden"></div>
 
-  <section id="opportunities" class="internal">
+    </section>
 
-    <button class="btn secondary back-btn" onclick="goHome()">
-      ← العودة للرئيسية
+
+    <!-- الفرص -->
+    <section id="opportunitiesScreen" class="screen">
+
+      <button class="back" onclick="showScreen('homeScreen')">→ العودة</button>
+
+      <div class="card">
+        <h2>🔎 الفرص</h2>
+        <p>
+          فرص تجريبية لواجهة مَدخَل.
+        </p>
+      </div>
+
+      <div class="category-scroll" id="categoryScroll"></div>
+
+      <div id="opportunitiesList"></div>
+
+    </section>
+
+
+    <!-- الحساب -->
+    <section id="accountScreen" class="screen">
+
+      <div class="card">
+        <h2>👤 حسابي</h2>
+        <p id="accountStatus">
+          لم يتم إنشاء ملف مهني بعد.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>📋 الملف المهني</h3>
+        <p>
+          المهارات والتقييمات والأعمال السابقة ستظهر هنا.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>📊 تقييماتي</h3>
+        <p id="savedAssessmentText">
+          لا توجد تقييمات محفوظة بعد.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>📩 طلباتي</h3>
+        <p>
+          ستظهر طلبات التقديم والمشاريع هنا في النسخ القادمة.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>⚙️ الإعدادات</h3>
+        <p>
+          إعدادات الحساب والتنبيهات ستضاف تدريجيًا.
+        </p>
+      </div>
+
+      <button class="secondary-btn"
+        style="width:100%;margin-top:5px;"
+        onclick="openOwnerMode()">
+        👑 وضع المالك
+      </button>
+
+    </section>
+
+
+    <!-- وضع المالك -->
+    <section id="ownerScreen" class="screen">
+
+      <button class="back" onclick="showScreen('accountScreen')">→ العودة</button>
+
+      <div class="owner-box">
+        <div class="owner-badge">👑 OWNER MODE</div>
+
+        <h2 style="margin:4px 0 8px;">
+          وضع المالك
+        </h2>
+
+        <p style="margin:0;color:#d6dddd;font-size:13px;line-height:1.7;">
+          هذه واجهة تمهيدية لوضع المالك.
+          الحماية الحقيقية والصلاحيات الحساسة يجب أن تكون على الخادم
+          وداخل Supabase RLS وEdge Functions، وليس في الواجهة فقط.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>اختر الواجهة التي تريد معاينتها</h3>
+      </div>
+
+      <div class="admin-grid">
+
+        <button class="admin-card" onclick="ownerPreview('worker')">
+          <span>📱</span>
+          الباحث عن عمل
+        </button>
+
+        <button class="admin-card" onclick="ownerPreview('project')">
+          <span>🏢</span>
+          صاحب مشروع
+        </button>
+
+        <button class="admin-card" onclick="showToast('واجهة الدعم ستضاف في المرحلة التالية')">
+          <span>💬</span>
+          الدعم
+        </button>
+
+        <button class="admin-card" onclick="showToast('واجهة التقييم ستضاف في المرحلة التالية')">
+          <span>🧪</span>
+          فريق التقييم
+        </button>
+
+        <button class="admin-card" onclick="showToast('واجهة المطابقة ستضاف في المرحلة التالية')">
+          <span>🎯</span>
+          المطابقة
+        </button>
+
+        <button class="admin-card" onclick="showToast('واجهة المالية ستضاف في المرحلة التالية')">
+          <span>💰</span>
+          المالية
+        </button>
+
+        <button class="admin-card" onclick="showToast('واجهة الإدارة ستضاف في المرحلة التالية')">
+          <span>🛡️</span>
+          الإدارة
+        </button>
+
+        <button class="admin-card" onclick="showToast('التقارير ستضاف في المرحلة التالية')">
+          <span>📈</span>
+          التقارير
+        </button>
+
+      </div>
+
+      <div class="card" style="margin-top:15px;">
+        <h3>🔐 ملاحظة أمنية</h3>
+        <p>
+          لا تعتمد صلاحيات المالك على JavaScript وحده.
+          عند بناء لوحة الإدارة الحقيقية سنجعل التحقق من الصلاحيات على الخادم،
+          مع RLS وسجل عمليات Audit Log وMFA للمالك.
+        </p>
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+
+    <button class="nav-item active" data-screen="homeScreen"
+      onclick="navigate('homeScreen',this)">
+      <span>🏠</span>
+      الرئيسية
     </button>
 
-    <div class="section-title">
+    <button class="nav-item" data-screen="opportunitiesScreen"
+      onclick="navigate('opportunitiesScreen',this)">
+      <span>🔎</span>
+      الفرص
+    </button>
 
-      <h2>🔎 الفرص</h2>
+    <button class="nav-item" data-screen="discoverSkillsSection"
+      onclick="navigate('discoverSkillsSection',this)">
+      <span>🧠</span>
+      اكتشف
+    </button>
 
-      <p>
-        اختر المجال الذي تريد البحث فيه.
-      </p>
+    <button class="nav-item" data-screen="assessmentSection"
+      onclick="navigate('assessmentSection',this)">
+      <span>📊</span>
+      قيّمني
+    </button>
 
-    </div>
+    <button class="nav-item" data-screen="accountScreen"
+      onclick="navigate('accountScreen',this)">
+      <span>👤</span>
+      حسابي
+    </button>
 
-    <div class="categories">
+  </nav>
 
-      <div class="category">🎙️ التفريغ الصوتي</div>
-      <div class="category">💻 البرمجة</div>
-      <div class="category">✍️ كتابة المقالات</div>
-      <div class="category">🌐 الترجمة</div>
-      <div class="category">🎨 التصميم</div>
-      <div class="category">🎬 المونتاج</div>
-      <div class="category">📱 التواصل الاجتماعي</div>
-      <div class="category">📢 التسويق الإلكتروني</div>
-      <div class="category">📊 إدخال البيانات</div>
-      <div class="category">📈 Excel والبيانات</div>
-      <div class="category">🎤 التعليق الصوتي</div>
-      <div class="category">📚 التعليم</div>
-      <div class="category">📝 التدقيق اللغوي</div>
-      <div class="category">🛒 المتاجر الإلكترونية</div>
-      <div class="category">🤖 الذكاء الاصطناعي</div>
-      <div class="category">🖼️ تحرير الصور</div>
-      <div class="category">💼 المساعدة الافتراضية</div>
-      <div class="category">🧮 المحاسبة</div>
-      <div class="category">🔧 خدمات أخرى</div>
+</div>
 
-    </div>
-
-
-    <div class="opportunities">
-
-      <div class="opportunity">
-
-        <h3>🎙️ تفريغ تسجيل صوتي</h3>
-
-        <p>
-          تحويل تسجيل صوتي إلى نص عربي منسق.
-        </p>
-
-        <div class="price">$20</div>
-
-        <button class="btn primary"
-                onclick="applyOpportunity('تفريغ تسجيل صوتي')">
-          📩 أريد التقديم
-        </button>
-
-      </div>
-
-
-      <div class="opportunity">
-
-        <h3>💻 إنشاء موقع إلكتروني</h3>
-
-        <p>
-          إنشاء موقع إلكتروني بسيط ومتجاوب.
-        </p>
-
-        <div class="price">$100</div>
-
-        <button class="btn primary"
-                onclick="applyOpportunity('إنشاء موقع إلكتروني')">
-          📩 أريد التقديم
-        </button>
-
-      </div>
-
-
-      <div class="opportunity">
-
-        <h3>✍️ كتابة مقالات</h3>
-
-        <p>
-          كتابة مقالات عربية واضحة ومنظمة.
-        </p>
-
-        <div class="price">$30</div>
-
-        <button class="btn primary"
-                onclick="applyOpportunity('كتابة مقالات')">
-          📩 أريد التقديم
-        </button>
-
-      </div>
-
-
-      <div class="opportunity">
-
-        <h3>🎨 تصميم شعار</h3>
-
-        <p>
-          تصميم شعار مناسب للهوية البصرية.
-        </p>
-
-        <div class="price">$40</div>
-
-        <button class="btn primary"
-                onclick="applyOpportunity('تصميم شعار')">
-          📩 أريد التقديم
-        </button>
-
-      </div>
-
-
-      <div class="opportunity">
-
-        <h3>🌐 ترجمة نصوص</h3>
-
-        <p>
-          ترجمة نصوص مع الحفاظ على المعنى والصياغة.
-        </p>
-
-        <div class="price">$25</div>
-
-        <button class="btn primary"
-                onclick="applyOpportunity('ترجمة نصوص')">
-          📩 أريد التقديم
-        </button>
-
-      </div>
-
-
-      <div class="opportunity">
-
-        <h3>🎬 تحرير فيديو</h3>
-
-        <p>
-          تحرير فيديو قصير مناسب للنشر الرقمي.
-        </p>
-
-        <div class="price">$35</div>
-
-        <button class="btn primary"
-                onclick="applyOpportunity('تحرير فيديو')">
-          📩 أريد التقديم
-        </button>
-
-      </div>
-
-    </div>
-
-  </section>
-
-</main>
-
-
-<footer>
-
-  <h3>مَدخَل 🚪</h3>
-
-  <p>
-    المدخل إلى سوق العمل الإلكتروني
-  </p>
-
-  <p>
-    اكتشف 🧠 → قيّم 📊 → تأهّل 📚 → طابق 🎯 → ابحث 🔎 → قدّم 📩
-  </p>
-
-</footer>
+<div id="toast" class="toast"></div>
 
 
 <script>
+/* =========================================================
+   SUPABASE
+   ========================================================= */
 
-  /* =========================================================
-     SUPABASE
-     ========================================================= */
+const SUPABASE_URL =
+  "https://qbufsdpdobuicpljnssr.supabase.co";
 
-  const SUPABASE_URL =
-    "https://qbufsdpdobuicpljnssr.supabase.co";
+/*
+  ضع هنا Supabase Publishable key فقط.
+  لا تضع sb_secret داخل هذا الملف.
+*/
+const SUPABASE_PUBLISHABLE_KEY =
+  "sb_publishable_mcPmNU2CGJkiSbfgOD6gOg_9RNMNlEY";
 
-  /*
-    ضع هنا مفتاح Supabase Publishable Key الحالي لديك.
-    لا تضع Secret Key هنا.
-  */
+let supabaseClient = null;
 
-  const SUPABASE_PUBLISHABLE_KEY =
-    "spuble_mcU2CGgOD6gOg_9RNMNlEY";
-
-
-  /* =========================================================
-     NAVIGATION
-     ========================================================= */
-
-  const allScreens = [
-    "worker",
-    "project",
-    "discoverSkillsSection",
-    "assessmentSection",
-    "opportunities"
-  ];
+if (
+  window.supabase &&
+  SUPABASE_PUBLISHABLE_KEY &&
+  !SUPABASE_PUBLISHABLE_KEY.includes("ضع مفتاح")
+) {
+  supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+}
 
 
-  function hideAllScreens() {
+/* =========================================================
+   التنقل
+   ========================================================= */
 
-    allScreens.forEach(function(id) {
+function showScreen(id) {
 
-      const element = document.getElementById(id);
+  document.querySelectorAll(".screen").forEach(screen => {
+    screen.classList.remove("active");
+  });
 
-      if (element) {
-        element.classList.remove("active");
-      }
+  const target = document.getElementById(id);
 
-    });
-
-    const homeArea = document.getElementById("homeArea");
-
-    if (homeArea) {
-      homeArea.style.display = "none";
-    }
-
+  if (target) {
+    target.classList.add("active");
   }
 
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
 
-  function showScreen(id) {
 
-    hideAllScreens();
+function navigate(id, button) {
 
-    const element = document.getElementById(id);
+  showScreen(id);
 
-    if (element) {
-      element.classList.add("active");
-    }
+  document.querySelectorAll(".nav-item").forEach(item => {
+    item.classList.remove("active");
+  });
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
+  if (button) {
+    button.classList.add("active");
+  }
+}
 
+
+/* =========================================================
+   Toast
+   ========================================================= */
+
+let toastTimer = null;
+
+function showToast(message) {
+
+  const toast = document.getElementById("toast");
+
+  toast.textContent = message;
+  toast.classList.add("show");
+
+  clearTimeout(toastTimer);
+
+  toastTimer = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 3500);
+}
+
+
+/* =========================================================
+   الباحث عن عمل
+   ========================================================= */
+
+function openWorker() {
+  showScreen("workerScreen");
+}
+
+
+function openProject() {
+  showScreen("projectScreen");
+}
+
+
+/* =========================================================
+   إنشاء الملف المهني
+   ========================================================= */
+
+function openProfile() {
+
+  showScreen("profileScreen");
+
+  const oldName =
+    localStorage.getItem("madkhal_profile_name");
+
+  if (oldName) {
+    document.getElementById("workerName").value = oldName;
+  }
+}
+
+
+async function saveWorker() {
+
+  const name =
+    document.getElementById("workerName").value.trim();
+
+  const skill =
+    document.getElementById("workerSkill").value.trim();
+
+  const description =
+    document.getElementById("workerDescription").value.trim();
+
+  if (!name || !skill) {
+    showToast("⚠️ اكتب الاسم والمهارة أولًا");
+    return;
   }
 
-
-  function openWorker() {
-    showScreen("worker");
+  if (!supabaseClient) {
+    showToast(
+      "⚠️ ضع Supabase Publishable key أولًا"
+    );
+    return;
   }
 
+  const profileId = crypto.randomUUID();
 
-  function openProject() {
-    showScreen("project");
-  }
+  try {
 
+    const { error } =
+      await supabaseClient
+        .from("profiles")
+        .insert({
+          id: profileId,
+          full_name: name,
+          role: "worker",
+          main_skill: skill,
+          bio: description
+        });
 
-  function openOpportunities() {
-    showScreen("opportunities");
-  }
-
-
-  function openDiscoverSkills() {
-    showScreen("discoverSkillsSection");
-  }
-
-
-  function openAssessmentScreen() {
-
-    showScreen("assessmentSection");
-
-    setTimeout(function() {
-
-      const savedSkills =
-        localStorage.getItem("madkhal_selected_skills");
-
-      if (savedSkills) {
-
-        try {
-
-          const skills = JSON.parse(savedSkills);
-
-          if (
-            Array.isArray(skills) &&
-            skills.length > 0 &&
-            skills.some(function(skill) {
-              return skill.includes("الكتابة");
-            })
-          ) {
-
-            showWritingTest();
-
-          }
-
-        } catch (error) {
-          console.log(error);
-        }
-
-      }
-
-    }, 100);
-
-  }
-
-
-  function goHome() {
-
-    allScreens.forEach(function(id) {
-
-      const element = document.getElementById(id);
-
-      if (element) {
-        element.classList.remove("active");
-      }
-
-    });
-
-    const homeArea = document.getElementById("homeArea");
-
-    if (homeArea) {
-      homeArea.style.display = "block";
-    }
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
-
-  }
-
-
-  /* =========================================================
-     WORKER PROFILE
-     ========================================================= */
-
-  async function saveWorker() {
-
-    const name =
-      document.getElementById("workerName").value.trim();
-
-    const skill =
-      document.getElementById("workerSkill").value.trim();
-
-    const description =
-      document.getElementById("workerDescription").value.trim();
-
-    const message =
-      document.getElementById("workerMessage");
-
-
-    if (!name || !skill) {
-
-      message.className = "message error";
-
-      message.textContent =
-        "❌ يرجى إدخال الاسم والمهارة الرئيسية.";
-
+    if (error) {
+      console.error(error);
+      showToast(
+        "❌ تعذر حفظ الملف: " + error.message
+      );
       return;
-
     }
 
+    localStorage.setItem(
+      "madkhal_profile_id",
+      profileId
+    );
 
-    if (
-      !SUPABASE_PUBLISHABLE_KEY ||
-      SUPABASE_PUBLISHABLE_KEY.includes("ضع مفتاح")
-    ) {
+    localStorage.setItem(
+      "madkhal_profile_name",
+      name
+    );
 
-      message.className = "message error";
+    localStorage.setItem(
+      "madkhal_profile_skill",
+      skill
+    );
 
-      message.textContent =
-        "❌ لم يتم وضع مفتاح Supabase في الكود بعد.";
+    document.getElementById("accountStatus").textContent =
+      "🎉 تم إنشاء ملفك المهني وحفظه بنجاح في مَدخَل.";
 
-      return;
+    showToast(
+      "🎉 تم إنشاء ملفك المهني وحفظه بنجاح في مَدخَل."
+    );
 
+    setTimeout(() => {
+      showScreen("accountScreen");
+    }, 800);
+
+  } catch (error) {
+
+    console.error(error);
+
+    showToast(
+      "❌ حدث خطأ أثناء حفظ الملف."
+    );
+  }
+}
+
+
+/* =========================================================
+   اكتشاف المهارات
+   ========================================================= */
+
+const skills = [
+  ["✍️","الكتابة"],
+  ["🌐","الترجمة"],
+  ["🎨","التصميم"],
+  ["💻","البرمجة"],
+  ["🎬","تحرير الفيديو"],
+  ["🎙️","التفريغ الصوتي"],
+  ["📱","إدارة حسابات التواصل"],
+  ["📊","إدخال البيانات"],
+  ["🗣️","التواصل مع العملاء"],
+  ["📚","التعليم والشرح"],
+  ["🔍","البحث وجمع المعلومات"],
+  ["🤷","لا أعرف بعد"]
+];
+
+let selectedSkills = [];
+
+
+function renderSkills() {
+
+  const grid =
+    document.getElementById("skillsGrid");
+
+  grid.innerHTML = "";
+
+  skills.forEach(([icon,name]) => {
+
+    const button =
+      document.createElement("button");
+
+    button.className = "skill";
+
+    if (selectedSkills.includes(name)) {
+      button.classList.add("selected");
     }
 
+    button.innerHTML =
+      `${icon}<br>${name}`;
 
-    try {
+    button.onclick = () =>
+      toggleSkill(name);
 
-      const profileId =
-        crypto.randomUUID();
+    grid.appendChild(button);
+
+  });
+
+  updateSelectedSkills();
+}
 
 
-      const response = await fetch(
-        SUPABASE_URL + "/rest/v1/profiles",
-        {
-          method: "POST",
+function toggleSkill(skill) {
 
-          headers: {
-            "Content-Type": "application/json",
+  if (skill === "لا أعرف بعد") {
 
-            "apikey":
-              SUPABASE_PUBLISHABLE_KEY,
+    selectedSkills = ["لا أعرف بعد"];
 
-            "Authorization":
-              "Bearer " +
-              SUPABASE_PUBLISHABLE_KEY,
+  } else {
 
-            "Prefer":
-              "return=minimal"
-          },
-
-          body: JSON.stringify({
-
-            id: profileId,
-
-            full_name: name,
-
-            role: "worker",
-
-            main_skill: skill,
-
-            bio: description
-
-          })
-
-        }
+    selectedSkills =
+      selectedSkills.filter(
+        item => item !== "لا أعرف بعد"
       );
 
+    if (selectedSkills.includes(skill)) {
 
-      if (!response.ok) {
-
-        const errorText =
-          await response.text();
-
-        console.error(errorText);
-
-        throw new Error(
-          "فشل حفظ الملف"
+      selectedSkills =
+        selectedSkills.filter(
+          item => item !== skill
         );
 
-      }
-
-
-      localStorage.setItem(
-        "madkhal_profile_id",
-        profileId
-      );
-
-      localStorage.setItem(
-        "madkhal_profile_name",
-        name
-      );
-
-
-      message.className =
-        "message success";
-
-      message.textContent =
-        "🎉 تم إنشاء ملفك المهني وحفظه بنجاح في مَدخَل.";
-
-    }
-
-    catch (error) {
-
-      console.error(error);
-
-      message.className =
-        "message error";
-
-      message.textContent =
-        "❌ حدث خطأ أثناء حفظ الملف. تأكد من مفتاح Supabase واتصال الإنترنت.";
-
-    }
-
-  }
-
-
-  /* =========================================================
-     PROJECT
-     ========================================================= */
-
-  function saveProject() {
-
-    const name =
-      document.getElementById("projectName").value.trim();
-
-    const type =
-      document.getElementById("projectType").value;
-
-    const description =
-      document.getElementById("projectDescription").value.trim();
-
-    const message =
-      document.getElementById("projectMessage");
-
-
-    if (!name || !type || !description) {
-
-      message.className =
-        "message error";
-
-      message.textContent =
-        "❌ يرجى تعبئة جميع بيانات المشروع.";
-
-      return;
-
-    }
-
-
-    /*
-      حاليًا هذه خطوة واجهة وتجهيز.
-      الحفظ الحقيقي للمشاريع في Supabase
-      سيكون في المرحلة التالية.
-    */
-
-    message.className =
-      "message success";
-
-    message.textContent =
-      "✅ تم تسجيل بيانات مشروعك مبدئيًا. سيتم ربط الإرسال الحقيقي بقاعدة البيانات في المرحلة التالية.";
-
-  }
-
-
-  /* =========================================================
-     DISCOVER SKILLS
-     ========================================================= */
-
-  let selectedSkills = [];
-
-
-  function toggleSkill(button, skill) {
-
-    const index =
-      selectedSkills.indexOf(skill);
-
-
-    if (index === -1) {
+    } else {
 
       selectedSkills.push(skill);
 
-      button.classList.add("selected");
-
-    } else {
-
-      selectedSkills.splice(index, 1);
-
-      button.classList.remove("selected");
-
     }
-
-
-    updateSelectedSkills();
-
   }
 
-
-  function updateSelectedSkills() {
-
-    const box =
-      document.getElementById("selectedSkillsBox");
+  renderSkills();
+}
 
 
-    if (selectedSkills.length === 0) {
+function updateSelectedSkills() {
 
-      box.textContent =
-        "لم تختر أي مهارة بعد.";
+  const box =
+    document.getElementById("selectedSkillsBox");
 
-      return;
+  if (!selectedSkills.length) {
 
-    }
+    box.textContent =
+      "لم تختر أي مهارة بعد.";
 
-
-    box.innerHTML =
-      "<strong>المهارات المختارة:</strong><br>" +
-      selectedSkills.join(" • ");
-
+    return;
   }
 
-
-  function startSkillAssessment() {
-
-    if (selectedSkills.length === 0) {
-
-      alert("اختر مهارة واحدة على الأقل أولًا.");
-
-      return;
-
-    }
+  box.textContent =
+    "المهارات المختارة: " +
+    selectedSkills.join("، ");
+}
 
 
-    localStorage.setItem(
-      "madkhal_selected_skills",
-      JSON.stringify(selectedSkills)
+function openDiscoverSkills() {
+
+  showScreen("discoverSkillsSection");
+
+  renderSkills();
+}
+
+
+function startSkillAssessment() {
+
+  if (!selectedSkills.length) {
+
+    showToast(
+      "⚠️ اختر مهارة واحدة على الأقل"
     );
 
+    return;
+  }
 
-    openAssessmentScreen();
+  localStorage.setItem(
+    "madkhal_selected_skills",
+    JSON.stringify(selectedSkills)
+  );
+
+  openAssessmentScreen();
+}
+
+
+/* =========================================================
+   التقييم
+   ========================================================= */
+
+let experienceLevel = null;
+
+
+function openAssessmentScreen() {
+
+  showScreen("assessmentSection");
+
+  document.getElementById(
+    "assessmentIntro"
+  ).classList.remove("hidden");
+
+  document.getElementById(
+    "writingTest"
+  ).classList.add("hidden");
+
+  document.getElementById(
+    "assessmentResult"
+  ).classList.add("hidden");
+
+  experienceLevel = null;
+}
+
+
+function selectExperience(button, level) {
+
+  document.querySelectorAll(
+    "#assessmentIntro .option"
+  ).forEach(item => {
+    item.classList.remove("selected");
+  });
+
+  button.classList.add("selected");
+
+  experienceLevel = level;
+
+  const stored =
+    localStorage.getItem(
+      "madkhal_selected_skills"
+    );
+
+  let currentSkills = [];
+
+  try {
+    currentSkills =
+      stored ? JSON.parse(stored) : selectedSkills;
+  } catch {
+    currentSkills = selectedSkills;
+  }
+
+  if (
+    currentSkills.includes("الكتابة") ||
+    currentSkills.length === 0
+  ) {
+
+    document.getElementById(
+      "writingTest"
+    ).classList.remove("hidden");
+
+    setTimeout(() => {
+
+      document.getElementById(
+        "writingTest"
+      ).scrollIntoView({
+        behavior: "smooth"
+      });
+
+    }, 150);
+
+  } else {
+
+    showToast(
+      "📊 سنضيف الاختبار العملي لهذا المجال في المرحلة التالية."
+    );
+
+  }
+}
+
+
+function updateWordCount() {
+
+  const text =
+    document.getElementById(
+      "writingAnswer"
+    ).value.trim();
+
+  const words =
+    text ? text.split(/\s+/).length : 0;
+
+  document.getElementById(
+    "wordCount"
+  ).textContent =
+    "عدد الكلمات: " + words;
+}
+
+
+function calculateWritingScore(text) {
+
+  const words =
+    text.trim()
+      ? text.trim().split(/\s+/).length
+      : 0;
+
+  if (!words) return 0;
+
+  let score = 35;
+
+  if (words >= 120 && words <= 180) {
+    score += 20;
+  } else if (words >= 90 && words <= 220) {
+    score += 12;
+  }
+
+  const lower = text.toLowerCase();
+
+  const ideas = [
+    "عملاء",
+    "العملاء",
+    "تواصل",
+    "تسويق",
+    "شركة",
+    "الشركات",
+    "منصات",
+    "مبيعات",
+    "جمهور",
+    "ثقة",
+    "محتوى",
+    "إعلان",
+    "اعلان"
+  ];
+
+  let matched = 0;
+
+  ideas.forEach(word => {
+
+    if (lower.includes(word)) {
+      matched++;
+    }
+
+  });
+
+  score += Math.min(
+    matched * 4,
+    24
+  );
+
+  const sentences =
+    text.split(/[.!؟\n]+/)
+      .filter(x => x.trim()).length;
+
+  if (sentences >= 4) {
+    score += 10;
+  }
+
+  return Math.min(
+    100,
+    Math.round(score)
+  );
+}
+
+
+function getWritingLevel(score) {
+
+  if (score >= 85) {
+    return "🏆 محترف";
+  }
+
+  if (score >= 70) {
+    return "⭐ جيد جدًا";
+  }
+
+  if (score >= 55) {
+    return "👍 جيد";
+  }
+
+  return "🌱 مبتدئ";
+}
+
+
+function submitWritingTest() {
+
+  const answer =
+    document.getElementById(
+      "writingAnswer"
+    ).value.trim();
+
+  const words =
+    answer
+      ? answer.split(/\s+/).length
+      : 0;
+
+  if (words < 50) {
+
+    showToast(
+      "⚠️ اكتب إجابة أطول قليلًا قبل التقييم."
+    );
+
+    return;
+  }
+
+  const score =
+    calculateWritingScore(answer);
+
+  const level =
+    getWritingLevel(score);
+
+  const result = {
+
+    score,
+    level,
+    words,
+    date: new Date().toISOString(),
+
+    strengths: [
+      words >= 120
+        ? "طول الإجابة مناسب للمطلوب"
+        : "لديك بداية جيدة في بناء الإجابة",
+
+      "قدرتك على شرح الفكرة الأساسية واضحة"
+    ],
+
+    improvements: [
+      words < 120
+        ? "تحتاج إلى تطوير الإجابة وتوسيع الأفكار"
+        : "حاول زيادة الأمثلة العملية",
+
+      "حسّن ترابط الفقرات وتسلسل الأفكار"
+    ]
+  };
+
+  localStorage.setItem(
+    "madkhal_writing_assessment",
+    JSON.stringify(result)
+  );
+
+  renderAssessmentResult(result);
+
+  document.getElementById(
+    "writingTest"
+  ).classList.add("hidden");
+
+  document.getElementById(
+    "assessmentIntro"
+  ).classList.add("hidden");
+}
+
+
+function renderAssessmentResult(result) {
+
+  const container =
+    document.getElementById(
+      "assessmentResult"
+    );
+
+  container.classList.remove("hidden");
+
+  container.innerHTML = `
+
+    <div class="result">
+
+      <div style="font-size:13px;color:#718080;">
+        نتيجتك في اختبار الكتابة
+      </div>
+
+      <div class="score">
+        ${result.score}
+      </div>
+
+      <div class="level">
+        ${result.level}
+      </div>
+
+      <div class="result-list">
+
+        <div>
+          📝 عدد الكلمات:
+          <strong>${result.words}</strong>
+        </div>
+
+        <div>
+          💪 <strong>نقاط القوة</strong><br>
+          ${result.strengths.join("<br>")}
+        </div>
+
+        <div>
+          📚 <strong>ما يحتاج تطويرًا</strong><br>
+          ${result.improvements.join("<br>")}
+        </div>
+
+        <div>
+          ℹ️ <strong>ملاحظة</strong><br>
+          هذا تقييم أولي محلي. سيتم لاحقًا ربط مَدخَل
+          بمحرك تقييم ذكي حقيقي على الخادم.
+        </div>
+
+      </div>
+
+      <button
+        class="primary-btn"
+        style="width:100%;margin-top:15px;"
+        onclick="openOpportunities()">
+        🔎 ابحث عن فرص
+      </button>
+
+    </div>
+
+  `;
+
+  const accountText =
+    document.getElementById(
+      "savedAssessmentText"
+    );
+
+  if (accountText) {
+
+    accountText.textContent =
+      `📊 آخر نتيجة: ${result.score}/100 — ${result.level}`;
+
+  }
+}
+
+
+/* =========================================================
+   الفرص
+   ========================================================= */
+
+const opportunityCategories = [
+  "🎙️ التفريغ الصوتي",
+  "💻 البرمجة",
+  "✍️ كتابة المقالات",
+  "🌐 الترجمة",
+  "🎨 التصميم",
+  "🎬 المونتاج",
+  "📱 التواصل الاجتماعي",
+  "📢 التسويق الإلكتروني",
+  "📊 إدخال البيانات",
+  "📈 Excel والبيانات",
+  "🎤 التعليق الصوتي",
+  "📚 التعليم",
+  "📝 التدقيق اللغوي",
+  "🛒 المتاجر الإلكترونية",
+  "🤖 الذكاء الاصطناعي",
+  "🖼️ تحرير الصور",
+  "💼 المساعدة الافتراضية",
+  "🧮 المحاسبة",
+  "🔧 خدمات أخرى"
+];
+
+const opportunities = [
+
+  {
+    icon: "🎙️",
+    title: "تفريغ تسجيل صوتي",
+    price: "$20",
+    category: "🎙️ التفريغ الصوتي",
+    description: "تحويل تسجيل صوتي إلى نص مرتب."
+  },
+
+  {
+    icon: "💻",
+    title: "إنشاء موقع إلكتروني",
+    price: "$100",
+    category: "💻 البرمجة",
+    description: "إنشاء صفحة أو موقع إلكتروني بسيط."
+  },
+
+  {
+    icon: "✍️",
+    title: "كتابة مقالات",
+    price: "$30",
+    category: "✍️ كتابة المقالات",
+    description: "كتابة مقالات عربية واضحة ومنظمة."
+  },
+
+  {
+    icon: "🎨",
+    title: "تصميم شعار",
+    price: "$40",
+    category: "🎨 التصميم",
+    description: "تصميم شعار احترافي لمشروع."
+  },
+
+  {
+    icon: "🌐",
+    title: "ترجمة نصوص",
+    price: "$25",
+    category: "🌐 الترجمة",
+    description: "ترجمة النصوص مع المحافظة على المعنى."
+  },
+
+  {
+    icon: "🎬",
+    title: "تحرير فيديو",
+    price: "$35",
+    category: "🎬 المونتاج",
+    description: "تحرير فيديو قصير مناسب للنشر."
+  }
+
+];
+
+let currentCategory = "الكل";
+
+
+function renderCategories() {
+
+  const container =
+    document.getElementById(
+      "categoryScroll"
+    );
+
+  container.innerHTML = "";
+
+  const all =
+    document.createElement("button");
+
+  all.className =
+    "category" +
+    (currentCategory === "الكل"
+      ? " active"
+      : "");
+
+  all.textContent = "الكل";
+
+  all.onclick = () => {
+
+    currentCategory = "الكل";
+
+    renderCategories();
+    renderOpportunities();
+
+  };
+
+  container.appendChild(all);
+
+  opportunityCategories.forEach(category => {
+
+    const button =
+      document.createElement("button");
+
+    button.className =
+      "category" +
+      (currentCategory === category
+        ? " active"
+        : "");
+
+    button.textContent = category;
+
+    button.onclick = () => {
+
+      currentCategory = category;
+
+      renderCategories();
+      renderOpportunities();
+
+    };
+
+    container.appendChild(button);
+
+  });
+}
+
+
+function renderOpportunities() {
+
+  const container =
+    document.getElementById(
+      "opportunitiesList"
+    );
+
+  container.innerHTML = "";
+
+  let list = opportunities;
+
+  if (currentCategory !== "الكل") {
+
+    list =
+      opportunities.filter(
+        item =>
+          item.category === currentCategory
+      );
 
   }
 
+  if (!list.length) {
 
-  /* =========================================================
-     ASSESSMENT
-     ========================================================= */
+    container.innerHTML = `
+      <div class="card">
+        <h3>🔎 لا توجد فرص تجريبية هنا بعد</h3>
+        <p>
+          ستتم إضافة فرص حقيقية تدريجيًا.
+        </p>
+      </div>
+    `;
 
-  let assessmentExperience = "";
+    return;
+  }
+
+  list.forEach(item => {
+
+    const div =
+      document.createElement("div");
+
+    div.className = "opportunity";
+
+    div.innerHTML = `
+
+      <div class="opportunity-top">
+
+        <div>
+          <h3>
+            ${item.icon} ${item.title}
+          </h3>
+
+          <p style="margin:0;color:#687575;font-size:12px;">
+            ${item.description}
+          </p>
+
+          <span class="tag">
+            ${item.category}
+          </span>
+        </div>
+
+        <div class="price">
+          ${item.price}
+        </div>
+
+      </div>
+
+      <button
+        class="primary-btn"
+        style="width:100%;margin-top:13px;"
+        onclick="applyOpportunity('${item.title}')">
+        📩 التقديم
+      </button>
+
+    `;
+
+    container.appendChild(div);
+
+  });
+}
 
 
-  function chooseAssessment(answer) {
+function openOpportunities() {
 
-    assessmentExperience =
-      answer;
+  showScreen("opportunitiesScreen");
+
+  currentCategory = "الكل";
+
+  renderCategories();
+  renderOpportunities();
+}
 
 
-    const savedSkills =
-      localStorage.getItem("madkhal_selected_skills");
+function applyOpportunity(title) {
+
+  const profileId =
+    localStorage.getItem(
+      "madkhal_profile_id"
+    );
+
+  if (!profileId) {
+
+    showToast(
+      "👤 أنشئ ملفك المهني أولًا حتى تستطيع التقديم."
+    );
+
+    setTimeout(() => {
+      openProfile();
+    }, 800);
+
+    return;
+  }
+
+  showToast(
+    `📩 تم تجهيز طلب التقديم على: ${title}`
+  );
+
+  /*
+    لاحقًا:
+    سيتم إنشاء سجل applications
+    وربطه بـ profiles و opportunities
+    ثم إرسال إشعار لصاحب المشروع.
+  */
+}
 
 
-    let skills = [];
+/* =========================================================
+   المشاريع
+   ========================================================= */
 
+function saveProject() {
+
+  const name =
+    document.getElementById(
+      "projectName"
+    ).value.trim();
+
+  const type =
+    document.getElementById(
+      "projectType"
+    ).value;
+
+  const description =
+    document.getElementById(
+      "projectDescription"
+    ).value.trim();
+
+  if (!name || !type || !description) {
+
+    showToast(
+      "⚠️ أكمل بيانات المشروع أولًا."
+    );
+
+    return;
+  }
+
+  showToast(
+    "🎉 تم استلام بيانات المشروع. سيتم ربط الحفظ الحقيقي في المرحلة التالية."
+  );
+
+  /*
+    لاحقًا:
+    INSERT INTO projects
+  */
+}
+
+
+/* =========================================================
+   الحساب
+   ========================================================= */
+
+function loadAccount() {
+
+  const name =
+    localStorage.getItem(
+      "madkhal_profile_name"
+    );
+
+  const skill =
+    localStorage.getItem(
+      "madkhal_profile_skill"
+    );
+
+  const account =
+    document.getElementById(
+      "accountStatus"
+    );
+
+  if (name) {
+
+    account.innerHTML =
+      `👋 أهلًا ${name}<br>
+       المهارة الأساسية: ${skill || "غير محددة"}`;
+
+  }
+
+  const saved =
+    localStorage.getItem(
+      "madkhal_writing_assessment"
+    );
+
+  if (saved) {
 
     try {
 
-      if (savedSkills) {
-        skills = JSON.parse(savedSkills);
-      }
+      const result =
+        JSON.parse(saved);
 
-    } catch (error) {
-      skills = [];
-    }
+      document.getElementById(
+        "savedAssessmentText"
+      ).textContent =
+        `📊 ${result.score}/100 — ${result.level}`;
 
-
-    if (
-      Array.isArray(skills) &&
-      skills.some(function(skill) {
-        return skill.includes("الكتابة");
-      })
-    ) {
-
-      showWritingTest();
-
-      return;
-
-    }
-
-
-    alert(
-      "✅ تم تسجيل إجابتك: " +
-      answer +
-      "\n\nسيتم توسيع الاختبار العملي لهذا المجال في المرحلة التالية."
-    );
+    } catch {}
 
   }
+}
 
 
-  function showWritingTest() {
+/* =========================================================
+   وضع المالك — واجهة تمهيدية فقط
+   ========================================================= */
 
-    const test =
-      document.getElementById("writingTest");
+function openOwnerMode() {
 
-    if (test) {
-      test.style.display = "block";
-    }
+  /*
+    هذا ليس تحققًا أمنيًا حقيقيًا.
+    لاحقًا سنربط Owner role بحساب Supabase
+    وRLS وEdge Functions وMFA.
+  */
 
-    setTimeout(function() {
-
-      if (test) {
-
-        test.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
-
-      }
-
-    }, 100);
-
-  }
+  showScreen("ownerScreen");
+}
 
 
-  /* =========================================================
-     WRITING PRACTICAL TEST
-     ========================================================= */
+function ownerPreview(type) {
 
-  function countWords(text) {
+  if (type === "worker") {
 
-    return text
-      .trim()
-      .split(/\s+/)
-      .filter(function(word) {
-        return word.length > 0;
-      }).length;
-
-  }
-
-
-  function updateWordCount() {
-
-    const answer =
-      document.getElementById("writingAnswer").value;
-
-    const count =
-      countWords(answer);
-
-
-    document.getElementById(
-      "wordCounter"
-    ).textContent =
-      "عدد الكلمات: " + count;
-
-  }
-
-
-  function submitWritingTest() {
-
-    const answer =
-      document.getElementById("writingAnswer").value.trim();
-
-    const message =
-      document.getElementById("writingMessage");
-
-
-    const words =
-      countWords(answer);
-
-
-    if (words < 120) {
-
-      message.className =
-        "message error";
-
-      message.textContent =
-        "❌ الإجابة قصيرة. المطلوب من 120 إلى 180 كلمة. عدد كلماتك الحالي: " +
-        words;
-
-      return;
-
-    }
-
-
-    if (words > 180) {
-
-      message.className =
-        "message error";
-
-      message.textContent =
-        "❌ الإجابة أطول من المطلوب. المطلوب من 120 إلى 180 كلمة. عدد كلماتك الحالي: " +
-        words;
-
-      return;
-
-    }
-
-
-    /*
-      التقييم الحالي محلي وأولي.
-      لاحقًا سنستبدل هذا المحرك بتحليل AI حقيقي
-      عبر Supabase Edge Function دون وضع مفتاح Gemini في الواجهة.
-    */
-
-
-    const result =
-      evaluateWriting(answer, words);
-
-
-    document.getElementById(
-      "writingScore"
-    ).textContent =
-      result.score + "/100";
-
-
-    document.getElementById(
-      "writingLevel"
-    ).textContent =
-      result.level;
-
-
-    document.getElementById(
-      "writingStrengths"
-    ).innerHTML =
-      result.strengths
-        .map(function(item) {
-          return "<li>" + item + "</li>";
-        })
-        .join("");
-
-
-    document.getElementById(
-      "writingWeaknesses"
-    ).innerHTML =
-      result.weaknesses
-        .map(function(item) {
-          return "<li>" + item + "</li>";
-        })
-        .join("");
-
-
-    document.getElementById(
-      "writingDetails"
-    ).innerHTML =
-      result.details
-        .map(function(item) {
-          return "<li>" + item + "</li>";
-        })
-        .join("");
-
-
-    document.getElementById(
-      "writingResult"
-    ).style.display = "block";
-
-
-    message.className =
-      "message success";
-
-    message.textContent =
-      "🎉 تم إرسال الاختبار وتوليد نتيجة أولية.";
-
-
-    localStorage.setItem(
-      "madkhal_writing_assessment",
-      JSON.stringify({
-        score: result.score,
-        level: result.level,
-        words: words,
-        answer: answer,
-        date: new Date().toISOString()
-      })
+    showToast(
+      "👑 معاينة واجهة الباحث بصلاحية المالك"
     );
 
-
-    document.getElementById(
-      "writingResult"
-    ).scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
-
-  }
-
-
-  function evaluateWriting(text, words) {
-
-    let score = 0;
-
-    const strengths = [];
-
-    const weaknesses = [];
-
-    const details = [];
-
-
-    /* 1 — عدد الكلمات */
-
-    if (words >= 120 && words <= 180) {
-
-      score += 15;
-
-      strengths.push(
-        "الالتزام بعدد الكلمات المطلوب."
-      );
-
-    }
-
-
-    /* 2 — وجود فكرة واضحة */
-
-    const ideaWords = [
-      "الشركات",
-      "التواصل",
-      "العملاء",
-      "التسويق",
-      "وسائل",
-      "الاجتماعي",
-      "الوصول"
-    ];
-
-
-    let ideaMatches = 0;
-
-
-    ideaWords.forEach(function(word) {
-
-      if (text.includes(word)) {
-        ideaMatches++;
-      }
-
-    });
-
-
-    if (ideaMatches >= 4) {
-
-      score += 25;
-
-      strengths.push(
-        "الإجابة مرتبطة بموضوع الاختبار."
-      );
-
-    } else {
-
-      score += 12;
-
-      weaknesses.push(
-        "تحتاج الإجابة إلى ارتباط أوضح بموضوع السؤال."
-      );
-
-    }
-
-
-    /* 3 — علامات الترقيم */
-
-    const punctuation =
-      (text.match(/[،,؛;.!؟?]/g) || []).length;
-
-
-    if (punctuation >= 5) {
-
-      score += 15;
-
-      strengths.push(
-        "استخدام جيد نسبيًا لعلامات الترقيم."
-      );
-
-    } else {
-
-      score += 7;
-
-      weaknesses.push(
-        "حاول استخدام علامات الترقيم لتنظيم الأفكار."
-      );
-
-    }
-
-
-    /* 4 — تقسيم الجمل */
-
-    const sentences =
-      text
-        .split(/[.!؟\n]+/)
-        .map(function(s) {
-          return s.trim();
-        })
-        .filter(function(s) {
-          return s.length > 0;
-        });
-
-
-    if (sentences.length >= 4) {
-
-      score += 15;
-
-      strengths.push(
-        "وجود عدة جمل يساعد على تنظيم الفكرة."
-      );
-
-    } else {
-
-      score += 7;
-
-      weaknesses.push(
-        "يفضل تقسيم النص إلى جمل وأفكار أكثر وضوحًا."
-      );
-
-    }
-
-
-    /* 5 — طول النص وتنوعه */
-
-    const uniqueWords =
-      new Set(
-        text
-          .replace(/[،,؛;.!؟?]/g, "")
-          .split(/\s+/)
-          .filter(Boolean)
-      ).size;
-
-
-    const diversity =
-      uniqueWords / Math.max(words, 1);
-
-
-    if (diversity >= 0.45) {
-
-      score += 15;
-
-      strengths.push(
-        "تنوع جيد نسبيًا في المفردات."
-      );
-
-    } else {
-
-      score += 7;
-
-      weaknesses.push(
-        "حاول تنويع المفردات وعدم تكرار الكلمات نفسها كثيرًا."
-      );
-
-    }
-
-
-    /* 6 — الحد الأدنى للنحو والصياغة */
-
-    const badPatterns = [
-      "هاذا",
-      "هاذه",
-      "الذيين",
-      "اللذينن",
-      "ان الشركات",
-      "لان الشركات"
-    ];
-
-
-    let spellingIssues = 0;
-
-
-    badPatterns.forEach(function(pattern) {
-
-      if (text.includes(pattern)) {
-        spellingIssues++;
-      }
-
-    });
-
-
-    if (spellingIssues === 0) {
-
-      score += 15;
-
-      strengths.push(
-        "لم تظهر أخطاء إملائية واضحة ضمن الفحص الأولي."
-      );
-
-    } else {
-
-      score += 5;
-
-      weaknesses.push(
-        "توجد بعض الأخطاء الإملائية أو اللغوية التي تحتاج إلى مراجعة."
-      );
-
-    }
-
-
-    score =
-      Math.max(
-        0,
-        Math.min(100, Math.round(score))
-      );
-
-
-    let level;
-
-
-    if (score >= 85) {
-
-      level = "🏆 محترف";
-
-    } else if (score >= 70) {
-
-      level = "⭐ جيد جدًا";
-
-    } else if (score >= 50) {
-
-      level = "👍 جيد";
-
-    } else {
-
-      level = "🌱 مبتدئ";
-
-    }
-
-
-    details.push(
-      "الالتزام بعدد الكلمات: 15 نقطة."
-    );
-
-    details.push(
-      "وضوح الارتباط بالموضوع: حتى 25 نقطة."
-    );
-
-    details.push(
-      "علامات الترقيم: حتى 15 نقطة."
-    );
-
-    details.push(
-      "تنظيم الجمل: حتى 15 نقطة."
-    );
-
-    details.push(
-      "تنوع المفردات: حتى 15 نقطة."
-    );
-
-    details.push(
-      "الفحص الإملائي الأولي: حتى 15 نقطة."
-    );
-
-
-    return {
-      score: score,
-      level: level,
-      strengths: strengths,
-      weaknesses: weaknesses,
-      details: details
-    };
-
-  }
-
-
-  /* =========================================================
-     OPPORTUNITIES
-     ========================================================= */
-
-  function applyOpportunity(name) {
-
-    const profileId =
-      localStorage.getItem("madkhal_profile_id");
-
-
-    if (!profileId) {
-
-      alert(
-        "ℹ️ أنشئ ملفك المهني أولًا حتى نستطيع ربط طلب التقديم بحسابك."
-      );
-
+    setTimeout(() => {
       openWorker();
+    }, 500);
 
-      return;
+  }
+
+  if (type === "project") {
+
+    showToast(
+      "👑 معاينة واجهة صاحب المشروع بصلاحية المالك"
+    );
+
+    setTimeout(() => {
+      openProject();
+    }, 500);
+
+  }
+}
+
+
+/* =========================================================
+   PWA
+   ========================================================= */
+
+if ("serviceWorker" in navigator) {
+
+  window.addEventListener(
+    "load",
+    () => {
+
+      navigator.serviceWorker
+        .register("/service-worker.js")
+        .then(() => {
+          console.log(
+            "مَدخَل: Service Worker registered"
+          );
+        })
+        .catch(error => {
+          console.error(
+            "Service Worker error:",
+            error
+          );
+        });
 
     }
+  );
+
+}
 
 
-    alert(
-      "📩 تم اختيار فرصة: " +
-      name +
-      "\n\nسيتم ربط التقديم الحقيقي بالفرصة وقاعدة البيانات في المرحلة التالية."
-    );
+/* =========================================================
+   التشغيل الأول
+   ========================================================= */
 
-  }
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
 
+    loadAccount();
 
-  /* =========================================================
-     PWA
-     ========================================================= */
+    renderSkills();
 
-  if ("serviceWorker" in navigator) {
+    renderCategories();
 
-    window.addEventListener(
-      "load",
-      function() {
-
-        navigator.serviceWorker
-          .register("/service-worker.js")
-          .then(function() {
-
-            console.log(
-              "Service Worker registered successfully."
-            );
-
-          })
-          .catch(function(error) {
-
-            console.error(
-              "Service Worker registration failed:",
-              error
-            );
-
-          });
-
-      }
-    );
+    renderOpportunities();
 
   }
-
-
-  /* =========================================================
-     INITIAL STATE
-     ========================================================= */
-
-  goHome();
+);
 
 </script>
 
