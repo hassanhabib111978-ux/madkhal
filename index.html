@@ -1,18 +1,37 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#0f766e">
-  <meta name="description" content="مَدخَل - المدخل إلى سوق العمل الإلكتروني">
 
-  <link rel="manifest" href="/manifest.json">
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
+
+  <meta
+    name="theme-color"
+    content="#0f766e"
+  >
+
+  <meta
+    name="description"
+    content="مَدخَل - المدخل إلى سوق العمل الإلكتروني"
+  >
+
+  <link
+    rel="manifest"
+    href="/manifest.json"
+  >
 
   <title>مَدخَل 🚪</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+
   <style>
+
     * {
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
@@ -49,7 +68,9 @@
       background: #f6f8f8;
     }
 
+
     /* Header */
+
     .header {
       position: sticky;
       top: 0;
@@ -82,7 +103,9 @@
       font-weight: 700;
     }
 
+
     /* Main */
+
     main {
       padding: 16px;
     }
@@ -97,6 +120,7 @@
     }
 
     @keyframes fade {
+
       from {
         opacity: 0;
         transform: translateY(5px);
@@ -106,9 +130,12 @@
         opacity: 1;
         transform: translateY(0);
       }
+
     }
 
+
     /* Hero */
+
     .hero {
       position: relative;
       overflow: hidden;
@@ -198,7 +225,9 @@
       transform: scale(.97);
     }
 
+
     /* Cards */
+
     .section-title {
       font-size: 19px;
       margin: 24px 2px 12px;
@@ -225,7 +254,9 @@
       line-height: 1.7;
     }
 
+
     /* Journey */
+
     .journey {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -248,7 +279,9 @@
       margin-bottom: 6px;
     }
 
+
     /* Forms */
+
     .form-group {
       margin-bottom: 14px;
     }
@@ -284,7 +317,9 @@
       line-height: 1.8;
     }
 
+
     /* Options */
+
     .options {
       display: grid;
       gap: 9px;
@@ -306,7 +341,9 @@
       color: #0f766e;
     }
 
+
     /* Skills */
+
     .skills-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -338,7 +375,9 @@
       color: #0f766e;
     }
 
+
     /* Opportunities */
+
     .category-scroll {
       display: flex;
       gap: 8px;
@@ -403,7 +442,9 @@
       margin-top: 8px;
     }
 
+
     /* Result */
+
     .result {
       text-align: center;
       background: white;
@@ -437,7 +478,62 @@
       font-size: 13px;
     }
 
+
+    /* التقييم الاحترافي */
+
+    .premium-offer {
+      background: linear-gradient(145deg, #fffdf3, #ffffff);
+      border: 1px solid #eadb9a;
+      border-radius: 22px;
+      padding: 18px;
+      margin-top: 15px;
+    }
+
+    .premium-badge {
+      display: inline-block;
+      background: #f6c453;
+      color: #302600;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .premium-offer h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .premium-offer p {
+      margin: 0 0 12px;
+      color: #657070;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .premium-features {
+      margin: 0 0 15px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .premium-features li {
+      padding: 8px 0;
+      font-size: 13px;
+      border-bottom: 1px solid #f0eeee;
+    }
+
+    .premium-price {
+      font-size: 24px;
+      font-weight: 900;
+      color: #0f766e;
+      margin: 8px 0 13px;
+    }
+
+
     /* Owner */
+
     .owner-box {
       background: linear-gradient(145deg, #172121, #263333);
       color: white;
@@ -478,7 +574,9 @@
       margin-bottom: 6px;
     }
 
+
     /* Bottom navigation */
+
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -515,7 +613,9 @@
       color: #0f766e;
     }
 
+
     /* Toast */
+
     .toast {
       position: fixed;
       left: 15px;
@@ -558,7 +658,9 @@
       display: none !important;
     }
 
+
     @media (min-width: 701px) {
+
       body {
         background: #e9eeee;
       }
@@ -566,28 +668,52 @@
       .app {
         box-shadow: 0 0 50px rgba(0,0,0,.08);
       }
+
     }
+
   </style>
+
 </head>
+
 
 <body>
 
+
 <div class="app">
 
+
   <header class="header">
+
     <div class="header-inner">
-      <div class="logo">مَدخَل 🚪</div>
-      <div class="pilot">🚀 إطلاق تجريبي</div>
+
+      <div class="logo">
+        مَدخَل 🚪
+      </div>
+
+      <div class="pilot">
+        🚀 إطلاق تجريبي
+      </div>
+
     </div>
+
   </header>
+
 
   <main>
 
+
     <!-- الرئيسية -->
-    <section id="homeScreen" class="screen active">
+
+    <section
+      id="homeScreen"
+      class="screen active"
+    >
 
       <div class="hero">
-        <h1>المدخل إلى سوق العمل الإلكتروني</h1>
+
+        <h1>
+          المدخل إلى سوق العمل الإلكتروني
+        </h1>
 
         <p>
           لا تعرف ماذا تستطيع أن تعمل؟
@@ -599,19 +725,32 @@
         </div>
 
         <div class="hero-actions">
-          <button class="primary-btn" onclick="openWorker()">
+
+          <button
+            class="primary-btn"
+            onclick="openWorker()"
+          >
             💼 أبحث عن عمل
           </button>
 
-          <button class="secondary-btn" onclick="openProject()">
+          <button
+            class="secondary-btn"
+            onclick="openProject()"
+          >
             📋 لدي مشروع
           </button>
+
         </div>
+
       </div>
 
-      <h2 class="section-title">رحلتك في مَدخَل</h2>
+
+      <h2 class="section-title">
+        رحلتك في مَدخَل
+      </h2>
 
       <div class="journey">
+
         <div class="journey-item">
           <span>🧠</span>
           اكتشف
@@ -641,111 +780,219 @@
           <span>📩</span>
           قدّم
         </div>
+
       </div>
 
-      <h2 class="section-title">لماذا مَدخَل؟</h2>
+
+      <h2 class="section-title">
+        لماذا مَدخَل؟
+      </h2>
+
 
       <div class="card">
-        <h3>🧠 اكتشف ما تستطيع فعله</h3>
+
+        <h3>
+          🧠 اكتشف ما تستطيع فعله
+        </h3>
+
         <p>
           حتى لو لم تكن تعرف المجال المناسب لك، نساعدك على استكشاف المهارات التي قد تناسبك.
         </p>
+
       </div>
 
+
       <div class="card">
-        <h3>📊 اعرف مستواك الحقيقي</h3>
+
+        <h3>
+          📊 اعرف مستواك الحقيقي
+        </h3>
+
         <p>
           اختبارات عملية أولية تساعدك على معرفة نقاط قوتك وما تحتاج إلى تطويره.
         </p>
+
       </div>
 
+
       <div class="card">
-        <h3>🎯 اقترب من الفرصة المناسبة</h3>
+
+        <h3>
+          🎯 اقترب من الفرصة المناسبة
+        </h3>
+
         <p>
           الهدف النهائي هو ربط المهارة المثبتة بفرصة عمل حقيقية.
         </p>
+
       </div>
 
+
       <div class="card">
-        <h3>🚀 الإطلاق التجريبي</h3>
+
+        <h3>
+          🚀 الإطلاق التجريبي
+        </h3>
+
         <p>
           تعمل مَدخَل حاليًا على بناء أول مجتمع من الباحثين عن العمل وأصحاب المشاريع.
         </p>
+
       </div>
 
     </section>
 
 
     <!-- الباحث عن عمل -->
-    <section id="workerScreen" class="screen">
 
-      <button class="back" onclick="showScreen('homeScreen')">→ العودة</button>
+    <section
+      id="workerScreen"
+      class="screen"
+    >
+
+      <button
+        class="back"
+        onclick="showScreen('homeScreen')"
+      >
+        → العودة
+      </button>
 
       <div class="card">
-        <h2>💼 أبحث عن عمل</h2>
+
+        <h2>
+          💼 أبحث عن عمل
+        </h2>
+
         <p>
           اختر الطريق الذي يناسب وضعك الآن.
         </p>
+
       </div>
+
 
       <div class="options">
 
-        <button class="option" onclick="openDiscoverSkills()">
+        <button
+          class="option"
+          onclick="openDiscoverSkills()"
+        >
           🧠 لا أعرف المجال المناسب لي
           <br>
           <small>اكتشف مهاراتي</small>
         </button>
 
-        <button class="option" onclick="openAssessmentScreen()">
+        <button
+          class="option"
+          onclick="openAssessmentScreen()"
+        >
           📊 أعرف مجالي وأريد تقييم مستواي
         </button>
 
-        <button class="option" onclick="openOpportunities()">
+        <button
+          class="option"
+          onclick="openOpportunities()"
+        >
           🔎 أعرف مهارتي وأريد فرصة
         </button>
 
       </div>
 
-      <div class="card" style="margin-top:15px;">
-        <h3>💡 هدف مَدخَل</h3>
+
+      <div
+        class="card"
+        style="margin-top:15px;"
+      >
+
+        <h3>
+          💡 هدف مَدخَل
+        </h3>
+
         <p>
           نريد أن تنتقل من "لا أعرف ماذا أستطيع أن أعمل"
           إلى "أعرف مهارتي ومستواي وهذه فرصة مناسبة لي".
         </p>
+
       </div>
 
     </section>
 
 
     <!-- الملف المهني -->
-    <section id="profileScreen" class="screen">
 
-      <button class="back" onclick="showScreen('workerScreen')">→ العودة</button>
+    <section
+      id="profileScreen"
+      class="screen"
+    >
+
+      <button
+        class="back"
+        onclick="showScreen('workerScreen')"
+      >
+        → العودة
+      </button>
 
       <div class="card">
-        <h2>👤 أنشئ ملفك المهني</h2>
+
+        <h2>
+          👤 أنشئ ملفك المهني
+        </h2>
+
         <p>
           نحتاج هذه المعلومات حتى تستطيع التقديم على الفرص.
         </p>
+
       </div>
+
 
       <div class="form-group">
-        <label>الاسم</label>
-        <input id="workerName" type="text" placeholder="اكتب اسمك">
+
+        <label>
+          الاسم
+        </label>
+
+        <input
+          id="workerName"
+          type="text"
+          placeholder="اكتب اسمك"
+        >
+
       </div>
+
 
       <div class="form-group">
-        <label>المهارة أو المجال</label>
-        <input id="workerSkill" type="text" placeholder="مثال: الكتابة">
+
+        <label>
+          المهارة أو المجال
+        </label>
+
+        <input
+          id="workerSkill"
+          type="text"
+          placeholder="مثال: الكتابة"
+        >
+
       </div>
+
 
       <div class="form-group">
-        <label>نبذة عنك</label>
-        <textarea id="workerDescription"
-          placeholder="اكتب نبذة قصيرة عن خبرتك ومهاراتك"></textarea>
+
+        <label>
+          نبذة عنك
+        </label>
+
+        <textarea
+          id="workerDescription"
+          placeholder="اكتب نبذة قصيرة عن خبرتك ومهاراتك"
+        ></textarea>
+
       </div>
 
-      <button class="primary-btn" style="width:100%;" onclick="saveWorker()">
+
+      <button
+        class="primary-btn"
+        style="width:100%;"
+        onclick="saveWorker()"
+      >
         💾 حفظ الملف المهني
       </button>
 
@@ -753,45 +1000,119 @@
 
 
     <!-- صاحب المشروع -->
-    <section id="projectScreen" class="screen">
 
-      <button class="back" onclick="showScreen('homeScreen')">→ العودة</button>
+    <section
+      id="projectScreen"
+      class="screen"
+    >
+
+      <button
+        class="back"
+        onclick="showScreen('homeScreen')"
+      >
+        → العودة
+      </button>
 
       <div class="card">
-        <h2>🏢 لدي مشروع</h2>
+
+        <h2>
+          🏢 لدي مشروع
+        </h2>
+
         <p>
           أخبرنا بما تحتاج، وسنجهز لك مسار المشروع.
         </p>
+
       </div>
 
-      <div class="form-group">
-        <label>اسم المشروع</label>
-        <input id="projectName" type="text" placeholder="مثال: تصميم موقع">
-      </div>
 
       <div class="form-group">
-        <label>نوع المشروع</label>
+
+        <label>
+          اسم المشروع
+        </label>
+
+        <input
+          id="projectName"
+          type="text"
+          placeholder="مثال: تصميم موقع"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          نوع المشروع
+        </label>
+
         <select id="projectType">
-          <option value="">اختر نوع المشروع</option>
-          <option>💻 البرمجة</option>
-          <option>✍️ الكتابة</option>
-          <option>🌐 الترجمة</option>
-          <option>🎨 التصميم</option>
-          <option>🎬 تحرير الفيديو</option>
-          <option>📱 التواصل الاجتماعي</option>
-          <option>📊 إدخال البيانات</option>
-          <option>🤖 الذكاء الاصطناعي</option>
-          <option>🔧 خدمات أخرى</option>
+
+          <option value="">
+            اختر نوع المشروع
+          </option>
+
+          <option>
+            💻 البرمجة
+          </option>
+
+          <option>
+            ✍️ الكتابة
+          </option>
+
+          <option>
+            🌐 الترجمة
+          </option>
+
+          <option>
+            🎨 التصميم
+          </option>
+
+          <option>
+            🎬 تحرير الفيديو
+          </option>
+
+          <option>
+            📱 التواصل الاجتماعي
+          </option>
+
+          <option>
+            📊 إدخال البيانات
+          </option>
+
+          <option>
+            🤖 الذكاء الاصطناعي
+          </option>
+
+          <option>
+            🔧 خدمات أخرى
+          </option>
+
         </select>
+
       </div>
+
 
       <div class="form-group">
-        <label>وصف المشروع</label>
-        <textarea id="projectDescription"
-          placeholder="اشرح ما الذي تحتاجه"></textarea>
+
+        <label>
+          وصف المشروع
+        </label>
+
+        <textarea
+          id="projectDescription"
+          placeholder="اشرح ما الذي تحتاجه"
+        ></textarea>
+
       </div>
 
-      <button class="primary-btn" style="width:100%;" onclick="saveProject()">
+
+      <button
+        class="primary-btn"
+        style="width:100%;"
+        onclick="saveProject()"
+      >
         📩 إرسال طلب المشروع
       </button>
 
@@ -799,24 +1120,51 @@
 
 
     <!-- اكتشاف المهارات -->
-    <section id="discoverSkillsSection" class="screen">
 
-      <button class="back" onclick="showScreen('workerScreen')">→ العودة</button>
+    <section
+      id="discoverSkillsSection"
+      class="screen"
+    >
+
+      <button
+        class="back"
+        onclick="showScreen('workerScreen')"
+      >
+        → العودة
+      </button>
 
       <div class="card">
-        <h2>🧠 اكتشف مهاراتك</h2>
+
+        <h2>
+          🧠 اكتشف مهاراتك
+        </h2>
+
         <p>
           اختر كل المهارات التي جربتها أو تشعر أنك قد تستطيع القيام بها.
         </p>
+
       </div>
 
-      <div id="skillsGrid" class="skills-grid"></div>
 
-      <div id="selectedSkillsBox" class="selected-box">
+      <div
+        id="skillsGrid"
+        class="skills-grid"
+      ></div>
+
+
+      <div
+        id="selectedSkillsBox"
+        class="selected-box"
+      >
         لم تختر أي مهارة بعد.
       </div>
 
-      <button class="primary-btn" style="width:100%;" onclick="startSkillAssessment()">
+
+      <button
+        class="primary-btn"
+        style="width:100%;"
+        onclick="startSkillAssessment()"
+      >
         📊 انتقل إلى التقييم
       </button>
 
@@ -824,148 +1172,391 @@
 
 
     <!-- التقييم -->
-    <section id="assessmentSection" class="screen">
 
-      <button class="back" onclick="showScreen('workerScreen')">→ العودة</button>
+    <section
+      id="assessmentSection"
+      class="screen"
+    >
+
+      <button
+        class="back"
+        onclick="showScreen('workerScreen')"
+      >
+        → العودة
+      </button>
+
 
       <div id="assessmentIntro">
 
         <div class="card">
-          <h2>📊 تقييم المستوى</h2>
+
+          <h2>
+            📊 تقييم المستوى
+          </h2>
+
           <p>
             سنبدأ بسؤال تمهيدي ثم ننتقل إلى اختبار عملي عندما يكون متاحًا.
           </p>
+
         </div>
 
+
         <div class="card">
-          <h3>هل سبق أن عملت في المجال الذي تريد تقييمه؟</h3>
+
+          <h3>
+            هل سبق أن عملت في المجال الذي تريد تقييمه؟
+          </h3>
+
 
           <div class="options">
 
-            <button class="option" onclick="selectExperience(this,'expert')">
+            <button
+              class="option"
+              onclick="selectExperience(this,'expert')"
+            >
               🏆 نعم، وأتقنه
             </button>
 
-            <button class="option" onclick="selectExperience(this,'learning')">
+            <button
+              class="option"
+              onclick="selectExperience(this,'learning')"
+            >
               ⭐ نعم، لكنني ما زلت أتعلم
             </button>
 
-            <button class="option" onclick="selectExperience(this,'little')">
+            <button
+              class="option"
+              onclick="selectExperience(this,'little')"
+            >
               👍 جربته قليلًا
             </button>
 
-            <button class="option" onclick="selectExperience(this,'none')">
+            <button
+              class="option"
+              onclick="selectExperience(this,'none')"
+            >
               🌱 لم أجربه
             </button>
 
           </div>
+
         </div>
 
       </div>
 
 
-      <div id="writingTest" class="hidden">
+      <div
+        id="writingTest"
+        class="hidden"
+      >
 
         <div class="card">
 
-          <h2>✍️ اختبار الكتابة</h2>
+          <h2>
+            ✍️ اختبار الكتابة
+          </h2>
 
           <p>
             اكتب فقرة من 120 إلى 180 كلمة تشرح فيها:
           </p>
 
-          <p style="font-weight:800;margin-top:10px;">
+          <p
+            style="font-weight:800;margin-top:10px;"
+          >
             لماذا يجب على الشركات الصغيرة استخدام وسائل التواصل الاجتماعي للوصول إلى العملاء؟
           </p>
 
         </div>
 
+
         <div class="form-group">
 
-          <textarea id="writingAnswer"
+          <textarea
+            id="writingAnswer"
             oninput="updateWordCount()"
-            placeholder="اكتب إجابتك هنا..."></textarea>
+            placeholder="اكتب إجابتك هنا..."
+          ></textarea>
 
-          <div id="wordCount" class="word-count">
+          <div
+            id="wordCount"
+            class="word-count"
+          >
             عدد الكلمات: 0
           </div>
 
         </div>
 
-        <button class="primary-btn"
+
+        <button
+          class="primary-btn"
           style="width:100%;"
-          onclick="submitWritingTest()">
+          onclick="submitWritingTest()"
+        >
           📊 تقييم إجابتي
         </button>
 
       </div>
 
 
-      <div id="assessmentResult" class="hidden"></div>
+      <div
+        id="assessmentResult"
+        class="hidden"
+      ></div>
+
+    </section>
+
+
+    <!-- التقييم الاحترافي -->
+
+    <section
+      id="professionalEvaluationScreen"
+      class="screen"
+    >
+
+      <button
+        class="back"
+        onclick="showScreen('assessmentSection')"
+      >
+        → العودة
+      </button>
+
+
+      <div class="card">
+
+        <div class="premium-badge">
+          ⭐ تقييم احترافي
+        </div>
+
+        <h2>
+          تقرير التميز المهني
+        </h2>
+
+        <p>
+          سنحول نتيجة التقييم الأولي إلى خطة عملية
+          تساعدك على معرفة ما تحتاج إلى تطويره.
+        </p>
+
+      </div>
+
+
+      <div
+        id="professionalEvaluationScore"
+        class="selected-box"
+      >
+        نتيجة التقييم المجاني الحالية
+      </div>
+
+
+      <div class="card">
+
+        <h3>
+          ماذا ستحصل عليه؟
+        </h3>
+
+        <div class="result-list">
+
+          <div>
+            📉
+            <strong>
+              تحليل الفجوات
+            </strong>
+            <br>
+            تحديد المهارات التي تحتاج إلى تطويرها.
+          </div>
+
+          <div>
+            🗺️
+            <strong>
+              خطة 30 يومًا
+            </strong>
+            <br>
+            خطوات عملية وموارد مجانية للتطوير.
+          </div>
+
+          <div>
+            📄
+            <strong>
+              مراجعة CV
+            </strong>
+            <br>
+            ملاحظات لتحسين السيرة الذاتية وفق ممارسات ATS.
+          </div>
+
+          <div>
+            🎖️
+            <strong>
+              شارة تقييم مَدخَل
+            </strong>
+            <br>
+            شارة مرتبطة بنتيجة تقييمك.
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="card">
+
+        <h3>
+          💳 السعر التجريبي
+        </h3>
+
+        <div class="premium-price">
+          $2 فقط
+        </div>
+
+        <p>
+          خلال الإطلاق التجريبي، نختبر هذه الخدمة
+          بسعر منخفض قبل إطلاقها بشكل كامل.
+        </p>
+
+      </div>
+
+
+      <div class="card">
+
+        <h3>
+          📩 طلب التقرير
+        </h3>
+
+        <p
+          style="margin-bottom:14px;"
+        >
+          في هذه المرحلة التجريبية، اضغط لإرسال طلبك.
+          سيتم التواصل معك لتأكيد الطلب وطريقة الدفع المتاحة.
+        </p>
+
+        <button
+          class="primary-btn"
+          style="width:100%;"
+          onclick="requestProfessionalEvaluation()"
+        >
+          📩 طلب التقرير الاحترافي — $2
+        </button>
+
+      </div>
 
     </section>
 
 
     <!-- الفرص -->
-    <section id="opportunitiesScreen" class="screen">
 
-      <button class="back" onclick="showScreen('homeScreen')">→ العودة</button>
+    <section
+      id="opportunitiesScreen"
+      class="screen"
+    >
+
+      <button
+        class="back"
+        onclick="showScreen('homeScreen')"
+      >
+        → العودة
+      </button>
 
       <div class="card">
-        <h2>🔎 الفرص</h2>
+
+        <h2>
+          🔎 الفرص
+        </h2>
+
         <p>
           فرص تجريبية لواجهة مَدخَل.
         </p>
+
       </div>
 
-      <div class="category-scroll" id="categoryScroll"></div>
 
-      <div id="opportunitiesList"></div>
+      <div
+        class="category-scroll"
+        id="categoryScroll"
+      ></div>
+
+
+      <div
+        id="opportunitiesList"
+      ></div>
 
     </section>
 
 
     <!-- الحساب -->
-    <section id="accountScreen" class="screen">
+
+    <section
+      id="accountScreen"
+      class="screen"
+    >
 
       <div class="card">
-        <h2>👤 حسابي</h2>
+
+        <h2>
+          👤 حسابي
+        </h2>
+
         <p id="accountStatus">
           لم يتم إنشاء ملف مهني بعد.
         </p>
+
       </div>
 
+
       <div class="card">
-        <h3>📋 الملف المهني</h3>
+
+        <h3>
+          📋 الملف المهني
+        </h3>
+
         <p>
           المهارات والتقييمات والأعمال السابقة ستظهر هنا.
         </p>
+
       </div>
 
+
       <div class="card">
-        <h3>📊 تقييماتي</h3>
+
+        <h3>
+          📊 تقييماتي
+        </h3>
+
         <p id="savedAssessmentText">
           لا توجد تقييمات محفوظة بعد.
         </p>
+
       </div>
 
+
       <div class="card">
-        <h3>📩 طلباتي</h3>
+
+        <h3>
+          📩 طلباتي
+        </h3>
+
         <p>
           ستظهر طلبات التقديم والمشاريع هنا في النسخ القادمة.
         </p>
+
       </div>
 
+
       <div class="card">
-        <h3>⚙️ الإعدادات</h3>
+
+        <h3>
+          ⚙️ الإعدادات
+        </h3>
+
         <p>
           إعدادات الحساب والتنبيهات ستضاف تدريجيًا.
         </p>
+
       </div>
 
-      <button class="secondary-btn"
+
+      <button
+        class="secondary-btn"
         style="width:100%;margin-top:5px;"
-        onclick="openOwnerMode()">
+        onclick="openOwnerMode()"
+      >
         👑 وضع المالك
       </button>
 
@@ -973,152 +1564,256 @@
 
 
     <!-- وضع المالك -->
-    <section id="ownerScreen" class="screen">
 
-      <button class="back" onclick="showScreen('accountScreen')">→ العودة</button>
+    <section
+      id="ownerScreen"
+      class="screen"
+    >
+
+      <button
+        class="back"
+        onclick="showScreen('accountScreen')"
+      >
+        → العودة
+      </button>
+
 
       <div class="owner-box">
-        <div class="owner-badge">👑 OWNER MODE</div>
 
-        <h2 style="margin:4px 0 8px;">
+        <div class="owner-badge">
+          👑 OWNER MODE
+        </div>
+
+        <h2
+          style="margin:4px 0 8px;"
+        >
           وضع المالك
         </h2>
 
-        <p style="margin:0;color:#d6dddd;font-size:13px;line-height:1.7;">
+        <p
+          style="margin:0;color:#d6dddd;font-size:13px;line-height:1.7;"
+        >
           هذه واجهة تمهيدية لوضع المالك.
           الحماية الحقيقية والصلاحيات الحساسة يجب أن تكون على الخادم
           وداخل Supabase RLS وEdge Functions، وليس في الواجهة فقط.
         </p>
+
       </div>
 
+
       <div class="card">
-        <h3>اختر الواجهة التي تريد معاينتها</h3>
+
+        <h3>
+          اختر الواجهة التي تريد معاينتها
+        </h3>
+
       </div>
+
 
       <div class="admin-grid">
 
-        <button class="admin-card" onclick="ownerPreview('worker')">
+
+        <button
+          class="admin-card"
+          onclick="ownerPreview('worker')"
+        >
           <span>📱</span>
           الباحث عن عمل
         </button>
 
-        <button class="admin-card" onclick="ownerPreview('project')">
+
+        <button
+          class="admin-card"
+          onclick="ownerPreview('project')"
+        >
           <span>🏢</span>
           صاحب مشروع
         </button>
 
-        <button class="admin-card" onclick="showToast('واجهة الدعم ستضاف في المرحلة التالية')">
+
+        <button
+          class="admin-card"
+          onclick="showToast('واجهة الدعم ستضاف في المرحلة التالية')"
+        >
           <span>💬</span>
           الدعم
         </button>
 
-        <button class="admin-card" onclick="showToast('واجهة التقييم ستضاف في المرحلة التالية')">
+
+        <button
+          class="admin-card"
+          onclick="showToast('واجهة التقييم ستضاف في المرحلة التالية')"
+        >
           <span>🧪</span>
           فريق التقييم
         </button>
 
-        <button class="admin-card" onclick="showToast('واجهة المطابقة ستضاف في المرحلة التالية')">
+
+        <button
+          class="admin-card"
+          onclick="showToast('واجهة المطابقة ستضاف في المرحلة التالية')"
+        >
           <span>🎯</span>
           المطابقة
         </button>
 
-        <button class="admin-card" onclick="showToast('واجهة المالية ستضاف في المرحلة التالية')">
+
+        <button
+          class="admin-card"
+          onclick="showToast('واجهة المالية ستضاف في المرحلة التالية')"
+        >
           <span>💰</span>
           المالية
         </button>
 
-        <button class="admin-card" onclick="showToast('واجهة الإدارة ستضاف في المرحلة التالية')">
+
+        <button
+          class="admin-card"
+          onclick="showToast('واجهة الإدارة ستضاف في المرحلة التالية')"
+        >
           <span>🛡️</span>
           الإدارة
         </button>
 
-        <button class="admin-card" onclick="showToast('التقارير ستضاف في المرحلة التالية')">
+
+        <button
+          class="admin-card"
+          onclick="showToast('التقارير ستضاف في المرحلة التالية')"
+        >
           <span>📈</span>
           التقارير
         </button>
 
+
       </div>
 
-      <div class="card" style="margin-top:15px;">
-        <h3>🔐 ملاحظة أمنية</h3>
+
+      <div
+        class="card"
+        style="margin-top:15px;"
+      >
+
+        <h3>
+          🔐 ملاحظة أمنية
+        </h3>
+
         <p>
           لا تعتمد صلاحيات المالك على JavaScript وحده.
           عند بناء لوحة الإدارة الحقيقية سنجعل التحقق من الصلاحيات على الخادم،
           مع RLS وسجل عمليات Audit Log وMFA للمالك.
         </p>
+
       </div>
 
     </section>
+
 
   </main>
 
 
   <!-- Bottom Navigation -->
+
   <nav class="bottom-nav">
 
-    <button class="nav-item active" data-screen="homeScreen"
-      onclick="navigate('homeScreen',this)">
+
+    <button
+      class="nav-item active"
+      data-screen="homeScreen"
+      onclick="navigate('homeScreen',this)"
+    >
       <span>🏠</span>
       الرئيسية
     </button>
 
-    <button class="nav-item" data-screen="opportunitiesScreen"
-      onclick="navigate('opportunitiesScreen',this)">
+
+    <button
+      class="nav-item"
+      data-screen="opportunitiesScreen"
+      onclick="navigate('opportunitiesScreen',this)"
+    >
       <span>🔎</span>
       الفرص
     </button>
 
-    <button class="nav-item" data-screen="discoverSkillsSection"
-      onclick="navigate('discoverSkillsSection',this)">
+
+    <button
+      class="nav-item"
+      data-screen="discoverSkillsSection"
+      onclick="navigate('discoverSkillsSection',this)"
+    >
       <span>🧠</span>
       اكتشف
     </button>
 
-    <button class="nav-item" data-screen="assessmentSection"
-      onclick="navigate('assessmentSection',this)">
+
+    <button
+      class="nav-item"
+      data-screen="assessmentSection"
+      onclick="navigate('assessmentSection',this)"
+    >
       <span>📊</span>
       قيّمني
     </button>
 
-    <button class="nav-item" data-screen="accountScreen"
-      onclick="navigate('accountScreen',this)">
+
+    <button
+      class="nav-item"
+      data-screen="accountScreen"
+      onclick="navigate('accountScreen',this)"
+    >
       <span>👤</span>
       حسابي
     </button>
 
+
   </nav>
+
 
 </div>
 
-<div id="toast" class="toast"></div>
+
+<div
+  id="toast"
+  class="toast"
+></div>
 
 
 <script>
+
+
 /* =========================================================
    SUPABASE
    ========================================================= */
 
+
 const SUPABASE_URL =
   "https://qbufsdpdobuicpljnssr.supabase.co";
+
 
 /*
   ضع هنا Supabase Publishable key فقط.
   لا تضع sb_secret داخل هذا الملف.
 */
+
 const SUPABASE_PUBLISHABLE_KEY =
-  "le_mcPmJkiSD6gOg_NlEY";
+  "sb_publishable_mcPmNU2CGJkiSbfgOD6gOg_9RNMNlEY";
+
 
 let supabaseClient = null;
+
 
 if (
   window.supabase &&
   SUPABASE_PUBLISHABLE_KEY &&
   !SUPABASE_PUBLISHABLE_KEY.includes("ضع مفتاح")
 ) {
-  supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
-  );
+
+  supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
+
 }
 
 
@@ -1126,22 +1821,34 @@ if (
    التنقل
    ========================================================= */
 
+
 function showScreen(id) {
 
-  document.querySelectorAll(".screen").forEach(screen => {
-    screen.classList.remove("active");
-  });
+  document
+    .querySelectorAll(".screen")
+    .forEach(screen => {
 
-  const target = document.getElementById(id);
+      screen.classList.remove("active");
+
+    });
+
+
+  const target =
+    document.getElementById(id);
+
 
   if (target) {
+
     target.classList.add("active");
+
   }
+
 
   window.scrollTo({
     top: 0,
     behavior: "smooth"
   });
+
 }
 
 
@@ -1149,13 +1856,22 @@ function navigate(id, button) {
 
   showScreen(id);
 
-  document.querySelectorAll(".nav-item").forEach(item => {
-    item.classList.remove("active");
-  });
+
+  document
+    .querySelectorAll(".nav-item")
+    .forEach(item => {
+
+      item.classList.remove("active");
+
+    });
+
 
   if (button) {
+
     button.classList.add("active");
+
   }
+
 }
 
 
@@ -1163,20 +1879,31 @@ function navigate(id, button) {
    Toast
    ========================================================= */
 
+
 let toastTimer = null;
+
 
 function showToast(message) {
 
-  const toast = document.getElementById("toast");
+  const toast =
+    document.getElementById("toast");
+
 
   toast.textContent = message;
+
   toast.classList.add("show");
+
 
   clearTimeout(toastTimer);
 
-  toastTimer = setTimeout(() => {
-    toast.classList.remove("show");
-  }, 3500);
+
+  toastTimer =
+    setTimeout(() => {
+
+      toast.classList.remove("show");
+
+    }, 3500);
+
 }
 
 
@@ -1184,13 +1911,18 @@ function showToast(message) {
    الباحث عن عمل
    ========================================================= */
 
+
 function openWorker() {
+
   showScreen("workerScreen");
+
 }
 
 
 function openProject() {
+
   showScreen("projectScreen");
+
 }
 
 
@@ -1198,99 +1930,162 @@ function openProject() {
    إنشاء الملف المهني
    ========================================================= */
 
+
 function openProfile() {
 
   showScreen("profileScreen");
 
+
   const oldName =
-    localStorage.getItem("madkhal_profile_name");
+    localStorage.getItem(
+      "madkhal_profile_name"
+    );
+
 
   if (oldName) {
-    document.getElementById("workerName").value = oldName;
+
+    document.getElementById(
+      "workerName"
+    ).value = oldName;
+
   }
+
 }
 
 
 async function saveWorker() {
 
+
   const name =
-    document.getElementById("workerName").value.trim();
+    document
+      .getElementById("workerName")
+      .value
+      .trim();
+
 
   const skill =
-    document.getElementById("workerSkill").value.trim();
+    document
+      .getElementById("workerSkill")
+      .value
+      .trim();
+
 
   const description =
-    document.getElementById("workerDescription").value.trim();
+    document
+      .getElementById("workerDescription")
+      .value
+      .trim();
+
 
   if (!name || !skill) {
-    showToast("⚠️ اكتب الاسم والمهارة أولًا");
+
+    showToast(
+      "⚠️ اكتب الاسم والمهارة أولًا"
+    );
+
     return;
+
   }
 
+
   if (!supabaseClient) {
+
     showToast(
       "⚠️ ضع Supabase Publishable key أولًا"
     );
+
     return;
+
   }
 
-  const profileId = crypto.randomUUID();
+
+  const profileId =
+    crypto.randomUUID();
+
 
   try {
+
 
     const { error } =
       await supabaseClient
         .from("profiles")
         .insert({
+
           id: profileId,
+
           full_name: name,
+
           role: "worker",
+
           main_skill: skill,
+
           bio: description
+
         });
 
+
     if (error) {
+
       console.error(error);
+
       showToast(
-        "❌ تعذر حفظ الملف: " + error.message
+        "❌ تعذر حفظ الملف: " +
+        error.message
       );
+
       return;
+
     }
+
 
     localStorage.setItem(
       "madkhal_profile_id",
       profileId
     );
 
+
     localStorage.setItem(
       "madkhal_profile_name",
       name
     );
+
 
     localStorage.setItem(
       "madkhal_profile_skill",
       skill
     );
 
-    document.getElementById("accountStatus").textContent =
+
+    document.getElementById(
+      "accountStatus"
+    ).textContent =
       "🎉 تم إنشاء ملفك المهني وحفظه بنجاح في مَدخَل.";
+
 
     showToast(
       "🎉 تم إنشاء ملفك المهني وحفظه بنجاح في مَدخَل."
     );
 
+
     setTimeout(() => {
+
       showScreen("accountScreen");
+
     }, 800);
+
 
   } catch (error) {
 
+
     console.error(error);
+
 
     showToast(
       "❌ حدث خطأ أثناء حفظ الملف."
     );
+
   }
+
 }
 
 
@@ -1298,74 +2093,116 @@ async function saveWorker() {
    اكتشاف المهارات
    ========================================================= */
 
+
 const skills = [
+
   ["✍️","الكتابة"],
+
   ["🌐","الترجمة"],
+
   ["🎨","التصميم"],
+
   ["💻","البرمجة"],
+
   ["🎬","تحرير الفيديو"],
+
   ["🎙️","التفريغ الصوتي"],
+
   ["📱","إدارة حسابات التواصل"],
+
   ["📊","إدخال البيانات"],
+
   ["🗣️","التواصل مع العملاء"],
+
   ["📚","التعليم والشرح"],
+
   ["🔍","البحث وجمع المعلومات"],
+
   ["🤷","لا أعرف بعد"]
+
 ];
+
 
 let selectedSkills = [];
 
 
 function renderSkills() {
 
+
   const grid =
-    document.getElementById("skillsGrid");
+    document.getElementById(
+      "skillsGrid"
+    );
+
 
   grid.innerHTML = "";
 
+
   skills.forEach(([icon,name]) => {
+
 
     const button =
       document.createElement("button");
 
+
     button.className = "skill";
 
-    if (selectedSkills.includes(name)) {
-      button.classList.add("selected");
+
+    if (
+      selectedSkills.includes(name)
+    ) {
+
+      button.classList.add(
+        "selected"
+      );
+
     }
 
+
     button.innerHTML =
-      `${icon}<br>${name}`;
+      `${icon}${name}`;
+
 
     button.onclick = () =>
       toggleSkill(name);
+
 
     grid.appendChild(button);
 
   });
 
+
   updateSelectedSkills();
+
 }
 
 
 function toggleSkill(skill) {
 
+
   if (skill === "لا أعرف بعد") {
 
-    selectedSkills = ["لا أعرف بعد"];
+    selectedSkills =
+      ["لا أعرف بعد"];
 
   } else {
 
+
     selectedSkills =
       selectedSkills.filter(
-        item => item !== "لا أعرف بعد"
+        item =>
+          item !== "لا أعرف بعد"
       );
 
-    if (selectedSkills.includes(skill)) {
+
+    if (
+      selectedSkills.includes(skill)
+    ) {
 
       selectedSkills =
         selectedSkills.filter(
-          item => item !== skill
+          item =>
+            item !== skill
         );
 
     } else {
@@ -1373,16 +2210,23 @@ function toggleSkill(skill) {
       selectedSkills.push(skill);
 
     }
+
   }
 
+
   renderSkills();
+
 }
 
 
 function updateSelectedSkills() {
 
+
   const box =
-    document.getElementById("selectedSkillsBox");
+    document.getElementById(
+      "selectedSkillsBox"
+    );
+
 
   if (!selectedSkills.length) {
 
@@ -1390,23 +2234,30 @@ function updateSelectedSkills() {
       "لم تختر أي مهارة بعد.";
 
     return;
+
   }
+
 
   box.textContent =
     "المهارات المختارة: " +
     selectedSkills.join("، ");
+
 }
 
 
 function openDiscoverSkills() {
 
-  showScreen("discoverSkillsSection");
+  showScreen(
+    "discoverSkillsSection"
+  );
 
   renderSkills();
+
 }
 
 
 function startSkillAssessment() {
+
 
   if (!selectedSkills.length) {
 
@@ -1415,14 +2266,18 @@ function startSkillAssessment() {
     );
 
     return;
+
   }
+
 
   localStorage.setItem(
     "madkhal_selected_skills",
     JSON.stringify(selectedSkills)
   );
 
+
   openAssessmentScreen();
+
 }
 
 
@@ -1430,195 +2285,321 @@ function startSkillAssessment() {
    التقييم
    ========================================================= */
 
+
 let experienceLevel = null;
 
 
 function openAssessmentScreen() {
 
-  showScreen("assessmentSection");
 
-  document.getElementById(
-    "assessmentIntro"
-  ).classList.remove("hidden");
+  showScreen(
+    "assessmentSection"
+  );
 
-  document.getElementById(
-    "writingTest"
-  ).classList.add("hidden");
 
-  document.getElementById(
-    "assessmentResult"
-  ).classList.add("hidden");
+  document
+    .getElementById(
+      "assessmentIntro"
+    )
+    .classList.remove("hidden");
+
+
+  document
+    .getElementById(
+      "writingTest"
+    )
+    .classList.add("hidden");
+
+
+  document
+    .getElementById(
+      "assessmentResult"
+    )
+    .classList.add("hidden");
+
 
   experienceLevel = null;
+
 }
 
 
-function selectExperience(button, level) {
+function selectExperience(
+  button,
+  level
+) {
 
-  document.querySelectorAll(
-    "#assessmentIntro .option"
-  ).forEach(item => {
-    item.classList.remove("selected");
-  });
 
-  button.classList.add("selected");
+  document
+    .querySelectorAll(
+      "#assessmentIntro .option"
+    )
+    .forEach(item => {
+
+      item.classList.remove(
+        "selected"
+      );
+
+    });
+
+
+  button.classList.add(
+    "selected"
+  );
+
 
   experienceLevel = level;
+
 
   const stored =
     localStorage.getItem(
       "madkhal_selected_skills"
     );
 
+
   let currentSkills = [];
 
+
   try {
+
     currentSkills =
-      stored ? JSON.parse(stored) : selectedSkills;
+      stored
+        ? JSON.parse(stored)
+        : selectedSkills;
+
   } catch {
-    currentSkills = selectedSkills;
+
+    currentSkills =
+      selectedSkills;
+
   }
+
 
   if (
     currentSkills.includes("الكتابة") ||
     currentSkills.length === 0
   ) {
 
-    document.getElementById(
-      "writingTest"
-    ).classList.remove("hidden");
+
+    document
+      .getElementById(
+        "writingTest"
+      )
+      .classList.remove("hidden");
+
 
     setTimeout(() => {
 
-      document.getElementById(
-        "writingTest"
-      ).scrollIntoView({
-        behavior: "smooth"
-      });
+      document
+        .getElementById(
+          "writingTest"
+        )
+        .scrollIntoView({
+
+          behavior: "smooth"
+
+        });
 
     }, 150);
 
+
   } else {
+
 
     showToast(
       "📊 سنضيف الاختبار العملي لهذا المجال في المرحلة التالية."
     );
 
   }
+
 }
 
 
 function updateWordCount() {
 
+
   const text =
-    document.getElementById(
-      "writingAnswer"
-    ).value.trim();
+    document
+      .getElementById(
+        "writingAnswer"
+      )
+      .value
+      .trim();
+
 
   const words =
-    text ? text.split(/\s+/).length : 0;
+    text
+      ? text.split(/\s+/).length
+      : 0;
+
 
   document.getElementById(
     "wordCount"
   ).textContent =
-    "عدد الكلمات: " + words;
+    "عدد الكلمات: " +
+    words;
+
 }
 
 
 function calculateWritingScore(text) {
+
 
   const words =
     text.trim()
       ? text.trim().split(/\s+/).length
       : 0;
 
+
   if (!words) return 0;
+
 
   let score = 35;
 
-  if (words >= 120 && words <= 180) {
+
+  if (
+    words >= 120 &&
+    words <= 180
+  ) {
+
     score += 20;
-  } else if (words >= 90 && words <= 220) {
+
+  } else if (
+    words >= 90 &&
+    words <= 220
+  ) {
+
     score += 12;
+
   }
 
-  const lower = text.toLowerCase();
+
+  const lower =
+    text.toLowerCase();
+
 
   const ideas = [
+
     "عملاء",
+
     "العملاء",
+
     "تواصل",
+
     "تسويق",
+
     "شركة",
+
     "الشركات",
+
     "منصات",
+
     "مبيعات",
+
     "جمهور",
+
     "ثقة",
+
     "محتوى",
+
     "إعلان",
+
     "اعلان"
+
   ];
+
 
   let matched = 0;
 
+
   ideas.forEach(word => {
 
-    if (lower.includes(word)) {
+    if (
+      lower.includes(word)
+    ) {
+
       matched++;
+
     }
 
   });
+
 
   score += Math.min(
     matched * 4,
     24
   );
 
+
   const sentences =
-    text.split(/[.!؟\n]+/)
-      .filter(x => x.trim()).length;
+    text
+      .split(/[.!؟\n]+/)
+      .filter(
+        x => x.trim()
+      )
+      .length;
+
 
   if (sentences >= 4) {
+
     score += 10;
+
   }
+
 
   return Math.min(
     100,
     Math.round(score)
   );
+
 }
 
 
 function getWritingLevel(score) {
 
+
   if (score >= 85) {
+
     return "🏆 محترف";
+
   }
+
 
   if (score >= 70) {
+
     return "⭐ جيد جدًا";
+
   }
+
 
   if (score >= 55) {
+
     return "👍 جيد";
+
   }
 
+
   return "🌱 مبتدئ";
+
 }
 
 
 function submitWritingTest() {
 
+
   const answer =
-    document.getElementById(
-      "writingAnswer"
-    ).value.trim();
+    document
+      .getElementById(
+        "writingAnswer"
+      )
+      .value
+      .trim();
+
 
   const words =
     answer
       ? answer.split(/\s+/).length
       : 0;
+
 
   if (words < 50) {
 
@@ -1627,69 +2608,106 @@ function submitWritingTest() {
     );
 
     return;
+
   }
 
+
   const score =
-    calculateWritingScore(answer);
+    calculateWritingScore(
+      answer
+    );
+
 
   const level =
-    getWritingLevel(score);
+    getWritingLevel(
+      score
+    );
+
 
   const result = {
 
     score,
+
     level,
+
     words,
-    date: new Date().toISOString(),
+
+    date:
+      new Date().toISOString(),
 
     strengths: [
+
       words >= 120
         ? "طول الإجابة مناسب للمطلوب"
         : "لديك بداية جيدة في بناء الإجابة",
 
       "قدرتك على شرح الفكرة الأساسية واضحة"
+
     ],
 
     improvements: [
+
       words < 120
         ? "تحتاج إلى تطوير الإجابة وتوسيع الأفكار"
         : "حاول زيادة الأمثلة العملية",
 
       "حسّن ترابط الفقرات وتسلسل الأفكار"
+
     ]
+
   };
+
 
   localStorage.setItem(
     "madkhal_writing_assessment",
     JSON.stringify(result)
   );
 
-  renderAssessmentResult(result);
 
-  document.getElementById(
-    "writingTest"
-  ).classList.add("hidden");
+  renderAssessmentResult(
+    result
+  );
 
-  document.getElementById(
-    "assessmentIntro"
-  ).classList.add("hidden");
+
+  document
+    .getElementById(
+      "writingTest"
+    )
+    .classList.add("hidden");
+
+
+  document
+    .getElementById(
+      "assessmentIntro"
+    )
+    .classList.add("hidden");
+
 }
 
 
-function renderAssessmentResult(result) {
+function renderAssessmentResult(
+  result
+) {
+
 
   const container =
     document.getElementById(
       "assessmentResult"
     );
 
-  container.classList.remove("hidden");
+
+  container.classList.remove(
+    "hidden"
+  );
+
 
   container.innerHTML = `
 
     <div class="result">
 
-      <div style="font-size:13px;color:#718080;">
+      <div
+        style="font-size:13px;color:#718080;"
+      >
         نتيجتك في اختبار الكتابة
       </div>
 
@@ -1705,42 +2723,114 @@ function renderAssessmentResult(result) {
 
         <div>
           📝 عدد الكلمات:
-          <strong>${result.words}</strong>
+          <strong>
+            ${result.words}
+          </strong>
         </div>
 
         <div>
-          💪 <strong>نقاط القوة</strong><br>
+          💪 <strong>نقاط القوة</strong>
+          <br>
           ${result.strengths.join("<br>")}
         </div>
 
         <div>
-          📚 <strong>ما يحتاج تطويرًا</strong><br>
+          📚 <strong>ما يحتاج تطويرًا</strong>
+          <br>
           ${result.improvements.join("<br>")}
         </div>
 
         <div>
-          ℹ️ <strong>ملاحظة</strong><br>
-          هذا تقييم أولي محلي. سيتم لاحقًا ربط مَدخَل
-          بمحرك تقييم ذكي حقيقي على الخادم.
+          ℹ️ <strong>ملاحظة</strong>
+          <br>
+          هذا تقييم أولي مجاني لمساعدتك على معرفة مستواك.
         </div>
 
       </div>
 
+
       <button
         class="primary-btn"
         style="width:100%;margin-top:15px;"
-        onclick="openOpportunities()">
+        onclick="openOpportunities()"
+      >
         🔎 ابحث عن فرص
       </button>
 
     </div>
 
+
+    <div class="premium-offer">
+
+      <div class="premium-badge">
+        ⭐ تقييم احترافي
+      </div>
+
+      <h3>
+        تريد أن تعرف كيف تطور مستواك؟
+      </h3>
+
+      <p>
+        احصل على تقرير مهني مفصل يساعدك على معرفة
+        نقاط القوة والفجوات والخطوات التالية.
+      </p>
+
+      <ul class="premium-features">
+
+        <li>
+          📉 <strong>تحليل الفجوات</strong>
+          <br>
+          معرفة المهارات التي تحتاج إلى تطويرها.
+        </li>
+
+        <li>
+          🗺️ <strong>خطة عمل لمدة 30 يومًا</strong>
+          <br>
+          خطوات عملية باستخدام أدوات وموارد مجانية.
+        </li>
+
+        <li>
+          📄 <strong>مراجعة السيرة الذاتية CV</strong>
+          <br>
+          ملاحظات لتحسين السيرة الذاتية وفق ممارسات ATS.
+        </li>
+
+        <li>
+          🎖️ <strong>شارة تقييم مَدخَل</strong>
+          <br>
+          توضح مستوى تقييمك داخل ملفك.
+        </li>
+
+      </ul>
+
+      <div class="premium-price">
+        $2 فقط
+      </div>
+
+      <button
+        class="primary-btn"
+        style="width:100%;"
+        onclick="openProfessionalEvaluation()"
+      >
+        ⭐ أريد التقييم الاحترافي
+      </button>
+
+      <p
+        style="margin-top:10px;font-size:11px;text-align:center;"
+      >
+        السعر تجريبي خلال فترة الإطلاق.
+      </p>
+
+    </div>
+
   `;
+
 
   const accountText =
     document.getElementById(
       "savedAssessmentText"
     );
+
 
   if (accountText) {
 
@@ -1748,6 +2838,268 @@ function renderAssessmentResult(result) {
       `📊 آخر نتيجة: ${result.score}/100 — ${result.level}`;
 
   }
+
+}
+
+
+/* =========================================================
+   التقييم الاحترافي
+   ========================================================= */
+
+
+function openProfessionalEvaluation() {
+
+
+  const saved =
+    localStorage.getItem(
+      "madkhal_writing_assessment"
+    );
+
+
+  let result = null;
+
+
+  try {
+
+    result =
+      saved
+        ? JSON.parse(saved)
+        : null;
+
+  } catch {
+
+    result = null;
+
+  }
+
+
+  const score =
+    result
+      ? result.score
+      : "غير متوفر";
+
+
+  const level =
+    result
+      ? result.level
+      : "غير متوفر";
+
+
+  showScreen(
+    "professionalEvaluationScreen"
+  );
+
+
+  const scoreBox =
+    document.getElementById(
+      "professionalEvaluationScore"
+    );
+
+
+  if (scoreBox) {
+
+    scoreBox.innerHTML = `
+
+      📊 نتيجة التقييم المجاني الحالية:
+      <strong>
+        ${score}/100
+      </strong>
+      — ${level}
+
+    `;
+
+  }
+
+}
+
+
+async function requestProfessionalEvaluation() {
+
+
+  const profileId =
+    localStorage.getItem(
+      "madkhal_profile_id"
+    );
+
+
+  if (!profileId) {
+
+    showToast(
+      "👤 أنشئ ملفك المهني أولًا لإرسال طلب التقييم."
+    );
+
+
+    setTimeout(() => {
+
+      openProfile();
+
+    }, 800);
+
+
+    return;
+
+  }
+
+
+  if (!supabaseClient) {
+
+    showToast(
+      "⚠️ ضع Supabase Publishable key أولًا."
+    );
+
+    return;
+
+  }
+
+
+  const saved =
+    localStorage.getItem(
+      "madkhal_writing_assessment"
+    );
+
+
+  let assessment = null;
+
+
+  try {
+
+    assessment =
+      saved
+        ? JSON.parse(saved)
+        : null;
+
+  } catch {
+
+    assessment = null;
+
+  }
+
+
+  try {
+
+
+    const requestId =
+      crypto.randomUUID();
+
+
+    /*
+      سيتم استخدام جدول
+      professional_evaluation_requests
+      عندما ننشئه في Supabase.
+
+      إذا لم يكن الجدول موجودًا بعد،
+      سنكتفي مؤقتًا برسالة الطلب
+      دون تعطيل بقية التطبيق.
+    */
+
+
+    const { error } =
+      await supabaseClient
+        .from(
+          "professional_evaluation_requests"
+        )
+        .insert({
+
+          id: requestId,
+
+          profile_id: profileId,
+
+          price: 2,
+
+          assessment_score:
+            assessment
+              ? assessment.score
+              : null,
+
+          assessment_level:
+            assessment
+              ? assessment.level
+              : null,
+
+          status: "pending"
+
+        });
+
+
+    if (error) {
+
+      console.error(
+        "Professional evaluation request error:",
+        error
+      );
+
+
+      /*
+        الجدول لم ننشئه بعد.
+        لا نريد أن نكسر تجربة المستخدم.
+      */
+
+
+      if (
+        error.code === "42P01" ||
+        error.message
+          .toLowerCase()
+          .includes("does not exist")
+      ) {
+
+        showToast(
+          "📩 تم تجهيز طلب التقييم. سنربطه بقاعدة الطلبات في الخطوة التالية."
+        );
+
+        return;
+
+      }
+
+
+      showToast(
+        "❌ تعذر تسجيل الطلب: " +
+        error.message
+      );
+
+      return;
+
+    }
+
+
+    showToast(
+      "🎉 تم تسجيل طلب التقييم الاحترافي بنجاح. سنتابع معك لإتمام الطلب."
+    );
+
+
+    console.log(
+      "Professional evaluation requested",
+      {
+
+        requestId,
+
+        profileId,
+
+        price: 2,
+
+        score:
+          assessment
+            ? assessment.score
+            : null,
+
+        date:
+          new Date().toISOString()
+
+      }
+    );
+
+
+  } catch (error) {
+
+
+    console.error(error);
+
+
+    showToast(
+      "❌ حدث خطأ أثناء إرسال طلب التقييم."
+    );
+
+  }
+
 }
 
 
@@ -1755,200 +3107,329 @@ function renderAssessmentResult(result) {
    الفرص
    ========================================================= */
 
+
 const opportunityCategories = [
+
   "🎙️ التفريغ الصوتي",
+
   "💻 البرمجة",
+
   "✍️ كتابة المقالات",
+
   "🌐 الترجمة",
+
   "🎨 التصميم",
+
   "🎬 المونتاج",
+
   "📱 التواصل الاجتماعي",
+
   "📢 التسويق الإلكتروني",
+
   "📊 إدخال البيانات",
+
   "📈 Excel والبيانات",
+
   "🎤 التعليق الصوتي",
+
   "📚 التعليم",
+
   "📝 التدقيق اللغوي",
+
   "🛒 المتاجر الإلكترونية",
+
   "🤖 الذكاء الاصطناعي",
+
   "🖼️ تحرير الصور",
+
   "💼 المساعدة الافتراضية",
+
   "🧮 المحاسبة",
+
   "🔧 خدمات أخرى"
+
 ];
+
 
 const opportunities = [
 
   {
+
     icon: "🎙️",
+
     title: "تفريغ تسجيل صوتي",
+
     price: "$20",
+
     category: "🎙️ التفريغ الصوتي",
-    description: "تحويل تسجيل صوتي إلى نص مرتب."
+
+    description:
+      "تحويل تسجيل صوتي إلى نص مرتب."
+
   },
 
+
   {
+
     icon: "💻",
+
     title: "إنشاء موقع إلكتروني",
+
     price: "$100",
+
     category: "💻 البرمجة",
-    description: "إنشاء صفحة أو موقع إلكتروني بسيط."
+
+    description:
+      "إنشاء صفحة أو موقع إلكتروني بسيط."
+
   },
 
+
   {
+
     icon: "✍️",
+
     title: "كتابة مقالات",
+
     price: "$30",
+
     category: "✍️ كتابة المقالات",
-    description: "كتابة مقالات عربية واضحة ومنظمة."
+
+    description:
+      "كتابة مقالات عربية واضحة ومنظمة."
+
   },
 
+
   {
+
     icon: "🎨",
+
     title: "تصميم شعار",
+
     price: "$40",
+
     category: "🎨 التصميم",
-    description: "تصميم شعار احترافي لمشروع."
+
+    description:
+      "تصميم شعار احترافي لمشروع."
+
   },
 
+
   {
+
     icon: "🌐",
+
     title: "ترجمة نصوص",
+
     price: "$25",
+
     category: "🌐 الترجمة",
-    description: "ترجمة النصوص مع المحافظة على المعنى."
+
+    description:
+      "ترجمة النصوص مع المحافظة على المعنى."
+
   },
 
+
   {
+
     icon: "🎬",
+
     title: "تحرير فيديو",
+
     price: "$35",
+
     category: "🎬 المونتاج",
-    description: "تحرير فيديو قصير مناسب للنشر."
+
+    description:
+      "تحرير فيديو قصير مناسب للنشر."
+
   }
 
 ];
+
 
 let currentCategory = "الكل";
 
 
 function renderCategories() {
 
+
   const container =
     document.getElementById(
       "categoryScroll"
     );
 
+
   container.innerHTML = "";
 
+
   const all =
-    document.createElement("button");
+    document.createElement(
+      "button"
+    );
+
 
   all.className =
     "category" +
-    (currentCategory === "الكل"
-      ? " active"
-      : "");
+    (
+      currentCategory === "الكل"
+        ? " active"
+        : ""
+    );
 
-  all.textContent = "الكل";
+
+  all.textContent =
+    "الكل";
+
 
   all.onclick = () => {
 
-    currentCategory = "الكل";
+    currentCategory =
+      "الكل";
 
     renderCategories();
+
     renderOpportunities();
 
   };
 
+
   container.appendChild(all);
 
-  opportunityCategories.forEach(category => {
 
-    const button =
-      document.createElement("button");
+  opportunityCategories.forEach(
+    category => {
 
-    button.className =
-      "category" +
-      (currentCategory === category
-        ? " active"
-        : "");
 
-    button.textContent = category;
+      const button =
+        document.createElement(
+          "button"
+        );
 
-    button.onclick = () => {
 
-      currentCategory = category;
+      button.className =
+        "category" +
+        (
+          currentCategory === category
+            ? " active"
+            : ""
+        );
 
-      renderCategories();
-      renderOpportunities();
 
-    };
+      button.textContent =
+        category;
 
-    container.appendChild(button);
 
-  });
+      button.onclick = () => {
+
+        currentCategory =
+          category;
+
+        renderCategories();
+
+        renderOpportunities();
+
+      };
+
+
+      container.appendChild(
+        button
+      );
+
+    }
+  );
+
 }
 
 
 function renderOpportunities() {
+
 
   const container =
     document.getElementById(
       "opportunitiesList"
     );
 
+
   container.innerHTML = "";
 
-  let list = opportunities;
 
-  if (currentCategory !== "الكل") {
+  let list =
+    opportunities;
+
+
+  if (
+    currentCategory !== "الكل"
+  ) {
 
     list =
       opportunities.filter(
         item =>
-          item.category === currentCategory
+          item.category ===
+          currentCategory
       );
 
   }
 
+
   if (!list.length) {
 
     container.innerHTML = `
+
       <div class="card">
-        <h3>🔎 لا توجد فرص تجريبية هنا بعد</h3>
+
+        <h3>
+          🔎 لا توجد فرص تجريبية هنا بعد
+        </h3>
+
         <p>
           ستتم إضافة فرص حقيقية تدريجيًا.
         </p>
+
       </div>
+
     `;
 
     return;
+
   }
+
 
   list.forEach(item => {
 
-    const div =
-      document.createElement("div");
 
-    div.className = "opportunity";
+    const div =
+      document.createElement(
+        "div"
+      );
+
+
+    div.className =
+      "opportunity";
+
 
     div.innerHTML = `
 
       <div class="opportunity-top">
 
         <div>
+
           <h3>
-            ${item.icon} ${item.title}
+            ${item.icon}
+            ${item.title}
           </h3>
 
-          <p style="margin:0;color:#687575;font-size:12px;">
+          <div>
             ${item.description}
-          </p>
+          </div>
 
           <span class="tag">
             ${item.category}
           </span>
+
         </div>
 
         <div class="price">
@@ -1957,38 +3438,54 @@ function renderOpportunities() {
 
       </div>
 
+
       <button
         class="primary-btn"
         style="width:100%;margin-top:13px;"
-        onclick="applyOpportunity('${item.title}')">
+        onclick="applyOpportunity('${item.title.replace(/'/g, "\\'")}')"
+      >
         📩 التقديم
       </button>
 
     `;
 
-    container.appendChild(div);
+
+    container.appendChild(
+      div
+    );
 
   });
+
 }
 
 
 function openOpportunities() {
 
-  showScreen("opportunitiesScreen");
 
-  currentCategory = "الكل";
+  showScreen(
+    "opportunitiesScreen"
+  );
+
+
+  currentCategory =
+    "الكل";
+
 
   renderCategories();
+
   renderOpportunities();
+
 }
 
 
 function applyOpportunity(title) {
 
+
   const profileId =
     localStorage.getItem(
       "madkhal_profile_id"
     );
+
 
   if (!profileId) {
 
@@ -1996,16 +3493,23 @@ function applyOpportunity(title) {
       "👤 أنشئ ملفك المهني أولًا حتى تستطيع التقديم."
     );
 
+
     setTimeout(() => {
+
       openProfile();
+
     }, 800);
 
+
     return;
+
   }
+
 
   showToast(
     `📩 تم تجهيز طلب التقديم على: ${title}`
   );
+
 
   /*
     لاحقًا:
@@ -2013,6 +3517,7 @@ function applyOpportunity(title) {
     وربطه بـ profiles و opportunities
     ثم إرسال إشعار لصاحب المشروع.
   */
+
 }
 
 
@@ -2020,40 +3525,163 @@ function applyOpportunity(title) {
    المشاريع
    ========================================================= */
 
-function saveProject() {
+
+async function saveProject() {
+
 
   const name =
-    document.getElementById(
-      "projectName"
-    ).value.trim();
+    document
+      .getElementById(
+        "projectName"
+      )
+      .value
+      .trim();
+
 
   const type =
-    document.getElementById(
-      "projectType"
-    ).value;
+    document
+      .getElementById(
+        "projectType"
+      )
+      .value;
+
 
   const description =
-    document.getElementById(
-      "projectDescription"
-    ).value.trim();
+    document
+      .getElementById(
+        "projectDescription"
+      )
+      .value
+      .trim();
 
-  if (!name || !type || !description) {
+
+  if (
+    !name ||
+    !type ||
+    !description
+  ) {
 
     showToast(
       "⚠️ أكمل بيانات المشروع أولًا."
     );
 
     return;
+
   }
 
-  showToast(
-    "🎉 تم استلام بيانات المشروع. سيتم ربط الحفظ الحقيقي في المرحلة التالية."
-  );
 
-  /*
-    لاحقًا:
-    INSERT INTO projects
-  */
+  if (!supabaseClient) {
+
+    showToast(
+      "⚠️ ضع Supabase Publishable key أولًا."
+    );
+
+    return;
+
+  }
+
+
+  const userId =
+    localStorage.getItem(
+      "madkhal_profile_id"
+    );
+
+
+  if (!userId) {
+
+    showToast(
+      "👤 أنشئ ملفًا مهنيًا أولًا حتى نستطيع ربط المشروع بحسابك."
+    );
+
+
+    setTimeout(() => {
+
+      openProfile();
+
+    }, 800);
+
+
+    return;
+
+  }
+
+
+  try {
+
+
+    const { error } =
+      await supabaseClient
+        .from("projects")
+        .insert({
+
+          id:
+            crypto.randomUUID(),
+
+          user_id:
+            userId,
+
+          name:
+            name,
+
+          category:
+            type,
+
+          description:
+            description,
+
+          status:
+            "pending"
+
+        });
+
+
+    if (error) {
+
+      console.error(error);
+
+
+      showToast(
+        "❌ تعذر حفظ المشروع: " +
+        error.message
+      );
+
+      return;
+
+    }
+
+
+    showToast(
+      "🎉 تم إرسال طلب المشروع وحفظه بنجاح في مَدخَل."
+    );
+
+
+    document.getElementById(
+      "projectName"
+    ).value = "";
+
+
+    document.getElementById(
+      "projectType"
+    ).value = "";
+
+
+    document.getElementById(
+      "projectDescription"
+    ).value = "";
+
+
+  } catch (error) {
+
+
+    console.error(error);
+
+
+    showToast(
+      "❌ حدث خطأ أثناء إرسال المشروع."
+    );
+
+  }
+
 }
 
 
@@ -2061,51 +3689,65 @@ function saveProject() {
    الحساب
    ========================================================= */
 
+
 function loadAccount() {
+
 
   const name =
     localStorage.getItem(
       "madkhal_profile_name"
     );
 
+
   const skill =
     localStorage.getItem(
       "madkhal_profile_skill"
     );
+
 
   const account =
     document.getElementById(
       "accountStatus"
     );
 
+
   if (name) {
 
     account.innerHTML =
-      `👋 أهلًا ${name}<br>
-       المهارة الأساسية: ${skill || "غير محددة"}`;
+      `👋 أهلًا ${name}
+      <br>
+      المهارة الأساسية:
+      ${skill || "غير محددة"}`;
 
   }
+
 
   const saved =
     localStorage.getItem(
       "madkhal_writing_assessment"
     );
 
+
   if (saved) {
+
 
     try {
 
+
       const result =
         JSON.parse(saved);
+
 
       document.getElementById(
         "savedAssessmentText"
       ).textContent =
         `📊 ${result.score}/100 — ${result.level}`;
 
+
     } catch {}
 
   }
+
 }
 
 
@@ -2113,7 +3755,9 @@ function loadAccount() {
    وضع المالك — واجهة تمهيدية فقط
    ========================================================= */
 
+
 function openOwnerMode() {
+
 
   /*
     هذا ليس تحققًا أمنيًا حقيقيًا.
@@ -2121,35 +3765,50 @@ function openOwnerMode() {
     وRLS وEdge Functions وMFA.
   */
 
-  showScreen("ownerScreen");
+
+  showScreen(
+    "ownerScreen"
+  );
+
 }
 
 
 function ownerPreview(type) {
 
+
   if (type === "worker") {
+
 
     showToast(
       "👑 معاينة واجهة الباحث بصلاحية المالك"
     );
 
+
     setTimeout(() => {
+
       openWorker();
+
     }, 500);
 
   }
 
+
   if (type === "project") {
+
 
     showToast(
       "👑 معاينة واجهة صاحب المشروع بصلاحية المالك"
     );
 
+
     setTimeout(() => {
+
       openProject();
+
     }, 500);
 
   }
+
 }
 
 
@@ -2157,24 +3816,35 @@ function ownerPreview(type) {
    PWA
    ========================================================= */
 
-if ("serviceWorker" in navigator) {
+
+if (
+  "serviceWorker" in navigator
+) {
+
 
   window.addEventListener(
     "load",
     () => {
 
+
       navigator.serviceWorker
-        .register("/service-worker.js")
+        .register(
+          "/service-worker.js"
+        )
         .then(() => {
+
           console.log(
             "مَدخَل: Service Worker registered"
           );
+
         })
         .catch(error => {
+
           console.error(
             "Service Worker error:",
             error
           );
+
         });
 
     }
@@ -2187,9 +3857,11 @@ if ("serviceWorker" in navigator) {
    التشغيل الأول
    ========================================================= */
 
+
 document.addEventListener(
   "DOMContentLoaded",
   () => {
+
 
     loadAccount();
 
@@ -2199,10 +3871,14 @@ document.addEventListener(
 
     renderOpportunities();
 
+
   }
 );
 
+
 </script>
 
+
 </body>
+
 </html>
