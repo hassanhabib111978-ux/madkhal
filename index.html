@@ -2,7 +2,6 @@
 <html lang="ar" dir="rtl">
 
 <head>
-
   <meta charset="UTF-8">
 
   <meta
@@ -10,20 +9,14 @@
     content="width=device-width, initial-scale=1.0, viewport-fit=cover"
   >
 
-  <meta
-    name="theme-color"
-    content="#0f766e"
-  >
+  <meta name="theme-color" content="#0f766e">
 
   <meta
     name="description"
-    content="مَدخَل - المدخل إلى سوق العمل الإلكتروني"
+    content="مَدخَل — سوق العمل لحظة بلحظة"
   >
 
-  <link
-    rel="manifest"
-    href="/manifest.json"
-  >
+  <link rel="manifest" href="/manifest.json">
 
   <title>مَدخَل 🚪</title>
 
@@ -42,7 +35,7 @@
 
     body {
       margin: 0;
-      font-family: Arial, "Tahoma", sans-serif;
+      font-family: Arial, Tahoma, sans-serif;
       background: #f6f8f8;
       color: #172121;
       padding-bottom: 82px;
@@ -67,13 +60,11 @@
       background: #f6f8f8;
     }
 
-    /* Header */
-
     .header {
       position: sticky;
       top: 0;
       z-index: 50;
-      background: rgba(255,255,255,.94);
+      background: rgba(255,255,255,.95);
       backdrop-filter: blur(15px);
       border-bottom: 1px solid #e5eaea;
       padding: 13px 16px;
@@ -101,8 +92,6 @@
       font-weight: 700;
     }
 
-    /* Main */
-
     main {
       padding: 16px;
     }
@@ -117,25 +106,20 @@
     }
 
     @keyframes fade {
-
       from {
         opacity: 0;
         transform: translateY(5px);
       }
-
       to {
         opacity: 1;
         transform: translateY(0);
       }
-
     }
-
-    /* Hero */
 
     .hero {
       position: relative;
       overflow: hidden;
-      background: linear-gradient(145deg, #e9f8f5, #ffffff);
+      background: linear-gradient(145deg,#e9f8f5,#ffffff);
       border-radius: 28px;
       padding: 25px 20px;
       margin-bottom: 18px;
@@ -221,8 +205,6 @@
       transform: scale(.97);
     }
 
-    /* Cards */
-
     .section-title {
       font-size: 19px;
       margin: 24px 2px 12px;
@@ -249,11 +231,9 @@
       line-height: 1.7;
     }
 
-    /* Journey */
-
     .journey {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3,1fr);
       gap: 8px;
     }
 
@@ -272,8 +252,6 @@
       font-size: 23px;
       margin-bottom: 6px;
     }
-
-    /* Forms */
 
     .form-group {
       margin-bottom: 14px;
@@ -310,8 +288,6 @@
       line-height: 1.8;
     }
 
-    /* Options */
-
     .options {
       display: grid;
       gap: 9px;
@@ -332,8 +308,6 @@
       background: #eaf8f5;
       color: #0f766e;
     }
-
-    /* Skills */
 
     .skills-grid {
       display: grid;
@@ -366,7 +340,22 @@
       color: #0f766e;
     }
 
-    /* Opportunities */
+    .search-box {
+      background: linear-gradient(145deg,#eaf8f5,#ffffff);
+      border: 1px solid #d6ebe7;
+      border-radius: 22px;
+      padding: 16px;
+      margin-bottom: 15px;
+    }
+
+    .search-box h3 {
+      margin: 0 0 12px;
+    }
+
+    .search-grid {
+      display: grid;
+      gap: 9px;
+    }
 
     .category-scroll {
       display: flex;
@@ -416,7 +405,7 @@
       font-size: 16px;
     }
 
-    .price {
+    .salary {
       font-weight: 900;
       color: #0f766e;
       white-space: nowrap;
@@ -432,7 +421,52 @@
       margin-top: 8px;
     }
 
-    /* Result */
+    .match {
+      display: inline-block;
+      background: #eaf8f5;
+      color: #0f766e;
+      padding: 6px 9px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 900;
+      margin-top: 9px;
+    }
+
+    .source-note {
+      margin-top: 9px;
+      font-size: 11px;
+      color: #788383;
+    }
+
+    .status-open {
+      display: inline-block;
+      background: #e9f8ef;
+      color: #19713b;
+      padding: 5px 8px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .status-review {
+      display: inline-block;
+      background: #fff7dc;
+      color: #806300;
+      padding: 5px 8px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .status-closed {
+      display: inline-block;
+      background: #f5eeee;
+      color: #8b4b4b;
+      padding: 5px 8px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 800;
+    }
 
     .result {
       text-align: center;
@@ -467,10 +501,8 @@
       font-size: 13px;
     }
 
-    /* التقييم الاحترافي */
-
     .premium-offer {
-      background: linear-gradient(145deg, #fffdf3, #ffffff);
+      background: linear-gradient(145deg,#fffdf3,#ffffff);
       border: 1px solid #eadb9a;
       border-radius: 22px;
       padding: 18px;
@@ -519,10 +551,36 @@
       margin: 8px 0 13px;
     }
 
-    /* Owner */
+    .employer-box {
+      background: linear-gradient(145deg,#eef8f6,#ffffff);
+      border: 1px solid #d5eae6;
+      border-radius: 23px;
+      padding: 18px;
+      margin-bottom: 15px;
+    }
+
+    .employer-box h2 {
+      margin: 0 0 8px;
+    }
+
+    .employer-box p {
+      margin: 0;
+      color: #617070;
+      line-height: 1.8;
+      font-size: 13px;
+    }
+
+    .info-strip {
+      background: #f7f9f9;
+      border-radius: 15px;
+      padding: 12px;
+      font-size: 12px;
+      line-height: 1.8;
+      margin-top: 12px;
+    }
 
     .owner-box {
-      background: linear-gradient(145deg, #172121, #263333);
+      background: linear-gradient(145deg,#172121,#263333);
       color: white;
       border-radius: 24px;
       padding: 20px;
@@ -561,21 +619,19 @@
       margin-bottom: 6px;
     }
 
-    /* Bottom navigation */
-
     .bottom-nav {
       position: fixed;
       bottom: 0;
       left: 50%;
       transform: translateX(-50%);
-      width: min(700px, 100%);
+      width: min(700px,100%);
       height: 72px;
       background: rgba(255,255,255,.97);
       backdrop-filter: blur(16px);
       border-top: 1px solid #e0e7e7;
       z-index: 100;
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(5,1fr);
       padding-bottom: env(safe-area-inset-bottom);
     }
 
@@ -598,8 +654,6 @@
     .nav-item.active {
       color: #0f766e;
     }
-
-    /* Toast */
 
     .toast {
       position: fixed;
@@ -643,8 +697,7 @@
       display: none !important;
     }
 
-    @media (min-width: 701px) {
-
+    @media (min-width:701px) {
       body {
         background: #e9eeee;
       }
@@ -652,1039 +705,989 @@
       .app {
         box-shadow: 0 0 50px rgba(0,0,0,.08);
       }
-
     }
 
   </style>
-
 </head>
 
 <body>
 
 <div class="app">
 
-  <header class="header">
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">مَدخَل 🚪</div>
+    <div class="pilot">🚀 إطلاق تجريبي</div>
+  </div>
+</header>
 
-    <div class="header-inner">
+<main>
 
-      <div class="logo">
-        مَدخَل 🚪
-      </div>
+<!-- ================= الرئيسية ================= -->
 
-      <div class="pilot">
-        🚀 إطلاق تجريبي
-      </div>
+<section id="homeScreen" class="screen active">
+
+  <div class="hero">
+
+    <h1>مَدخَل</h1>
+
+    <p>
+      <strong>سوق العمل لحظة بلحظة</strong>
+      <br>
+      نساعدك على الوصول إلى الفرص الأنسب لك،
+      سواء كنت تبحث عن عمل أو لديك فرصة عمل.
+    </p>
+
+    <div class="door">
+      <div class="door-light"></div>
+    </div>
+
+    <div class="hero-actions">
+
+      <button class="primary-btn" onclick="openWorker()">
+        💼 أبحث عن عمل
+      </button>
+
+      <button class="secondary-btn" onclick="openEmployer()">
+        🏢 لدي فرصة عمل
+      </button>
 
     </div>
 
-  </header>
+  </div>
 
-  <main>
+  <div class="card">
 
-    <!-- الرئيسية -->
+    <h3>🔑 ما الذي يفعله مَدخَل؟</h3>
 
-    <section
-      id="homeScreen"
-      class="screen active"
+    <p>
+      مَدخَل يجمع فرص العمل من مصادر متعددة،
+      ويقارنها ببيانات الباحثين عن العمل،
+      ثم يساعد كل شخص على الوصول إلى الفرص الأقرب إلى مهاراته ومؤهلاته.
+    </p>
+
+  </div>
+
+  <div class="card">
+
+    <h3>🤝 مَدخَل وسيط بين الطرفين</h3>
+
+    <p>
+      مَدخَل ليس جهة توظيف، ولا يقرر من يحصل على الوظيفة.
+      دوره هو تسهيل الوصول والمطابقة بين الباحث عن العمل وصاحب الفرصة.
+    </p>
+
+  </div>
+
+  <div class="card">
+
+    <h3>🔎 كيف تعمل المنصة؟</h3>
+
+    <p>
+      تبحث مجانًا عن الفرص المتاحة،
+      وإذا أردت أن يبحث مَدخَل باستمرار عن الفرص المناسبة لك،
+      يمكنك الاشتراك في خدمة المتابعة والتنبيهات.
+    </p>
+
+  </div>
+
+  <div class="premium-offer">
+
+    <div class="premium-badge">
+      🔔 المتابعة المستمرة
+    </div>
+
+    <h3>
+      اشترك، ونحن نجد ما تبحث عنه.
+    </h3>
+
+    <p>
+      لا تحتاج إلى البحث كل يوم.
+      أخبر مَدخَل بما تبحث عنه،
+      ونحن نتابع الفرص الجديدة التي تتوافق مع ملفك ونرسل لك التنبيهات.
+    </p>
+
+    <div class="premium-price">
+      $1 شهريًا
+    </div>
+
+    <button
+      class="primary-btn"
+      style="width:100%;"
+      onclick="openSubscription()"
+    >
+      🔔 أريد المتابعة المستمرة
+    </button>
+
+  </div>
+
+  <h2 class="section-title">
+    رحلتك في مَدخَل
+  </h2>
+
+  <div class="journey">
+
+    <div class="journey-item">
+      <span>👤</span>
+      أنشئ ملفك
+    </div>
+
+    <div class="journey-item">
+      <span>🧠</span>
+      حدّد مهاراتك
+    </div>
+
+    <div class="journey-item">
+      <span>🔎</span>
+      ابحث
+    </div>
+
+    <div class="journey-item">
+      <span>🎯</span>
+      طابق
+    </div>
+
+    <div class="journey-item">
+      <span>🔔</span>
+      تابع
+    </div>
+
+    <div class="journey-item">
+      <span>📩</span>
+      قدّم
+    </div>
+
+  </div>
+
+  <h2 class="section-title">
+    الشفافية أولًا
+  </h2>
+
+  <div class="card">
+
+    <h3>لا نعدك بالوظيفة</h3>
+
+    <p>
+      نحن لا نعدك بأن نجد لك وظيفة.
+      نحن نساعدك على الوصول إلى الفرص الأنسب لك،
+      ونقارن ملفك بمتطلبات الفرص ونرتبها وفق مدى المطابقة.
+    </p>
+
+    <div class="info-strip">
+      🔑 نحن لا نفتح الباب بدلًا عنك،
+      بل نحاول أن نعطيك المفتاح الصحيح للباب الذي تبحث عنه.
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ================= الباحث عن عمل ================= -->
+
+<section id="workerScreen" class="screen">
+
+  <button class="back" onclick="showScreen('homeScreen')">
+    → العودة
+  </button>
+
+  <div class="card">
+
+    <h2>💼 أبحث عن عمل</h2>
+
+    <p>
+      ابدأ من وضعك الحالي، وساعد مَدخَل على معرفة ما تبحث عنه.
+    </p>
+
+  </div>
+
+  <div class="options">
+
+    <button class="option" onclick="openProfile()">
+      👤 إنشاء أو تحديث ملفي المهني
+      <br>
+      <small>الاسم والمهارات والمكان ونوع العمل</small>
+    </button>
+
+    <button class="option" onclick="openDiscoverSkills()">
+      🧠 لا أعرف المجال المناسب لي
+      <br>
+      <small>اكتشف مهاراتي</small>
+    </button>
+
+    <button class="option" onclick="openAssessmentScreen()">
+      📊 أعرف مجالي وأريد تقييم مستواي
+    </button>
+
+    <button class="option" onclick="openOpportunities()">
+      🔎 أعرف مهارتي وأريد فرصة
+    </button>
+
+    <button class="option" onclick="openSubscription()">
+      🔔 أريد من مَدخَل أن يبحث باستمرار
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- ================= الملف المهني ================= -->
+
+<section id="profileScreen" class="screen">
+
+  <button class="back" onclick="showScreen('workerScreen')">
+    → العودة
+  </button>
+
+  <div class="card">
+
+    <h2>👤 ملفك المهني</h2>
+
+    <p>
+      هذه البيانات تساعد مَدخَل على مقارنة ملفك بالفرص المناسبة.
+    </p>
+
+  </div>
+
+  <div class="form-group">
+    <label>الاسم</label>
+
+    <input
+      id="workerName"
+      type="text"
+      placeholder="اكتب اسمك"
+    >
+  </div>
+
+  <div class="form-group">
+    <label>المؤهل</label>
+
+    <input
+      id="workerQualification"
+      type="text"
+      placeholder="مثال: بكالوريوس"
+    >
+  </div>
+
+  <div class="form-group">
+    <label>المهنة أو المهارات</label>
+
+    <input
+      id="workerSkill"
+      type="text"
+      placeholder="مثال: محاسبة، Excel، كتابة"
+    >
+  </div>
+
+  <div class="form-group">
+    <label>المكان</label>
+
+    <input
+      id="workerLocation"
+      type="text"
+      placeholder="مثال: دمشق"
+    >
+  </div>
+
+  <div class="form-group">
+    <label>نوع العمل المطلوب</label>
+
+    <select id="workerWorkType">
+
+      <option value="">
+        اختر نوع العمل
+      </option>
+
+      <option value="full_time">
+        دوام كامل
+      </option>
+
+      <option value="part_time">
+        دوام جزئي
+      </option>
+
+      <option value="remote">
+        عن بُعد
+      </option>
+
+      <option value="freelance">
+        عمل حر
+      </option>
+
+      <option value="any">
+        لا يهم
+      </option>
+
+    </select>
+
+  </div>
+
+  <div class="form-group">
+
+    <label>نبذة عنك</label>
+
+    <textarea
+      id="workerDescription"
+      placeholder="اكتب نبذة قصيرة عن خبرتك ومهاراتك"
+    ></textarea>
+
+  </div>
+
+  <button
+    class="primary-btn"
+    style="width:100%;"
+    onclick="saveWorker()"
+  >
+    💾 حفظ الملف المهني
+  </button>
+
+</section>
+
+
+<!-- ================= صاحب فرصة العمل ================= -->
+
+<section id="employerScreen" class="screen">
+
+  <button class="back" onclick="showScreen('homeScreen')">
+    → العودة
+  </button>
+
+  <div class="employer-box">
+
+    <h2>🏢 لدي فرصة عمل</h2>
+
+    <p>
+      لديك وظيفة أو فرصة عمل وتريد الوصول إلى أشخاص
+      تتوافق مهاراتهم مع متطلباتها؟
+    </p>
+
+    <div class="info-strip">
+      🔐 الفرصة التي تدخلها هنا ليست قائمة عامة للتصفح.
+      يستخدمها مَدخَل للمطابقة مع الباحثين المناسبين.
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <h3>📋 بيانات الفرصة</h3>
+
+    <p>
+      أدخل المعلومات الأساسية حتى يستطيع نظام المطابقة
+      تحديد الأشخاص الأقرب إلى متطلباتك.
+    </p>
+
+  </div>
+
+  <div class="form-group">
+
+    <label>اسم الشركة أو صاحب العمل</label>
+
+    <input
+      id="employerName"
+      type="text"
+      placeholder="اسم الشركة أو صاحب العمل"
     >
 
-      <div class="hero">
+  </div>
 
-        <h1>
-          المدخل إلى سوق العمل الإلكتروني
-        </h1>
+  <div class="form-group">
 
-        <p>
-          لا تعرف ماذا تستطيع أن تعمل؟
-          اكتشف مهاراتك، قيّم مستواك، ثم اعثر على الفرصة المناسبة.
-        </p>
+    <label>المسمى الوظيفي</label>
 
-        <div class="door">
-          <div class="door-light"></div>
-        </div>
-
-        <div class="hero-actions">
-
-          <button
-            class="primary-btn"
-            onclick="openWorker()"
-          >
-            💼 أبحث عن عمل
-          </button>
-
-          <button
-            class="secondary-btn"
-            onclick="openProject()"
-          >
-            📋 لدي مشروع
-          </button>
-
-        </div>
-
-      </div>
-
-      <h2 class="section-title">
-        رحلتك في مَدخَل
-      </h2>
-
-      <div class="journey">
-
-        <div class="journey-item">
-          <span>🧠</span>
-          اكتشف
-        </div>
-
-        <div class="journey-item">
-          <span>📊</span>
-          قيّم
-        </div>
-
-        <div class="journey-item">
-          <span>📚</span>
-          تأهّل
-        </div>
-
-        <div class="journey-item">
-          <span>🎯</span>
-          طابق
-        </div>
-
-        <div class="journey-item">
-          <span>🔎</span>
-          ابحث
-        </div>
-
-        <div class="journey-item">
-          <span>📩</span>
-          قدّم
-        </div>
-
-      </div>
-
-      <h2 class="section-title">
-        لماذا مَدخَل؟
-      </h2>
-
-      <div class="card">
-
-        <h3>
-          🧠 اكتشف ما تستطيع فعله
-        </h3>
-
-        <p>
-          حتى لو لم تكن تعرف المجال المناسب لك، نساعدك على استكشاف المهارات التي قد تناسبك.
-        </p>
-
-      </div>
-
-      <div class="card">
-
-        <h3>
-          📊 اعرف مستواك الحقيقي
-        </h3>
-
-        <p>
-          اختبارات عملية أولية تساعدك على معرفة نقاط قوتك وما تحتاج إلى تطويره.
-        </p>
-
-      </div>
-
-      <div class="card">
-
-        <h3>
-          🎯 اقترب من الفرصة المناسبة
-        </h3>
-
-        <p>
-          الهدف النهائي هو ربط المهارة المثبتة بفرصة عمل حقيقية.
-        </p>
-
-      </div>
-
-      <div class="card">
-
-        <h3>
-          🚀 الإطلاق التجريبي
-        </h3>
-
-        <p>
-          تعمل مَدخَل حاليًا على بناء أول مجتمع من الباحثين عن العمل وأصحاب المشاريع.
-        </p>
-
-      </div>
-
-    </section>
-
-    <!-- الباحث عن عمل -->
-
-    <section
-      id="workerScreen"
-      class="screen"
+    <input
+      id="vacancyTitle"
+      type="text"
+      placeholder="مثال: محاسب"
     >
 
-      <button
-        class="back"
-        onclick="showScreen('homeScreen')"
-      >
-        → العودة
-      </button>
+  </div>
 
-      <div class="card">
+  <div class="form-group">
 
-        <h2>
-          💼 أبحث عن عمل
-        </h2>
+    <label>مكان العمل</label>
 
-        <p>
-          اختر الطريق الذي يناسب وضعك الآن.
-        </p>
+    <input
+      id="vacancyLocation"
+      type="text"
+      placeholder="مثال: دمشق"
+    >
 
-      </div>
+  </div>
+
+  <div class="form-group">
+
+    <label>نوع العمل</label>
+
+    <select id="vacancyWorkType">
+
+      <option value="">
+        اختر نوع العمل
+      </option>
+
+      <option value="full_time">
+        دوام كامل
+      </option>
+
+      <option value="part_time">
+        دوام جزئي
+      </option>
+
+      <option value="remote">
+        عن بُعد
+      </option>
+
+      <option value="freelance">
+        عمل حر
+      </option>
+
+    </select>
+
+  </div>
+
+  <div class="form-group">
+
+    <label>المهارات المطلوبة</label>
+
+    <input
+      id="vacancySkills"
+      type="text"
+      placeholder="مثال: Excel، محاسبة، خبرة"
+    >
+
+  </div>
+
+  <div class="form-group">
+
+    <label>المؤهل المطلوب</label>
+
+    <input
+      id="vacancyQualification"
+      type="text"
+      placeholder="مثال: بكالوريوس أو خبرة عملية"
+    >
+
+  </div>
+
+  <div class="form-group">
+
+    <label>عدد الأشخاص المطلوبين</label>
+
+    <input
+      id="vacancyNumber"
+      type="number"
+      min="1"
+      value="1"
+    >
+
+  </div>
+
+  <div class="form-group">
+
+    <label>الراتب أو الأجر</label>
+
+    <input
+      id="vacancySalary"
+      type="text"
+      placeholder="مثال: 500 دولار"
+    >
+
+  </div>
+
+  <div class="form-group">
+
+    <label>وصف الفرصة</label>
+
+    <textarea
+      id="vacancyDescription"
+      placeholder="اكتب تفاصيل العمل والمسؤوليات المطلوبة"
+    ></textarea>
+
+  </div>
+
+  <button
+    class="primary-btn"
+    style="width:100%;"
+    onclick="submitEmployerVacancy()"
+  >
+    📩 إرسال فرصة العمل إلى مَدخَل
+  </button>
+
+  <div class="info-strip">
+
+    ℹ️ مَدخَل لا يوظف الأشخاص ولا يختار الموظف بدلًا عنك.
+    بعد المطابقة، يستطيع صاحب العمل اختيار الأشخاص الذين يريد التواصل معهم.
+
+  </div>
+
+</section>
+
+
+<!-- ================= اكتشاف المهارات ================= -->
+
+<section id="discoverSkillsSection" class="screen">
+
+  <button class="back" onclick="showScreen('workerScreen')">
+    → العودة
+  </button>
+
+  <div class="card">
+
+    <h2>🧠 اكتشف مهاراتك</h2>
+
+    <p>
+      اختر كل المهارات التي جربتها أو تشعر أنك تستطيع القيام بها.
+    </p>
+
+  </div>
+
+  <div id="skillsGrid" class="skills-grid"></div>
+
+  <div id="selectedSkillsBox" class="selected-box">
+    لم تختر أي مهارة بعد.
+  </div>
+
+  <button
+    class="primary-btn"
+    style="width:100%;"
+    onclick="startSkillAssessment()"
+  >
+    📊 انتقل إلى التقييم
+  </button>
+
+</section>
+
+
+<!-- ================= التقييم ================= -->
+
+<section id="assessmentSection" class="screen">
+
+  <button class="back" onclick="showScreen('workerScreen')">
+    → العودة
+  </button>
+
+  <div id="assessmentIntro">
+
+    <div class="card">
+
+      <h2>📊 تقييم المستوى</h2>
+
+      <p>
+        تقييم أولي يساعدك على فهم مستواك في المجال الذي اخترته.
+      </p>
+
+    </div>
+
+    <div class="card">
+
+      <h3>
+        هل سبق أن عملت في المجال الذي تريد تقييمه؟
+      </h3>
 
       <div class="options">
 
         <button
           class="option"
-          onclick="openDiscoverSkills()"
+          onclick="selectExperience(this,'expert')"
         >
-          🧠 لا أعرف المجال المناسب لي
-          <br>
-          <small>اكتشف مهاراتي</small>
+          🏆 نعم، وأتقنه
         </button>
 
         <button
           class="option"
-          onclick="openAssessmentScreen()"
+          onclick="selectExperience(this,'learning')"
         >
-          📊 أعرف مجالي وأريد تقييم مستواي
+          ⭐ نعم، لكنني ما زلت أتعلم
         </button>
 
         <button
           class="option"
-          onclick="openOpportunities()"
+          onclick="selectExperience(this,'little')"
         >
-          🔎 أعرف مهارتي وأريد فرصة
-        </button>
-
-      </div>
-
-      <div
-        class="card"
-        style="margin-top:15px;"
-      >
-
-        <h3>
-          💡 هدف مَدخَل
-        </h3>
-
-        <p>
-          نريد أن تنتقل من "لا أعرف ماذا أستطيع أن أعمل"
-          إلى "أعرف مهارتي ومستواي وهذه فرصة مناسبة لي".
-        </p>
-
-      </div>
-
-    </section>
-
-    <!-- الملف المهني -->
-
-    <section
-      id="profileScreen"
-      class="screen"
-    >
-
-      <button
-        class="back"
-        onclick="showScreen('workerScreen')"
-      >
-        → العودة
-      </button>
-
-      <div class="card">
-
-        <h2>
-          👤 أنشئ ملفك المهني
-        </h2>
-
-        <p>
-          نحتاج هذه المعلومات حتى تستطيع التقديم على الفرص.
-        </p>
-
-      </div>
-
-      <div class="form-group">
-
-        <label>
-          الاسم
-        </label>
-
-        <input
-          id="workerName"
-          type="text"
-          placeholder="اكتب اسمك"
-        >
-
-      </div>
-
-      <div class="form-group">
-
-        <label>
-          المهارة أو المجال
-        </label>
-
-        <input
-          id="workerSkill"
-          type="text"
-          placeholder="مثال: الكتابة"
-        >
-
-      </div>
-
-      <div class="form-group">
-
-        <label>
-          نبذة عنك
-        </label>
-
-        <textarea
-          id="workerDescription"
-          placeholder="اكتب نبذة قصيرة عن خبرتك ومهاراتك"
-        ></textarea>
-
-      </div>
-
-      <button
-        class="primary-btn"
-        style="width:100%;"
-        onclick="saveWorker()"
-      >
-        💾 حفظ الملف المهني
-      </button>
-
-    </section>
-
-    <!-- صاحب المشروع -->
-
-    <section
-      id="projectScreen"
-      class="screen"
-    >
-
-      <button
-        class="back"
-        onclick="showScreen('homeScreen')"
-      >
-        → العودة
-      </button>
-
-      <div class="card">
-
-        <h2>
-          🏢 لدي مشروع
-        </h2>
-
-        <p>
-          أخبرنا بما تحتاج، وسنجهز لك مسار المشروع.
-        </p>
-
-      </div>
-
-      <div class="form-group">
-
-        <label>
-          اسم المشروع
-        </label>
-
-        <input
-          id="projectName"
-          type="text"
-          placeholder="مثال: تصميم موقع"
-        >
-
-      </div>
-
-      <div class="form-group">
-
-        <label>
-          نوع المشروع
-        </label>
-
-        <select id="projectType">
-
-          <option value="">
-            اختر نوع المشروع
-          </option>
-
-          <option>
-            💻 البرمجة
-          </option>
-
-          <option>
-            ✍️ الكتابة
-          </option>
-
-          <option>
-            🌐 الترجمة
-          </option>
-
-          <option>
-            🎨 التصميم
-          </option>
-
-          <option>
-            🎬 تحرير الفيديو
-          </option>
-
-          <option>
-            📱 التواصل الاجتماعي
-          </option>
-
-          <option>
-            📊 إدخال البيانات
-          </option>
-
-          <option>
-            🤖 الذكاء الاصطناعي
-          </option>
-
-          <option>
-            🔧 خدمات أخرى
-          </option>
-
-        </select>
-
-      </div>
-
-      <div class="form-group">
-
-        <label>
-          وصف المشروع
-        </label>
-
-        <textarea
-          id="projectDescription"
-          placeholder="اشرح ما الذي تحتاجه"
-        ></textarea>
-
-      </div>
-
-      <button
-        class="primary-btn"
-        style="width:100%;"
-        onclick="saveProject()"
-      >
-        📩 إرسال طلب المشروع
-      </button>
-
-    </section>
-
-    <!-- اكتشاف المهارات -->
-
-    <section
-      id="discoverSkillsSection"
-      class="screen"
-    >
-
-      <button
-        class="back"
-        onclick="showScreen('workerScreen')"
-      >
-        → العودة
-      </button>
-
-      <div class="card">
-
-        <h2>
-          🧠 اكتشف مهاراتك
-        </h2>
-
-        <p>
-          اختر كل المهارات التي جربتها أو تشعر أنك قد تستطيع القيام بها.
-        </p>
-
-      </div>
-
-      <div
-        id="skillsGrid"
-        class="skills-grid"
-      ></div>
-
-      <div
-        id="selectedSkillsBox"
-        class="selected-box"
-      >
-        لم تختر أي مهارة بعد.
-      </div>
-
-      <button
-        class="primary-btn"
-        style="width:100%;"
-        onclick="startSkillAssessment()"
-      >
-        📊 انتقل إلى التقييم
-      </button>
-
-    </section>
-
-    <!-- التقييم -->
-
-    <section
-      id="assessmentSection"
-      class="screen"
-    >
-
-      <button
-        class="back"
-        onclick="showScreen('workerScreen')"
-      >
-        → العودة
-      </button>
-
-      <div id="assessmentIntro">
-
-        <div class="card">
-
-          <h2>
-            📊 تقييم المستوى
-          </h2>
-
-          <p>
-            سنبدأ بسؤال تمهيدي ثم ننتقل إلى اختبار عملي عندما يكون متاحًا.
-          </p>
-
-        </div>
-
-        <div class="card">
-
-          <h3>
-            هل سبق أن عملت في المجال الذي تريد تقييمه؟
-          </h3>
-
-          <div class="options">
-
-            <button
-              class="option"
-              onclick="selectExperience(this,'expert')"
-            >
-              🏆 نعم، وأتقنه
-            </button>
-
-            <button
-              class="option"
-              onclick="selectExperience(this,'learning')"
-            >
-              ⭐ نعم، لكنني ما زلت أتعلم
-            </button>
-
-            <button
-              class="option"
-              onclick="selectExperience(this,'little')"
-            >
-              👍 جربته قليلًا
-            </button>
-
-            <button
-              class="option"
-              onclick="selectExperience(this,'none')"
-            >
-              🌱 لم أجربه
-            </button>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      <div
-        id="writingTest"
-        class="hidden"
-      >
-
-        <div class="card">
-
-          <h2>
-            ✍️ اختبار الكتابة
-          </h2>
-
-          <p>
-            اكتب فقرة من 120 إلى 180 كلمة تشرح فيها:
-          </p>
-
-          <p
-            style="font-weight:800;margin-top:10px;"
-          >
-            لماذا يجب على الشركات الصغيرة استخدام وسائل التواصل الاجتماعي للوصول إلى العملاء؟
-          </p>
-
-        </div>
-
-        <div class="form-group">
-
-          <textarea
-            id="writingAnswer"
-            oninput="updateWordCount()"
-            placeholder="اكتب إجابتك هنا..."
-          ></textarea>
-
-          <div
-            id="wordCount"
-            class="word-count"
-          >
-            عدد الكلمات: 0
-          </div>
-
-        </div>
-
-        <button
-          class="primary-btn"
-          style="width:100%;"
-          onclick="submitWritingTest()"
-        >
-          📊 تقييم إجابتي
-        </button>
-
-      </div>
-
-      <div
-        id="assessmentResult"
-        class="hidden"
-      ></div>
-
-    </section>
-
-    <!-- التقييم الاحترافي -->
-
-    <section
-      id="professionalEvaluationScreen"
-      class="screen"
-    >
-
-      <button
-        class="back"
-        onclick="showScreen('assessmentSection')"
-      >
-        → العودة
-      </button>
-
-      <div class="card">
-
-        <div class="premium-badge">
-          ⭐ تقييم احترافي
-        </div>
-
-        <h2>
-          تقرير التميز المهني
-        </h2>
-
-        <p>
-          سنحول نتيجة التقييم الأولي إلى خطة عملية
-          تساعدك على معرفة ما تحتاج إلى تطويره.
-        </p>
-
-      </div>
-
-      <div
-        id="professionalEvaluationScore"
-        class="selected-box"
-      >
-        نتيجة التقييم المجاني الحالية
-      </div>
-
-      <div class="card">
-
-        <h3>
-          ماذا ستحصل عليه؟
-        </h3>
-
-        <div class="result-list">
-
-          <div>
-            📉
-            <strong>
-              تحليل الفجوات
-            </strong>
-            <br>
-            تحديد المهارات التي تحتاج إلى تطويرها.
-          </div>
-
-          <div>
-            🗺️
-            <strong>
-              خطة 30 يومًا
-            </strong>
-            <br>
-            خطوات عملية وموارد مجانية للتطوير.
-          </div>
-
-          <div>
-            📄
-            <strong>
-              مراجعة CV
-            </strong>
-            <br>
-            ملاحظات لتحسين السيرة الذاتية وفق ممارسات ATS.
-          </div>
-
-          <div>
-            🎖️
-            <strong>
-              شارة تقييم مَدخَل
-            </strong>
-            <br>
-            شارة مرتبطة بنتيجة تقييمك.
-          </div>
-
-        </div>
-
-      </div>
-
-      <div class="card">
-
-        <h3>
-          💳 السعر التجريبي
-        </h3>
-
-        <div class="premium-price">
-          $2 فقط
-        </div>
-
-        <p>
-          خلال الإطلاق التجريبي، نختبر هذه الخدمة
-          بسعر منخفض قبل إطلاقها بشكل كامل.
-        </p>
-
-      </div>
-
-      <div class="card">
-
-        <h3>
-          📩 طلب التقرير
-        </h3>
-
-        <p
-          style="margin-bottom:14px;"
-        >
-          في هذه المرحلة التجريبية، اضغط لإرسال طلبك.
-          سيتم التواصل معك لتأكيد الطلب وطريقة الدفع المتاحة.
-        </p>
-
-        <button
-          class="primary-btn"
-          style="width:100%;"
-          onclick="requestProfessionalEvaluation()"
-        >
-          📩 طلب التقرير الاحترافي — $2
-        </button>
-
-      </div>
-
-    </section>
-
-    <!-- الفرص -->
-
-    <section
-      id="opportunitiesScreen"
-      class="screen"
-    >
-
-      <button
-        class="back"
-        onclick="showScreen('homeScreen')"
-      >
-        → العودة
-      </button>
-
-      <div class="card">
-
-        <h2>
-          🔎 الفرص
-        </h2>
-
-        <p>
-          فرص تجريبية لواجهة مَدخَل.
-        </p>
-
-      </div>
-
-      <div
-        class="category-scroll"
-        id="categoryScroll"
-      ></div>
-
-      <div
-        id="opportunitiesList"
-      ></div>
-
-    </section>
-
-    <!-- الحساب -->
-
-    <section
-      id="accountScreen"
-      class="screen"
-    >
-
-      <div class="card">
-
-        <h2>
-          👤 حسابي
-        </h2>
-
-        <p id="accountStatus">
-          لم يتم إنشاء ملف مهني بعد.
-        </p>
-
-      </div>
-
-      <div class="card">
-
-        <h3>
-          📋 الملف المهني
-        </h3>
-
-        <p>
-          المهارات والتقييمات والأعمال السابقة ستظهر هنا.
-        </p>
-
-      </div>
-
-      <div class="card">
-
-        <h3>
-          📊 تقييماتي
-        </h3>
-
-        <p id="savedAssessmentText">
-          لا توجد تقييمات محفوظة بعد.
-        </p>
-
-      </div>
-
-      <div class="card">
-
-        <h3>
-          📩 طلباتي
-        </h3>
-
-        <p>
-          ستظهر طلبات التقديم والمشاريع هنا في النسخ القادمة.
-        </p>
-
-      </div>
-
-      <div class="card">
-
-        <h3>
-          ⚙️ الإعدادات
-        </h3>
-
-        <p>
-          إعدادات الحساب والتنبيهات ستضاف تدريجيًا.
-        </p>
-
-      </div>
-
-      <button
-        class="secondary-btn"
-        style="width:100%;margin-top:5px;"
-        onclick="openOwnerMode()"
-      >
-        👑 وضع المالك
-      </button>
-
-    </section>
-
-    <!-- وضع المالك -->
-
-    <section
-      id="ownerScreen"
-      class="screen"
-    >
-
-      <button
-        class="back"
-        onclick="showScreen('accountScreen')"
-      >
-        → العودة
-      </button>
-
-      <div class="owner-box">
-
-        <div class="owner-badge">
-          👑 OWNER MODE
-        </div>
-
-        <h2
-          style="margin:4px 0 8px;"
-        >
-          وضع المالك
-        </h2>
-
-        <p
-          style="margin:0;color:#d6dddd;font-size:13px;line-height:1.7;"
-        >
-          هذه واجهة تمهيدية لوضع المالك.
-          الحماية الحقيقية والصلاحيات الحساسة يجب أن تكون على الخادم
-          وداخل Supabase RLS وEdge Functions، وليس في الواجهة فقط.
-        </p>
-
-      </div>
-
-      <div class="card">
-
-        <h3>
-          اختر الواجهة التي تريد معاينتها
-        </h3>
-
-      </div>
-
-      <div class="admin-grid">
-
-        <button
-          class="admin-card"
-          onclick="ownerPreview('worker')"
-        >
-          <span>📱</span>
-          الباحث عن عمل
+          👍 جربته قليلًا
         </button>
 
         <button
-          class="admin-card"
-          onclick="ownerPreview('project')"
+          class="option"
+          onclick="selectExperience(this,'none')"
         >
-          <span>🏢</span>
-          صاحب مشروع
-        </button>
-
-        <button
-          class="admin-card"
-          onclick="showToast('واجهة الدعم ستضاف في المرحلة التالية')"
-        >
-          <span>💬</span>
-          الدعم
-        </button>
-
-        <button
-          class="admin-card"
-          onclick="showToast('واجهة التقييم ستضاف في المرحلة التالية')"
-        >
-          <span>🧪</span>
-          فريق التقييم
-        </button>
-
-        <button
-          class="admin-card"
-          onclick="showToast('واجهة المطابقة ستضاف في المرحلة التالية')"
-        >
-          <span>🎯</span>
-          المطابقة
-        </button>
-
-        <button
-          class="admin-card"
-          onclick="showToast('واجهة المالية ستضاف في المرحلة التالية')"
-        >
-          <span>💰</span>
-          المالية
-        </button>
-
-        <button
-          class="admin-card"
-          onclick="showToast('واجهة الإدارة ستضاف في المرحلة التالية')"
-        >
-          <span>🛡️</span>
-          الإدارة
-        </button>
-
-        <button
-          class="admin-card"
-          onclick="showToast('التقارير ستضاف في المرحلة التالية')"
-        >
-          <span>📈</span>
-          التقارير
+          🌱 لم أجربه
         </button>
 
       </div>
 
-      <div
-        class="card"
-        style="margin-top:15px;"
-      >
+    </div>
 
-        <h3>
-          🔐 ملاحظة أمنية
-        </h3>
+  </div>
 
-        <p>
-          لا تعتمد صلاحيات المالك على JavaScript وحده.
-          عند بناء لوحة الإدارة الحقيقية سنجعل التحقق من الصلاحيات على الخادم،
-          مع RLS وسجل عمليات Audit Log وMFA للمالك.
-        </p>
+  <div id="writingTest" class="hidden">
 
+    <div class="card">
+
+      <h2>✍️ اختبار الكتابة</h2>
+
+      <p>
+        اكتب فقرة من 120 إلى 180 كلمة تشرح فيها:
+      </p>
+
+      <p style="font-weight:800;margin-top:10px;">
+        لماذا يجب على الشركات الصغيرة استخدام وسائل التواصل الاجتماعي للوصول إلى العملاء؟
+      </p>
+
+    </div>
+
+    <div class="form-group">
+
+      <textarea
+        id="writingAnswer"
+        oninput="updateWordCount()"
+        placeholder="اكتب إجابتك هنا..."
+      ></textarea>
+
+      <div id="wordCount" class="word-count">
+        عدد الكلمات: 0
       </div>
 
-    </section>
-
-  </main>
-
-  <!-- Bottom Navigation -->
-
-  <nav class="bottom-nav">
+    </div>
 
     <button
-      class="nav-item active"
-      data-screen="homeScreen"
-      onclick="navigate('homeScreen',this)"
+      class="primary-btn"
+      style="width:100%;"
+      onclick="submitWritingTest()"
     >
-      <span>🏠</span>
-      الرئيسية
+      📊 تقييم إجابتي
     </button>
 
-    <button
-      class="nav-item"
-      data-screen="opportunitiesScreen"
-      onclick="navigate('opportunitiesScreen',this)"
-    >
-      <span>🔎</span>
-      الفرص
-    </button>
+  </div>
+
+  <div id="assessmentResult" class="hidden"></div>
+
+</section>
+
+
+<!-- ================= الفرص ================= -->
+
+<section id="opportunitiesScreen" class="screen">
+
+  <button class="back" onclick="showScreen('homeScreen')">
+    → العودة
+  </button>
+
+  <div class="card">
+
+    <h2>🔎 فرص العمل</h2>
+
+    <p>
+      ابحث في الفرص المتاحة داخل مَدخَل.
+      بعض الفرص تأتي من مصادر خارجية ويتم تحويلك إلى المصدر الأصلي عند التقديم،
+      وبعض فرص أصحاب العمل تكون مخصصة للمطابقة الداخلية.
+    </p>
+
+  </div>
+
+  <div class="search-box">
+
+    <h3>🔎 ماذا تبحث عنه؟</h3>
+
+    <div class="search-grid">
+
+      <input
+        id="jobSearch"
+        type="search"
+        placeholder="اكتب المهنة أو المهارة"
+        oninput="renderOpportunities()"
+      >
+
+      <input
+        id="jobLocation"
+        type="text"
+        placeholder="المدينة أو البلد"
+        oninput="renderOpportunities()"
+      >
+
+    </div>
+
+  </div>
+
+  <div
+    class="category-scroll"
+    id="categoryScroll"
+  ></div>
+
+  <div id="opportunitiesList"></div>
+
+</section>
+
+
+<!-- ================= الاشتراك ================= -->
+
+<section id="subscriptionScreen" class="screen">
+
+  <button class="back" onclick="showScreen('homeScreen')">
+    → العودة
+  </button>
+
+  <div class="premium-offer">
+
+    <div class="premium-badge">
+      🔔 مَدخَل يبحث معك
+    </div>
+
+    <h2>
+      اشترك، ونحن نجد ما تبحث عنه.
+    </h2>
+
+    <p>
+      البحث الأساسي مجاني.
+      الاشتراك مخصص للمتابعة المستمرة والتنبيهات عند ظهور فرص جديدة
+      تتوافق مع ملفك وتفضيلاتك.
+    </p>
+
+    <div class="premium-price">
+      $1 / شهر
+    </div>
+
+    <ul class="premium-features">
+
+      <li>
+        🔎 حفظ ما تبحث عنه
+      </li>
+
+      <li>
+        🎯 مطابقة الفرص مع ملفك
+      </li>
+
+      <li>
+        🔔 تنبيهات عن الفرص الجديدة
+      </li>
+
+      <li>
+        📋 متابعة حالة الفرص التي تقدمت إليها
+      </li>
+
+    </ul>
 
     <button
-      class="nav-item"
-      data-screen="discoverSkillsSection"
-      onclick="navigate('discoverSkillsSection',this)"
+      class="primary-btn"
+      style="width:100%;"
+      onclick="startSubscriptionRequest()"
     >
-      <span>🧠</span>
-      اكتشف
+      🔔 أريد الاشتراك
     </button>
 
-    <button
-      class="nav-item"
-      data-screen="assessmentSection"
-      onclick="navigate('assessmentSection',this)"
-    >
-      <span>📊</span>
-      قيّمني
-    </button>
+  </div>
+
+  <div class="card">
+
+    <h3>⚠️ تنبيه مهم</h3>
+
+    <p>
+      الاشتراك لا يعني ضمان الحصول على وظيفة.
+      هو خدمة بحث ومتابعة ومطابقة تساعدك على الوصول إلى الفرص المناسبة.
+    </p>
+
+  </div>
+
+</section>
+
+
+<!-- ================= الحساب ================= -->
+
+<section id="accountScreen" class="screen">
+
+  <div class="card">
+
+    <h2>👤 حسابي</h2>
+
+    <p id="accountStatus">
+      لم يتم إنشاء ملف مهني بعد.
+    </p>
+
+  </div>
+
+  <div class="card">
+
+    <h3>📋 ملفي المهني</h3>
+
+    <p>
+      بياناتك المهنية ومهاراتك ومكانك ونوع العمل المطلوب.
+    </p>
 
     <button
-      class="nav-item"
-      data-screen="accountScreen"
-      onclick="navigate('accountScreen',this)"
+      class="secondary-btn"
+      style="width:100%;margin-top:12px;"
+      onclick="openProfile()"
     >
+      ✏️ تعديل الملف
+    </button>
+
+  </div>
+
+  <div class="card">
+
+    <h3>📊 تقييماتي</h3>
+
+    <p id="savedAssessmentText">
+      لا توجد تقييمات محفوظة بعد.
+    </p>
+
+  </div>
+
+  <div class="card">
+
+    <h3>🔔 المتابعة والتنبيهات</h3>
+
+    <p>
+      احصل على تنبيهات عند ظهور فرص تتوافق مع ما تبحث عنه.
+    </p>
+
+    <button
+      class="primary-btn"
+      style="width:100%;margin-top:12px;"
+      onclick="openSubscription()"
+    >
+      🔔 الاشتراك — $1 شهريًا
+    </button>
+
+  </div>
+
+  <div class="card">
+
+    <h3>📩 طلباتي</h3>
+
+    <p>
+      ستظهر هنا طلبات التقديم وحالة الفرص التي تقدمت إليها.
+    </p>
+
+  </div>
+
+  <button
+    class="secondary-btn"
+    style="width:100%;margin-top:5px;"
+    onclick="openOwnerMode()"
+  >
+    👑 وضع المالك
+  </button>
+
+</section>
+
+
+<!-- ================= المالك ================= -->
+
+<section id="ownerScreen" class="screen">
+
+  <button class="back" onclick="showScreen('accountScreen')">
+    → العودة
+  </button>
+
+  <div class="owner-box">
+
+    <div class="owner-badge">
+      👑 OWNER MODE
+    </div>
+
+    <h2 style="margin:4px 0 8px;">
+      لوحة مَدخَل
+    </h2>
+
+    <p style="margin:0;color:#d6dddd;font-size:13px;line-height:1.7;">
+      هذه معاينة للواجهات.
+      الحماية الحقيقية والصلاحيات الحساسة ستكون على الخادم
+      وSupabase RLS وEdge Functions.
+    </p>
+
+  </div>
+
+  <div class="admin-grid">
+
+    <button class="admin-card" onclick="ownerPreview('worker')">
       <span>👤</span>
-      حسابي
+      الباحثون عن عمل
     </button>
 
-  </nav>
+    <button class="admin-card" onclick="ownerPreview('employer')">
+      <span>🏢</span>
+      أصحاب الفرص
+    </button>
+
+    <button class="admin-card" onclick="showToast('🎯 المطابقة ستربط الباحثين بالفرص المناسبة.')">
+      <span>🎯</span>
+      المطابقة
+    </button>
+
+    <button class="admin-card" onclick="showToast('🔔 إدارة التنبيهات ستضاف مع نظام الإشعارات.')">
+      <span>🔔</span>
+      التنبيهات
+    </button>
+
+    <button class="admin-card" onclick="showToast('💰 المالية ستضاف مع نظام الاشتراكات.')">
+      <span>💰</span>
+      المالية
+    </button>
+
+    <button class="admin-card" onclick="showToast('📈 التقارير ستضاف في مرحلة الإدارة.')">
+      <span>📈</span>
+      التقارير
+    </button>
+
+  </div>
+
+</section>
+
+</main>
+
+
+<!-- ================= التنقل السفلي ================= -->
+
+<nav class="bottom-nav">
+
+  <button
+    class="nav-item active"
+    onclick="navigate('homeScreen',this)"
+  >
+    <span>🏠</span>
+    الرئيسية
+  </button>
+
+  <button
+    class="nav-item"
+    onclick="navigate('opportunitiesScreen',this)"
+  >
+    <span>🔎</span>
+    الفرص
+  </button>
+
+  <button
+    class="nav-item"
+    onclick="navigate('discoverSkillsSection',this)"
+  >
+    <span>🧠</span>
+    اكتشف
+  </button>
+
+  <button
+    class="nav-item"
+    onclick="navigate('assessmentSection',this)"
+  >
+    <span>📊</span>
+    قيّمني
+  </button>
+
+  <button
+    class="nav-item"
+    onclick="navigate('accountScreen',this)"
+  >
+    <span>👤</span>
+    حسابي
+  </button>
+
+</nav>
 
 </div>
 
-<div
-  id="toast"
-  class="toast"
-></div>
+<div id="toast" class="toast"></div>
+
 
 <script>
 
@@ -1695,13 +1698,8 @@
 const SUPABASE_URL =
   "https://qbufsdpdobuicpljnssr.supabase.co";
 
-/*
-  ضع هنا Supabase Publishable key فقط.
-  لا تضع sb_secret داخل هذا الملف.
-*/
-
 const SUPABASE_PUBLISHABLE_KEY =
-  "sb_publishable_mcPmNU2CGJkiSbfgOD6gOg_9RNMNlEY";
+  "ضع مفتاح Supabase Publishable هنا";
 
 let supabaseClient = null;
 
@@ -1710,13 +1708,11 @@ if (
   SUPABASE_PUBLISHABLE_KEY &&
   !SUPABASE_PUBLISHABLE_KEY.includes("ضع مفتاح")
 ) {
-
   supabaseClient =
     window.supabase.createClient(
       SUPABASE_URL,
       SUPABASE_PUBLISHABLE_KEY
     );
-
 }
 
 
@@ -1729,25 +1725,20 @@ function showScreen(id) {
   document
     .querySelectorAll(".screen")
     .forEach(screen => {
-
       screen.classList.remove("active");
-
     });
 
   const target =
     document.getElementById(id);
 
   if (target) {
-
     target.classList.add("active");
-
   }
 
   window.scrollTo({
     top: 0,
     behavior: "smooth"
   });
-
 }
 
 
@@ -1758,15 +1749,11 @@ function navigate(id, button) {
   document
     .querySelectorAll(".nav-item")
     .forEach(item => {
-
       item.classList.remove("active");
-
     });
 
   if (button) {
-
     button.classList.add("active");
-
   }
 
 }
@@ -1791,11 +1778,8 @@ function showToast(message) {
 
   toastTimer =
     setTimeout(() => {
-
       toast.classList.remove("show");
-
     }, 3500);
-
 }
 
 
@@ -1804,39 +1788,40 @@ function showToast(message) {
    ========================================================= */
 
 function openWorker() {
-
   showScreen("workerScreen");
-
 }
 
-
-function openProject() {
-
-  showScreen("projectScreen");
-
-}
-
-
-/* =========================================================
-   إنشاء الملف المهني
-   ========================================================= */
 
 function openProfile() {
 
   showScreen("profileScreen");
 
-  const oldName =
-    localStorage.getItem(
-      "madkhal_profile_name"
-    );
+  const fields = {
+    workerName: "madkhal_profile_name",
+    workerQualification: "madkhal_profile_qualification",
+    workerSkill: "madkhal_profile_skill",
+    workerLocation: "madkhal_profile_location",
+    workerWorkType: "madkhal_profile_work_type",
+    workerDescription: "madkhal_profile_description"
+  };
 
-  if (oldName) {
+  Object.keys(fields).forEach(id => {
 
-    document.getElementById(
-      "workerName"
-    ).value = oldName;
+    const value =
+      localStorage.getItem(fields[id]);
 
-  }
+    if (value !== null) {
+
+      const element =
+        document.getElementById(id);
+
+      if (element) {
+        element.value = value;
+      }
+
+    }
+
+  });
 
 }
 
@@ -1844,119 +1829,243 @@ function openProfile() {
 async function saveWorker() {
 
   const name =
+    document.getElementById("workerName").value.trim();
+
+  const qualification =
     document
-      .getElementById("workerName")
+      .getElementById("workerQualification")
+      .value.trim();
+
+  const skill =
+    document.getElementById("workerSkill").value.trim();
+
+  const location =
+    document.getElementById("workerLocation").value.trim();
+
+  const workType =
+    document.getElementById("workerWorkType").value;
+
+  const description =
+    document
+      .getElementById("workerDescription")
+      .value.trim();
+
+  if (!name || !skill || !location) {
+
+    showToast(
+      "⚠️ اكتب الاسم والمهارة والمكان أولًا."
+    );
+
+    return;
+  }
+
+  localStorage.setItem(
+    "madkhal_profile_name",
+    name
+  );
+
+  localStorage.setItem(
+    "madkhal_profile_qualification",
+    qualification
+  );
+
+  localStorage.setItem(
+    "madkhal_profile_skill",
+    skill
+  );
+
+  localStorage.setItem(
+    "madkhal_profile_location",
+    location
+  );
+
+  localStorage.setItem(
+    "madkhal_profile_work_type",
+    workType
+  );
+
+  localStorage.setItem(
+    "madkhal_profile_description",
+    description
+  );
+
+  /*
+    في هذه المرحلة نحفظ البيانات محليًا حتى لا نعتمد
+    على هوية غير آمنة قبل تفعيل Supabase Auth.
+  */
+
+  document.getElementById(
+    "accountStatus"
+  ).innerHTML =
+    `👋 أهلًا ${name}
+     <br>
+     ${skill}
+     <br>
+     📍 ${location}`;
+
+  showToast(
+    "🎉 تم حفظ ملفك المهني على هذا الجهاز."
+  );
+
+  setTimeout(() => {
+    showScreen("accountScreen");
+  }, 700);
+}
+
+
+/* =========================================================
+   صاحب فرصة العمل
+   ========================================================= */
+
+function openEmployer() {
+
+  showScreen("employerScreen");
+
+}
+
+
+async function submitEmployerVacancy() {
+
+  const employerName =
+    document
+      .getElementById("employerName")
       .value
       .trim();
 
-  const skill =
+  const title =
     document
-      .getElementById("workerSkill")
+      .getElementById("vacancyTitle")
+      .value
+      .trim();
+
+  const location =
+    document
+      .getElementById("vacancyLocation")
+      .value
+      .trim();
+
+  const workType =
+    document
+      .getElementById("vacancyWorkType")
+      .value;
+
+  const skills =
+    document
+      .getElementById("vacancySkills")
+      .value
+      .trim();
+
+  const qualification =
+    document
+      .getElementById("vacancyQualification")
+      .value
+      .trim();
+
+  const numberNeeded =
+    document
+      .getElementById("vacancyNumber")
+      .value;
+
+  const salary =
+    document
+      .getElementById("vacancySalary")
       .value
       .trim();
 
   const description =
     document
-      .getElementById("workerDescription")
+      .getElementById("vacancyDescription")
       .value
       .trim();
 
-  if (!name || !skill) {
+  if (
+    !employerName ||
+    !title ||
+    !location ||
+    !workType ||
+    !skills ||
+    !description
+  ) {
 
     showToast(
-      "⚠️ اكتب الاسم والمهارة أولًا"
+      "⚠️ أكمل بيانات فرصة العمل الأساسية."
     );
 
     return;
-
   }
 
-  if (!supabaseClient) {
+  const vacancy = {
 
-    showToast(
-      "⚠️ ضع Supabase Publishable key أولًا"
+    id: crypto.randomUUID(),
+
+    employer_name: employerName,
+
+    title,
+
+    location,
+
+    work_type: workType,
+
+    required_skills: skills,
+
+    required_qualification: qualification,
+
+    number_needed:
+      Number(numberNeeded || 1),
+
+    salary,
+
+    description,
+
+    status: "open",
+
+    visibility: "private_match_only",
+
+    created_at:
+      new Date().toISOString()
+
+  };
+
+  /*
+    نحفظ نسخة مؤقتة محليًا أثناء تجهيز الربط الآمن
+    بجدول employer_vacancies.
+  */
+
+  const existing =
+    JSON.parse(
+      localStorage.getItem(
+        "madkhal_demo_vacancies"
+      ) || "[]"
     );
 
-    return;
+  existing.push(vacancy);
 
-  }
+  localStorage.setItem(
+    "madkhal_demo_vacancies",
+    JSON.stringify(existing)
+  );
 
-  const profileId =
-    crypto.randomUUID();
+  showToast(
+    "🎉 تم تسجيل فرصة العمل تجريبيًا. سيتم ربطها بنظام المطابقة الآمن."
+  );
 
-  try {
+  document
+    .getElementById("vacancyTitle")
+    .value = "";
 
-    const { error } =
-      await supabaseClient
-        .from("profiles")
-        .insert({
+  document
+    .getElementById("vacancySkills")
+    .value = "";
 
-          id: profileId,
-          full_name: name,
-          role: "worker",
-          main_skill: skill,
-          bio: description
-
-        });
-
-    if (error) {
-
-      console.error(error);
-
-      showToast(
-        "❌ تعذر حفظ الملف: " +
-        error.message
-      );
-
-      return;
-
-    }
-
-    localStorage.setItem(
-      "madkhal_profile_id",
-      profileId
-    );
-
-    localStorage.setItem(
-      "madkhal_profile_name",
-      name
-    );
-
-    localStorage.setItem(
-      "madkhal_profile_skill",
-      skill
-    );
-
-    document.getElementById(
-      "accountStatus"
-    ).textContent =
-      "🎉 تم إنشاء ملفك المهني وحفظه بنجاح في مَدخَل.";
-
-    showToast(
-      "🎉 تم إنشاء ملفك المهني وحفظه بنجاح في مَدخَل."
-    );
-
-    setTimeout(() => {
-
-      showScreen("accountScreen");
-
-    }, 800);
-
-  } catch (error) {
-
-    console.error(error);
-
-    showToast(
-      "❌ حدث خطأ أثناء حفظ الملف."
-    );
-
-  }
+  document
+    .getElementById("vacancyDescription")
+    .value = "";
 
 }
 
 
 /* =========================================================
-   اكتشاف المهارات
+   المهارات
    ========================================================= */
 
 const skills = [
@@ -1972,6 +2081,7 @@ const skills = [
   ["🗣️","التواصل مع العملاء"],
   ["📚","التعليم والشرح"],
   ["🔍","البحث وجمع المعلومات"],
+  ["🧮","المحاسبة"],
   ["🤷","لا أعرف بعد"]
 
 ];
@@ -1983,9 +2093,7 @@ let selectedSkills = [];
 function renderSkills() {
 
   const grid =
-    document.getElementById(
-      "skillsGrid"
-    );
+    document.getElementById("skillsGrid");
 
   grid.innerHTML = "";
 
@@ -1999,25 +2107,20 @@ function renderSkills() {
     if (
       selectedSkills.includes(name)
     ) {
-
-      button.classList.add(
-        "selected"
-      );
-
+      button.classList.add("selected");
     }
 
-    button.innerHTML =
-      `${icon}${name}`;
+    button.textContent =
+      `${icon} ${name}`;
 
-    button.onclick = () =>
-      toggleSkill(name);
+    button.onclick =
+      () => toggleSkill(name);
 
     grid.appendChild(button);
 
   });
 
   updateSelectedSkills();
-
 }
 
 
@@ -2055,7 +2158,6 @@ function toggleSkill(skill) {
   }
 
   renderSkills();
-
 }
 
 
@@ -2072,13 +2174,11 @@ function updateSelectedSkills() {
       "لم تختر أي مهارة بعد.";
 
     return;
-
   }
 
   box.textContent =
     "المهارات المختارة: " +
     selectedSkills.join("، ");
-
 }
 
 
@@ -2089,7 +2189,6 @@ function openDiscoverSkills() {
   );
 
   renderSkills();
-
 }
 
 
@@ -2098,11 +2197,10 @@ function startSkillAssessment() {
   if (!selectedSkills.length) {
 
     showToast(
-      "⚠️ اختر مهارة واحدة على الأقل"
+      "⚠️ اختر مهارة واحدة على الأقل."
     );
 
     return;
-
   }
 
   localStorage.setItem(
@@ -2111,7 +2209,6 @@ function startSkillAssessment() {
   );
 
   openAssessmentScreen();
-
 }
 
 
@@ -2124,53 +2221,35 @@ let experienceLevel = null;
 
 function openAssessmentScreen() {
 
-  showScreen(
-    "assessmentSection"
-  );
+  showScreen("assessmentSection");
 
   document
-    .getElementById(
-      "assessmentIntro"
-    )
+    .getElementById("assessmentIntro")
     .classList.remove("hidden");
 
   document
-    .getElementById(
-      "writingTest"
-    )
+    .getElementById("writingTest")
     .classList.add("hidden");
 
   document
-    .getElementById(
-      "assessmentResult"
-    )
+    .getElementById("assessmentResult")
     .classList.add("hidden");
 
   experienceLevel = null;
-
 }
 
 
-function selectExperience(
-  button,
-  level
-) {
+function selectExperience(button, level) {
 
   document
     .querySelectorAll(
       "#assessmentIntro .option"
     )
     .forEach(item => {
-
-      item.classList.remove(
-        "selected"
-      );
-
+      item.classList.remove("selected");
     });
 
-  button.classList.add(
-    "selected"
-  );
+  button.classList.add("selected");
 
   experienceLevel = level;
 
@@ -2201,27 +2280,13 @@ function selectExperience(
   ) {
 
     document
-      .getElementById(
-        "writingTest"
-      )
+      .getElementById("writingTest")
       .classList.remove("hidden");
-
-    setTimeout(() => {
-
-      document
-        .getElementById(
-          "writingTest"
-        )
-        .scrollIntoView({
-          behavior: "smooth"
-        });
-
-    }, 150);
 
   } else {
 
     showToast(
-      "📊 سنضيف الاختبار العملي لهذا المجال في المرحلة التالية."
+      "📊 الاختبار العملي لهذا المجال سيضاف لاحقًا."
     );
 
   }
@@ -2233,9 +2298,7 @@ function updateWordCount() {
 
   const text =
     document
-      .getElementById(
-        "writingAnswer"
-      )
+      .getElementById("writingAnswer")
       .value
       .trim();
 
@@ -2247,9 +2310,7 @@ function updateWordCount() {
   document.getElementById(
     "wordCount"
   ).textContent =
-    "عدد الكلمات: " +
-    words;
-
+    "عدد الكلمات: " + words;
 }
 
 
@@ -2277,7 +2338,6 @@ function calculateWritingScore(text) {
   ) {
 
     score += 12;
-
   }
 
   const lower =
@@ -2308,9 +2368,7 @@ function calculateWritingScore(text) {
     if (
       lower.includes(word)
     ) {
-
       matched++;
-
     }
 
   });
@@ -2329,41 +2387,25 @@ function calculateWritingScore(text) {
       .length;
 
   if (sentences >= 4) {
-
     score += 10;
-
   }
 
   return Math.min(
     100,
     Math.round(score)
   );
-
 }
 
 
 function getWritingLevel(score) {
 
-  if (score >= 85) {
+  if (score >= 85) return "🏆 محترف";
 
-    return "🏆 محترف";
+  if (score >= 70) return "⭐ جيد جدًا";
 
-  }
-
-  if (score >= 70) {
-
-    return "⭐ جيد جدًا";
-
-  }
-
-  if (score >= 55) {
-
-    return "👍 جيد";
-
-  }
+  if (score >= 55) return "👍 جيد";
 
   return "🌱 مبتدئ";
-
 }
 
 
@@ -2371,9 +2413,7 @@ function submitWritingTest() {
 
   const answer =
     document
-      .getElementById(
-        "writingAnswer"
-      )
+      .getElementById("writingAnswer")
       .value
       .trim();
 
@@ -2389,46 +2429,37 @@ function submitWritingTest() {
     );
 
     return;
-
   }
 
   const score =
-    calculateWritingScore(
-      answer
-    );
+    calculateWritingScore(answer);
 
   const level =
-    getWritingLevel(
-      score
-    );
+    getWritingLevel(score);
 
   const result = {
 
     score,
+
     level,
+
     words,
 
     date:
       new Date().toISOString(),
 
     strengths: [
-
       words >= 120
         ? "طول الإجابة مناسب للمطلوب"
         : "لديك بداية جيدة في بناء الإجابة",
-
       "قدرتك على شرح الفكرة الأساسية واضحة"
-
     ],
 
     improvements: [
-
       words < 120
         ? "تحتاج إلى تطوير الإجابة وتوسيع الأفكار"
         : "حاول زيادة الأمثلة العملية",
-
       "حسّن ترابط الفقرات وتسلسل الأفكار"
-
     ]
 
   };
@@ -2438,28 +2469,19 @@ function submitWritingTest() {
     JSON.stringify(result)
   );
 
-  renderAssessmentResult(
-    result
-  );
+  renderAssessmentResult(result);
 
   document
-    .getElementById(
-      "writingTest"
-    )
+    .getElementById("writingTest")
     .classList.add("hidden");
 
   document
-    .getElementById(
-      "assessmentIntro"
-    )
+    .getElementById("assessmentIntro")
     .classList.add("hidden");
-
 }
 
 
-function renderAssessmentResult(
-  result
-) {
+function renderAssessmentResult(result) {
 
   const container =
     document.getElementById(
@@ -2474,9 +2496,7 @@ function renderAssessmentResult(
 
     <div class="result">
 
-      <div
-        style="font-size:13px;color:#718080;"
-      >
+      <div style="font-size:13px;color:#718080;">
         نتيجتك في اختبار الكتابة
       </div>
 
@@ -2492,9 +2512,7 @@ function renderAssessmentResult(
 
         <div>
           📝 عدد الكلمات:
-          <strong>
-            ${result.words}
-          </strong>
+          <strong>${result.words}</strong>
         </div>
 
         <div>
@@ -2507,12 +2525,6 @@ function renderAssessmentResult(
           📚 <strong>ما يحتاج تطويرًا</strong>
           <br>
           ${result.improvements.join("<br>")}
-        </div>
-
-        <div>
-          ℹ️ <strong>ملاحظة</strong>
-          <br>
-          هذا تقييم أولي مجاني لمساعدتك على معرفة مستواك.
         </div>
 
       </div>
@@ -2530,66 +2542,30 @@ function renderAssessmentResult(
     <div class="premium-offer">
 
       <div class="premium-badge">
-        ⭐ تقييم احترافي
+        🔔 المتابعة المستمرة
       </div>
 
       <h3>
-        تريد أن تعرف كيف تطور مستواك؟
+        لا تريد البحث كل يوم؟
       </h3>
 
       <p>
-        احصل على تقرير مهني مفصل يساعدك على معرفة
-        نقاط القوة والفجوات والخطوات التالية.
+        اشترك، ونحن نجد ما تبحث عنه.
       </p>
 
-      <ul class="premium-features">
-
-        <li>
-          📉 <strong>تحليل الفجوات</strong>
-          <br>
-          معرفة المهارات التي تحتاج إلى تطويرها.
-        </li>
-
-        <li>
-          🗺️ <strong>خطة عمل لمدة 30 يومًا</strong>
-          <br>
-          خطوات عملية باستخدام أدوات وموارد مجانية.
-        </li>
-
-        <li>
-          📄 <strong>مراجعة السيرة الذاتية CV</strong>
-          <br>
-          ملاحظات لتحسين السيرة الذاتية وفق ممارسات ATS.
-        </li>
-
-        <li>
-          🎖️ <strong>شارة تقييم مَدخَل</strong>
-          <br>
-          توضح مستوى تقييمك داخل ملفك.
-        </li>
-
-      </ul>
-
       <div class="premium-price">
-        $2 فقط
+        $1 / شهر
       </div>
 
       <button
         class="primary-btn"
         style="width:100%;"
-        onclick="openProfessionalEvaluation()"
+        onclick="openSubscription()"
       >
-        ⭐ أريد التقييم الاحترافي
+        🔔 الاشتراك والمتابعة
       </button>
 
-      <p
-        style="margin-top:10px;font-size:11px;text-align:center;"
-      >
-        السعر تجريبي خلال فترة الإطلاق.
-      </p>
-
     </div>
-
   `;
 
   const accountText =
@@ -2608,251 +2584,25 @@ function renderAssessmentResult(
 
 
 /* =========================================================
-   التقييم الاحترافي
-   ========================================================= */
-
-function openProfessionalEvaluation() {
-
-  const saved =
-    localStorage.getItem(
-      "madkhal_writing_assessment"
-    );
-
-  let result = null;
-
-  try {
-
-    result =
-      saved
-        ? JSON.parse(saved)
-        : null;
-
-  } catch {
-
-    result = null;
-
-  }
-
-  const score =
-    result
-      ? result.score
-      : "غير متوفر";
-
-  const level =
-    result
-      ? result.level
-      : "غير متوفر";
-
-  showScreen(
-    "professionalEvaluationScreen"
-  );
-
-  const scoreBox =
-    document.getElementById(
-      "professionalEvaluationScore"
-    );
-
-  if (scoreBox) {
-
-    scoreBox.innerHTML = `
-      📊 نتيجة التقييم المجاني الحالية:
-      <strong>
-        ${score}/100
-      </strong>
-      — ${level}
-    `;
-
-  }
-
-}
-
-
-async function requestProfessionalEvaluation() {
-
-  const profileId =
-    localStorage.getItem(
-      "madkhal_profile_id"
-    );
-
-  if (!profileId) {
-
-    showToast(
-      "👤 أنشئ ملفك المهني أولًا لإرسال طلب التقييم."
-    );
-
-    setTimeout(() => {
-
-      openProfile();
-
-    }, 800);
-
-    return;
-
-  }
-
-  if (!supabaseClient) {
-
-    showToast(
-      "⚠️ ضع Supabase Publishable key أولًا."
-    );
-
-    return;
-
-  }
-
-  const saved =
-    localStorage.getItem(
-      "madkhal_writing_assessment"
-    );
-
-  let assessment = null;
-
-  try {
-
-    assessment =
-      saved
-        ? JSON.parse(saved)
-        : null;
-
-  } catch {
-
-    assessment = null;
-
-  }
-
-  try {
-
-    const requestId =
-      crypto.randomUUID();
-
-    const { error } =
-      await supabaseClient
-        .from(
-          "professional_evaluation_requests"
-        )
-        .insert({
-
-          id: requestId,
-
-          profile_id:
-            profileId,
-
-          price: 2,
-
-          assessment_score:
-            assessment
-              ? assessment.score
-              : null,
-
-          assessment_level:
-            assessment
-              ? assessment.level
-              : null,
-
-          status:
-            "pending"
-
-        });
-
-    if (error) {
-
-      console.error(
-        "Professional evaluation request error:",
-        error
-      );
-
-      /*
-        إذا كان جدول الطلبات غير موجود بعد،
-        لا نكسر تجربة المستخدم.
-      */
-
-      if (
-        error.code === "42P01" ||
-        error.message
-          .toLowerCase()
-          .includes("does not exist")
-      ) {
-
-        showToast(
-          "📩 تم تجهيز طلب التقييم. سنربطه بقاعدة الطلبات في الخطوة التالية."
-        );
-
-        return;
-
-      }
-
-      showToast(
-        "❌ تعذر تسجيل الطلب: " +
-        error.message
-      );
-
-      return;
-
-    }
-
-    showToast(
-      "🎉 تم تسجيل طلب التقييم الاحترافي بنجاح. سنتابع معك لإتمام الطلب."
-    );
-
-    console.log(
-      "Professional evaluation requested",
-      {
-
-        requestId,
-
-        profileId,
-
-        price: 2,
-
-        score:
-          assessment
-            ? assessment.score
-            : null,
-
-        date:
-          new Date().toISOString()
-
-      }
-    );
-
-  } catch (error) {
-
-    console.error(error);
-
-    showToast(
-      "❌ حدث خطأ أثناء إرسال طلب التقييم."
-    );
-
-  }
-
-}
-
-
-/* =========================================================
    الفرص
    ========================================================= */
 
 const opportunityCategories = [
 
-  "🎙️ التفريغ الصوتي",
   "💻 البرمجة",
-  "✍️ كتابة المقالات",
+  "✍️ الكتابة",
   "🌐 الترجمة",
   "🎨 التصميم",
-  "🎬 المونتاج",
+  "🎬 الفيديو",
   "📱 التواصل الاجتماعي",
-  "📢 التسويق الإلكتروني",
-  "📊 إدخال البيانات",
-  "📈 Excel والبيانات",
-  "🎤 التعليق الصوتي",
+  "📢 التسويق",
+  "📊 البيانات",
   "📚 التعليم",
-  "📝 التدقيق اللغوي",
-  "🛒 المتاجر الإلكترونية",
-  "🤖 الذكاء الاصطناعي",
-  "🖼️ تحرير الصور",
-  "💼 المساعدة الافتراضية",
+  "📝 التدقيق",
   "🧮 المحاسبة",
-  "🔧 خدمات أخرى"
+  "🤖 الذكاء الاصطناعي",
+  "💼 المساعدة الافتراضية",
+  "🔧 أخرى"
 
 ];
 
@@ -2860,111 +2610,39 @@ const opportunityCategories = [
 const opportunities = [
 
   {
-
-    icon: "🎙️",
-
-    title:
-      "تفريغ تسجيل صوتي",
-
-    price:
-      "$20",
-
-    category:
-      "🎙️ التفريغ الصوتي",
-
+    icon: "🧮",
+    title: "محاسب",
+    company: "فرصة من المصدر الأصلي",
+    location: "عن بُعد",
+    type: "دوام كامل",
+    category: "🧮 المحاسبة",
+    salary: "حسب المصدر",
     description:
-      "تحويل تسجيل صوتي إلى نص مرتب."
-
+      "مثال لواجهة وظيفة سيتم استبدالها ببيانات حقيقية من مصادر العمل."
   },
 
   {
-
     icon: "💻",
-
-    title:
-      "إنشاء موقع إلكتروني",
-
-    price:
-      "$100",
-
-    category:
-      "💻 البرمجة",
-
+    title: "مطور مواقع",
+    company: "فرصة من المصدر الأصلي",
+    location: "عن بُعد",
+    type: "دوام كامل",
+    category: "💻 البرمجة",
+    salary: "حسب المصدر",
     description:
-      "إنشاء صفحة أو موقع إلكتروني بسيط."
-
+      "مثال لواجهة وظيفة سيتم استبدالها بالبيانات الحقيقية."
   },
 
   {
-
     icon: "✍️",
-
-    title:
-      "كتابة مقالات",
-
-    price:
-      "$30",
-
-    category:
-      "✍️ كتابة المقالات",
-
+    title: "كاتب محتوى عربي",
+    company: "فرصة من المصدر الأصلي",
+    location: "عن بُعد",
+    type: "عمل حر",
+    category: "✍️ الكتابة",
+    salary: "حسب المصدر",
     description:
-      "كتابة مقالات عربية واضحة ومنظمة."
-
-  },
-
-  {
-
-    icon: "🎨",
-
-    title:
-      "تصميم شعار",
-
-    price:
-      "$40",
-
-    category:
-      "🎨 التصميم",
-
-    description:
-      "تصميم شعار احترافي لمشروع."
-
-  },
-
-  {
-
-    icon: "🌐",
-
-    title:
-      "ترجمة نصوص",
-
-    price:
-      "$25",
-
-    category:
-      "🌐 الترجمة",
-
-    description:
-      "ترجمة النصوص مع المحافظة على المعنى."
-
-  },
-
-  {
-
-    icon: "🎬",
-
-    title:
-      "تحرير فيديو",
-
-    price:
-      "$35",
-
-    category:
-      "🎬 المونتاج",
-
-    description:
-      "تحرير فيديو قصير مناسب للنشر."
-
+      "مثال لفرصة كتابة ستظهر لاحقًا من قاعدة بيانات مَدخَل."
   }
 
 ];
@@ -2983,9 +2661,7 @@ function renderCategories() {
   container.innerHTML = "";
 
   const all =
-    document.createElement(
-      "button"
-    );
+    document.createElement("button");
 
   all.className =
     "category" +
@@ -2995,13 +2671,11 @@ function renderCategories() {
         : ""
     );
 
-  all.textContent =
-    "الكل";
+  all.textContent = "الكل";
 
   all.onclick = () => {
 
-    currentCategory =
-      "الكل";
+    currentCategory = "الكل";
 
     renderCategories();
     renderOpportunities();
@@ -3010,41 +2684,35 @@ function renderCategories() {
 
   container.appendChild(all);
 
-  opportunityCategories.forEach(
-    category => {
+  opportunityCategories.forEach(category => {
 
-      const button =
-        document.createElement(
-          "button"
-        );
+    const button =
+      document.createElement("button");
 
-      button.className =
-        "category" +
-        (
-          currentCategory === category
-            ? " active"
-            : ""
-        );
-
-      button.textContent =
-        category;
-
-      button.onclick = () => {
-
-        currentCategory =
-          category;
-
-        renderCategories();
-        renderOpportunities();
-
-      };
-
-      container.appendChild(
-        button
+    button.className =
+      "category" +
+      (
+        currentCategory === category
+          ? " active"
+          : ""
       );
 
-    }
-  );
+    button.textContent =
+      category;
+
+    button.onclick = () => {
+
+      currentCategory =
+        category;
+
+      renderCategories();
+      renderOpportunities();
+
+    };
+
+    container.appendChild(button);
+
+  });
 
 }
 
@@ -3058,6 +2726,24 @@ function renderOpportunities() {
 
   container.innerHTML = "";
 
+  const search =
+    (
+      document
+        .getElementById("jobSearch")
+        ?.value || ""
+    )
+    .trim()
+    .toLowerCase();
+
+  const location =
+    (
+      document
+        .getElementById("jobLocation")
+        ?.value || ""
+    )
+    .trim()
+    .toLowerCase();
+
   let list =
     opportunities;
 
@@ -3066,10 +2752,38 @@ function renderOpportunities() {
   ) {
 
     list =
-      opportunities.filter(
+      list.filter(
         item =>
           item.category ===
           currentCategory
+      );
+
+  }
+
+  if (search) {
+
+    list =
+      list.filter(item =>
+        (
+          item.title +
+          " " +
+          item.company +
+          " " +
+          item.description
+        )
+        .toLowerCase()
+        .includes(search)
+      );
+
+  }
+
+  if (location) {
+
+    list =
+      list.filter(item =>
+        item.location
+          .toLowerCase()
+          .includes(location)
       );
 
   }
@@ -3081,11 +2795,11 @@ function renderOpportunities() {
       <div class="card">
 
         <h3>
-          🔎 لا توجد فرص تجريبية هنا بعد
+          🔎 لا توجد نتائج حاليًا
         </h3>
 
         <p>
-          ستتم إضافة فرص حقيقية تدريجيًا.
+          ستظهر هنا الفرص التي تتوافق مع بحثك.
         </p>
 
       </div>
@@ -3093,23 +2807,15 @@ function renderOpportunities() {
     `;
 
     return;
-
   }
 
   list.forEach(item => {
 
     const div =
-      document.createElement(
-        "div"
-      );
+      document.createElement("div");
 
     div.className =
       "opportunity";
-
-    const safeTitle =
-      item.title
-        .replace(/\\/g, "\\\\")
-        .replace(/'/g, "\\'");
 
     div.innerHTML = `
 
@@ -3122,18 +2828,38 @@ function renderOpportunities() {
             ${item.title}
           </h3>
 
-          <div>
+          <div style="font-weight:700;">
+            ${item.company}
+          </div>
+
+          <div style="margin-top:6px;color:#657070;font-size:13px;">
             ${item.description}
           </div>
+
+          <span class="tag">
+            📍 ${item.location}
+          </span>
+
+          <span class="tag">
+            💼 ${item.type}
+          </span>
 
           <span class="tag">
             ${item.category}
           </span>
 
+          <div class="match">
+            🎯 مثال: مطابقة ملفك تظهر هنا
+          </div>
+
+          <div class="source-note">
+            هذه واجهة تجريبية. التقديم الحقيقي سيحوّلك إلى المصدر الأصلي للفرصة.
+          </div>
+
         </div>
 
-        <div class="price">
-          ${item.price}
+        <div class="salary">
+          ${item.salary}
         </div>
 
       </div>
@@ -3141,18 +2867,26 @@ function renderOpportunities() {
       <button
         class="primary-btn"
         style="width:100%;margin-top:13px;"
-        onclick="applyOpportunity('${safeTitle}')"
+        onclick="applyOpportunity('${escapeJs(item.title)}')"
       >
-        📩 التقديم
+        📩 التقديم على الفرصة
       </button>
 
     `;
 
-    container.appendChild(
-      div
-    );
+    container.appendChild(div);
 
   });
+
+}
+
+
+function escapeJs(value) {
+
+  return String(value)
+    .replace(/\\/g,"\\\\")
+    .replace(/'/g,"\\'")
+    .replace(/"/g,"&quot;");
 
 }
 
@@ -3174,25 +2908,22 @@ function openOpportunities() {
 
 function applyOpportunity(title) {
 
-  const profileId =
+  const name =
     localStorage.getItem(
-      "madkhal_profile_id"
+      "madkhal_profile_name"
     );
 
-  if (!profileId) {
+  if (!name) {
 
     showToast(
       "👤 أنشئ ملفك المهني أولًا حتى تستطيع التقديم."
     );
 
     setTimeout(() => {
-
       openProfile();
-
     }, 800);
 
     return;
-
   }
 
   showToast(
@@ -3200,154 +2931,33 @@ function applyOpportunity(title) {
   );
 
   /*
-    لاحقًا:
-    سيتم إنشاء سجل applications
-    وربطه بـ profiles و opportunities
-    ثم إرسال إشعار لصاحب المشروع.
+    المرحلة القادمة:
+    إنشاء applications في Supabase
+    ثم ربط الطلب بالوظيفة والباحث
+    وإرسال الإشعار.
   */
 
 }
 
 
 /* =========================================================
-   المشاريع
+   الاشتراك
    ========================================================= */
 
-async function saveProject() {
+function openSubscription() {
 
-  const name =
-    document
-      .getElementById(
-        "projectName"
-      )
-      .value
-      .trim();
+  showScreen(
+    "subscriptionScreen"
+  );
 
-  const type =
-    document
-      .getElementById(
-        "projectType"
-      )
-      .value;
+}
 
-  const description =
-    document
-      .getElementById(
-        "projectDescription"
-      )
-      .value
-      .trim();
 
-  if (
-    !name ||
-    !type ||
-    !description
-  ) {
+function startSubscriptionRequest() {
 
-    showToast(
-      "⚠️ أكمل بيانات المشروع أولًا."
-    );
-
-    return;
-
-  }
-
-  if (!supabaseClient) {
-
-    showToast(
-      "⚠️ ضع Supabase Publishable key أولًا."
-    );
-
-    return;
-
-  }
-
-  const userId =
-    localStorage.getItem(
-      "madkhal_profile_id"
-    );
-
-  if (!userId) {
-
-    showToast(
-      "👤 أنشئ ملفًا مهنيًا أولًا حتى نستطيع ربط المشروع بحسابك."
-    );
-
-    setTimeout(() => {
-
-      openProfile();
-
-    }, 800);
-
-    return;
-
-  }
-
-  try {
-
-    const { error } =
-      await supabaseClient
-        .from("projects")
-        .insert({
-
-          id:
-            crypto.randomUUID(),
-
-          user_id:
-            userId,
-
-          name:
-            name,
-
-          category:
-            type,
-
-          description:
-            description,
-
-          status:
-            "pending"
-
-        });
-
-    if (error) {
-
-      console.error(error);
-
-      showToast(
-        "❌ تعذر حفظ المشروع: " +
-        error.message
-      );
-
-      return;
-
-    }
-
-    showToast(
-      "🎉 تم إرسال طلب المشروع وحفظه بنجاح في مَدخَل."
-    );
-
-    document.getElementById(
-      "projectName"
-    ).value = "";
-
-    document.getElementById(
-      "projectType"
-    ).value = "";
-
-    document.getElementById(
-      "projectDescription"
-    ).value = "";
-
-  } catch (error) {
-
-    console.error(error);
-
-    showToast(
-      "❌ حدث خطأ أثناء إرسال المشروع."
-    );
-
-  }
+  showToast(
+    "🔔 تم تسجيل رغبتك بالاشتراك تجريبيًا. سنربط الدفع والتنبيهات في المرحلة التالية."
+  );
 
 }
 
@@ -3368,6 +2978,11 @@ function loadAccount() {
       "madkhal_profile_skill"
     );
 
+  const location =
+    localStorage.getItem(
+      "madkhal_profile_location"
+    );
+
   const account =
     document.getElementById(
       "accountStatus"
@@ -3377,9 +2992,11 @@ function loadAccount() {
 
     account.innerHTML =
       `👋 أهلًا ${name}
-      <br>
-      المهارة الأساسية:
-      ${skill || "غير محددة"}`;
+       <br>
+       المهارة:
+       ${skill || "غير محددة"}
+       <br>
+       📍 ${location || "غير محدد"}`;
 
   }
 
@@ -3408,16 +3025,10 @@ function loadAccount() {
 
 
 /* =========================================================
-   وضع المالك — واجهة تمهيدية فقط
+   وضع المالك
    ========================================================= */
 
 function openOwnerMode() {
-
-  /*
-    هذا ليس تحققًا أمنيًا حقيقيًا.
-    لاحقًا سنربط Owner role بحساب Supabase
-    وRLS وEdge Functions وMFA.
-  */
 
   showScreen(
     "ownerScreen"
@@ -3431,27 +3042,23 @@ function ownerPreview(type) {
   if (type === "worker") {
 
     showToast(
-      "👑 معاينة واجهة الباحث بصلاحية المالك"
+      "👑 معاينة واجهة الباحث عن العمل"
     );
 
     setTimeout(() => {
-
       openWorker();
-
     }, 500);
 
   }
 
-  if (type === "project") {
+  if (type === "employer") {
 
     showToast(
-      "👑 معاينة واجهة صاحب المشروع بصلاحية المالك"
+      "👑 معاينة واجهة صاحب فرصة العمل"
     );
 
     setTimeout(() => {
-
-      openProject();
-
+      openEmployer();
     }, 500);
 
   }
@@ -3498,7 +3105,7 @@ if (
 
 
 /* =========================================================
-   التشغيل الأول
+   التشغيل
    ========================================================= */
 
 document.addEventListener(
@@ -3519,5 +3126,4 @@ document.addEventListener(
 </script>
 
 </body>
-
 </html>
