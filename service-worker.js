@@ -1,4 +1,4 @@
-const CACHE_NAME = "madkhal-v2";
+const CACHE_NAME = "madkhal-v3";
 
 const FILES_TO_CACHE = [
   "/",
@@ -31,6 +31,26 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const responseClone = response.clone();
+
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put("/index.html", responseClone);
+          });
+
+          return response;
+        })
+        .catch(() => {
+          return caches.match("/index.html");
+        })
+    );
+
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       return cachedResponse || fetch(event.request);
