@@ -2,10 +2,153 @@ name: UN Jobs Import
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *"
 
 jobs:
-  test:
+  import-un-jobs:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Test
-        run: echo "UN Careers import ready"
+      - name: Import UN Careers jobs
+        env:
+          SUPABASE_URL: https://qbufsdpdobuicpljnssr.supabase.co
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          python - <<'PY'
+          import os
+          import hashlib
+          import xml.etree.ElementTree as ET
+          from urllib.request import Request, urlopen
+          from urllib.parse import quote
+
+          SUPABASE_URL = os.environ["SUPABASE_URL"]
+          SUPABASE_KEY = os.environ["SUPABASE_KEY"]
+
+          RSS_URL = "https://careers.un.org/jobfeed?isPage=true&language=en"
+
+          print("Downloading UN Careers RSS...")
+
+          req = Request(
+              RSS_URL,
+              headers={
+                  "User-Agent": "Madkhal/1.0"
+              }
+          )
+
+          with urlopen(req, timeout=30) as response:
+              xml_data = response.read()
+
+          root = ET.fromstring(xml_data)
+
+          jobs = []
+
+          for item in root.iter():
+              if item.tag.lower().endswith("item"):
+                  data = {}
+
+                  for child in list(item):
+                      key = child.tag.split("}")[-1].lower()
+                      value = (child.text or "").strip()
+                      data[key] = value
+
+                  job_id = (
+                      data.get("jobid")
+                      or data.get("job_id")
+                      or data.get("id")
+                  )
+
+                  title = data.get("title", "").strip()
+                  link = data.get("link", "").strip()
+                  description = data.get("description", "").strip()
+
+                  if not job_id or not title:
+                      continue
+
+                  if not link:
+                      link = f"https://careers.un.org/jobSearchDescription/{job_id}"
+
+                  jobs.append({
+                      "source": "UN Careers",
+                      "source_job_id": job_id,
+                      "company": "United Nations",
+                      "title": title,
+                      "description": description[:5000] if description else
+                          "United Nations job opening — official source: UN Careers.",
+                      "source_url": link,
+                      "canonical_url": link,
+                      "status": "active",
+                      "confidence": 1.0,
+                      "dedupe_hash": hashlib.md5(
+                          f"UN Careers:{job_id}".encode()
+                      ).hexdigest()
+                  })
+
+          print(f"Found {len(jobs)} UN Careers jobs.")
+
+          if not jobs:
+              raise SystemExit("No jobs found in UN Careers RSS.")
+
+          # Insert jobs one by one only when they do not already exist.
+          import json
+
+          for job in jobs:
+
+              check_url = (
+                  SUPABASE_URL
+                  + "/rest/v1/jobs"
+                  + "?source=eq.UN%20Careers"
+                  + "&source_job_id=eq."
+                  + quote(job["source_job_id"])
+                  + "&select=id"
+              )
+
+              check_req = Request(
+                  check_url,
+                  headers={
+                      "apikey": SUPABASE_KEY,
+                      "Authorization": f"Bearer {SUPABASE_KEY}"
+                  }
+              )
+
+              with urlopen(check_req, timeout=30) as response:
+                  existing = json.loads(response.read().decode())
+
+              if existing:
+                  continue
+
+              insert_url = SUPABASE_URL + "/rest/v1/jobs"
+
+              body = json.dumps(job).encode()
+
+              insert_req = Request(
+                  insert_url,
+                  data=body,
+                  method="POST",
+                  headers={
+                      "apikey": SUPABASE_KEY,
+                      "Authorization": f"Bearer {SUPABASE_KEY}",
+                      "Content-Type": "application/json",
+                      "Prefer": "return=minimal"
+                  }
+              )
+
+              try:
+                  with urlopen(insert_req, timeout=30) as response:
+                      response.read()
+
+                  print(
+                      "Inserted:",
+                      job["source_job_id"],
+                      job["title"]
+                  )
+
+              except Exception as e:
+                  print(
+                      "Insert failed:",
+                      job["source_job_id"],
+                      str(e)
+                  )
+
+          print("UN Careers import finished.")
+          PY
