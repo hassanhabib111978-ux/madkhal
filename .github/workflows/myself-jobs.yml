@@ -1,1 +1,169 @@
+name: Myself UAE Jobs Import
 
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 * * * *"
+
+jobs:
+  import-myself-jobs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Import jobs from myself.ae
+        env:
+          SUPABASE_URL: https://qbufsdpdobuicpljnssr.supabase.co
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          FEED_URL: https://www.admin.myself.ae/api/jobs-feed.json
+        run: |
+          python - <<'PY'
+          import os
+          import json
+          import urllib.request
+          import urllib.error
+          import hashlib
+          from datetime import datetime, timezone
+
+          SUPABASE_URL = os.environ["SUPABASE_URL"]
+          SUPABASE_KEY = os.environ["SUPABASE_KEY"]
+          FEED_URL = os.environ["FEED_URL"]
+
+          headers = {
+              "User-Agent": "Madkhal-Jobs-Importer/1.0",
+              "apikey": SUPABASE_KEY,
+              "Authorization": f"Bearer {SUPABASE_KEY}",
+              "Content-Type": "application/json",
+              "Prefer": "resolution=merge-duplicates"
+          }
+
+          print("Downloading myself.ae feed...")
+
+          req = urllib.request.Request(
+              FEED_URL,
+              headers={"User-Agent": "Madkhal-Jobs-Importer/1.0"}
+          )
+
+          with urllib.request.urlopen(req, timeout=60) as response:
+              data = json.loads(response.read().decode("utf-8"))
+
+          jobs = data.get("jobs", [])
+
+          print(f"Jobs received from feed: {len(jobs)}")
+
+          if not jobs:
+              print("No jobs found in feed.")
+              raise SystemExit(0)
+
+          def clean(value):
+              if value is None:
+                  return None
+              return str(value).strip()
+
+          def parse_date(value):
+              if not value:
+                  return None
+
+              value = str(value).strip()
+
+              try:
+                  dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+                  return dt.isoformat()
+              except Exception:
+                  return None
+
+          rows = []
+
+          for job in jobs:
+              reference = clean(job.get("reference"))
+              title = clean(job.get("title"))
+              company = clean(job.get("company"))
+
+              if not reference or not title:
+                  continue
+
+              canonical_url = clean(job.get("canonical_link"))
+              source_url = clean(job.get("link")) or canonical_url
+
+              description = clean(job.get("snippet"))
+              location = clean(job.get("location"))
+              city = clean(job.get("city"))
+              state = clean(job.get("state"))
+
+              country = clean(job.get("country")) or "United Arab Emirates"
+              job_type = clean(job.get("type"))
+              category = clean(job.get("category"))
+
+              posted_at = parse_date(job.get("posted_at"))
+              expires_at = parse_date(job.get("expires_at"))
+              updated_at = parse_date(job.get("updated"))
+
+              dedupe_string = f"myself.ae|{reference}"
+              dedupe_hash = hashlib.sha256(
+                  dedupe_string.encode("utf-8")
+              ).hexdigest()
+
+              rows.append({
+                  "source": "myself.ae",
+                  "source_id": reference,
+                  "source_job_id": reference,
+                  "company": company,
+                  "title": title,
+                  "description": description,
+                  "category": category,
+                  "job_type": job_type,
+                  "country": country,
+                  "location": location or city or state,
+                  "dedupe_hash": dedupe_hash,
+                  "created_at": datetime.now(timezone.utc).isoformat(),
+                  "last_checked_at": datetime.now(timezone.utc).isoformat(),
+                  "confidence": 1.0,
+                  "status": "active",
+                  "expires_at": expires_at,
+                  "updated_at": updated_at,
+                  "posted_at": posted_at,
+                  "canonical_url": canonical_url,
+                  "source_url": source_url
+              })
+
+          print(f"Prepared rows: {len(rows)}")
+
+          if not rows:
+              print("No valid rows to insert.")
+              raise SystemExit(0)
+
+          api_url = f"{SUPABASE_URL}/rest/v1/jobs"
+
+          batch_size = 50
+          inserted = 0
+
+          for i in range(0, len(rows), batch_size):
+              batch = rows[i:i + batch_size]
+
+              request = urllib.request.Request(
+                  api_url,
+                  data=json.dumps(batch).encode("utf-8"),
+                  headers=headers,
+                  method="POST"
+              )
+
+              try:
+                  with urllib.request.urlopen(request, timeout=60) as response:
+                      response_body = response.read().decode("utf-8")
+                      print(
+                          f"Batch {i // batch_size + 1}: "
+                          f"HTTP {response.status}"
+                      )
+
+                      if response_body:
+                          print(response_body[:500])
+
+                  inserted += len(batch)
+
+              except urllib.error.HTTPError as e:
+                  body = e.read().decode("utf-8", errors="replace")
+                  print(f"Supabase error: HTTP {e.code}")
+                  print(body)
+                  raise
+
+          print(f"Import completed successfully: {inserted} rows processed.")
+          PY
