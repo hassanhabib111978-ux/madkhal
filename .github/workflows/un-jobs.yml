@@ -2,333 +2,38 @@ name: UN Jobs Import
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 */6 * * *"
 
 jobs:
-  import-un-jobs:
+  test-supabase:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Import UN Careers jobs
+      - name: Test Supabase connection
         env:
           SUPABASE_URL: https://qbufsdpdobuicpljnssr.supabase.co
           SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
         run: |
-          python - <<'PY'
-          import os
-          import json
-          import hashlib
-          import re
-          import urllib.request
-          import urllib.error
-
-          SUPABASE_URL = os.environ["SUPABASE_URL"]
-          SUPABASE_KEY = os.environ["SUPABASE_KEY"]
-
-          RSS_URLS = [
-              "https://careers.un.org/jobfeed?isPage=true&language=en",
-              "https://careers.un.org/jobfeed?isPage=true"
-          ]
-
-          print("Trying UN Careers RSS...")
-
-          xml_data = None
-
-          for url in RSS_URLS:
-              try:
-                  request = urllib.request.Request(
-                      url,
-                      headers={
-                          "User-Agent": "Mozilla/5.0 (compatible; Madkhal/1.0)",
-                          "Accept": "application/rss+xml, application/xml, text/xml, */*"
-                      }
-                  )
-
-                  with urllib.request.urlopen(request, timeout=60) as response:
-                      data = response.read()
-
-                  print("HTTP response received:", len(data), "bytes")
-
-                  # Make sure we actually received XML.
-                  text = data.decode("utf-8", errors="replace").strip()
-
-                  if "<item" in text.lower() or "<rss" in text.lower() or "<feed" in text.lower():
-                      xml_data = text
-                      print("Valid feed response found.")
-                      break
-
-                  print("Response was not XML. Trying next URL...")
-
-              except Exception as e:
-                  print("RSS request failed:", str(e))
-
-          if not xml_data:
-              raise SystemExit(
-                  "UN Careers RSS could not be reached from GitHub Actions."
-              )
-
-          # Parse RSS/XML without requiring external Python packages.
-          import xml.etree.ElementTree as ET
-
-          try:
-              root = ET.fromstring(xml_data)
-          except Exception as e:
-              print("First XML parsing attempt failed:", str(e))
-
-              # Remove invalid control characters.
-              cleaned = re.sub(
-                  r"[\x00-\x08\x0B\x0C\x0E-\x1F]",
-                  "",
-                  xml_data
-              )
-
-              root = ET.fromstring(cleaned)
-
-          jobs = []
-
-          for item in root.iter():
-
-              tag = item.tag.split("}")[-1].lower()
-
-              if tag != "item":
-                  continue
-
-              fields = {}
-
-              for child in list(item):
-                  key = child.tag.split("}")[-1].lower()
-
-                  value = "".join(child.itertext()).strip()
-
-                  fields[key] = value
-
-              job_id = (
-                  fields.get("jobid")
-                  or fields.get("job_id")
-                  or fields.get("id")
-              )
-
-              title = fields.get("title", "").strip()
-
-              link = fields.get("link", "").strip()
-
-              description = fields.get(
-                  "description",
-                  ""
-              ).strip()
-
-              if not job_id or not title:
-                  continue
-
-              # Keep the official UN Careers URL.
-              if not link:
-                  link = (
-                      "https://careers.un.org/jobSearchDescription/"
-                      + job_id
-                  )
-
-              # Basic location extraction.
-              duty_station = (
-                  fields.get("dutystation")
-                  or fields.get("duty_station")
-                  or fields.get("location")
-                  or ""
-              ).strip()
-
-              country = ""
-
-              country_map = {
-                  "DAMASCUS": "Syria",
-                  "BEIRUT": "Lebanon",
-                  "AMMAN": "Jordan",
-                  "CAIRO": "Egypt",
-                  "ERBIL": "Iraq",
-                  "BAGHDAD": "Iraq",
-                  "SANA'A": "Yemen",
-                  "SANAA": "Yemen",
-                  "DOHA": "Qatar",
-                  "RIYADH": "Saudi Arabia",
-                  "JEDDAH": "Saudi Arabia",
-                  "ABU DHABI": "United Arab Emirates",
-                  "DUBAI": "United Arab Emirates",
-                  "KUWAIT CITY": "Kuwait",
-                  "MANAMA": "Bahrain",
-                  "MUSCAT": "Oman",
-                  "RAMALLAH": "Palestine"
-              }
-
-              station_upper = duty_station.upper()
-
-              for city, detected_country in country_map.items():
-                  if city in station_upper:
-                      country = detected_country
-                      break
-
-              posted_at = (
-                  fields.get("dateposted")
-                  or fields.get("date_posted")
-                  or fields.get("pubdate")
-                  or None
-              )
-
-              deadline = (
-                  fields.get("deadline")
-                  or fields.get("closingdate")
-                  or fields.get("expirydate")
-                  or None
-              )
-
-              job = {
-                  "source": "UN Careers",
-                  "source_job_id": str(job_id),
-                  "company": "United Nations",
-                  "title": title,
-                  "description": (
-                      description[:5000]
-                      if description
-                      else
-                      "United Nations job opening — official source: UN Careers."
-                  ),
-                  "country": country or None,
-                  "location": duty_station or None,
-                  "source_url": link,
-                  "canonical_url": link,
-                  "status": "active",
-                  "confidence": 1.0,
-                  "dedupe_hash": hashlib.md5(
-                      f"UN Careers:{job_id}".encode()
-                  ).hexdigest()
-              }
-
-              if posted_at:
-                  job["posted_at"] = posted_at
-
-              if deadline:
-                  job["expires_at"] = deadline
-
-              jobs.append(job)
-
-          print("Jobs found:", len(jobs))
-
-          if not jobs:
-              raise SystemExit(
-                  "The UN feed was reached, but no jobs were found."
-              )
-
-          inserted = 0
-          skipped = 0
-          failed = 0
-
-          for job in jobs:
-
-              job_id = job["source_job_id"]
-
-              check_url = (
-                  SUPABASE_URL
-                  + "/rest/v1/jobs"
-                  + "?source=eq.UN%20Careers"
-                  + "&source_job_id=eq."
-                  + urllib.parse.quote(job_id, safe="")
-                  + "&select=id"
-              )
-
-              check_request = urllib.request.Request(
-                  check_url,
-                  headers={
-                      "apikey": SUPABASE_KEY,
-                      "Authorization": "Bearer " + SUPABASE_KEY
-                  }
-              )
-
-              try:
-
-                  with urllib.request.urlopen(
-                      check_request,
-                      timeout=30
-                  ) as response:
-
-                      existing = json.loads(
-                          response.read().decode()
-                      )
-
-                  if existing:
-                      skipped += 1
-                      continue
-
-              except Exception as e:
-
-                  print(
-                      "Check failed for",
-                      job_id,
-                      ":",
-                      str(e)
-                  )
-
-                  failed += 1
-                  continue
-
-              insert_url = SUPABASE_URL + "/rest/v1/jobs"
-
-              body = json.dumps(
-                  job,
-                  ensure_ascii=False
-              ).encode("utf-8")
-
-              insert_request = urllib.request.Request(
-                  insert_url,
-                  data=body,
-                  method="POST",
-                  headers={
-                      "apikey": SUPABASE_KEY,
-                      "Authorization": "Bearer " + SUPABASE_KEY,
-                      "Content-Type": "application/json",
-                      "Prefer": "return=minimal"
-                  }
-              )
-
-              try:
-
-                  with urllib.request.urlopen(
-                      insert_request,
-                      timeout=30
-                  ) as response:
-
-                      response.read()
-
-                  inserted += 1
-
-                  print(
-                      "Inserted:",
-                      job_id,
-                      title
-                  )
-
-              except Exception as e:
-
-                  failed += 1
-
-                  print(
-                      "Insert failed:",
-                      job_id,
-                      ":",
-                      str(e)
-                  )
-
-          print("")
-          print("========== UN IMPORT SUMMARY ==========")
-          print("Found:", len(jobs))
-          print("Inserted:", inserted)
-          print("Skipped:", skipped)
-          print("Failed:", failed)
-          print("========================================")
-
-          if inserted == 0 and failed > 0:
-              raise SystemExit(
-                  "UN jobs were found but none could be inserted."
-              )
-
-          print("UN Careers import completed successfully.")
-
-          PY
+          curl -i \
+            -X POST \
+            "${SUPABASE_URL}/rest/v1/jobs" \
+            -H "apikey: ${SUPABASE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_KEY}" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            --data '{
+              "source": "UN Careers",
+              "source_job_id": "GITHUB-ACTION-TEST-001",
+              "company": "United Nations",
+              "title": "GitHub Actions Connection Test",
+              "description": "Temporary test record for Madkhal.",
+              "category": "Test",
+              "job_type": "Test",
+              "country": "Syria",
+              "location": "Damascus",
+              "source_url": "https://careers.un.org/",
+              "canonical_url": "https://careers.un.org/",
+              "status": "active",
+              "confidence": 1.0,
+              "dedupe_hash": "GITHUB-ACTION-TEST-001"
+            }'
