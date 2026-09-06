@@ -17,63 +17,64 @@ jobs:
 
         run: |
           python - <<'PY'
-          import hashlib
           import json
           import urllib.request
           import urllib.parse
+          import hashlib
 
           SUPABASE_URL = "https://qbufsdpdobuicpljnssr.supabase.co"
           SUPABASE_KEY = "${SUPABASE_KEY}"
 
           API_URL = "https://himalayas.app/jobs/api"
 
-          headers = {
-              "User-Agent": "Madkhal-Jobs-Importer/1.0",
-              "Accept": "application/json"
-          }
-
           print("Fetching Himalayas jobs...")
 
-          request = urllib.request.Request(API_URL, headers=headers)
+          request = urllib.request.Request(
+              API_URL,
+              headers={
+                  "User-Agent": "Madkhal-Jobs-Importer/1.0",
+                  "Accept": "application/json"
+              }
+          )
 
           with urllib.request.urlopen(request, timeout=30) as response:
-              data = json.loads(response.read().decode("utf-8"))
+              data = json.loads(
+                  response.read().decode("utf-8")
+              )
 
           jobs = data.get("jobs", [])
 
-          print(f"Jobs received from Himalayas: {len(jobs)}")
-
-          if not jobs:
-              raise SystemExit("No jobs received from Himalayas.")
+          print(f"Jobs received: {len(jobs)}")
 
           inserted = 0
           skipped = 0
 
-          for item in jobs:
+          for job in jobs:
 
               job_id = str(
-                  item.get("id")
-                  or item.get("jobId")
-                  or item.get("url")
+                  job.get("id")
+                  or job.get("jobId")
+                  or job.get("url")
                   or ""
               ).strip()
 
-              title = str(item.get("title") or "").strip()
+              title = str(
+                  job.get("title") or ""
+              ).strip()
 
               company = str(
-                  item.get("companyName")
-                  or item.get("company")
+                  job.get("companyName")
+                  or job.get("company")
                   or ""
               ).strip()
 
               description = str(
-                  item.get("description")
-                  or ""
+                  job.get("description") or ""
               )
 
               source_url = str(
-                  item.get("url")
-                  or item.get("applicationLink")
+                  job.get("url")
+                  or job.get("applicationLink")
                   or ""
               ).strip()
 
@@ -82,23 +83,20 @@ jobs:
                   continue
 
               location = str(
-                  item.get("location")
-                  or ""
+                  job.get("location") or ""
               ).strip()
 
               country = str(
-                  item.get("country")
-                  or ""
+                  job.get("country") or ""
               ).strip()
 
               category = str(
-                  item.get("category")
-                  or ""
+                  job.get("category") or ""
               ).strip()
 
               job_type = str(
-                  item.get("employmentType")
-                  or item.get("jobType")
+                  job.get("employmentType")
+                  or job.get("jobType")
                   or ""
               ).strip()
 
@@ -112,8 +110,8 @@ jobs:
               })
 
               check_url = (
-                  f"{SUPABASE_URL}/rest/v1/jobs?{params}"
-                  f"&select=id&limit=1"
+                  f"{SUPABASE_URL}/rest/v1/jobs?"
+                  f"{params}&select=id&limit=1"
               )
 
               check_request = urllib.request.Request(
@@ -127,10 +125,10 @@ jobs:
               with urllib.request.urlopen(
                   check_request,
                   timeout=30
-              ) as check_response:
+              ) as response:
 
                   existing = json.loads(
-                      check_response.read().decode("utf-8")
+                      response.read().decode("utf-8")
                   )
 
               if existing:
@@ -172,22 +170,22 @@ jobs:
                   with urllib.request.urlopen(
                       insert_request,
                       timeout=30
-                  ) as insert_response:
+                  ) as response:
 
-                      if insert_response.status in (200, 201, 204):
+                      if response.status in (200, 201, 204):
                           inserted += 1
                       else:
                           skipped += 1
 
-              except Exception as e:
+              except Exception as error:
                   print(
-                      f"Insert failed for {title}: {e}"
+                      f"Insert failed: {title} - {error}"
                   )
                   skipped += 1
 
-          print("================================")
+          print("--------------------------------")
           print("Himalayas import completed")
           print(f"Inserted: {inserted}")
           print(f"Skipped: {skipped}")
-          print("================================")
+          print("--------------------------------")
           PY
