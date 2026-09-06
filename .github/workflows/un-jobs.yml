@@ -1,39 +1,231 @@
-name: UN Jobs Import
+name: Jobs Import
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *"
 
 jobs:
-  test-supabase:
+  import-jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Test Supabase connection
+      - name: Import Himalayas jobs
         env:
           SUPABASE_URL: https://qbufsdpdobuicpljnssr.supabase.co
           SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
         run: |
-          curl -i \
-            -X POST \
-            "${SUPABASE_URL}/rest/v1/jobs" \
-            -H "apikey: ${SUPABASE_KEY}" \
-            -H "Authorization: Bearer ${SUPABASE_KEY}" \
-            -H "Content-Type: application/json" \
-            -H "Prefer: return=minimal" \
-            --data '{
-              "source": "UN Careers",
-              "source_job_id": "GITHUB-ACTION-TEST-001",
-              "company": "United Nations",
-              "title": "GitHub Actions Connection Test",
-              "description": "Temporary test record for Madkhal.",
-              "category": "Test",
-              "job_type": "Test",
-              "country": "Syria",
-              "location": "Damascus",
-              "source_url": "https://careers.un.org/",
-              "canonical_url": "https://careers.un.org/",
-              "status": "active",
-              "confidence": 1.0,
-              "dedupe_hash": "GITHUB-ACTION-TEST-001"
-            }'
+          python - <<'PY'
+          import os
+          import json
+          import hashlib
+          import urllib.request
+          import urllib.parse
+
+          SUPABASE_URL = os.environ["SUPABASE_URL"]
+          SUPABASE_KEY = os.environ["SUPABASE_KEY"]
+
+          API_URL = "https://himalayas.app/jobs/api"
+
+          print("Downloading Himalayas jobs...")
+
+          request = urllib.request.Request(
+              API_URL,
+              headers={
+                  "User-Agent": "Madkhal/1.0",
+                  "Accept": "application/json"
+              }
+          )
+
+          with urllib.request.urlopen(request, timeout=60) as response:
+              data = json.loads(response.read().decode("utf-8"))
+
+          jobs = data.get("jobs", [])
+
+          print("Jobs received:", len(jobs))
+
+          if not jobs:
+              raise SystemExit("No jobs received from Himalayas.")
+
+          inserted = 0
+          skipped = 0
+          failed = 0
+
+          for item in jobs:
+
+              job_id = str(
+                  item.get("id")
+                  or item.get("jobId")
+                  or item.get("slug")
+                  or ""
+              ).strip()
+
+              title = str(
+                  item.get("title")
+                  or ""
+              ).strip()
+
+              if not job_id or not title:
+                  continue
+
+              company = str(
+                  item.get("companyName")
+                  or item.get("company")
+                  or "Unknown company"
+              ).strip()
+
+              description = str(
+                  item.get("description")
+                  or ""
+              ).strip()
+
+              location = str(
+                  item.get("location")
+                  or ""
+              ).strip()
+
+              url = str(
+                  item.get("url")
+                  or item.get("applicationLink")
+                  or ""
+              ).strip()
+
+              if not url:
+                  url = "https://himalayas.app/jobs"
+
+              job = {
+                  "source": "Himalayas",
+                  "source_job_id": job_id,
+                  "company": company,
+                  "title": title,
+                  "description": (
+                      description[:5000]
+                      if description
+                      else
+                      "Remote job — official source: Himalayas."
+                  ),
+                  "category": str(
+                      item.get("category") or ""
+                  ).strip() or None,
+                  "job_type": str(
+                      item.get("employmentType")
+                      or item.get("type")
+                      or ""
+                  ).strip() or None,
+                  "country": str(
+                      item.get("country") or ""
+                  ).strip() or None,
+                  "location": location or None,
+                  "source_url": url,
+                  "canonical_url": url,
+                  "status": "active",
+                  "confidence": 1.0,
+                  "dedupe_hash": hashlib.md5(
+                      f"Himalayas:{job_id}".encode()
+                  ).hexdigest()
+              }
+
+              check_url = (
+                  SUPABASE_URL
+                  + "/rest/v1/jobs"
+                  + "?source=eq.Himalayas"
+                  + "&source_job_id=eq."
+                  + urllib.parse.quote(job_id, safe="")
+                  + "&select=id"
+              )
+
+              check_request = urllib.request.Request(
+                  check_url,
+                  headers={
+                      "apikey": SUPABASE_KEY,
+                      "Authorization": "Bearer " + SUPABASE_KEY
+                  }
+              )
+
+              try:
+
+                  with urllib.request.urlopen(
+                      check_request,
+                      timeout=30
+                  ) as response:
+                      existing = json.loads(
+                          response.read().decode()
+                      )
+
+                  if existing:
+                      skipped += 1
+                      continue
+
+              except Exception as e:
+
+                  print(
+                      "Check failed:",
+                      job_id,
+                      str(e)
+                  )
+
+                  failed += 1
+                  continue
+
+              insert_url = SUPABASE_URL + "/rest/v1/jobs"
+
+              body = json.dumps(
+                  job,
+                  ensure_ascii=False
+              ).encode("utf-8")
+
+              insert_request = urllib.request.Request(
+                  insert_url,
+                  data=body,
+                  method="POST",
+                  headers={
+                      "apikey": SUPABASE_KEY,
+                      "Authorization": "Bearer " + SUPABASE_KEY,
+                      "Content-Type": "application/json",
+                      "Prefer": "return=minimal"
+                  }
+              )
+
+              try:
+
+                  with urllib.request.urlopen(
+                      insert_request,
+                      timeout=30
+                  ) as response:
+                      response.read()
+
+                  inserted += 1
+
+                  print(
+                      "Inserted:",
+                      job_id,
+                      title
+                  )
+
+              except Exception as e:
+
+                  failed += 1
+
+                  print(
+                      "Insert failed:",
+                      job_id,
+                      str(e)
+                  )
+
+          print("")
+          print("========== IMPORT SUMMARY ==========")
+          print("Found:", len(jobs))
+          print("Inserted:", inserted)
+          print("Skipped:", skipped)
+          print("Failed:", failed)
+          print("====================================")
+
+          if inserted == 0 and failed > 0:
+              raise SystemExit(
+                  "Jobs were found but none could be inserted."
+              )
+
+          print("Himalayas import completed successfully.")
+
+          PY
