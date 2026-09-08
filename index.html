@@ -1,1 +1,7739 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
+
+  <meta name="theme-color" content="#0f766e">
+
+  <meta
+    name="description"
+    content="مَدخَل — سوق العمل لحظة بلحظة"
+  >
+
+  <link rel="manifest" href="/manifest.json">
+
+  <title>مَدخَل 🚪</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Tahoma, sans-serif;
+      background: #f6f8f8;
+      color: #172121;
+      padding-bottom: 82px;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: 0;
+    }
+
+    .app {
+      max-width: 700px;
+      margin: auto;
+      min-height: 100vh;
+      background: #f6f8f8;
+    }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255,255,255,.95);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid #e5eaea;
+      padding: 13px 16px;
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .logo {
+      font-size: 23px;
+      font-weight: 900;
+      color: #0f766e;
+    }
+
+    .pilot {
+      background: #e7f6f3;
+      color: #0f766e;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    main {
+      padding: 16px;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+      animation: fade .2s ease;
+    }
+
+    @keyframes fade {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(145deg,#e9f8f5,#ffffff);
+      border-radius: 28px;
+      padding: 25px 20px;
+      margin-bottom: 18px;
+      border: 1px solid #dcefeb;
+    }
+
+    .hero h1 {
+      margin: 0 0 9px;
+      font-size: 30px;
+      line-height: 1.25;
+    }
+
+    .hero p {
+      margin: 0;
+      color: #5b6767;
+      line-height: 1.8;
+      font-size: 14px;
+    }
+
+    .door {
+      margin: 22px auto 18px;
+      width: 130px;
+      height: 155px;
+      background: #0f766e;
+      border-radius: 65px 65px 8px 8px;
+      position: relative;
+      box-shadow: 0 15px 35px rgba(15,118,110,.22);
+    }
+
+    .door::after {
+      content: "";
+      position: absolute;
+      width: 70px;
+      height: 90px;
+      background: #fff;
+      left: 30px;
+      bottom: 0;
+      border-radius: 45px 45px 0 0;
+      opacity: .95;
+    }
+
+    .door-light {
+      position: absolute;
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      background: #f6c453;
+      left: 52px;
+      top: 67px;
+      z-index: 3;
+      box-shadow: 0 0 30px #f6c453;
+    }
+
+    .hero {
+      min-height: 470px;
+      background: radial-gradient(circle at 22% 52%, rgba(255,248,220,.72), transparent 24%), linear-gradient(135deg,#eef8f6,#ffffff);
+      padding: 22px 18px 18px;
+    }
+
+    .hero-stage {
+      position: relative;
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      direction: ltr;
+      gap: 10px;
+    }
+
+    .door-scene {
+      position: relative;
+      width: 48%;
+      height: 285px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-end;
+      perspective: 900px;
+    }
+
+    .door-floor {
+      position: absolute;
+      bottom: 3px;
+      right: 2px;
+      width: 94%;
+      height: 22px;
+      background: linear-gradient(90deg,transparent,#b99a72,transparent);
+      filter: blur(2px);
+      opacity: .45;
+    }
+
+    .door-frame {
+      position: relative;
+      width: 150px;
+      height: 270px;
+      border-radius: 7px 7px 0 0;
+      background: linear-gradient(90deg,#4a2b1c,#8a5a35 22%,#5d351f 55%,#9a6840 82%,#432619);
+      box-shadow: 14px 16px 30px rgba(55,35,20,.28);
+      overflow: visible;
+    }
+
+    .door-frame::before {
+      content: "";
+      position: absolute;
+      inset: 9px 9px 0;
+      border: 4px solid rgba(35,20,12,.55);
+      border-bottom: 0;
+      border-radius: 4px 4px 0 0;
+    }
+
+    .real-door {
+      position: absolute;
+      top: 15px;
+      left: 12px;
+      width: 132px;
+      height: 255px;
+      transform-origin: left center;
+      transform: perspective(700px) rotateY(-13deg);
+      border-radius: 3px 8px 0 0;
+      background: repeating-linear-gradient(90deg,rgba(255,255,255,.045) 0 7px,rgba(0,0,0,.055) 8px 15px), linear-gradient(105deg,#6d3e24,#a86f42 35%,#6b3b22 72%,#3e2417);
+      box-shadow: -9px 8px 20px rgba(30,18,10,.35), inset 0 0 0 2px rgba(35,20,12,.35);
+    }
+
+    .real-door::before {
+      content: "";
+      position: absolute;
+      inset: 18px 14px 20px;
+      border: 2px solid rgba(235,205,166,.28);
+      box-shadow: inset 0 0 0 3px rgba(40,20,10,.22);
+    }
+
+    .door-gap {
+      position: absolute;
+      top: 20px;
+      left: 22px;
+      width: 42px;
+      height: 245px;
+      background: linear-gradient(90deg,rgba(255,250,214,.98),rgba(255,225,146,.7),rgba(255,255,255,0));
+      filter: blur(.4px);
+      box-shadow: 0 0 34px rgba(255,211,100,.62);
+      transform: skewY(-2deg);
+    }
+
+    .door-handle {
+      position: absolute;
+      top: 137px;
+      right: 14px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #d8b36a;
+      box-shadow: 0 1px 3px rgba(0,0,0,.45);
+      z-index: 4;
+    }
+
+    .tools-orbit {
+      position: relative;
+      width: 50%;
+      height: 285px;
+      direction: ltr;
+      display: grid;
+      place-items: center;
+    }
+
+    .tools-orbit::before {
+      content: "";
+      position: absolute;
+      width: 205px;
+      height: 205px;
+      border: 1px dashed rgba(15,118,110,.25);
+      border-radius: 50%;
+      box-shadow: 0 0 40px rgba(15,118,110,.08);
+    }
+
+    .job-counter {
+      position: relative;
+      z-index: 2;
+      width: 116px;
+      height: 116px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.94);
+      border: 6px solid #0f766e;
+      box-shadow: 0 12px 35px rgba(15,118,110,.18);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .job-counter-number { font-size: 28px; font-weight: 900; color:#0f766e; line-height:1; }
+    .job-counter-label { margin-top: 7px; font-size: 11px; font-weight: 800; color:#536161; }
+
+    .tool {
+      position: absolute;
+      z-index: 3;
+      width: 48px;
+      height: 48px;
+      border-radius: 15px;
+      background: rgba(255,255,255,.92);
+      border: 1px solid #dbe8e6;
+      box-shadow: 0 8px 18px rgba(20,40,40,.12);
+      display: grid;
+      place-items: center;
+      font-size: 25px;
+    }
+    .tool.t1{top:18px;left:50%;transform:translateX(-50%)}
+    .tool.t2{top:48px;right:5px}
+    .tool.t3{bottom:48px;right:5px}
+    .tool.t4{bottom:10px;left:50%;transform:translateX(-50%)}
+    .tool.t5{bottom:48px;left:5px}
+    .tool.t6{top:48px;left:5px}
+
+    .hero-copy { text-align:center; margin: 4px auto 12px; max-width:560px; }
+    .hero-copy h1 { margin:0 0 8px; font-size:30px; }
+    .hero-copy p { margin:0; color:#5b6767; line-height:1.8; font-size:14px; }
+
+    @media (max-width: 520px) {
+      .hero { min-height: 500px; }
+      .hero-stage { min-height: 315px; }
+      .door-frame { width: 125px; height: 245px; }
+      .real-door { width: 108px; height: 230px; }
+      .door-gap { height: 220px; width:34px; left:18px; }
+      .tools-orbit::before { width:185px;height:185px; }
+      .job-counter { width:105px;height:105px; }
+      .tool { width:44px;height:44px;font-size:22px; }
+    }
+
+    .hero-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+      padding: 14px 12px;
+      border-radius: 16px;
+      font-weight: 800;
+      transition: .15s;
+    }
+
+    .primary-btn {
+      background: #0f766e;
+      color: white;
+    }
+
+    .secondary-btn {
+      background: white;
+      color: #0f766e;
+      border: 1px solid #cfe4e1;
+    }
+
+    .primary-btn:active,
+    .secondary-btn:active,
+    .option:active,
+    .nav-item:active,
+    .admin-card:active,
+    .category:active,
+    .skill:active {
+      transform: scale(.97);
+    }
+
+    .section-title {
+      font-size: 19px;
+      margin: 24px 2px 12px;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #e5eaea;
+      border-radius: 20px;
+      padding: 17px;
+      margin-bottom: 12px;
+      box-shadow: 0 5px 18px rgba(20,40,40,.035);
+    }
+
+    .card h3 {
+      margin: 0 0 7px;
+      font-size: 17px;
+    }
+
+    .card p {
+      margin: 0;
+      color: #657070;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .journey {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 8px;
+    }
+
+    .journey-item {
+      background: white;
+      border: 1px solid #e4eaea;
+      border-radius: 17px;
+      padding: 13px 5px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .journey-item span {
+      display: block;
+      font-size: 23px;
+      margin-bottom: 6px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #d8e1e1;
+      border-radius: 14px;
+      outline: none;
+      background: white;
+      color: #172121;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: #0f766e;
+    }
+
+    textarea {
+      min-height: 130px;
+      resize: vertical;
+      line-height: 1.8;
+    }
+
+    .options {
+      display: grid;
+      gap: 9px;
+      margin-top: 14px;
+    }
+
+    .option {
+      text-align: right;
+      background: white;
+      border: 1px solid #dfe7e7;
+      border-radius: 15px;
+      padding: 14px;
+      font-weight: 700;
+    }
+
+    .option.selected {
+      border-color: #0f766e;
+      background: #eaf8f5;
+      color: #0f766e;
+    }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    .skill {
+      background: white;
+      border: 1px solid #dfe7e7;
+      border-radius: 15px;
+      padding: 13px 8px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .skill.selected {
+      background: #e9f8f5;
+      border-color: #0f766e;
+      color: #0f766e;
+    }
+
+    .selected-box {
+      margin: 14px 0;
+      background: #f0f8f7;
+      padding: 12px;
+      border-radius: 14px;
+      font-size: 12px;
+      color: #0f766e;
+    }
+
+    .search-box {
+      background: linear-gradient(145deg,#eaf8f5,#ffffff);
+      border: 1px solid #d6ebe7;
+      border-radius: 22px;
+      padding: 16px;
+      margin-bottom: 15px;
+    }
+
+    .search-box h3 {
+      margin: 0 0 12px;
+    }
+
+    .search-grid {
+      display: grid;
+      gap: 9px;
+    }
+
+    .category-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 5px;
+      margin-bottom: 15px;
+      scrollbar-width: none;
+    }
+
+    .category-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .category {
+      white-space: nowrap;
+      background: white;
+      border: 1px solid #dfe7e7;
+      padding: 10px 13px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .category.active {
+      background: #0f766e;
+      color: white;
+      border-color: #0f766e;
+    }
+
+    .opportunity {
+      background: white;
+      border: 1px solid #e3e9e9;
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 11px;
+    }
+
+    .opportunity-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .opportunity h3 {
+      margin: 0 0 6px;
+      font-size: 16px;
+    }
+
+    .salary {
+      font-weight: 900;
+      color: #0f766e;
+      white-space: nowrap;
+    }
+
+    .tag {
+      display: inline-block;
+      background: #f0f4f4;
+      color: #596565;
+      padding: 5px 8px;
+      border-radius: 7px;
+      font-size: 10px;
+      margin-top: 8px;
+    }
+
+    .match {
+      display: inline-block;
+      background: #eaf8f5;
+      color: #0f766e;
+      padding: 6px 9px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 900;
+      margin-top: 9px;
+    }
+
+    .source-note {
+      margin-top: 9px;
+      font-size: 11px;
+      color: #788383;
+      line-height: 1.6;
+    }
+
+    .status-open {
+      display: inline-block;
+      background: #e9f8ef;
+      color: #19713b;
+      padding: 5px 8px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .status-review {
+      display: inline-block;
+      background: #fff7dc;
+      color: #806300;
+      padding: 5px 8px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .status-closed {
+      display: inline-block;
+      background: #f5eeee;
+      color: #8b4b4b;
+      padding: 5px 8px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .result {
+      text-align: center;
+      background: white;
+      border-radius: 24px;
+      padding: 25px 18px;
+      border: 1px solid #e4eaea;
+    }
+
+    .score {
+      font-size: 55px;
+      font-weight: 900;
+      color: #0f766e;
+    }
+
+    .level {
+      font-size: 19px;
+      font-weight: 900;
+      margin-bottom: 15px;
+    }
+
+    .result-list {
+      text-align: right;
+      margin-top: 18px;
+    }
+
+    .result-list div {
+      padding: 11px;
+      background: #f7f9f9;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .premium-offer {
+      background: linear-gradient(145deg,#fffdf3,#ffffff);
+      border: 1px solid #eadb9a;
+      border-radius: 22px;
+      padding: 18px;
+      margin-top: 15px;
+    }
+
+    .premium-badge {
+      display: inline-block;
+      background: #f6c453;
+      color: #302600;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .premium-offer h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .premium-offer p {
+      margin: 0 0 12px;
+      color: #657070;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .premium-features {
+      margin: 0 0 15px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .premium-features li {
+      padding: 8px 0;
+      font-size: 13px;
+      border-bottom: 1px solid #f0eeee;
+    }
+
+    .premium-price {
+      font-size: 24px;
+      font-weight: 900;
+      color: #0f766e;
+      margin: 8px 0 13px;
+    }
+
+    .employer-box {
+      background: linear-gradient(145deg,#eef8f6,#ffffff);
+      border: 1px solid #d5eae6;
+      border-radius: 23px;
+      padding: 18px;
+      margin-bottom: 15px;
+    }
+
+    .employer-box h2 {
+      margin: 0 0 8px;
+    }
+
+    .employer-box p {
+      margin: 0;
+      color: #617070;
+      line-height: 1.8;
+      font-size: 13px;
+    }
+
+    .info-strip {
+      background: #f7f9f9;
+      border-radius: 15px;
+      padding: 12px;
+      font-size: 12px;
+      line-height: 1.8;
+      margin-top: 12px;
+    }
+
+    .owner-box {
+      background: linear-gradient(145deg,#172121,#263333);
+      color: white;
+      border-radius: 24px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .owner-badge {
+      display: inline-block;
+      background: #f6c453;
+      color: #302600;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .admin-card {
+      background: white;
+      border: 1px solid #e3e9e9;
+      border-radius: 17px;
+      padding: 16px 10px;
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .admin-card span {
+      display: block;
+      font-size: 25px;
+      margin-bottom: 6px;
+    }
+
+    .admin-stat {
+      display: block;
+      margin-top: 6px;
+      color: #0f766e;
+      font-size: 12px;
+    }
+
+    .list-row {
+      background: #f7f9f9;
+      border-radius: 14px;
+      padding: 12px;
+      margin-top: 9px;
+      font-size: 12px;
+      line-height: 1.8;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #718080;
+      padding: 20px 10px;
+      line-height: 1.8;
+      font-size: 13px;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(700px,100%);
+      height: 72px;
+      background: rgba(255,255,255,.97);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid #e0e7e7;
+      z-index: 100;
+      display: grid;
+      grid-template-columns: repeat(5,1fr);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .nav-item {
+      background: transparent;
+      color: #718080;
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-item span {
+      font-size: 22px;
+    }
+
+    .nav-item.active {
+      color: #0f766e;
+    }
+
+    .toast {
+      position: fixed;
+      left: 15px;
+      right: 15px;
+      bottom: 88px;
+      max-width: 650px;
+      margin: auto;
+      background: #172121;
+      color: white;
+      padding: 14px 16px;
+      border-radius: 15px;
+      text-align: center;
+      z-index: 200;
+      display: none;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .toast.show {
+      display: block;
+      animation: fade .2s ease;
+    }
+
+    .back {
+      margin-bottom: 15px;
+      background: transparent;
+      color: #0f766e;
+      font-weight: 800;
+      padding: 5px 0;
+    }
+
+    .word-count {
+      text-align: left;
+      color: #718080;
+      font-size: 11px;
+      margin-top: 5px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (min-width:701px) {
+
+      body {
+        background: #e9eeee;
+      }
+
+      .app {
+        box-shadow: 0 0 50px rgba(0,0,0,.08);
+      }
+
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header class="header">
+
+  <div class="header-inner">
+
+    <div class="logo">
+      مَدخَل 🚪
+    </div>
+
+    <div class="pilot">
+      🚀 إطلاق تجريبي
+    </div>
+
+  </div>
+
+</header>
+
+<main>
+
+
+<!-- =====================================================
+     الرئيسية
+===================================================== -->
+
+<section id="homeScreen" class="screen active">
+
+  <div class="hero">
+
+    <div class="hero-copy">
+      <h1>مَدخَل 🚪</h1>
+      <p><strong>سوق العمل لحظة بلحظة</strong><br>مَدخَل يطابقك مع الفرص الأنسب، ويتابع الجديد بدل أن يتركك تبحث كل يوم.</p>
+    </div>
+
+    <div class="hero-stage">
+      <div class="tools-orbit" aria-label="عداد فرص العمل">
+        <div class="tool t1" title="حاسوب">💻</div>
+        <div class="tool t2" title="هاتف">📱</div>
+        <div class="tool t3" title="كتاب">📖</div>
+        <div class="tool t4" title="قلم">✏️</div>
+        <div class="tool t5" title="مطرقة">🔨</div>
+        <div class="tool t6" title="فرجار">📐</div>
+        <div class="job-counter">
+          <div id="jobCounterNumber" class="job-counter-number">—</div>
+          <div id="jobCounterLabel" class="job-counter-label">جاري تحديث الفرص</div>
+        </div>
+      </div>
+
+      <div class="door-scene" aria-label="باب مَدخَل">
+        <div class="door-floor"></div>
+        <div class="door-frame">
+          <div class="door-gap"></div>
+          <div class="real-door"></div>
+          <div class="door-handle"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-actions">
+      <button class="primary-btn" onclick="openWorker()">💼 ابدأ البحث عن فرصة مناسبة</button>
+      <button class="secondary-btn" onclick="openEmployer()">🏢 لدي فرصة عمل</button>
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <h3>
+      🔑 ما الذي يفعله مَدخَل؟
+    </h3>
+
+    <p>
+
+      مَدخَل يجمع فرص العمل من مصادر متعددة،
+      ويقارنها ببيانات الباحثين عن العمل،
+      ثم يساعد كل شخص على الوصول إلى الفرص الأقرب
+      إلى مهاراته ومؤهلاته.
+
+    </p>
+
+  </div>
+
+
+  <div class="card">
+
+    <h3>
+      🤝 مَدخَل وسيط بين الطرفين
+    </h3>
+
+    <p>
+
+      مَدخَل ليس جهة توظيف،
+      ولا يقرر من يحصل على الوظيفة.
+      دوره هو تسهيل الوصول والمطابقة
+      بين الباحث عن العمل وصاحب الفرصة.
+
+    </p>
+
+  </div>
+
+
+  <div class="card">
+
+    <h3>
+      🔎 كيف تعمل المنصة؟
+    </h3>
+
+    <p>
+
+      تبحث مجانًا عن الفرص المتاحة،
+      وإذا أردت أن يبحث مَدخَل باستمرار
+      عن الفرص المناسبة لك،
+      يمكنك الاشتراك في خدمة المتابعة والتنبيهات.
+
+    </p>
+
+  </div>
+
+
+  <div class="premium-offer">
+
+    <div class="premium-badge">
+      🔔 المتابعة المستمرة
+    </div>
+
+    <h3>
+      اشترك، ونحن نجد ما تبحث عنه.
+    </h3>
+
+    <p>
+
+      لا تحتاج إلى البحث كل يوم.
+      أخبر مَدخَل بما تبحث عنه،
+      ونحن نتابع الفرص الجديدة التي تتوافق
+      مع ملفك ونرسل لك التنبيهات.
+
+    </p>
+
+    <div class="premium-price">
+      $1 شهريًا
+    </div>
+
+    <button
+      class="primary-btn"
+      style="width:100%;"
+      onclick="openSubscription()"
+    >
+      🔔 أريد المتابعة المستمرة
+    </button>
+
+  </div>
+
+
+  <h2 class="section-title">
+    رحلتك في مَدخَل
+  </h2>
+
+
+  <div class="journey">
+
+    <div class="journey-item">
+      <span>👤</span>
+      أنشئ ملفك
+    </div>
+
+    <div class="journey-item">
+      <span>🧠</span>
+      حدّد مهاراتك
+    </div>
+
+    <div class="journey-item">
+      <span>🔎</span>
+      ابحث
+    </div>
+
+    <div class="journey-item">
+      <span>🎯</span>
+      طابق
+    </div>
+
+    <div class="journey-item">
+      <span>🔔</span>
+      تابع
+    </div>
+
+    <div class="journey-item">
+      <span>📩</span>
+      قدّم
+    </div>
+
+  </div>
+
+
+  <h2 class="section-title">
+    الشفافية أولًا
+  </h2>
+
+
+  <div class="card">
+
+    <h3>
+      لا نعدك بالوظيفة
+    </h3>
+
+    <p>
+
+      نحن لا نعدك بأن نجد لك وظيفة.
+      نحن نساعدك على الوصول إلى الفرص الأنسب لك،
+      ونقارن ملفك بمتطلبات الفرص ونرتبها
+      وفق مدى المطابقة.
+
+    </p>
+
+    <div class="info-strip">
+
+      🔑 نحن لا نفتح الباب بدلًا عنك،
+      بل نحاول أن نعطيك المفتاح الصحيح
+      للباب الذي تبحث عنه.
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     الباحث عن عمل
+===================================================== -->
+
+<section id="workerScreen" class="screen">
+
+  <button
+    class="back"
+    onclick="showScreen('homeScreen')"
+  >
+    → العودة
+  </button>
+
+  <div class="card">
+
+    <h2>
+      💼 أبحث عن عمل
+    </h2>
+
+    <p>
+      ابدأ من وضعك الحالي،
+      وساعد مَدخَل على معرفة ما تبحث عنه.
+    </p>
+
+  </div>
+
+
+  <div class="options">
+
+    <button
+      class="option"
+      onclick="openProfile()"
+    >
+      👤 إنشاء أو تحديث ملفي المهني
+
+      <br>
+
+      <small>
+        الاسم والمهارات والمكان ونوع العمل
+      </small>
+
+    </button>
+
+
+    <button
+      class="option"
+      onclick="openDiscoverSkills()"
+    >
+      🧠 لا أعرف المجال المناسب لي
+
+      <br>
+
+      <small>
+        اكتشف مهاراتي
+      </small>
+
+    </button>
+
+
+    <button
+      class="option"
+      onclick="openAssessmentScreen()"
+    >
+      📊 أعرف مجالي وأريد تقييم مستواي
+    </button>
+
+
+    <button
+      class="option"
+      onclick="openOpportunities()"
+    >
+      🔎 أعرف مهارتي وأريد فرصة
+    </button>
+
+
+    <button
+      class="option"
+      onclick="openSubscription()"
+    >
+      🔔 أريد من مَدخَل أن يبحث باستمرار
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     الملف المهني
+===================================================== -->
+
+<section id="profileScreen" class="screen">
+
+  <button
+    class="back"
+    onclick="showScreen('workerScreen')"
+  >
+    → العودة
+  </button>
+
+
+  <div class="card">
+
+    <h2>
+      👤 ملفك المهني
+    </h2>
+
+    <p>
+      هذه البيانات تساعد مَدخَل على مقارنة
+      ملفك بالفرص المناسبة.
+    </p>
+
+  </div>
+
+
+  <div class="form-group">
+
+    <label>
+      الاسم
+    </label>
+
+    <input
+      id="workerName"
+      type="text"
+      placeholder="اكتب اسمك"
+    >
+
+  </div>
+
+
+  <div class="form-group">
+
+    <label>
+      المؤهل
+    </label>
+
+    <input
+      id="workerQualification"
+      type="text"
+      placeholder="مثال: بكالوريوس"
+    >
+
+  </div>
+
+
+  <div class="form-group">
+
+    <label>
+      المهنة أو المهارات
+    </label>
+
+    <input
+      id="workerSkill"
+      type="text"
+      placeholder="مثال: محاسبة، Excel، كتابة"
+    >
+
+  </div>
+
+
+  <div class="form-group">
+
+    <label>
+      المكان
+    </label>
+
+    <input
+      id="workerLocation"
+      type="text"
+      placeholder="مثال: دمشق"
+    >
+
+  </div>
+
+
+  <div class="form-group">
+
+    <label>
+      نوع العمل المطلوب
+    </label>
+
+    <select id="workerWorkType">
+
+      <option value="">
+        اختر نوع العمل
+      </option>
+
+      <option value="full_time">
+        دوام كامل
+      </option>
+
+      <option value="part_time">
+        دوام جزئي
+      </option>
+
+      <option value="remote">
+        عن بُعد
+      </option>
+
+      <option value="freelance">
+        عمل حر
+      </option>
+
+      <option value="any">
+        لا يهم
+      </option>
+
+    </select>
+
+  </div>
+
+
+  <div class="form-group">
+
+    <label>
+      نبذة عنك
+    </label>
+
+    <textarea
+      id="workerDescription"
+      placeholder="اكتب نبذة قصيرة عن خبرتك ومهاراتك"
+    ></textarea>
+
+  </div>
+
+
+  <button
+    id="saveWorkerButton"
+    class="primary-btn"
+    style="width:100%;"
+    onclick="saveWorker()"
+  >
+    💾 حفظ الملف المهني
+  </button>
+
+
+  <div
+    class="info-strip"
+    style="margin-top:12px;"
+  >
+    🔐 سيتم حفظ ملفك في مَدخَل،
+    مع نسخة احتياطية على هذا الجهاز.
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     صاحب فرصة العمل
+===================================================== -->
+
+<section id="employerScreen" class="screen">
+
+  <button
+    class="back"
+    onclick="showScreen('homeScreen')"
+  >
+    → العودة
+  </button>
+
+
+  <div class="employer-box">
+
+    <h2>
+      🏢 لدي فرصة عمل
+    </h2>
+
+    <p>
+
+      لديك وظيفة أو فرصة عمل وتريد الوصول
+      إلى أشخاص تتوافق مهاراتهم مع متطلباتها؟
+
+    </p>
+
+
+    <div class="info-strip">
+
+      🔐 الفرصة التي تدخلها هنا ليست قائمة عامة للتصفح.
+      يستخدمها مَدخَل للمطابقة مع الباحثين المناسبين.
+
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <h3>
+      📋 بيانات الفرصة
+    </h3>
+
+    <p>
+
+      أدخل المعلومات الأساسية حتى يستطيع
+      نظام المطابقة تحديد الأشخاص الأقرب
+      إلى متطلباتك.
+
+    </p>
+
+  </div>
+
+
+  <div class="form-group">
+
+    <label>
+      اسم الشركة أو صاحب العمل
+    </label>
+
+    <input
+      id="employerName"
+      type="text"
+      placeholder="اسم الشركة أو صاحب العمل"
+    >
+
+  </div>
+
+
+  <div class="form-group">
+
+    <label>
+      المسمى الوظيفي
+    </label>
+
+    <input
+      id="vacancyTitle"
+      type="text"
+      placeholder="مثال: محاسب"
+    >
+
+  </div>
+
+
+  <div class="form-group">
+
+    <label>
+      مكان العمل
+    </label>
+
+    <input
+      id="vacancyLocation"
+      type="text"
+      placeholder="مثال: دمشق"
+    >
+
+  </div>
+
+
+  <div class="form-group">
+
+    <label>
+      نوع العمل
+    </label>
+
+    <select id="vacancyWorkType">
+
+      <option value="">
+        اختر نوع العمل
+      </option>
+
+      <option value="full_time">
+        دوام كامل
+      </option>
+
+      <option value="part_time">
+        دوام جزئي
+      </option>
+
+      <option value="remote">
+        عن بُعد
+      </option>
+
+      <option value="freelance">
+        عمل حر
+      </option>
+
+    </select>
+
+  </div>
+
+
+  <div class="form-group">
+
+    <label>
+      المهارات المطلوبة
+    </label>
+
+    <input
+      id="vacancySkills"
+      type="text"
+      placeholder="مثال: Excel، محاسبة، خبرة"
+    >
+
+  </div>
+
+
+  <div class="form-group">
+
+    <label>
+      المؤهل المطلوب
+    </label>
+
+    <input
+      id="vacancyQualification"
+      type="text"
+      placeholder="مثال: بكالوريوس أو خبرة عملية"
+    >
+
+  </div>
+
+
+  <div class="form-group">
+
+    <label>
+      عدد الأشخاص المطلوبين
+    </label>
+
+    <input
+      id="vacancyNumber"
+      type="number"
+      min="1"
+      value="1"
+    >
+
+  </div>
+
+
+  <div class="form-group">
+
+    <label>
+      الراتب أو الأجر
+    </label>
+
+    <input
+      id="vacancySalary"
+      type="text"
+      placeholder="مثال: 500 دولار"
+    >
+
+  </div>
+
+
+  <div class="form-group">
+
+    <label>
+      وصف الفرصة
+    </label>
+
+    <textarea
+      id="vacancyDescription"
+      placeholder="اكتب تفاصيل العمل والمسؤوليات المطلوبة"
+    ></textarea>
+
+  </div>
+
+
+  <button
+    class="primary-btn"
+    style="width:100%;"
+    onclick="submitEmployerVacancy()"
+  >
+    📩 إرسال فرصة العمل إلى مَدخَل
+  </button>
+
+
+  <div class="info-strip">
+
+    ℹ️ مَدخَل لا يوظف الأشخاص ولا يختار الموظف بدلًا عنك.
+    بعد المطابقة، يستطيع صاحب العمل اختيار الأشخاص
+    الذين يريد التواصل معهم.
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     اكتشاف المهارات
+===================================================== -->
+
+<section id="discoverSkillsSection" class="screen">
+
+  <button
+    class="back"
+    onclick="showScreen('workerScreen')"
+  >
+    → العودة
+  </button>
+
+
+  <div class="card">
+
+    <h2>
+      🧠 اكتشف مهاراتك
+    </h2>
+
+    <p>
+
+      اختر كل المهارات التي جربتها
+      أو تشعر أنك تستطيع القيام بها.
+
+    </p>
+
+  </div>
+
+
+  <div
+    id="skillsGrid"
+    class="skills-grid"
+  ></div>
+
+
+  <div
+    id="selectedSkillsBox"
+    class="selected-box"
+  >
+    لم تختر أي مهارة بعد.
+  </div>
+
+
+  <button
+    class="primary-btn"
+    style="width:100%;"
+    onclick="startSkillAssessment()"
+  >
+    📊 انتقل إلى التقييم
+  </button>
+
+</section>
+
+
+<!-- =====================================================
+     التقييم
+===================================================== -->
+
+<section id="assessmentSection" class="screen">
+
+  <button
+    class="back"
+    onclick="showScreen('workerScreen')"
+  >
+    → العودة
+  </button>
+
+
+  <div id="assessmentIntro">
+
+    <div class="card">
+
+      <h2>
+        📊 تقييم المستوى
+      </h2>
+
+      <p>
+
+        تقييم أولي يساعدك على فهم مستواك
+        في المجال الذي اخترته.
+
+      </p>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>
+        هل سبق أن عملت في المجال الذي تريد تقييمه؟
+      </h3>
+
+
+      <div class="options">
+
+        <button
+          class="option"
+          onclick="selectExperience(this,'expert')"
+        >
+          🏆 نعم، وأتقنه
+        </button>
+
+
+        <button
+          class="option"
+          onclick="selectExperience(this,'learning')"
+        >
+          ⭐ نعم، لكنني ما زلت أتعلم
+        </button>
+
+
+        <button
+          class="option"
+          onclick="selectExperience(this,'little')"
+        >
+          👍 جربته قليلًا
+        </button>
+
+
+        <button
+          class="option"
+          onclick="selectExperience(this,'none')"
+        >
+          🌱 لم أجربه
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div
+    id="writingTest"
+    class="hidden"
+  >
+
+    <div class="card">
+
+      <h2>
+        ✍️ اختبار الكتابة
+      </h2>
+
+      <p>
+        اكتب فقرة من 120 إلى 180 كلمة تشرح فيها:
+      </p>
+
+      <p
+        style="font-weight:800;margin-top:10px;"
+      >
+        لماذا يجب على الشركات الصغيرة استخدام
+        وسائل التواصل الاجتماعي للوصول إلى العملاء؟
+      </p>
+
+    </div>
+
+
+    <div class="form-group">
+
+      <textarea
+        id="writingAnswer"
+        oninput="updateWordCount()"
+        placeholder="اكتب إجابتك هنا..."
+      ></textarea>
+
+
+      <div
+        id="wordCount"
+        class="word-count"
+      >
+        عدد الكلمات: 0
+      </div>
+
+    </div>
+
+
+    <button
+      class="primary-btn"
+      style="width:100%;"
+      onclick="submitWritingTest()"
+    >
+      📊 تقييم إجابتي
+    </button>
+
+  </div>
+
+
+  <div
+    id="generalAssessment"
+    class="hidden"
+  >
+
+    <div class="card">
+
+      <h3>
+        📊 تقييم أولي
+      </h3>
+
+      <p>
+        بناءً على المجال والخبرة التي اخترتها،
+        سيحسب مَدخَل مؤشرًا أوليًا يساعدك
+        على معرفة نقطة البداية.
+      </p>
+
+    </div>
+
+    <button
+      class="primary-btn"
+      style="width:100%;"
+      onclick="submitGeneralAssessment()"
+    >
+      📊 إظهار نتيجتي
+    </button>
+
+  </div>
+
+
+  <div
+    id="assessmentResult"
+    class="hidden"
+  ></div>
+
+</section>
+
+
+<!-- =====================================================
+     الفرص
+===================================================== -->
+
+<section id="opportunitiesScreen" class="screen">
+
+  <button
+    class="back"
+    onclick="showScreen('homeScreen')"
+  >
+    → العودة
+  </button>
+
+
+  <div class="card">
+
+    <h2>
+      🔎 فرص العمل
+    </h2>
+
+    <p>
+
+      ابحث في الفرص المتاحة داخل مَدخَل.
+      بعض الفرص تأتي من مصادر خارجية ويتم تحويلك
+      إلى المصدر الأصلي عند التقديم،
+      وبعض فرص أصحاب العمل تكون مخصصة للمطابقة الداخلية.
+
+    </p>
+
+  </div>
+
+
+  <div class="search-box">
+
+    <h3>
+      🔎 ماذا تبحث عنه؟
+    </h3>
+
+
+    <div class="search-grid">
+
+      <input
+        id="jobSearch"
+        type="search"
+        placeholder="اكتب المهنة أو المهارة"
+        oninput="renderOpportunities()"
+      >
+
+
+      <input
+        id="jobLocation"
+        type="text"
+        placeholder="المدينة أو البلد"
+        oninput="renderOpportunities()"
+      >
+
+    </div>
+
+  </div>
+
+
+  <div
+    class="category-scroll"
+    id="categoryScroll"
+  ></div>
+
+
+  <div
+    id="opportunitiesList"
+  ></div>
+
+</section>
+
+
+<!-- =====================================================
+     الاشتراك
+===================================================== -->
+
+<section id="subscriptionScreen" class="screen">
+
+  <button
+    class="back"
+    onclick="showScreen('homeScreen')"
+  >
+    → العودة
+  </button>
+
+
+  <div class="premium-offer">
+
+    <div class="premium-badge">
+      🔔 مَدخَل يبحث معك
+    </div>
+
+
+    <h2>
+      اشترك، ونحن نجد ما تبحث عنه.
+    </h2>
+
+
+    <p>
+
+      البحث الأساسي مجاني.
+      الاشتراك مخصص للمتابعة المستمرة
+      والتنبيهات عند ظهور فرص جديدة
+      تتوافق مع ملفك وتفضيلاتك.
+
+    </p>
+
+
+    <div class="premium-price">
+      $1 / شهر
+    </div>
+
+
+    <ul class="premium-features">
+
+      <li>
+        🔎 حفظ ما تبحث عنه
+      </li>
+
+      <li>
+        🎯 مطابقة الفرص مع ملفك
+      </li>
+
+      <li>
+        🔔 تنبيهات عن الفرص الجديدة
+      </li>
+
+      <li>
+        📋 متابعة حالة الفرص التي تقدمت إليها
+      </li>
+
+    </ul>
+
+
+    <button
+      class="primary-btn"
+      style="width:100%;"
+      onclick="startSubscriptionRequest()"
+    >
+      🔔 أريد الاشتراك
+    </button>
+
+  </div>
+
+
+  <div class="card">
+
+    <h3>
+      ⚠️ تنبيه مهم
+    </h3>
+
+    <p>
+
+      الاشتراك لا يعني ضمان الحصول على وظيفة.
+      هو خدمة بحث ومتابعة ومطابقة تساعدك
+      على الوصول إلى الفرص المناسبة.
+
+    </p>
+
+  </div>
+
+
+  <div
+    id="subscriptionStatusBox"
+  ></div>
+
+</section>
+
+
+<!-- =====================================================
+     الحساب
+===================================================== -->
+
+<section id="accountScreen" class="screen">
+
+  <div class="card">
+
+    <h2>
+      👤 حسابي
+    </h2>
+
+    <p id="accountStatus">
+      لم يتم إنشاء ملف مهني بعد.
+    </p>
+
+  </div>
+
+
+  <div class="card">
+
+    <h3>
+      📋 ملفي المهني
+    </h3>
+
+    <p>
+      بياناتك المهنية ومهاراتك ومكانك
+      ونوع العمل المطلوب.
+    </p>
+
+
+    <button
+      class="secondary-btn"
+      style="width:100%;margin-top:12px;"
+      onclick="openProfile()"
+    >
+      ✏️ تعديل الملف
+    </button>
+
+  </div>
+
+
+  <div class="card">
+
+    <h3>
+      📊 تقييماتي
+    </h3>
+
+    <p id="savedAssessmentText">
+      لا توجد تقييمات محفوظة بعد.
+    </p>
+
+  </div>
+
+
+  <div class="card">
+
+    <h3>
+      📩 طلباتي
+    </h3>
+
+    <div
+      id="applicationsList"
+    ></div>
+
+  </div>
+
+
+  <div class="card">
+
+    <h3>
+      🔔 المتابعة والتنبيهات
+    </h3>
+
+    <p>
+      احصل على تنبيهات عند ظهور فرص
+      تتوافق مع ما تبحث عنه.
+    </p>
+
+
+    <div
+      id="accountSubscriptionStatus"
+      class="info-strip"
+    >
+      الاشتراك غير مفعل.
+    </div>
+
+
+    <button
+      class="primary-btn"
+      style="width:100%;margin-top:12px;"
+      onclick="openSubscription()"
+    >
+      🔔 الاشتراك — $1 شهريًا
+    </button>
+
+  </div>
+
+
+  <button
+    class="secondary-btn"
+    style="width:100%;margin-top:5px;"
+    onclick="openOwnerMode()"
+  >
+    👑 وضع المالك
+  </button>
+
+</section>
+
+
+<!-- =====================================================
+     المالك
+===================================================== -->
+
+<section id="ownerScreen" class="screen">
+
+  <button
+    class="back"
+    onclick="showScreen('accountScreen')"
+  >
+    → العودة
+  </button>
+
+
+  <div class="owner-box">
+
+    <div class="owner-badge">
+      👑 OWNER MODE
+    </div>
+
+
+    <h2
+      style="margin:4px 0 8px;"
+    >
+      لوحة مَدخَل
+    </h2>
+
+
+    <p
+      style="margin:0;color:#d6dddd;font-size:13px;line-height:1.7;"
+    >
+
+      هذه معاينة للواجهات والإحصاءات المحلية.
+      الحماية الحقيقية والصلاحيات الحساسة ستكون
+      على الخادم وSupabase RLS وEdge Functions.
+
+    </p>
+
+  </div>
+
+
+  <div class="admin-grid">
+
+    <button
+      class="admin-card"
+      onclick="ownerPreview('worker')"
+    >
+
+      <span>
+        👤
+      </span>
+
+      الباحثون عن عمل
+
+      <strong
+        id="ownerWorkerCount"
+        class="admin-stat"
+      >
+        0
+      </strong>
+
+    </button>
+
+
+    <button
+      class="admin-card"
+      onclick="ownerPreview('employer')"
+    >
+
+      <span>
+        🏢
+      </span>
+
+      أصحاب الفرص
+
+      <strong
+        id="ownerEmployerCount"
+        class="admin-stat"
+      >
+        0
+      </strong>
+
+    </button>
+
+
+    <button
+      class="admin-card"
+      onclick="showOwnerMatches()"
+    >
+
+      <span>
+        🎯
+      </span>
+
+      المطابقة
+
+      <strong
+        id="ownerMatchCount"
+        class="admin-stat"
+      >
+        0
+      </strong>
+
+    </button>
+
+
+    <button
+      class="admin-card"
+      onclick="showOwnerNotifications()"
+    >
+
+      <span>
+        🔔
+      </span>
+
+      التنبيهات
+
+      <strong
+        id="ownerNotificationCount"
+        class="admin-stat"
+      >
+        0
+      </strong>
+
+    </button>
+
+
+    <button
+      class="admin-card"
+      onclick="showOwnerFinance()"
+    >
+
+      <span>
+        💰
+      </span>
+
+      المالية
+
+      <strong
+        id="ownerSubscriptionCount"
+        class="admin-stat"
+      >
+        0
+      </strong>
+
+    </button>
+
+
+    <button
+      class="admin-card"
+      onclick="showOwnerReports()"
+    >
+
+      <span>
+        📈
+      </span>
+
+      التقارير
+
+      <strong
+        id="ownerApplicationCount"
+        class="admin-stat"
+      >
+        0
+      </strong>
+
+    </button>
+
+  </div>
+
+
+  <div
+    id="ownerDetails"
+    style="margin-top:15px;"
+  ></div>
+
+
+  <div
+    class="card"
+    style="margin-top:15px;"
+  >
+
+    <h3>
+      🏢 فرص أصحاب العمل
+    </h3>
+
+    <div
+      id="ownerVacanciesList"
+    ></div>
+
+  </div>
+
+</section>
+
+
+</main>
+
+
+<!-- =====================================================
+     التنقل السفلي
+===================================================== -->
+
+<nav class="bottom-nav">
+
+  <button
+    class="nav-item active"
+    data-screen="homeScreen"
+    onclick="navigate('homeScreen',this)"
+  >
+    <span>
+      🏠
+    </span>
+    الرئيسية
+  </button>
+
+
+  <button
+    class="nav-item"
+    data-screen="opportunitiesScreen"
+    onclick="navigate('opportunitiesScreen',this)"
+  >
+    <span>
+      🔎
+    </span>
+    الفرص
+  </button>
+
+
+  <button
+    class="nav-item"
+    data-screen="discoverSkillsSection"
+    onclick="navigate('discoverSkillsSection',this)"
+  >
+    <span>
+      🧠
+    </span>
+    اكتشف
+  </button>
+
+
+  <button
+    class="nav-item"
+    data-screen="assessmentSection"
+    onclick="navigate('assessmentSection',this)"
+  >
+    <span>
+      📊
+    </span>
+    قيّمني
+  </button>
+
+
+  <button
+    class="nav-item"
+    data-screen="accountScreen"
+    onclick="navigate('accountScreen',this)"
+  >
+    <span>
+      👤
+    </span>
+    حسابي
+  </button>
+
+</nav>
+
+
+</div>
+
+
+<div
+  id="toast"
+  class="toast"
+></div>
+
+
+<script>
+
+/* =========================================================
+   SUPABASE
+========================================================= */
+
+const SUPABASE_URL =
+  "https://qbufsdpdobuicpljnssr.supabase.co";
+
+
+const SUPABASE_PUBLISHABLE_KEY =
+  "sb_pule_mcgOg_NlEY";
+
+
+let supabaseClient = null;
+
+
+if (
+  window.supabase &&
+  SUPABASE_PUBLISHABLE_KEY &&
+  !SUPABASE_PUBLISHABLE_KEY.includes("ضع مفتاح")
+) {
+
+  supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
+
+}
+
+
+/* =========================================================
+   متغيرات عامة
+========================================================= */
+
+let toastTimer = null;
+
+let experienceLevel = null;
+
+let assessmentSkillContext = [];
+
+let selectedSkills = [];
+
+let currentCategory = "الكل";
+
+
+/* =========================================================
+   البيانات المحلية
+========================================================= */
+
+const LOCAL_KEYS = {
+
+  vacancies:
+    "madkhal_demo_vacancies",
+
+  applications:
+    "madkhal_applications",
+
+  subscription:
+    "madkhal_subscription",
+
+  notifications:
+    "madkhal_notifications",
+
+  selectedSkills:
+    "madkhal_selected_skills",
+
+  assessment:
+    "madkhal_writing_assessment"
+
+};
+
+
+/* =========================================================
+   أدوات عامة
+========================================================= */
+
+function safeJsonParse(value, fallback) {
+
+  try {
+
+    return value
+      ? JSON.parse(value)
+      : fallback;
+
+  } catch {
+
+    return fallback;
+
+  }
+
+}
+
+
+function getLocalArray(key) {
+
+  return safeJsonParse(
+    localStorage.getItem(key),
+    []
+  );
+
+}
+
+
+function setLocalArray(key, value) {
+
+  localStorage.setItem(
+    key,
+    JSON.stringify(value)
+  );
+
+}
+
+
+function createId() {
+
+  if (
+    window.crypto &&
+    typeof crypto.randomUUID === "function"
+  ) {
+
+    return crypto.randomUUID();
+
+  }
+
+  return (
+    Date.now().toString(36) +
+    Math.random().toString(36).slice(2)
+  );
+
+}
+
+
+function normalizeText(value) {
+
+  return String(value || "")
+    .trim()
+    .toLowerCase();
+
+}
+
+
+function escapeHtml(value) {
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+function escapeJs(value) {
+
+  return String(value ?? "")
+    .replace(/\\/g,"\\\\")
+    .replace(/'/g,"\\'");
+
+}
+
+
+/* =========================================================
+   التنقل
+========================================================= */
+
+function updateBottomNavigation(screenId) {
+
+  document
+    .querySelectorAll(".nav-item")
+    .forEach(item => {
+
+      item.classList.remove("active");
+
+    });
+
+
+  const matchingButton =
+    document.querySelector(
+      `.nav-item[data-screen="${screenId}"]`
+    );
+
+
+  if (matchingButton) {
+
+    matchingButton.classList.add(
+      "active"
+    );
+
+  }
+
+}
+
+
+function showScreen(id) {
+
+  document
+    .querySelectorAll(".screen")
+    .forEach(screen => {
+
+      screen.classList.remove(
+        "active"
+      );
+
+    });
+
+
+  const target =
+    document.getElementById(id);
+
+
+  if (!target) {
+
+    console.warn(
+      "Madkhal: screen not found:",
+      id
+    );
+
+    return;
+
+  }
+
+
+  target.classList.add(
+    "active"
+  );
+
+
+  updateBottomNavigation(
+    id
+  );
+
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+
+  if (id === "accountScreen") {
+
+    loadAccount();
+
+  }
+
+
+  if (id === "ownerScreen") {
+
+    renderOwnerDashboard();
+
+  }
+
+
+  if (id === "opportunitiesScreen") {
+
+    renderCategories();
+
+    renderOpportunities();
+
+  }
+
+}
+
+
+function navigate(id, button) {
+
+  showScreen(id);
+
+  if (button) {
+
+    document
+      .querySelectorAll(".nav-item")
+      .forEach(item => {
+
+        item.classList.remove(
+          "active"
+        );
+
+      });
+
+    button.classList.add(
+      "active"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   Toast
+========================================================= */
+
+function showToast(message) {
+
+  const toast =
+    document.getElementById(
+      "toast"
+    );
+
+
+  if (!toast) return;
+
+
+  toast.textContent =
+    message;
+
+
+  toast.classList.add(
+    "show"
+  );
+
+
+  clearTimeout(
+    toastTimer
+  );
+
+
+  toastTimer =
+    setTimeout(() => {
+
+      toast.classList.remove(
+        "show"
+      );
+
+    },3500);
+
+}
+
+
+/* =========================================================
+   الباحث عن عمل
+========================================================= */
+
+function openWorker() {
+
+  showScreen(
+    "workerScreen"
+  );
+
+}
+
+
+function startWorkerMatching() {
+  const name = localStorage.getItem("madkhal_profile_name");
+  const skill = localStorage.getItem("madkhal_profile_skill");
+  const location = localStorage.getItem("madkhal_profile_location");
+
+  if (!name || !skill || !location) {
+    showToast("👤 أكمل ملفك أولًا، ثم نبدأ المطابقة مع الفرص.");
+    setTimeout(() => openProfile(), 700);
+    return;
+  }
+
+  openOpportunities();
+}
+
+async function openProfile() {
+
+  showScreen(
+    "profileScreen"
+  );
+
+
+  await loadProfileFromSupabase();
+
+}
+
+
+/* =========================================================
+   تحميل الملف من Supabase
+========================================================= */
+
+async function loadProfileFromSupabase() {
+
+  const fields = {
+
+    workerName:
+      "madkhal_profile_name",
+
+    workerQualification:
+      "madkhal_profile_qualification",
+
+    workerSkill:
+      "madkhal_profile_skill",
+
+    workerLocation:
+      "madkhal_profile_location",
+
+    workerWorkType:
+      "madkhal_profile_work_type",
+
+    workerDescription:
+      "madkhal_profile_description"
+
+  };
+
+
+  Object.keys(fields)
+    .forEach(id => {
+
+      const value =
+        localStorage.getItem(
+          fields[id]
+        );
+
+
+      if (value !== null) {
+
+        const element =
+          document.getElementById(id);
+
+
+        if (element) {
+
+          element.value =
+            value;
+
+        }
+
+      }
+
+    });
+
+
+  if (!supabaseClient) {
+
+    return;
+
+  }
+
+
+  try {
+
+    const {
+      data: sessionData,
+      error: sessionError
+    } =
+      await supabaseClient.auth.getSession();
+
+
+    if (sessionError) {
+
+      throw sessionError;
+
+    }
+
+
+    const user =
+      sessionData?.session?.user;
+
+
+    if (!user) {
+
+      return;
+
+    }
+
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("worker_profiles")
+        .select(
+          "full_name,qualification,profession,skills,location,work_type"
+        )
+        .eq(
+          "user_id",
+          user.id
+        )
+        .maybeSingle();
+
+
+    if (error) {
+
+      console.warn(
+        "Madkhal profile load:",
+        error
+      );
+
+      return;
+
+    }
+
+
+    if (!data) {
+
+      return;
+
+    }
+
+
+    const mapping = {
+
+      workerName:
+        data.full_name,
+
+      workerQualification:
+        data.qualification || "",
+
+      workerSkill:
+        data.profession ||
+        data.skills ||
+        "",
+
+      workerLocation:
+        data.location || "",
+
+      workerWorkType:
+        data.work_type || ""
+
+    };
+
+
+    Object.keys(mapping)
+      .forEach(id => {
+
+        const element =
+          document.getElementById(id);
+
+
+        if (
+          element &&
+          mapping[id] !== undefined
+        ) {
+
+          element.value =
+            mapping[id];
+
+        }
+
+      });
+
+
+    updateAccountPreview(
+      mapping.workerName,
+      mapping.workerSkill,
+      mapping.workerLocation
+    );
+
+
+  } catch (error) {
+
+    console.warn(
+      "Madkhal loadProfile error:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   حفظ الملف المهني
+========================================================= */
+
+async function saveWorker() {
+
+  const name =
+    document
+      .getElementById("workerName")
+      .value
+      .trim();
+
+
+  const qualification =
+    document
+      .getElementById("workerQualification")
+      .value
+      .trim();
+
+
+  const skill =
+    document
+      .getElementById("workerSkill")
+      .value
+      .trim();
+
+
+  const location =
+    document
+      .getElementById("workerLocation")
+      .value
+      .trim();
+
+
+  const workType =
+    document
+      .getElementById("workerWorkType")
+      .value;
+
+
+  const description =
+    document
+      .getElementById("workerDescription")
+      .value
+      .trim();
+
+
+  if (
+    !name ||
+    !skill ||
+    !location
+  ) {
+
+    showToast(
+      "⚠️ اكتب الاسم والمهارة والمكان أولًا."
+    );
+
+    return;
+
+  }
+
+
+  const button =
+    document.getElementById(
+      "saveWorkerButton"
+    );
+
+
+  if (button) {
+
+    button.disabled =
+      true;
+
+    button.textContent =
+      "⏳ جارٍ حفظ الملف...";
+
+  }
+
+
+  try {
+
+    /* =========================================
+       النسخة المحلية
+    ========================================= */
+
+    localStorage.setItem(
+      "madkhal_profile_name",
+      name
+    );
+
+    localStorage.setItem(
+      "madkhal_profile_qualification",
+      qualification
+    );
+
+    localStorage.setItem(
+      "madkhal_profile_skill",
+      skill
+    );
+
+    localStorage.setItem(
+      "madkhal_profile_location",
+      location
+    );
+
+    localStorage.setItem(
+      "madkhal_profile_work_type",
+      workType
+    );
+
+    localStorage.setItem(
+      "madkhal_profile_description",
+      description
+    );
+
+
+    /* =========================================
+       التحقق من Supabase
+    ========================================= */
+
+    if (!supabaseClient) {
+
+      throw new Error(
+        "SUPABASE_NOT_CONNECTED"
+      );
+
+    }
+
+
+    /* =========================================
+       الحصول على هوية المستخدم
+    ========================================= */
+
+    let {
+      data: sessionData,
+      error: sessionError
+    } =
+      await supabaseClient.auth.getSession();
+
+
+    if (sessionError) {
+
+      throw sessionError;
+
+    }
+
+
+    let user =
+      sessionData?.session?.user ||
+      null;
+
+
+    /* =========================================
+       إنشاء هوية مجهولة
+    ========================================= */
+
+    if (!user) {
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .auth
+          .signInAnonymously();
+
+
+      if (error) {
+
+        throw error;
+
+      }
+
+
+      user =
+        data?.user ||
+        null;
+
+    }
+
+
+    if (!user) {
+
+      throw new Error(
+        "لم يتم إنشاء هوية المستخدم."
+      );
+
+    }
+
+
+    /* =========================================
+       تجهيز البيانات
+    ========================================= */
+
+    const profile = {
+
+      user_id:
+        user.id,
+
+      full_name:
+        name,
+
+      qualification:
+        qualification || null,
+
+      profession:
+        skill,
+
+      skills:
+        skill,
+
+      location:
+        location,
+
+      work_type:
+        workType || null,
+
+      cv_url:
+        null,
+
+      updated_at:
+        new Date()
+          .toISOString()
+
+    };
+
+
+    /* =========================================
+       الحفظ في worker_profiles
+    ========================================= */
+
+    const {
+      error: saveError
+    } =
+      await supabaseClient
+        .from("worker_profiles")
+        .upsert(
+          profile,
+          {
+            onConflict:
+              "user_id"
+          }
+        );
+
+
+    if (saveError) {
+
+      throw saveError;
+
+    }
+
+
+    updateAccountPreview(
+      name,
+      skill,
+      location
+    );
+
+
+    showToast(
+      "🎉 تم حفظ ملفك المهني بنجاح."
+    );
+
+
+    setTimeout(() => {
+
+      showScreen(
+        "accountScreen"
+      );
+
+    },700);
+
+
+  } catch (error) {
+
+    console.error(
+      "Madkhal saveWorker error:",
+      error
+    );
+
+
+    if (
+      error?.message ===
+      "SUPABASE_NOT_CONNECTED"
+    ) {
+
+      showToast(
+        "⚠️ تم حفظ نسخة محلية، لكن اتصال Supabase غير متاح."
+      );
+
+    } else {
+
+      showToast(
+        "❌ تعذر حفظ الملف في قاعدة البيانات. تم الاحتفاظ بنسخة محلية."
+      );
+
+    }
+
+  } finally {
+
+    if (button) {
+
+      button.disabled =
+        false;
+
+      button.textContent =
+        "💾 حفظ الملف المهني";
+
+    }
+
+  }
+
+}
+
+
+/* =========================================================
+   تحديث معاينة الحساب
+========================================================= */
+
+function updateAccountPreview(
+  name,
+  skill,
+  location
+) {
+
+  const account =
+    document.getElementById(
+      "accountStatus"
+    );
+
+
+  if (!account || !name) {
+
+    return;
+
+  }
+
+
+  account.innerHTML =
+
+    `👋 أهلًا ${escapeHtml(name)}
+     <br>
+     المهارة:
+     ${escapeHtml(skill || "غير محددة")}
+     <br>
+     📍 ${escapeHtml(location || "غير محدد")}`;
+
+}
+
+
+/* =========================================================
+   صاحب فرصة العمل
+========================================================= */
+
+function openEmployer() {
+
+  showScreen(
+    "employerScreen"
+  );
+
+}
+
+
+async function submitEmployerVacancy() {
+
+  const employerName =
+    document
+      .getElementById("employerName")
+      .value
+      .trim();
+
+
+  const title =
+    document
+      .getElementById("vacancyTitle")
+      .value
+      .trim();
+
+
+  const location =
+    document
+      .getElementById("vacancyLocation")
+      .value
+      .trim();
+
+
+  const workType =
+    document
+      .getElementById("vacancyWorkType")
+      .value;
+
+
+  const skills =
+    document
+      .getElementById("vacancySkills")
+      .value
+      .trim();
+
+
+  const qualification =
+    document
+      .getElementById("vacancyQualification")
+      .value
+      .trim();
+
+
+  const numberNeeded =
+    Number(
+      document
+        .getElementById("vacancyNumber")
+        .value ||
+      1
+    );
+
+
+  const salary =
+    document
+      .getElementById("vacancySalary")
+      .value
+      .trim();
+
+
+  const description =
+    document
+      .getElementById("vacancyDescription")
+      .value
+      .trim();
+
+
+  if (
+    !employerName ||
+    !title ||
+    !location ||
+    !workType ||
+    !skills ||
+    !description
+  ) {
+
+    showToast(
+      "⚠️ أكمل بيانات فرصة العمل الأساسية."
+    );
+
+    return;
+
+  }
+
+
+  if (
+    numberNeeded < 1
+  ) {
+
+    showToast(
+      "⚠️ عدد الأشخاص يجب أن يكون واحدًا على الأقل."
+    );
+
+    return;
+
+  }
+
+
+  const vacancy = {
+
+    id:
+      createId(),
+
+    employer_name:
+      employerName,
+
+    title,
+
+    location,
+
+    work_type:
+      workType,
+
+    required_skills:
+      skills,
+
+    required_qualification:
+      qualification,
+
+    number_needed:
+      numberNeeded,
+
+    salary,
+
+    description,
+
+    status:
+      "open",
+
+    visibility:
+      "private_match_only",
+
+    created_at:
+      new Date()
+        .toISOString()
+
+  };
+
+
+  const existing =
+    getLocalArray(
+      LOCAL_KEYS.vacancies
+    );
+
+
+  existing.push(
+    vacancy
+  );
+
+
+  setLocalArray(
+    LOCAL_KEYS.vacancies,
+    existing
+  );
+
+
+  showToast(
+    "🎉 تم تسجيل فرصة العمل بنجاح."
+  );
+
+
+  clearEmployerForm();
+
+
+  setTimeout(() => {
+
+    showScreen(
+      "homeScreen"
+    );
+
+  },700);
+
+}
+
+
+function clearEmployerForm() {
+
+  const ids = [
+
+    "employerName",
+    "vacancyTitle",
+    "vacancyLocation",
+    "vacancySkills",
+    "vacancyQualification",
+    "vacancySalary",
+    "vacancyDescription"
+
+  ];
+
+
+  ids.forEach(id => {
+
+    const element =
+      document.getElementById(id);
+
+
+    if (element) {
+
+      element.value = "";
+
+    }
+
+  });
+
+
+  const number =
+    document.getElementById(
+      "vacancyNumber"
+    );
+
+
+  if (number) {
+
+    number.value =
+      "1";
+
+  }
+
+
+  const workType =
+    document.getElementById(
+      "vacancyWorkType"
+    );
+
+
+  if (workType) {
+
+    workType.value =
+      "";
+
+  }
+
+}
+
+
+/* =========================================================
+   المهارات
+========================================================= */
+
+const skills = [
+
+  ["✍️","الكتابة"],
+  ["🌐","الترجمة"],
+  ["🎨","التصميم"],
+  ["💻","البرمجة"],
+  ["🎬","تحرير الفيديو"],
+  ["🎙️","التفريغ الصوتي"],
+  ["📱","إدارة حسابات التواصل"],
+  ["📊","إدخال البيانات"],
+  ["🗣️","التواصل مع العملاء"],
+  ["📚","التعليم والشرح"],
+  ["🔍","البحث وجمع المعلومات"],
+  ["🧮","المحاسبة"],
+  ["🤷","لا أعرف بعد"]
+
+];
+
+
+function renderSkills() {
+
+  const grid =
+    document.getElementById(
+      "skillsGrid"
+    );
+
+
+  if (!grid) return;
+
+
+  grid.innerHTML = "";
+
+
+  skills.forEach(
+    ([icon,name]) => {
+
+      const button =
+        document.createElement(
+          "button"
+        );
+
+
+      button.className =
+        "skill";
+
+
+      if (
+        selectedSkills
+          .includes(name)
+      ) {
+
+        button.classList.add(
+          "selected"
+        );
+
+      }
+
+
+      button.textContent =
+        `${icon} ${name}`;
+
+
+      button.onclick =
+        () =>
+          toggleSkill(name);
+
+
+      grid.appendChild(
+        button
+      );
+
+    }
+  );
+
+
+  updateSelectedSkills();
+
+}
+
+
+function toggleSkill(skill) {
+
+  if (
+    skill ===
+    "لا أعرف بعد"
+  ) {
+
+    if (
+      selectedSkills.includes(
+        skill
+      )
+    ) {
+
+      selectedSkills = [];
+
+    } else {
+
+      selectedSkills =
+        ["لا أعرف بعد"];
+
+    }
+
+  } else {
+
+    selectedSkills =
+      selectedSkills.filter(
+        item =>
+          item !==
+          "لا أعرف بعد"
+      );
+
+
+    if (
+      selectedSkills.includes(
+        skill
+      )
+    ) {
+
+      selectedSkills =
+        selectedSkills.filter(
+          item =>
+            item !== skill
+        );
+
+    } else {
+
+      selectedSkills.push(
+        skill
+      );
+
+    }
+
+  }
+
+
+  setLocalArray(
+    LOCAL_KEYS.selectedSkills,
+    selectedSkills
+  );
+
+
+  renderSkills();
+
+}
+
+
+function updateSelectedSkills() {
+
+  const box =
+    document.getElementById(
+      "selectedSkillsBox"
+    );
+
+
+  if (!box) return;
+
+
+  if (
+    !selectedSkills.length
+  ) {
+
+    box.textContent =
+      "لم تختر أي مهارة بعد.";
+
+    return;
+
+  }
+
+
+  box.textContent =
+    "المهارات المختارة: " +
+    selectedSkills.join("، ");
+
+}
+
+
+function openDiscoverSkills() {
+
+  showScreen(
+    "discoverSkillsSection"
+  );
+
+
+  renderSkills();
+
+}
+
+
+function startSkillAssessment() {
+
+  if (
+    !selectedSkills.length
+  ) {
+
+    showToast(
+      "⚠️ اختر مهارة واحدة على الأقل."
+    );
+
+    return;
+
+  }
+
+
+  setLocalArray(
+    LOCAL_KEYS.selectedSkills,
+    selectedSkills
+  );
+
+
+  assessmentSkillContext =
+    [...selectedSkills];
+
+
+  openAssessmentScreen();
+
+}
+
+
+/* =========================================================
+   التقييم
+========================================================= */
+
+function openAssessmentScreen() {
+
+  showScreen(
+    "assessmentSection"
+  );
+
+
+  document
+    .getElementById(
+      "assessmentIntro"
+    )
+    .classList.remove(
+      "hidden"
+    );
+
+
+  document
+    .getElementById(
+      "writingTest"
+    )
+    .classList.add(
+      "hidden"
+    );
+
+
+  document
+    .getElementById(
+      "generalAssessment"
+    )
+    .classList.add(
+      "hidden"
+    );
+
+
+  document
+    .getElementById(
+      "assessmentResult"
+    )
+    .classList.add(
+      "hidden"
+    );
+
+
+  experienceLevel =
+    null;
+
+
+  const savedSkills =
+    getLocalArray(
+      LOCAL_KEYS.selectedSkills
+    );
+
+
+  assessmentSkillContext =
+    savedSkills.length
+      ? savedSkills
+      : [...selectedSkills];
+
+}
+
+
+function selectExperience(
+  button,
+  level
+) {
+
+  document
+    .querySelectorAll(
+      "#assessmentIntro .option"
+    )
+    .forEach(item => {
+
+      item.classList.remove(
+        "selected"
+      );
+
+    });
+
+
+  button.classList.add(
+    "selected"
+  );
+
+
+  experienceLevel =
+    level;
+
+
+  const stored =
+    getLocalArray(
+      LOCAL_KEYS.selectedSkills
+    );
+
+
+  const currentSkills =
+    stored.length
+      ? stored
+      : assessmentSkillContext;
+
+
+  assessmentSkillContext =
+    currentSkills;
+
+
+  if (
+    currentSkills.includes(
+      "الكتابة"
+    ) ||
+    currentSkills.length === 0
+  ) {
+
+    document
+      .getElementById(
+        "writingTest"
+      )
+      .classList.remove(
+        "hidden"
+      );
+
+
+    document
+      .getElementById(
+        "generalAssessment"
+      )
+      .classList.add(
+        "hidden"
+      );
+
+  } else {
+
+    document
+      .getElementById(
+        "writingTest"
+      )
+      .classList.add(
+        "hidden"
+      );
+
+
+    document
+      .getElementById(
+        "generalAssessment"
+      )
+      .classList.remove(
+        "hidden"
+      );
+
+  }
+
+}
+
+
+function updateWordCount() {
+
+  const text =
+    document
+      .getElementById(
+        "writingAnswer"
+      )
+      .value
+      .trim();
+
+
+  const words =
+    text
+      ? text.split(/\s+/).length
+      : 0;
+
+
+  document
+    .getElementById(
+      "wordCount"
+    )
+    .textContent =
+      "عدد الكلمات: " +
+      words;
+
+}
+
+
+function calculateWritingScore(
+  text
+) {
+
+  const words =
+    text.trim()
+      ? text.trim()
+          .split(/\s+/)
+          .length
+      : 0;
+
+
+  if (!words) {
+
+    return 0;
+
+  }
+
+
+  let score =
+    35;
+
+
+  if (
+    words >= 120 &&
+    words <= 180
+  ) {
+
+    score +=
+      20;
+
+  } else if (
+    words >= 90 &&
+    words <= 220
+  ) {
+
+    score +=
+      12;
+
+  }
+
+
+  const lower =
+    text.toLowerCase();
+
+
+  const ideas = [
+
+    "عملاء",
+    "العملاء",
+    "تواصل",
+    "تسويق",
+    "شركة",
+    "الشركات",
+    "منصات",
+    "مبيعات",
+    "جمهور",
+    "ثقة",
+    "محتوى",
+    "إعلان",
+    "اعلان"
+
+  ];
+
+
+  let matched =
+    0;
+
+
+  ideas.forEach(word => {
+
+    if (
+      lower.includes(word)
+    ) {
+
+      matched++;
+
+    }
+
+  });
+
+
+  score +=
+    Math.min(
+      matched * 4,
+      24
+    );
+
+
+  const sentences =
+    text
+      .split(/[.!؟\n]+/)
+      .filter(
+        x => x.trim()
+      )
+      .length;
+
+
+  if (
+    sentences >= 4
+  ) {
+
+    score +=
+      10;
+
+  }
+
+
+  return Math.min(
+    100,
+    Math.round(score)
+  );
+
+}
+
+
+function getWritingLevel(
+  score
+) {
+
+  if (
+    score >= 85
+  ) {
+
+    return "🏆 محترف";
+
+  }
+
+
+  if (
+    score >= 70
+  ) {
+
+    return "⭐ جيد جدًا";
+
+  }
+
+
+  if (
+    score >= 55
+  ) {
+
+    return "👍 جيد";
+
+  }
+
+
+  return "🌱 مبتدئ";
+
+}
+
+
+function submitWritingTest() {
+
+  const answer =
+    document
+      .getElementById(
+        "writingAnswer"
+      )
+      .value
+      .trim();
+
+
+  const words =
+    answer
+      ? answer.split(/\s+/).length
+      : 0;
+
+
+  if (
+    words < 50
+  ) {
+
+    showToast(
+      "⚠️ اكتب إجابة أطول قليلًا قبل التقييم."
+    );
+
+    return;
+
+  }
+
+
+  const score =
+    calculateWritingScore(
+      answer
+    );
+
+
+  const level =
+    getWritingLevel(
+      score
+    );
+
+
+  const result = {
+
+    score,
+
+    level,
+
+    words,
+
+    skill:
+      "الكتابة",
+
+    experience:
+      experienceLevel,
+
+    date:
+      new Date()
+        .toISOString(),
+
+    strengths: [
+
+      words >= 120
+        ? "طول الإجابة مناسب للمطلوب"
+        : "لديك بداية جيدة في بناء الإجابة",
+
+      "قدرتك على شرح الفكرة الأساسية واضحة"
+
+    ],
+
+    improvements: [
+
+      words < 120
+        ? "تحتاج إلى تطوير الإجابة وتوسيع الأفكار"
+        : "حاول زيادة الأمثلة العملية",
+
+      "حسّن ترابط الفقرات وتسلسل الأفكار"
+
+    ]
+
+  };
+
+
+  localStorage.setItem(
+    LOCAL_KEYS.assessment,
+    JSON.stringify(result)
+  );
+
+
+  renderAssessmentResult(
+    result
+  );
+
+
+  document
+    .getElementById(
+      "writingTest"
+    )
+    .classList.add(
+      "hidden"
+    );
+
+
+  document
+    .getElementById(
+      "assessmentIntro"
+    )
+    .classList.add(
+      "hidden"
+    );
+
+}
+
+
+function calculateGeneralAssessment() {
+
+  const experienceScores = {
+
+    expert:
+      90,
+
+    learning:
+      70,
+
+    little:
+      50,
+
+    none:
+      30
+
+  };
+
+
+  let score =
+    experienceScores[
+      experienceLevel
+    ] || 30;
+
+
+  const selected =
+    assessmentSkillContext
+      .filter(
+        skill =>
+          skill !==
+          "لا أعرف بعد"
+      );
+
+
+  if (
+    selected.length >= 3
+  ) {
+
+    score += 5;
+
+  }
+
+
+  if (
+    selected.length >= 5
+  ) {
+
+    score += 5;
+
+  }
+
+
+  return Math.min(
+    100,
+    score
+  );
+
+}
+
+
+function getGeneralLevel(
+  score
+) {
+
+  if (
+    score >= 85
+  ) {
+
+    return "🏆 متقدم";
+
+  }
+
+
+  if (
+    score >= 70
+  ) {
+
+    return "⭐ جيد";
+
+  }
+
+
+  if (
+    score >= 50
+  ) {
+
+    return "👍 في طور التطور";
+
+  }
+
+
+  return "🌱 بداية جيدة";
+
+}
+
+
+function submitGeneralAssessment() {
+
+  if (
+    !experienceLevel
+  ) {
+
+    showToast(
+      "⚠️ اختر مستوى خبرتك أولًا."
+    );
+
+    return;
+
+  }
+
+
+  const score =
+    calculateGeneralAssessment();
+
+
+  const level =
+    getGeneralLevel(
+      score
+    );
+
+
+  const result = {
+
+    score,
+
+    level,
+
+    skill:
+      assessmentSkillContext.join(
+        "، "
+      ) || "مجال عام",
+
+    experience:
+      experienceLevel,
+
+    date:
+      new Date()
+        .toISOString(),
+
+    strengths: [
+
+      "لديك نقطة بداية واضحة",
+
+      assessmentSkillContext.length
+        ? "حددت المهارات التي تريد تطويرها"
+        : "بدأت باستكشاف المجال"
+
+    ],
+
+    improvements: [
+
+      experienceLevel ===
+      "none"
+        ? "ابدأ بتطبيقات عملية بسيطة"
+        : "استمر في بناء الخبرة العملية",
+
+      "أضف أمثلة ومشاريع عملية إلى ملفك"
+
+    ]
+
+  };
+
+
+  localStorage.setItem(
+    LOCAL_KEYS.assessment,
+    JSON.stringify(result)
+  );
+
+
+  renderAssessmentResult(
+    result
+  );
+
+
+  document
+    .getElementById(
+      "generalAssessment"
+    )
+    .classList.add(
+      "hidden"
+    );
+
+
+  document
+    .getElementById(
+      "assessmentIntro"
+    )
+    .classList.add(
+      "hidden"
+    );
+
+}
+
+
+function renderAssessmentResult(
+  result
+) {
+
+  const container =
+    document.getElementById(
+      "assessmentResult"
+    );
+
+
+  if (!container) return;
+
+
+  container.classList.remove(
+    "hidden"
+  );
+
+
+  container.innerHTML = `
+
+    <div class="result">
+
+      <div
+        style="font-size:13px;color:#718080;"
+      >
+        نتيجتك في التقييم
+      </div>
+
+      <div class="score">
+        ${escapeHtml(result.score)}
+      </div>
+
+      <div class="level">
+        ${escapeHtml(result.level)}
+      </div>
+
+      <div
+        style="font-size:12px;color:#718080;"
+      >
+        المجال:
+        ${escapeHtml(result.skill)}
+      </div>
+
+      <div class="result-list">
+
+        <div>
+          📊 المؤشر:
+          <strong>
+            ${escapeHtml(result.score)}/100
+          </strong>
+        </div>
+
+        <div>
+          💪 <strong>نقاط القوة</strong>
+          <br>
+          ${result.strengths
+            .map(
+              item =>
+                escapeHtml(item)
+            )
+            .join("<br>")}
+        </div>
+
+        <div>
+          📚 <strong>ما يحتاج تطويرًا</strong>
+          <br>
+          ${result.improvements
+            .map(
+              item =>
+                escapeHtml(item)
+            )
+            .join("<br>")}
+        </div>
+
+      </div>
+
+
+      <button
+        class="primary-btn"
+        style="width:100%;margin-top:15px;"
+        onclick="openOpportunities()"
+      >
+        🔎 ابحث عن فرص
+      </button>
+
+    </div>
+
+
+    <div class="premium-offer">
+
+      <div class="premium-badge">
+        🔔 المتابعة المستمرة
+      </div>
+
+      <h3>
+        لا تريد البحث كل يوم؟
+      </h3>
+
+      <p>
+        اشترك، ونحن نجد ما تبحث عنه.
+      </p>
+
+      <div class="premium-price">
+        $1 / شهر
+      </div>
+
+      <button
+        class="primary-btn"
+        style="width:100%;"
+        onclick="openSubscription()"
+      >
+        🔔 الاشتراك والمتابعة
+      </button>
+
+    </div>
+
+  `;
+
+
+  const accountText =
+    document.getElementById(
+      "savedAssessmentText"
+    );
+
+
+  if (accountText) {
+
+    accountText.textContent =
+      `📊 آخر نتيجة: ${result.score}/100 — ${result.level}`;
+
+  }
+
+}
+
+
+/* =========================================================
+   الفرص
+========================================================= */
+
+const opportunityCategories = [
+
+  "💻 البرمجة",
+  "✍️ الكتابة",
+  "🌐 الترجمة",
+  "🎨 التصميم",
+  "🎬 الفيديو",
+  "📱 التواصل الاجتماعي",
+  "📢 التسويق",
+  "📊 البيانات",
+  "📚 التعليم",
+  "📝 التدقيق",
+  "🧮 المحاسبة",
+  "🤖 الذكاء الاصطناعي",
+  "💼 المساعدة الافتراضية",
+  "🔧 أخرى"
+
+];
+
+
+const opportunities = [
+
+  {
+
+    id:
+      "demo-accountant",
+
+    icon:
+      "🧮",
+
+    title:
+      "محاسب",
+
+    company:
+      "فرصة من المصدر الأصلي",
+
+    location:
+      "عن بُعد",
+
+    type:
+      "دوام كامل",
+
+    category:
+      "🧮 المحاسبة",
+
+    salary:
+      "حسب المصدر",
+
+    description:
+      "مثال لواجهة وظيفة سيتم استبدالها ببيانات حقيقية من مصادر العمل."
+
+  },
+
+
+  {
+
+    id:
+      "demo-web-developer",
+
+    icon:
+      "💻",
+
+    title:
+      "مطور مواقع",
+
+    company:
+      "فرصة من المصدر الأصلي",
+
+    location:
+      "عن بُعد",
+
+    type:
+      "دوام كامل",
+
+    category:
+      "💻 البرمجة",
+
+    salary:
+      "حسب المصدر",
+
+    description:
+      "مثال لواجهة وظيفة سيتم استبدالها بالبيانات الحقيقية."
+
+  },
+
+
+  {
+
+    id:
+      "demo-arabic-writer",
+
+    icon:
+      "✍️",
+
+    title:
+      "كاتب محتوى عربي",
+
+    company:
+      "فرصة من المصدر الأصلي",
+
+    location:
+      "عن بُعد",
+
+    type:
+      "عمل حر",
+
+    category:
+      "✍️ الكتابة",
+
+    salary:
+      "حسب المصدر",
+
+    description:
+      "مثال لفرصة كتابة ستظهر لاحقًا من قاعدة بيانات مَدخَل."
+
+  }
+
+];
+
+
+/* =========================================================
+   WorkLink — وظائف قاعدة Supabase
+========================================================= */
+
+let worklinkJobs = [];
+let worklinkLoaded = false;
+
+function worklinkFormatSalary(job) {
+  const min = job?.salary_min;
+  const max = job?.salary_max;
+  const currency = String(job?.salary_currency || "").trim();
+  const hasMin = min !== null && min !== undefined && min !== "";
+  const hasMax = max !== null && max !== undefined && max !== "";
+  if (!hasMin && !hasMax) return "حسب المصدر";
+  const unit = currency ? " " + currency : "";
+  if (hasMin && hasMax) return String(min) + " - " + String(max) + unit;
+  if (hasMin) return "من " + String(min) + unit;
+  return "حتى " + String(max) + unit;
+}
+
+function worklinkNormalizeJob(job) {
+  if (!job || !job.title || !job.source_url) return null;
+  const stableKey = String(job.source_job_id ?? job.id ?? job.source_url).trim();
+  if (!stableKey) return null;
+  const categoryText = [job.title, job.description, job.category].filter(Boolean).join(" ");
+  return {
+    id: "worklink-" + stableKey, icon: "💼", title: String(job.title),
+    company: String(job.company || "حسب المصدر"),
+    location: String(job.location || "غير محدد"),
+    type: formatWorkType(job.job_type),
+    category: String(job.category || "").trim() || guessOpportunityCategory(categoryText),
+    salary: worklinkFormatSalary(job),
+    description: String(job.description || "فرصة عمل من المصدر الأصلي."),
+    external_link: String(job.source_url),
+    canonical_link: String(job.canonical_url || job.source_url),
+    source: "worklink", source_name: "WorkLink",
+    posted_at: job.posted_at || null, expires_at: job.expires_at || null
+  };
+}
+
+async function loadWorklinkJobs(force = false) {
+  if (worklinkLoaded && !force) return worklinkJobs;
+  if (!supabaseClient) return [];
+  try {
+    const pageSize = 1000; let from = 0; const allRows = [];
+    while (true) {
+      const { data, error } = await supabaseClient.from("jobs")
+        .select("id,source,source_job_id,title,company,description,location,country,job_type,category,salary_min,salary_max,salary_currency,source_url,canonical_url,posted_at,expires_at,status")
+        .eq("source", "worklink").eq("status", "active").order("id", { ascending: true })
+        .range(from, from + pageSize - 1);
+      if (error) throw error;
+      const rows = Array.isArray(data) ? data : []; allRows.push(...rows);
+      if (rows.length < pageSize) break; from += pageSize;
+    }
+    const seen = new Set();
+    worklinkJobs = allRows.map(worklinkNormalizeJob).filter(job => {
+      if (!job || seen.has(job.id)) return false; seen.add(job.id); return true;
+    });
+    worklinkLoaded = true;
+    console.info("WorkLink loaded:", worklinkJobs.length, "jobs");
+    return worklinkJobs;
+  } catch (error) {
+    console.warn("WorkLink jobs:", error); worklinkJobs = []; worklinkLoaded = false; return [];
+  }
+}
+
+function getWorklinkOpportunities() { return Array.isArray(worklinkJobs) ? worklinkJobs : []; }
+
+function getAllVisibleOpportunities() {
+
+  const employerVacancies =
+    getLocalArray(
+      LOCAL_KEYS.vacancies
+    )
+    .filter(
+      vacancy =>
+        vacancy.status ===
+        "open"
+    )
+    .map(
+      vacancy => ({
+
+        id:
+          vacancy.id,
+
+        icon:
+          "🏢",
+
+        title:
+          vacancy.title,
+
+        company:
+          vacancy.employer_name,
+
+        location:
+          vacancy.location,
+
+        type:
+          formatWorkType(
+            vacancy.work_type
+          ),
+
+        category:
+          guessOpportunityCategory(
+            vacancy.title +
+            " " +
+            vacancy.required_skills
+          ),
+
+        salary:
+          vacancy.salary ||
+          "حسب الاتفاق",
+
+        description:
+          vacancy.description,
+
+        employerVacancy:
+          true,
+
+        source:
+          "صاحب العمل"
+
+      })
+    );
+
+
+  return [
+    ...opportunities,
+    ...employerVacancies,
+    ...getMyselfAeOpportunities(),
+    ...getWorklinkOpportunities()
+  ];
+
+}
+
+
+function guessOpportunityCategory(
+  text
+) {
+
+  const value =
+    normalizeText(
+      text
+    );
+
+
+  if (
+    value.includes("محاسب") ||
+    value.includes("محاسبة")
+  ) {
+
+    return "🧮 المحاسبة";
+
+  }
+
+
+  if (
+    value.includes("برمج") ||
+    value.includes("مطور") ||
+    value.includes("موقع")
+  ) {
+
+    return "💻 البرمجة";
+
+  }
+
+
+  if (
+    value.includes("كاتب") ||
+    value.includes("كتابة") ||
+    value.includes("محتوى")
+  ) {
+
+    return "✍️ الكتابة";
+
+  }
+
+
+  if (
+    value.includes("ترجم")
+  ) {
+
+    return "🌐 الترجمة";
+
+  }
+
+
+  if (
+    value.includes("تصميم") ||
+    value.includes("مصمم")
+  ) {
+
+    return "🎨 التصميم";
+
+  }
+
+
+  if (
+    value.includes("فيديو") ||
+    value.includes("مونتاج")
+  ) {
+
+    return "🎬 الفيديو";
+
+  }
+
+
+  if (
+    value.includes("تسويق") ||
+    value.includes("مبيعات")
+  ) {
+
+    return "📢 التسويق";
+
+  }
+
+
+  return "🔧 أخرى";
+
+}
+
+
+function formatWorkType(
+  type
+) {
+
+  const labels = {
+
+    full_time:
+      "دوام كامل",
+
+    part_time:
+      "دوام جزئي",
+
+    remote:
+      "عن بُعد",
+
+    freelance:
+      "عمل حر",
+
+    any:
+      "أي نوع"
+
+  };
+
+
+  return (
+    labels[type] ||
+    type ||
+    "غير محدد"
+  );
+
+}
+
+
+function renderCategories() {
+
+  const container =
+    document.getElementById(
+      "categoryScroll"
+    );
+
+
+  if (!container) return;
+
+
+  container.innerHTML = "";
+
+
+  const all =
+    document.createElement(
+      "button"
+    );
+
+
+  all.className =
+    "category" +
+    (
+      currentCategory ===
+      "الكل"
+        ? " active"
+        : ""
+    );
+
+
+  all.textContent =
+    "الكل";
+
+
+  all.onclick = () => {
+
+    currentCategory =
+      "الكل";
+
+    renderCategories();
+    renderOpportunities();
+
+  };
+
+
+  container.appendChild(
+    all
+  );
+
+
+  opportunityCategories
+    .forEach(
+      category => {
+
+        const button =
+          document.createElement(
+            "button"
+          );
+
+
+        button.className =
+          "category" +
+          (
+            currentCategory ===
+            category
+              ? " active"
+              : ""
+          );
+
+
+        button.textContent =
+          category;
+
+
+        button.onclick =
+          () => {
+
+            currentCategory =
+              category;
+
+            renderCategories();
+            renderOpportunities();
+
+          };
+
+
+        container.appendChild(
+          button
+        );
+
+      }
+    );
+
+}
+
+
+function calculateMatchScore(
+  item
+) {
+
+  const skill =
+    localStorage.getItem(
+      "madkhal_profile_skill"
+    ) || "";
+
+
+  const qualification =
+    localStorage.getItem(
+      "madkhal_profile_qualification"
+    ) || "";
+
+
+  const workType =
+    localStorage.getItem(
+      "madkhal_profile_work_type"
+    ) || "";
+
+
+  const profileText =
+    normalizeText(
+      skill +
+      " " +
+      qualification
+    );
+
+
+  const jobText =
+    normalizeText(
+      item.title +
+      " " +
+      item.description +
+      " " +
+      item.category
+    );
+
+
+  let score =
+    35;
+
+
+  const words =
+    profileText
+      .split(/[,\s،]+/)
+      .filter(
+        word =>
+          word.length >= 2
+      );
+
+
+  words.forEach(word => {
+
+    if (
+      jobText.includes(word)
+    ) {
+
+      score +=
+        8;
+
+    }
+
+  });
+
+
+  if (
+    workType === "remote" &&
+    normalizeText(
+      item.location
+    ).includes("عن بُعد")
+  ) {
+
+    score +=
+      10;
+
+  }
+
+
+  return Math.min(
+    99,
+    score
+  );
+
+}
+
+
+function renderOpportunities() {
+
+  const container =
+    document.getElementById(
+      "opportunitiesList"
+    );
+
+
+  if (!container) return;
+
+
+  container.innerHTML = "";
+
+
+  const search =
+    (
+      document
+        .getElementById(
+          "jobSearch"
+        )
+        ?.value ||
+      ""
+    )
+    .trim()
+    .toLowerCase();
+
+
+  const location =
+    (
+      document
+        .getElementById(
+          "jobLocation"
+        )
+        ?.value ||
+      ""
+    )
+    .trim()
+    .toLowerCase();
+
+
+  let list =
+    getAllVisibleOpportunities();
+
+
+  if (
+    currentCategory !==
+    "الكل"
+  ) {
+
+    list =
+      list.filter(
+        item =>
+          item.category ===
+          currentCategory
+      );
+
+  }
+
+
+  if (search) {
+
+    list =
+      list.filter(
+        item =>
+          (
+            item.title +
+            " " +
+            item.company +
+            " " +
+            item.description +
+            " " +
+            item.category
+          )
+          .toLowerCase()
+          .includes(search)
+      );
+
+  }
+
+
+  if (location) {
+
+    list =
+      list.filter(
+        item =>
+          (
+            item.location ||
+            ""
+          )
+          .toLowerCase()
+          .includes(location)
+      );
+
+  }
+
+
+  if (!list.length) {
+
+    container.innerHTML = `
+
+      <div class="card">
+
+        <div class="empty-state">
+
+          🔎 لا توجد نتائج حاليًا.
+
+          <br>
+
+          جرّب تغيير المهنة أو المكان.
+
+        </div>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  list.forEach(
+    item => {
+
+      const div =
+        document.createElement(
+          "div"
+        );
+
+
+      div.className =
+        "opportunity";
+
+
+      const match =
+        calculateMatchScore(
+          item
+        );
+
+
+      const sourceText =
+        item.employerVacancy
+          ? "🏢 فرصة مقدمة من صاحب العمل"
+          : item.source === "myself.ae"
+            ? "🌐 المصدر: myself.ae"
+            : item.source === "worklink"
+              ? "🌐 المصدر: WorkLink"
+              : "🌐 فرصة من المصدر الأصلي";
+
+
+      div.innerHTML = `
+
+        <div class="opportunity-top">
+
+          <div>
+
+            <h3>
+              ${escapeHtml(item.icon)}
+              ${escapeHtml(item.title)}
+            </h3>
+
+            <div
+              style="font-weight:700;"
+            >
+              ${escapeHtml(item.company)}
+            </div>
+
+            <div
+              style="margin-top:6px;color:#657070;font-size:13px;"
+            >
+              ${escapeHtml(item.description)}
+            </div>
+
+            <span class="tag">
+              📍 ${escapeHtml(item.location)}
+            </span>
+
+            <span class="tag">
+              💼 ${escapeHtml(item.type)}
+            </span>
+
+            <span class="tag">
+              ${escapeHtml(item.category)}
+            </span>
+
+            <div class="match">
+              🎯 مطابقة أولية: ${match}%
+            </div>
+
+            <div class="source-note">
+              ${sourceText}
+            </div>
+
+          </div>
+
+          <div class="salary">
+            ${escapeHtml(item.salary)}
+          </div>
+
+        </div>
+
+
+        <button
+          class="primary-btn"
+          style="width:100%;margin-top:13px;"
+          onclick="applyOpportunity('${escapeJs(item.id)}')"
+        >
+          📩 التقديم على الفرصة
+        </button>
+
+      `;
+
+
+      container.appendChild(
+        div
+      );
+
+    }
+  );
+
+}
+
+
+let madkhalJobStats = { total: 0, fresh: 0, expired: 0 };
+let madkhalCounterTimer = null;
+
+async function loadMadkhalJobCounter() {
+  if (!supabaseClient) return;
+  try {
+    const pageSize = 1000;
+    let from = 0;
+    const rows = [];
+    while (true) {
+      const { data, error } = await supabaseClient
+        .from("jobs")
+        .select("id,status,posted_at,expires_at")
+        .range(from, from + pageSize - 1);
+      if (error) throw error;
+      const page = Array.isArray(data) ? data : [];
+      rows.push(...page);
+      if (page.length < pageSize) break;
+      from += pageSize;
+    }
+    const now = Date.now();
+    const week = now - 7 * 24 * 60 * 60 * 1000;
+    madkhalJobStats = {
+      total: rows.filter(r => String(r.status || "").toLowerCase() === "active").length,
+      fresh: rows.filter(r => r.posted_at && new Date(r.posted_at).getTime() >= week && new Date(r.posted_at).getTime() <= now).length,
+      expired: rows.filter(r => r.expires_at && new Date(r.expires_at).getTime() < now).length
+    };
+    renderMadkhalJobCounter();
+  } catch (e) {
+    console.warn("Madkhal job counter:", e);
+  }
+}
+
+function renderMadkhalJobCounter() {
+  const number = document.getElementById("jobCounterNumber");
+  const label = document.getElementById("jobCounterLabel");
+  if (!number || !label) return;
+  const states = [
+    [madkhalJobStats.total, "فرصة متاحة الآن"],
+    [madkhalJobStats.fresh, "فرصة جديدة"],
+    [madkhalJobStats.expired, "فرصة انتهت" ]
+  ];
+  let index = Number(number.dataset.counterIndex || 0) % states.length;
+  const [value, text] = states[index];
+  number.textContent = Number.isFinite(value) ? value.toLocaleString("ar-EG") : "—";
+  label.textContent = text;
+  number.dataset.counterIndex = String((index + 1) % states.length);
+}
+
+function startMadkhalJobCounter() {
+  if (madkhalCounterTimer) clearInterval(madkhalCounterTimer);
+  renderMadkhalJobCounter();
+  madkhalCounterTimer = setInterval(renderMadkhalJobCounter, 3000);
+  loadMadkhalJobCounter();
+}
+
+async function openOpportunities() {
+
+  showScreen(
+    "opportunitiesScreen"
+  );
+
+
+  currentCategory =
+    "الكل";
+
+
+  renderCategories();
+  renderOpportunities();
+  if (typeof loadMyselfAeJobs === "function") await loadMyselfAeJobs();
+  await loadWorklinkJobs();
+  renderOpportunities();
+
+}
+
+
+function findOpportunityById(
+  id
+) {
+
+  return getAllVisibleOpportunities()
+    .find(
+      item =>
+        String(item.id) ===
+        String(id)
+    );
+
+}
+
+
+function applyOpportunity(
+  id
+) {
+
+  const name =
+    localStorage.getItem(
+      "madkhal_profile_name"
+    );
+
+
+  if (!name) {
+
+    showToast(
+      "👤 أنشئ ملفك المهني أولًا حتى تستطيع التقديم."
+    );
+
+
+    setTimeout(() => {
+
+      openProfile();
+
+    },800);
+
+
+    return;
+
+  }
+
+
+  const opportunity =
+    findOpportunityById(
+      id
+    );
+
+
+  if (!opportunity) {
+
+    showToast(
+      "❌ لم يتم العثور على الفرصة."
+    );
+
+    return;
+
+  }
+
+
+  const applications =
+    getLocalArray(
+      LOCAL_KEYS.applications
+    );
+
+
+  const alreadyApplied =
+    applications.some(
+      application =>
+        application.job_id ===
+        opportunity.id
+    );
+
+
+  if (
+    alreadyApplied
+  ) {
+
+    showToast(
+      "ℹ️ سبق أن سجلت طلب تقديم على هذه الفرصة."
+    );
+
+    return;
+
+  }
+
+
+  const application = {
+
+    id:
+      createId(),
+
+    job_id:
+      opportunity.id,
+
+    title:
+      opportunity.title,
+
+    company:
+      opportunity.company,
+
+    location:
+      opportunity.location,
+
+    source:
+      opportunity.employerVacancy
+        ? "employer"
+        : opportunity.source === "worklink"
+          ? "worklink"
+          : opportunity.source === "myself.ae"
+            ? "myself.ae"
+            : "external_demo",
+
+    status:
+      "submitted",
+
+    created_at:
+      new Date()
+        .toISOString()
+
+  };
+
+
+  applications.push(
+    application
+  );
+
+
+  setLocalArray(
+    LOCAL_KEYS.applications,
+    applications
+  );
+
+
+  const notifications =
+    getLocalArray(
+      LOCAL_KEYS.notifications
+    );
+
+
+  notifications.push({
+
+    id:
+      createId(),
+
+    type:
+      "application",
+
+    message:
+      `تم تسجيل طلب التقديم على ${opportunity.title}`,
+
+    created_at:
+      new Date()
+        .toISOString()
+
+  });
+
+
+  setLocalArray(
+    LOCAL_KEYS.notifications,
+    notifications
+  );
+
+
+  showToast(
+    `📩 تم تسجيل طلبك على: ${opportunity.title}`
+  );
+
+  if (opportunity.external_link && /^https?:\/\//i.test(String(opportunity.external_link))) {
+    setTimeout(() => window.open(String(opportunity.external_link), "_blank", "noopener,noreferrer"), 350);
+  }
+
+
+  setTimeout(() => {
+
+    loadAccount();
+
+  },300);
+
+}
+
+
+/* =========================================================
+   الاشتراك
+========================================================= */
+
+function openSubscription() {
+
+  showScreen(
+    "subscriptionScreen"
+  );
+
+
+  renderSubscriptionStatus();
+
+}
+
+
+function startSubscriptionRequest() {
+
+  const current =
+    localStorage.getItem(
+      LOCAL_KEYS.subscription
+    );
+
+
+  if (
+    current ===
+    "requested"
+  ) {
+
+    showToast(
+      "🔔 سبق أن سجلت رغبتك بالاشتراك."
+    );
+
+    renderSubscriptionStatus();
+
+    return;
+
+  }
+
+
+  localStorage.setItem(
+    LOCAL_KEYS.subscription,
+    "requested"
+  );
+
+
+  const notifications =
+    getLocalArray(
+      LOCAL_KEYS.notifications
+    );
+
+
+  notifications.push({
+
+    id:
+      createId(),
+
+    type:
+      "subscription",
+
+    message:
+      "تم تسجيل رغبة المستخدم في الاشتراك.",
+
+    created_at:
+      new Date()
+        .toISOString()
+
+  });
+
+
+  setLocalArray(
+    LOCAL_KEYS.notifications,
+    notifications
+  );
+
+
+  renderSubscriptionStatus();
+
+
+  showToast(
+    "🔔 تم تسجيل رغبتك بالاشتراك."
+  );
+
+}
+
+
+function renderSubscriptionStatus() {
+
+  const status =
+    localStorage.getItem(
+      LOCAL_KEYS.subscription
+    );
+
+
+  const box =
+    document.getElementById(
+      "subscriptionStatusBox"
+    );
+
+
+  const accountBox =
+    document.getElementById(
+      "accountSubscriptionStatus"
+    );
+
+
+  if (
+    status ===
+    "requested"
+  ) {
+
+    if (box) {
+
+      box.innerHTML = `
+
+        <div class="card">
+
+          <h3>
+            🔔 طلب الاشتراك مسجل
+          </h3>
+
+          <p>
+            سجلنا رغبتك بالاشتراك.
+            الدفع الحقيقي وتفعيل التنبيهات
+            سيتم ربطهما في المرحلة القادمة.
+          </p>
+
+        </div>
+
+      `;
+
+    }
+
+
+    if (accountBox) {
+
+      accountBox.textContent =
+        "🔔 تم تسجيل رغبتك بالاشتراك — التفعيل الحقيقي سيضاف لاحقًا.";
+
+    }
+
+  } else {
+
+    if (box) {
+
+      box.innerHTML =
+        "";
+
+    }
+
+
+    if (accountBox) {
+
+      accountBox.textContent =
+        "الاشتراك غير مفعل.";
+
+    }
+
+  }
+
+}
+
+
+/* =========================================================
+   الحساب
+========================================================= */
+
+function loadAccount() {
+
+  const name =
+    localStorage.getItem(
+      "madkhal_profile_name"
+    );
+
+
+  const skill =
+    localStorage.getItem(
+      "madkhal_profile_skill"
+    );
+
+
+  const location =
+    localStorage.getItem(
+      "madkhal_profile_location"
+    );
+
+
+  const account =
+    document.getElementById(
+      "accountStatus"
+    );
+
+
+  if (
+    name &&
+    account
+  ) {
+
+    updateAccountPreview(
+      name,
+      skill,
+      location
+    );
+
+  }
+
+
+  const saved =
+    localStorage.getItem(
+      LOCAL_KEYS.assessment
+    );
+
+
+  const assessmentText =
+    document.getElementById(
+      "savedAssessmentText"
+    );
+
+
+  if (
+    saved &&
+    assessmentText
+  ) {
+
+    try {
+
+      const result =
+        JSON.parse(saved);
+
+
+      assessmentText.textContent =
+        `📊 ${result.score}/100 — ${result.level}`;
+
+    } catch {
+
+      assessmentText.textContent =
+        "لا توجد تقييمات محفوظة بعد.";
+
+    }
+
+  }
+
+
+  renderApplications();
+
+  renderSubscriptionStatus();
+
+}
+
+
+function renderApplications() {
+
+  const container =
+    document.getElementById(
+      "applicationsList"
+    );
+
+
+  if (!container) return;
+
+
+  const applications =
+    getLocalArray(
+      LOCAL_KEYS.applications
+    );
+
+
+  if (
+    !applications.length
+  ) {
+
+    container.innerHTML = `
+
+      <div class="empty-state">
+        لا توجد طلبات تقديم حتى الآن.
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    applications
+      .slice()
+      .reverse()
+      .map(
+        application => `
+
+          <div class="list-row">
+
+            📩
+            <strong>
+              ${escapeHtml(application.title)}
+            </strong>
+
+            <br>
+
+            🏢
+            ${escapeHtml(application.company)}
+
+            <br>
+
+            📍
+            ${escapeHtml(application.location)}
+
+            <br>
+
+            <span class="status-review">
+              🟡 ${formatApplicationStatus(application.status)}
+            </span>
+
+            <br>
+
+            <small>
+              ${formatDate(application.created_at)}
+            </small>
+
+          </div>
+
+        `
+      )
+      .join("");
+
+}
+
+
+function formatApplicationStatus(
+  status
+) {
+
+  const labels = {
+
+    submitted:
+      "تم تسجيل الطلب",
+
+    reviewing:
+      "قيد الفرز",
+
+    accepted:
+      "تم التواصل",
+
+    rejected:
+      "لم تتم المتابعة",
+
+    closed:
+      "أغلقت الفرصة"
+
+  };
+
+
+  return (
+    labels[status] ||
+    "قيد المتابعة"
+  );
+
+}
+
+
+function formatDate(
+  value
+) {
+
+  if (!value) {
+
+    return "";
+
+  }
+
+
+  try {
+
+    return new Date(
+      value
+    ).toLocaleDateString(
+      "ar"
+    );
+
+  } catch {
+
+    return "";
+
+  }
+
+}
+
+
+/* =========================================================
+   وضع المالك
+========================================================= */
+
+function openOwnerMode() {
+
+  showScreen(
+    "ownerScreen"
+  );
+
+}
+
+
+function ownerPreview(
+  type
+) {
+
+  if (
+    type ===
+    "worker"
+  ) {
+
+    showToast(
+      "👑 معاينة واجهة الباحث عن العمل"
+    );
+
+
+    setTimeout(() => {
+
+      openWorker();
+
+    },500);
+
+  }
+
+
+  if (
+    type ===
+    "employer"
+  ) {
+
+    showToast(
+      "👑 معاينة واجهة صاحب فرصة العمل"
+    );
+
+
+    setTimeout(() => {
+
+      openEmployer();
+
+    },500);
+
+  }
+
+}
+
+
+function renderOwnerDashboard() {
+
+  const vacancies =
+    getLocalArray(
+      LOCAL_KEYS.vacancies
+    );
+
+
+  const applications =
+    getLocalArray(
+      LOCAL_KEYS.applications
+    );
+
+
+  const notifications =
+    getLocalArray(
+      LOCAL_KEYS.notifications
+    );
+
+
+  const subscription =
+    localStorage.getItem(
+      LOCAL_KEYS.subscription
+    );
+
+
+  const workerExists =
+    !!localStorage.getItem(
+      "madkhal_profile_name"
+    );
+
+
+  const workerCount =
+    workerExists
+      ? 1
+      : 0;
+
+
+  const employerCount =
+    vacancies.length;
+
+
+  const matchCount =
+    vacancies.length *
+    Math.max(
+      workerCount,
+      0
+    );
+
+
+  const subscriptionCount =
+    subscription ===
+    "requested"
+      ? 1
+      : 0;
+
+
+  const elements = {
+
+    ownerWorkerCount:
+      workerCount,
+
+    ownerEmployerCount:
+      employerCount,
+
+    ownerMatchCount:
+      matchCount,
+
+    ownerNotificationCount:
+      notifications.length,
+
+    ownerSubscriptionCount:
+      subscriptionCount,
+
+    ownerApplicationCount:
+      applications.length
+
+  };
+
+
+  Object.keys(elements)
+    .forEach(id => {
+
+      const element =
+        document.getElementById(
+          id
+        );
+
+
+      if (element) {
+
+        element.textContent =
+          elements[id];
+
+      }
+
+    });
+
+
+  renderOwnerVacancies();
+
+}
+
+
+function renderOwnerVacancies() {
+
+  const container =
+    document.getElementById(
+      "ownerVacanciesList"
+    );
+
+
+  if (!container) return;
+
+
+  const vacancies =
+    getLocalArray(
+      LOCAL_KEYS.vacancies
+    );
+
+
+  if (
+    !vacancies.length
+  ) {
+
+    container.innerHTML = `
+
+      <div class="empty-state">
+        لا توجد فرص أصحاب عمل مسجلة حتى الآن.
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    vacancies
+      .slice()
+      .reverse()
+      .map(
+        vacancy => `
+
+          <div class="list-row">
+
+            <strong>
+              🏢 ${escapeHtml(vacancy.title)}
+            </strong>
+
+            <br>
+
+            صاحب العمل:
+            ${escapeHtml(vacancy.employer_name)}
+
+            <br>
+
+            📍
+            ${escapeHtml(vacancy.location)}
+
+            <br>
+
+            👥
+            المطلوب:
+            ${escapeHtml(vacancy.number_needed)}
+
+            <br>
+
+            <span
+              class="${getStatusClass(vacancy.status)}"
+            >
+              ${getStatusLabel(vacancy.status)}
+            </span>
+
+            <div
+              style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px;"
+            >
+
+              <button
+                class="secondary-btn"
+                onclick="changeVacancyStatus('${escapeJs(vacancy.id)}','review')"
+              >
+                🟡 فرز
+              </button>
+
+              <button
+                class="secondary-btn"
+                onclick="changeVacancyStatus('${escapeJs(vacancy.id)}','open')"
+              >
+                🟢 فتح
+              </button>
+
+              <button
+                class="secondary-btn"
+                onclick="changeVacancyStatus('${escapeJs(vacancy.id)}','closed')"
+              >
+                🔴 إغلاق
+              </button>
+
+              <button
+                class="secondary-btn"
+                onclick="showVacancyDetails('${escapeJs(vacancy.id)}')"
+              >
+                👁️ التفاصيل
+              </button>
+
+            </div>
+
+          </div>
+
+        `
+      )
+      .join("");
+
+}
+
+
+function getStatusLabel(
+  status
+) {
+
+  if (
+    status ===
+    "open"
+  ) {
+
+    return "🟢 التقديم مفتوح";
+
+  }
+
+
+  if (
+    status ===
+    "review"
+  ) {
+
+    return "🟡 التقديم قيد الفرز";
+
+  }
+
+
+  if (
+    status ===
+    "closed"
+  ) {
+
+    return "🔴 التقديم مغلق";
+
+  }
+
+
+  if (
+    status ===
+    "filled"
+  ) {
+
+    return "✅ تم شغل الوظيفة";
+
+  }
+
+
+  return "⚪ غير محدد";
+
+}
+
+
+function getStatusClass(
+  status
+) {
+
+  if (
+    status ===
+    "open"
+  ) {
+
+    return "status-open";
+
+  }
+
+
+  if (
+    status ===
+    "review"
+  ) {
+
+    return "status-review";
+
+  }
+
+
+  return "status-closed";
+
+}
+
+
+function changeVacancyStatus(
+  id,
+  status
+) {
+
+  const vacancies =
+    getLocalArray(
+      LOCAL_KEYS.vacancies
+    );
+
+
+  const index =
+    vacancies.findIndex(
+      vacancy =>
+        String(vacancy.id) ===
+        String(id)
+    );
+
+
+  if (
+    index === -1
+  ) {
+
+    showToast(
+      "❌ لم يتم العثور على الفرصة."
+    );
+
+    return;
+
+  }
+
+
+  vacancies[index].status =
+    status;
+
+
+  vacancies[index].updated_at =
+    new Date()
+      .toISOString();
+
+
+  setLocalArray(
+    LOCAL_KEYS.vacancies,
+    vacancies
+  );
+
+
+  renderOwnerDashboard();
+
+
+  showToast(
+    "✅ تم تحديث حالة الفرصة."
+  );
+
+}
+
+
+function showVacancyDetails(
+  id
+) {
+
+  const vacancies =
+    getLocalArray(
+      LOCAL_KEYS.vacancies
+    );
+
+
+  const vacancy =
+    vacancies.find(
+      item =>
+        String(item.id) ===
+        String(id)
+    );
+
+
+  if (!vacancy) {
+
+    showToast(
+      "❌ لم يتم العثور على الفرصة."
+    );
+
+    return;
+
+  }
+
+
+  const details =
+    document.getElementById(
+      "ownerDetails"
+    );
+
+
+  if (!details) return;
+
+
+  details.innerHTML = `
+
+    <div class="card">
+
+      <h3>
+        📋 ${escapeHtml(vacancy.title)}
+      </h3>
+
+      <p>
+
+        🏢
+        ${escapeHtml(vacancy.employer_name)}
+
+        <br>
+
+        📍
+        ${escapeHtml(vacancy.location)}
+
+        <br>
+
+        💼
+        ${escapeHtml(formatWorkType(vacancy.work_type))}
+
+        <br>
+
+        🧠
+        ${escapeHtml(vacancy.required_skills)}
+
+        <br>
+
+        🎓
+        ${escapeHtml(vacancy.required_qualification || "غير محدد")}
+
+        <br>
+
+        👥
+        ${escapeHtml(vacancy.number_needed)}
+
+        <br>
+
+        💰
+        ${escapeHtml(vacancy.salary || "غير محدد")}
+
+      </p>
+
+      <div class="info-strip">
+
+        ${escapeHtml(vacancy.description)}
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  details.scrollIntoView({
+    behavior: "smooth"
+  });
+
+}
+
+
+function showOwnerMatches() {
+
+  const details =
+    document.getElementById(
+      "ownerDetails"
+    );
+
+
+  const vacancies =
+    getLocalArray(
+      LOCAL_KEYS.vacancies
+    );
+
+
+  const name =
+    localStorage.getItem(
+      "madkhal_profile_name"
+    );
+
+
+  const skill =
+    localStorage.getItem(
+      "madkhal_profile_skill"
+    );
+
+
+  if (!details) return;
+
+
+  details.innerHTML = `
+
+    <div class="card">
+
+      <h3>
+        🎯 المطابقة
+      </h3>
+
+      <p>
+
+        الباحث الحالي:
+        <strong>
+          ${escapeHtml(name || "لا يوجد ملف")}
+        </strong>
+
+        <br>
+
+        المهارات:
+        ${escapeHtml(skill || "غير محددة")}
+
+      </p>
+
+      ${
+        vacancies.length
+          ? vacancies
+              .map(
+                vacancy => {
+
+                  const score =
+                    calculateVacancyMatch(
+                      vacancy
+                    );
+
+                  return `
+
+                    <div class="list-row">
+
+                      🏢
+                      <strong>
+                        ${escapeHtml(vacancy.title)}
+                      </strong>
+
+                      <br>
+
+                      🎯
+                      المطابقة الأولية:
+                      <strong>
+                        ${score}%
+                      </strong>
+
+                      <br>
+
+                      الحالة:
+                      ${getStatusLabel(vacancy.status)}
+
+                    </div>
+
+                  `;
+
+                }
+              )
+              .join("")
+          : `
+              <div class="empty-state">
+                لا توجد فرص مطابقة حاليًا.
+              </div>
+            `
+      }
+
+    </div>
+
+  `;
+
+}
+
+
+function calculateVacancyMatch(
+  vacancy
+) {
+
+  const profileSkill =
+    normalizeText(
+      localStorage.getItem(
+        "madkhal_profile_skill"
+      ) || ""
+    );
+
+
+  const profileQualification =
+    normalizeText(
+      localStorage.getItem(
+        "madkhal_profile_qualification"
+      ) || ""
+    );
+
+
+  const jobText =
+    normalizeText(
+      vacancy.title +
+      " " +
+      vacancy.required_skills +
+      " " +
+      vacancy.required_qualification
+    );
+
+
+  let score =
+    25;
+
+
+  const terms =
+    (
+      profileSkill +
+      " " +
+      profileQualification
+    )
+      .split(/[,\s،]+/)
+      .filter(
+        term =>
+          term.length >= 2
+      );
+
+
+  terms.forEach(
+    term => {
+
+      if (
+        jobText.includes(term)
+      ) {
+
+        score +=
+          10;
+
+      }
+
+    }
+  );
+
+
+  return Math.min(
+    99,
+    score
+  );
+
+}
+
+
+function showOwnerNotifications() {
+
+  const details =
+    document.getElementById(
+      "ownerDetails"
+    );
+
+
+  const notifications =
+    getLocalArray(
+      LOCAL_KEYS.notifications
+    );
+
+
+  if (!details) return;
+
+
+  details.innerHTML = `
+
+    <div class="card">
+
+      <h3>
+        🔔 التنبيهات المسجلة
+      </h3>
+
+      ${
+        notifications.length
+          ? notifications
+              .slice()
+              .reverse()
+              .map(
+                item => `
+
+                  <div class="list-row">
+
+                    🔔
+                    ${escapeHtml(item.message)}
+
+                    <br>
+
+                    <small>
+                      ${formatDate(item.created_at)}
+                    </small>
+
+                  </div>
+
+                `
+              )
+              .join("")
+          : `
+              <div class="empty-state">
+                لا توجد تنبيهات مسجلة.
+              </div>
+            `
+      }
+
+    </div>
+
+  `;
+
+}
+
+
+function showOwnerFinance() {
+
+  const details =
+    document.getElementById(
+      "ownerDetails"
+    );
+
+
+  const subscription =
+    localStorage.getItem(
+      LOCAL_KEYS.subscription
+    );
+
+
+  if (!details) return;
+
+
+  details.innerHTML = `
+
+    <div class="card">
+
+      <h3>
+        💰 المالية
+      </h3>
+
+      <p>
+
+        الاشتراك:
+        ${
+          subscription ===
+          "requested"
+            ? "🔔 توجد رغبة اشتراك مسجلة."
+            : "لا توجد طلبات اشتراك."
+        }
+
+      </p>
+
+      <div class="info-strip">
+
+        الدفع الحقيقي لم يتم ربطه بعد.
+        هذه المنطقة جاهزة لربط بوابة الدفع
+        عندما نصل إلى مرحلة الدفع.
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+function showOwnerReports() {
+
+  const details =
+    document.getElementById(
+      "ownerDetails"
+    );
+
+
+  const applications =
+    getLocalArray(
+      LOCAL_KEYS.applications
+    );
+
+
+  const vacancies =
+    getLocalArray(
+      LOCAL_KEYS.vacancies
+    );
+
+
+  if (!details) return;
+
+
+  details.innerHTML = `
+
+    <div class="card">
+
+      <h3>
+        📈 التقارير
+      </h3>
+
+      <div class="list-row">
+        👤 ملفات الباحثين:
+        ${
+          localStorage.getItem(
+            "madkhal_profile_name"
+          )
+            ? 1
+            : 0
+        }
+      </div>
+
+      <div class="list-row">
+        🏢 فرص أصحاب العمل:
+        ${vacancies.length}
+      </div>
+
+      <div class="list-row">
+        📩 طلبات التقديم:
+        ${applications.length}
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+function madkhalNotify(message, title = "مَدخَل 🚪") {
+  try {
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification(title, { body: message, icon: "/icon-192.png", badge: "/icon-192.png" });
+    }
+  } catch (e) { console.warn("Madkhal notification:", e); }
+}
+
+async function enableMadkhalNotifications() {
+  if (!("Notification" in window)) {
+    showToast("ℹ️ هذا الجهاز لا يدعم إشعارات المتصفح.");
+    return false;
+  }
+  const permission = await Notification.requestPermission();
+  if (permission === "granted") {
+    localStorage.setItem("madkhal_notifications_enabled", "1");
+    showToast("🔔 تم تفعيل إشعارات مَدخَل على هذا الجهاز.");
+    return true;
+  }
+  showToast("ℹ️ يمكنك تفعيل الإشعارات من إعدادات المتصفح.");
+  return false;
+}
+
+function showNonSubscriberPrompt() {
+  const status = localStorage.getItem(LOCAL_KEYS.subscription);
+  if (status === "active" || status === "requested") return;
+  const last = Number(localStorage.getItem("madkhal_promo_notice_at") || 0);
+  if (Date.now() - last < 3 * 24 * 60 * 60 * 1000) return;
+  localStorage.setItem("madkhal_promo_notice_at", String(Date.now()));
+  setTimeout(() => {
+    showToast("🔔 تريد أن يبحث مَدخَل عن الفرص الجديدة بدلًا منك؟ المتابعة المستمرة بـ $1 شهريًا.");
+  }, 1800);
+}
+
+startMadkhalJobCounter();
+
+
+let madkhalInstallPrompt = null;
+window.addEventListener("beforeinstallprompt", event => {
+  event.preventDefault();
+  madkhalInstallPrompt = event;
+  localStorage.setItem("madkhal_install_available", "1");
+});
+
+window.addEventListener("appinstalled", () => {
+  localStorage.setItem("madkhal_app_installed", "1");
+  showToast("🚪 تم تثبيت مَدخَل على هاتفك.");
+});
+
+window.addEventListener("load", () => {
+  showNonSubscriberPrompt();
+});
+
+/* =========================================================
+   PWA
+========================================================= */
+
+if (
+  "serviceWorker" in navigator
+) {
+
+  window.addEventListener(
+    "load",
+    () => {
+
+      navigator.serviceWorker
+        .register(
+          "/service-worker.js"
+        )
+        .then(() => {
+
+          console.log(
+            "مَدخَل: Service Worker registered"
+          );
+
+        })
+        .catch(error => {
+
+          console.error(
+            "Service Worker error:",
+            error
+          );
+
+        });
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   التشغيل
+========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    selectedSkills =
+      getLocalArray(
+        LOCAL_KEYS.selectedSkills
+      );
+
+
+    renderSkills();
+
+    renderCategories();
+
+    renderOpportunities();
+
+    loadAccount();
+
+    renderSubscriptionStatus();
+
+  }
+);
+
+
+
+/* =========================================================
+   مَدخَل — طبقة التشغيل المجانية v2
+   لا تستبدل الواجهة؛ تضيف مزامنة Supabase، الحسابات،
+   الفرص، التقديمات، التقييمات، الاشتراك، والتنبيهات.
+   لا يحتوي هذا الملف على Service Role Key أو أي سر حساس.
+========================================================= */
+(function () {
+  "use strict";
+
+  const MADKHAL_TABLES = {
+    workers: "worker_profiles",
+    employers: "employer_profiles",
+    vacancies: "employer_vacancies",
+    applications: "applications",
+    notifications: "notifications",
+    subscriptions: "subscriptions",
+    assessments: "assessments"
+  };
+
+  const madkhalNow = () => new Date().toISOString();
+
+  function madkhalHasSupabase() {
+    return !!(window.supabase && supabaseClient);
+  }
+
+  async function madkhalSessionUser() {
+    if (!madkhalHasSupabase()) return null;
+    try {
+      const { data, error } = await supabaseClient.auth.getSession();
+      if (error) throw error;
+      if (data?.session?.user) return data.session.user;
+    } catch (e) {
+      console.warn("Madkhal session:", e);
+    }
+
+    try {
+      const { data, error } = await supabaseClient.auth.signInAnonymously();
+      if (error) throw error;
+      return data?.user || null;
+    } catch (e) {
+      console.warn("Madkhal anonymous auth:", e);
+      return null;
+    }
+  }
+
+  async function madkhalInsert(table, payload) {
+    if (!madkhalHasSupabase()) return { data: null, error: new Error("SUPABASE_NOT_CONNECTED") };
+    return await supabaseClient.from(table).insert(payload).select().maybeSingle();
+  }
+
+  async function madkhalUpsert(table, payload, onConflict) {
+    if (!madkhalHasSupabase()) return { data: null, error: new Error("SUPABASE_NOT_CONNECTED") };
+    const options = onConflict ? { onConflict } : undefined;
+    return await supabaseClient.from(table).upsert(payload, options).select().maybeSingle();
+  }
+
+  async function madkhalSelect(table, queryFn) {
+    if (!madkhalHasSupabase()) return { data: [], error: new Error("SUPABASE_NOT_CONNECTED") };
+    let query = supabaseClient.from(table).select("*");
+    if (typeof queryFn === "function") query = queryFn(query);
+    return await query;
+  }
+
+  function madkhalLocalProfile() {
+    return {
+      full_name: localStorage.getItem("madkhal_profile_name") || "",
+      qualification: localStorage.getItem("madkhal_profile_qualification") || "",
+      profession: localStorage.getItem("madkhal_profile_skill") || "",
+      skills: localStorage.getItem("madkhal_profile_skill") || "",
+      location: localStorage.getItem("madkhal_profile_location") || "",
+      work_type: localStorage.getItem("madkhal_profile_work_type") || "",
+      description: localStorage.getItem("madkhal_profile_description") || ""
+    };
+  }
+
+  function madkhalStoreProfile(p) {
+    if (!p) return;
+    const map = {
+      full_name: "madkhal_profile_name",
+      qualification: "madkhal_profile_qualification",
+      profession: "madkhal_profile_skill",
+      skills: "madkhal_profile_skill",
+      location: "madkhal_profile_location",
+      work_type: "madkhal_profile_work_type",
+      description: "madkhal_profile_description"
+    };
+    Object.keys(map).forEach(k => {
+      if (p[k] !== undefined && p[k] !== null) localStorage.setItem(map[k], p[k]);
+    });
+  }
+
+  function madkhalNormalizeSkills(value) {
+    return normalizeText(String(value || ""))
+      .split(/[،,\s]+/)
+      .filter(Boolean);
+  }
+
+  function madkhalMatch(profile, vacancy) {
+    const profileText = normalizeText([
+      profile?.profession,
+      profile?.skills,
+      profile?.qualification,
+      profile?.description
+    ].join(" "));
+
+    const jobText = normalizeText([
+      vacancy?.title,
+      vacancy?.required_skills,
+      vacancy?.required_qualification,
+      vacancy?.description,
+      vacancy?.category
+    ].join(" "));
+
+    const words = madkhalNormalizeSkills(profileText).filter(x => x.length >= 2);
+    let score = 30;
+    let hits = 0;
+    words.forEach(word => {
+      if (jobText.includes(word)) {
+        score += 7;
+        hits++;
+      }
+    });
+
+    if (profile?.work_type && vacancy?.work_type && profile.work_type === vacancy.work_type) score += 12;
+    if (profile?.location && vacancy?.location && normalizeText(profile.location) === normalizeText(vacancy.location)) score += 10;
+    if (hits >= 3) score += 8;
+    return Math.min(99, score);
+  }
+
+  async function madkhalSaveEmployerProfile(user, employerName) {
+    if (!user || !employerName) return;
+    try {
+      await madkhalUpsert(MADKHAL_TABLES.employers, {
+        user_id: user.id,
+        full_name: employerName,
+        updated_at: madkhalNow()
+      }, "user_id");
+    } catch (e) {
+      console.warn("Employer profile sync:", e);
+    }
+  }
+
+  /* ---------------------------------------------------------
+     حفظ ملف الباحث عن العمل — محلي + Supabase
+  --------------------------------------------------------- */
+  window.saveWorker = async function () {
+    const name = document.getElementById("workerName")?.value.trim() || "";
+    const qualification = document.getElementById("workerQualification")?.value.trim() || "";
+    const skill = document.getElementById("workerSkill")?.value.trim() || "";
+    const location = document.getElementById("workerLocation")?.value.trim() || "";
+    const workType = document.getElementById("workerWorkType")?.value || "";
+    const description = document.getElementById("workerDescription")?.value.trim() || "";
+
+    if (!name || !skill || !location) {
+      showToast("⚠️ اكتب الاسم والمهارة والمكان أولًا.");
+      return;
+    }
+
+    const button = document.getElementById("saveWorkerButton");
+    if (button) {
+      button.disabled = true;
+      button.textContent = "⏳ جارٍ حفظ الملف...";
+    }
+
+    const local = {
+      full_name: name,
+      qualification,
+      profession: skill,
+      skills: skill,
+      location,
+      work_type: workType,
+      description
+    };
+    madkhalStoreProfile(local);
+
+    try {
+      const user = await madkhalSessionUser();
+      if (!user) throw new Error("NO_USER");
+
+      const { error } = await supabaseClient
+        .from(MADKHAL_TABLES.workers)
+        .upsert({
+          user_id: user.id,
+          full_name: name,
+          qualification: qualification || null,
+          profession: skill,
+          skills: skill,
+          location,
+          work_type: workType || null,
+          cv_url: null,
+          updated_at: madkhalNow()
+        }, { onConflict: "user_id" });
+
+      if (error) throw error;
+
+      localStorage.setItem("madkhal_profile_user_id", user.id);
+      updateAccountPreview(name, skill, location);
+      showToast("🎉 تم حفظ ملفك المهني في مَدخَل.");
+      setTimeout(() => showScreen("accountScreen"), 500);
+      await madkhalSyncRemote();
+    } catch (e) {
+      console.warn("Madkhal saveWorker:", e);
+      updateAccountPreview(name, skill, location);
+      showToast("⚠️ حُفظ الملف على الهاتف. سيُزامن مع قاعدة البيانات عند توفر الاتصال.");
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.textContent = "💾 حفظ الملف المهني";
+      }
+    }
+  };
+
+  /* ---------------------------------------------------------
+     تسجيل فرصة صاحب العمل — محلي + Supabase
+  --------------------------------------------------------- */
+  window.submitEmployerVacancy = async function () {
+    const employerName = document.getElementById("employerName")?.value.trim() || "";
+    const title = document.getElementById("vacancyTitle")?.value.trim() || "";
+    const location = document.getElementById("vacancyLocation")?.value.trim() || "";
+    const workType = document.getElementById("vacancyWorkType")?.value || "";
+    const skills = document.getElementById("vacancySkills")?.value.trim() || "";
+    const qualification = document.getElementById("vacancyQualification")?.value.trim() || "";
+    const numberNeeded = Number(document.getElementById("vacancyNumber")?.value || 1);
+    const salary = document.getElementById("vacancySalary")?.value.trim() || "";
+    const description = document.getElementById("vacancyDescription")?.value.trim() || "";
+
+    if (!employerName || !title || !location || !workType || !skills || !description) {
+      showToast("⚠️ أكمل بيانات فرصة العمل الأساسية.");
+      return;
+    }
+    if (numberNeeded < 1) {
+      showToast("⚠️ عدد الأشخاص يجب أن يكون واحدًا على الأقل.");
+      return;
+    }
+
+    const vacancy = {
+      id: createId(),
+      employer_name: employerName,
+      title,
+      location,
+      work_type: workType,
+      required_skills: skills,
+      required_qualification: qualification,
+      number_needed: numberNeeded,
+      salary,
+      description,
+      status: "open",
+      visibility: "public",
+      created_at: madkhalNow()
+    };
+
+    const local = getLocalArray(LOCAL_KEYS.vacancies);
+    local.push(vacancy);
+    setLocalArray(LOCAL_KEYS.vacancies, local);
+
+    try {
+      const user = await madkhalSessionUser();
+      if (user) {
+        await madkhalSaveEmployerProfile(user, employerName);
+        const payload = {
+          user_id: user.id,
+          employer_name: employerName,
+          title,
+          location,
+          work_type: workType,
+          required_skills: skills,
+          required_qualification: qualification || null,
+          number_needed: numberNeeded,
+          salary: salary || null,
+          description,
+          status: "open",
+          visibility: "public",
+          created_at: vacancy.created_at
+        };
+        const { data, error } = await supabaseClient
+          .from(MADKHAL_TABLES.vacancies)
+          .insert(payload)
+          .select()
+          .maybeSingle();
+        if (error) throw error;
+        if (data) {
+          vacancy.remote_id = data.id;
+          vacancy.user_id = user.id;
+          const updated = getLocalArray(LOCAL_KEYS.vacancies).map(v => v.id === vacancy.id ? { ...v, ...data, id: v.id, remote_id: data.id, employerVacancy: true } : v);
+          setLocalArray(LOCAL_KEYS.vacancies, updated);
+        }
+      }
+
+      showToast("🎉 تم تسجيل فرصة العمل بنجاح.");
+      clearEmployerForm();
+      renderOpportunities();
+      setTimeout(() => showScreen("opportunitiesScreen"), 600);
+      await madkhalSyncRemote();
+    } catch (e) {
+      console.warn("Madkhal vacancy sync:", e);
+      showToast("🎉 تم حفظ الفرصة محليًا، وستُزامن عند توفر قاعدة البيانات.");
+      clearEmployerForm();
+      renderOpportunities();
+      setTimeout(() => showScreen("opportunitiesScreen"), 600);
+    }
+  };
+
+  /* ---------------------------------------------------------
+     التقديم — يحفظ الطلب ويزامنه
+  --------------------------------------------------------- */
+  window.applyOpportunity = async function (id) {
+    const name = localStorage.getItem("madkhal_profile_name");
+    if (!name) {
+      showToast("👤 أنشئ ملفك المهني أولًا حتى تستطيع التقديم.");
+      setTimeout(() => openProfile(), 700);
+      return;
+    }
+
+    const opportunity = findOpportunityById(id);
+    if (!opportunity) {
+      showToast("❌ لم يتم العثور على الفرصة.");
+      return;
+    }
+
+    const applications = getLocalArray(LOCAL_KEYS.applications);
+    const alreadyApplied = applications.some(a => String(a.job_id) === String(opportunity.id));
+    if (alreadyApplied) {
+      showToast("ℹ️ سبق أن سجلت طلب تقديم على هذه الفرصة.");
+      return;
+    }
+
+    const application = {
+      id: createId(),
+      job_id: opportunity.id,
+      remote_job_id: opportunity.remote_id || (opportunity.employerVacancy ? opportunity.id : null),
+      title: opportunity.title,
+      company: opportunity.company || opportunity.employer_name || "صاحب فرصة",
+      location: opportunity.location || "",
+      source: opportunity.employerVacancy ? "employer" : "external_demo",
+      status: "submitted",
+      created_at: madkhalNow()
+    };
+
+    applications.push(application);
+    setLocalArray(LOCAL_KEYS.applications, applications);
+
+    const notifications = getLocalArray(LOCAL_KEYS.notifications);
+    notifications.push({
+      id: createId(),
+      type: "application",
+      message: `تم تسجيل طلب التقديم على ${opportunity.title}`,
+      created_at: application.created_at
+    });
+    setLocalArray(LOCAL_KEYS.notifications, notifications);
+
+    try {
+      const user = await madkhalSessionUser();
+      if (user) {
+        const { data, error } = await supabaseClient
+          .from(MADKHAL_TABLES.applications)
+          .insert({
+            user_id: user.id,
+            job_id: opportunity.remote_id || (opportunity.employerVacancy ? opportunity.id : null),
+            job_title: opportunity.title,
+            company: opportunity.company || opportunity.employer_name || "صاحب فرصة",
+            location: opportunity.location || null,
+            source: application.source,
+            status: "submitted",
+            created_at: application.created_at
+          })
+          .select()
+          .maybeSingle();
+        if (error) throw error;
+        if (data) application.remote_id = data.id;
+
+        await madkhalInsert(MADKHAL_TABLES.notifications, {
+          user_id: user.id,
+          type: "application",
+          message: application.title ? `تم تسجيل طلب التقديم على ${application.title}` : "تم تسجيل طلب التقديم.",
+          created_at: application.created_at,
+          read: false
+        });
+      }
+    } catch (e) {
+      console.warn("Madkhal application sync:", e);
+    }
+
+    showToast(`📩 تم تسجيل طلبك على: ${opportunity.title}`);
+    loadAccount();
+  };
+
+  /* ---------------------------------------------------------
+     الاشتراك — طلب مجاني الآن، والدفع لاحقًا
+  --------------------------------------------------------- */
+  window.startSubscriptionRequest = async function () {
+    const current = localStorage.getItem(LOCAL_KEYS.subscription);
+    if (current === "requested" || current === "active") {
+      showToast(current === "active" ? "🔔 اشتراكك مفعل." : "🔔 سبق أن سجلت رغبتك بالاشتراك.");
+      renderSubscriptionStatus();
+      return;
+    }
+
+    localStorage.setItem(LOCAL_KEYS.subscription, "requested");
+    const notifications = getLocalArray(LOCAL_KEYS.notifications);
+    notifications.push({
+      id: createId(),
+      type: "subscription",
+      message: "تم تسجيل رغبة المستخدم في الاشتراك.",
+      created_at: madkhalNow()
+    });
+    setLocalArray(LOCAL_KEYS.notifications, notifications);
+
+    try {
+      const user = await madkhalSessionUser();
+      if (user) {
+        await supabaseClient.from(MADKHAL_TABLES.subscriptions).upsert({
+          user_id: user.id,
+          plan: "premium_monthly",
+          price_usd: 1,
+          status: "requested",
+          started_at: null,
+          expires_at: null,
+          updated_at: madkhalNow()
+        }, { onConflict: "user_id" });
+
+        await madkhalInsert(MADKHAL_TABLES.notifications, {
+          user_id: user.id,
+          type: "subscription",
+          message: "تم تسجيل رغبتك بالاشتراك. الدفع والتفعيل سيضافان عند الإطلاق.",
+          created_at: madkhalNow(),
+          read: false
+        });
+      }
+    } catch (e) {
+      console.warn("Madkhal subscription sync:", e);
+    }
+
+    renderSubscriptionStatus();
+    loadAccount();
+    showToast("🔔 تم تسجيل رغبتك بالاشتراك.");
+  };
+
+  /* ---------------------------------------------------------
+     حفظ نتائج التقييم في Supabase مع الإبقاء على المحلي
+  --------------------------------------------------------- */
+  const originalSubmitWritingTest = window.submitWritingTest;
+  const originalSubmitGeneralAssessment = window.submitGeneralAssessment;
+
+  window.submitWritingTest = async function () {
+    if (typeof originalSubmitWritingTest === "function") originalSubmitWritingTest();
+    await madkhalPersistAssessment();
+  };
+
+  window.submitGeneralAssessment = async function () {
+    if (typeof originalSubmitGeneralAssessment === "function") originalSubmitGeneralAssessment();
+    await madkhalPersistAssessment();
+  };
+
+  async function madkhalPersistAssessment() {
+    const raw = localStorage.getItem(LOCAL_KEYS.assessment);
+    if (!raw) return;
+    try {
+      const result = JSON.parse(raw);
+      const user = await madkhalSessionUser();
+      if (!user) return;
+      await supabaseClient.from(MADKHAL_TABLES.assessments).insert({
+        user_id: user.id,
+        skill: result.skill || "عام",
+        score: Number(result.score || 0),
+        level: result.level || null,
+        experience: result.experience || null,
+        result_json: result,
+        created_at: result.date || madkhalNow()
+      });
+    } catch (e) {
+      console.warn("Madkhal assessment sync:", e);
+    }
+  }
+
+  /* ---------------------------------------------------------
+     جلب البيانات البعيدة إلى نسخة الهاتف
+  --------------------------------------------------------- */
+  async function madkhalSyncRemote() {
+    if (!madkhalHasSupabase()) return;
+    const user = await madkhalSessionUser();
+    if (!user) return;
+
+    try {
+      const profileRes = await supabaseClient
+        .from(MADKHAL_TABLES.workers)
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!profileRes.error && profileRes.data) {
+        madkhalStoreProfile(profileRes.data);
+        updateAccountPreview(profileRes.data.full_name, profileRes.data.profession || profileRes.data.skills, profileRes.data.location);
+      }
+    } catch (e) { console.warn("Worker sync:", e); }
+
+    try {
+      const vacRes = await supabaseClient
+        .from(MADKHAL_TABLES.vacancies)
+        .select("*")
+        .eq("status", "open")
+        .order("created_at", { ascending: false });
+      if (!vacRes.error && Array.isArray(vacRes.data)) {
+        const local = getLocalArray(LOCAL_KEYS.vacancies);
+        const byRemote = new Map(local.filter(v => v.remote_id).map(v => [String(v.remote_id), v]));
+        const merged = [...local];
+        vacRes.data.forEach(v => {
+          const existing = byRemote.get(String(v.id));
+          const normalized = {
+            ...v,
+            id: existing?.id || `remote_${v.id}`,
+            remote_id: v.id,
+            employerVacancy: true,
+            company: v.employer_name || "صاحب فرصة",
+            type: v.work_type || "",
+            category: guessOpportunityCategory(v.title || "", v.required_skills || "")
+          };
+          if (existing) {
+            const i = merged.findIndex(x => x.id === existing.id);
+            if (i >= 0) merged[i] = { ...merged[i], ...normalized, id: existing.id };
+          } else {
+            merged.push(normalized);
+          }
+        });
+        setLocalArray(LOCAL_KEYS.vacancies, merged);
+      }
+    } catch (e) { console.warn("Vacancy sync:", e); }
+
+    try {
+      const appRes = await supabaseClient
+        .from(MADKHAL_TABLES.applications)
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      if (!appRes.error && Array.isArray(appRes.data)) {
+        const local = getLocalArray(LOCAL_KEYS.applications);
+        const merged = [...local];
+        appRes.data.forEach(a => {
+          const key = a.id ? String(a.id) : `${a.job_id}|${a.created_at}`;
+          const found = merged.find(x => String(x.remote_id || "") === key || (String(x.remote_job_id || "") === String(a.job_id) && x.status === a.status));
+          const item = {
+            id: found?.id || createId(),
+            remote_id: a.id,
+            job_id: a.job_id,
+            remote_job_id: a.job_id,
+            title: a.job_title || a.title || "فرصة",
+            company: a.company || "",
+            location: a.location || "",
+            source: a.source || "employer",
+            status: a.status || "submitted",
+            created_at: a.created_at || madkhalNow()
+          };
+          if (found) Object.assign(found, item);
+          else merged.push(item);
+        });
+        setLocalArray(LOCAL_KEYS.applications, merged);
+      }
+    } catch (e) { console.warn("Application sync:", e); }
+
+    try {
+      const nRes = await supabaseClient
+        .from(MADKHAL_TABLES.notifications)
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      if (!nRes.error && Array.isArray(nRes.data)) {
+        const local = getLocalArray(LOCAL_KEYS.notifications);
+        const merged = [...local];
+        nRes.data.forEach(n => {
+          if (!merged.some(x => String(x.remote_id || "") === String(n.id))) {
+            merged.push({
+              id: n.id || createId(),
+              remote_id: n.id,
+              type: n.type || "system",
+              message: n.message || "تنبيه جديد",
+              created_at: n.created_at || madkhalNow()
+            });
+          }
+        });
+        setLocalArray(LOCAL_KEYS.notifications, merged);
+      }
+    } catch (e) { console.warn("Notification sync:", e); }
+
+    try {
+      const subRes = await supabaseClient
+        .from(MADKHAL_TABLES.subscriptions)
+        .select("status,plan,price_usd,expires_at")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!subRes.error && subRes.data?.status) {
+        localStorage.setItem(LOCAL_KEYS.subscription, subRes.data.status);
+      }
+    } catch (e) { console.warn("Subscription sync:", e); }
+
+    try {
+      renderOpportunities();
+      renderApplications();
+      renderSubscriptionStatus();
+      loadAccount();
+      renderOwnerDashboard();
+    } catch (e) { console.warn("Madkhal render after sync:", e); }
+  }
+
+  /* ---------------------------------------------------------
+     حفظ البحث — يظهر فقط للمشترك/صاحب الرغبة بالاشتراك
+  --------------------------------------------------------- */
+  function madkhalAddSaveSearchButton() {
+    const list = document.getElementById("opportunitiesList");
+    const search = document.getElementById("jobSearch");
+    const location = document.getElementById("jobLocation");
+    if (!list || !search || !location) return;
+    if (document.getElementById("madkhalSaveSearchButton")) return;
+
+    const btn = document.createElement("button");
+    btn.id = "madkhalSaveSearchButton";
+    btn.className = "secondary-btn";
+    btn.style.cssText = "width:100%;margin:0 0 12px;";
+    btn.textContent = "💾 حفظ هذا البحث والمتابعة";
+    btn.onclick = async () => {
+      const status = localStorage.getItem(LOCAL_KEYS.subscription);
+      if (status !== "requested" && status !== "active") {
+        showToast("🔔 هذه الميزة ضمن خدمة المتابعة الشهرية.");
+        openSubscription();
+        return;
+      }
+      localStorage.setItem("madkhal_saved_search", JSON.stringify({
+        query: search.value.trim(),
+        location: location.value.trim(),
+        created_at: madkhalNow()
+      }));
+      showToast("💾 تم حفظ البحث على هذا الجهاز.");
+    };
+    list.parentNode.insertBefore(btn, list);
+  }
+
+  const originalRenderOpportunities = window.renderOpportunities;
+  window.renderOpportunities = function () {
+    if (typeof originalRenderOpportunities === "function") originalRenderOpportunities();
+    madkhalAddSaveSearchButton();
+  };
+
+  /* ---------------------------------------------------------
+     حماية وضع المالك: لا نعتمد على زر مخفي أو كلمة مرور داخل JS
+  --------------------------------------------------------- */
+  window.openOwnerMode = async function () {
+    if (!madkhalHasSupabase()) {
+      showToast("🔒 لوحة المالك تحتاج اتصال Supabase.");
+      return;
+    }
+    const user = await madkhalSessionUser();
+    if (!user || user.is_anonymous) {
+      showToast("🔒 دخول المالك يتطلب حسابًا موثقًا.");
+      return;
+    }
+
+    try {
+      const { data, error } = await supabaseClient
+        .from("owner_users")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (error || !data) {
+        showToast("⛔ هذا الحساب ليس حساب مالك.");
+        return;
+      }
+      showScreen("ownerScreen");
+      await renderOwnerDashboard();
+    } catch (e) {
+      console.warn("Owner authorization:", e);
+      showToast("⛔ تعذر التحقق من صلاحية المالك.");
+    }
+  };
+
+  const originalOwnerDashboard = window.renderOwnerDashboard;
+  window.renderOwnerDashboard = async function () {
+    if (typeof originalOwnerDashboard === "function") originalOwnerDashboard();
+    if (!madkhalHasSupabase()) return;
+    const user = await madkhalSessionUser();
+    if (!user || user.is_anonymous) return;
+
+    try {
+      const [workers, employers, vacancies, applications, notifications, subscriptions] = await Promise.all([
+        madkhalSelect(MADKHAL_TABLES.workers),
+        madkhalSelect(MADKHAL_TABLES.employers),
+        madkhalSelect(MADKHAL_TABLES.vacancies),
+        madkhalSelect(MADKHAL_TABLES.applications),
+        madkhalSelect(MADKHAL_TABLES.notifications),
+        madkhalSelect(MADKHAL_TABLES.subscriptions)
+      ]);
+
+      const set = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = String(value ?? 0);
+      };
+      const workerRows = Array.isArray(workers.data) ? workers.data : [];
+      const employerRows = Array.isArray(employers.data) ? employers.data : [];
+      const vacancyRows = Array.isArray(vacancies.data) ? vacancies.data : [];
+      const applicationRows = Array.isArray(applications.data) ? applications.data : [];
+      const notificationRows = Array.isArray(notifications.data) ? notifications.data : [];
+      const subscriptionRows = Array.isArray(subscriptions.data) ? subscriptions.data : [];
+
+      set("ownerWorkerCount", workerRows.length);
+      set("ownerEmployerCount", employerRows.length);
+      set("ownerMatchCount", vacancyRows.length * workerRows.length ? vacancyRows.length : 0);
+      set("ownerNotificationCount", notificationRows.length);
+      set("ownerSubscriptionCount", subscriptionRows.filter(x => x.status === "requested" || x.status === "active").length);
+      set("ownerApplicationCount", applicationRows.length);
+    } catch (e) {
+      console.warn("Owner dashboard remote stats:", e);
+    }
+  };
+
+  /* ---------------------------------------------------------
+     مطابقة تلقائية + تنبيه داخل التطبيق
+  --------------------------------------------------------- */
+  async function madkhalCheckMatches() {
+    const profile = madkhalLocalProfile();
+    if (!profile.full_name || !profile.profession) return;
+
+    const vacancies = getLocalArray(LOCAL_KEYS.vacancies).filter(v => v.status === "open" || !v.status);
+    const notifications = getLocalArray(LOCAL_KEYS.notifications);
+    let changed = false;
+
+    vacancies.forEach(v => {
+      const score = madkhalMatch(profile, v);
+      if (score < 70) return;
+      const marker = `match:${v.remote_id || v.id}`;
+      if (notifications.some(n => n.match_marker === marker)) return;
+      notifications.push({
+        id: createId(),
+        type: "match",
+        match_marker: marker,
+        message: `🎯 فرصة مناسبة لك: ${v.title} — مطابقة ${score}%`,
+        created_at: madkhalNow()
+      });
+      changed = true;
+    });
+
+    if (changed) setLocalArray(LOCAL_KEYS.notifications, notifications);
+  }
+
+  /* ---------------------------------------------------------
+     بدء التشغيل: مزامنة بلا تعطيل للواجهة
+  --------------------------------------------------------- */
+  window.madkhalSyncNow = madkhalSyncRemote;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(async () => {
+      try {
+        await madkhalSyncRemote();
+        await madkhalCheckMatches();
+        renderOpportunities();
+        renderApplications();
+        renderSubscriptionStatus();
+      } catch (e) {
+        console.warn("Madkhal startup sync:", e);
+      }
+    }, 300);
+  });
+})();
+
+
+</script>
+
+</body>
+</html>
 
