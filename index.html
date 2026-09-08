@@ -17,6 +17,7 @@
   >
 
   <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
   <title>مَدخَل 🚪</title>
 
@@ -192,8 +193,8 @@
 
     .door-scene {
       position: relative;
-      width: 48%;
-      height: 285px;
+      width: 40%;
+      height: 255px;
       display: flex;
       align-items: flex-end;
       justify-content: flex-end;
@@ -213,11 +214,11 @@
 
     .door-frame {
       position: relative;
-      width: 150px;
-      height: 270px;
+      width: 128px;
+      height: 245px;
       border-radius: 7px 7px 0 0;
       background: linear-gradient(90deg,#4a2b1c,#8a5a35 22%,#5d351f 55%,#9a6840 82%,#432619);
-      box-shadow: 14px 16px 30px rgba(55,35,20,.28);
+      box-shadow: 20px 20px 42px rgba(45,25,12,.38), -8px 16px 28px rgba(255,226,158,.18);
       overflow: visible;
     }
 
@@ -234,10 +235,10 @@
       position: absolute;
       top: 15px;
       left: 12px;
-      width: 132px;
-      height: 255px;
+      width: 112px;
+      height: 230px;
       transform-origin: left center;
-      transform: perspective(700px) rotateY(-13deg);
+      transform: perspective(700px) rotateY(-45deg);
       border-radius: 3px 8px 0 0;
       background: repeating-linear-gradient(90deg,rgba(255,255,255,.045) 0 7px,rgba(0,0,0,.055) 8px 15px), linear-gradient(105deg,#6d3e24,#a86f42 35%,#6b3b22 72%,#3e2417);
       box-shadow: -9px 8px 20px rgba(30,18,10,.35), inset 0 0 0 2px rgba(35,20,12,.35);
@@ -255,11 +256,11 @@
       position: absolute;
       top: 20px;
       left: 22px;
-      width: 42px;
-      height: 245px;
-      background: linear-gradient(90deg,rgba(255,250,214,.98),rgba(255,225,146,.7),rgba(255,255,255,0));
+      width: 62px;
+      height: 225px;
+      background: linear-gradient(90deg,rgba(255,252,221,1),rgba(255,225,146,.78),rgba(255,255,255,0));
       filter: blur(.4px);
-      box-shadow: 0 0 34px rgba(255,211,100,.62);
+      box-shadow: 0 0 55px rgba(255,211,100,.82), 18px 0 35px rgba(255,231,169,.42);
       transform: skewY(-2deg);
     }
 
@@ -340,9 +341,9 @@
     @media (max-width: 520px) {
       .hero { min-height: 500px; }
       .hero-stage { min-height: 315px; }
-      .door-frame { width: 125px; height: 245px; }
-      .real-door { width: 108px; height: 230px; }
-      .door-gap { height: 220px; width:34px; left:18px; }
+      .door-frame { width: 108px; height: 220px; }
+      .real-door { width: 94px; height: 205px; transform: perspective(650px) rotateY(-45deg); }
+      .door-gap { height: 198px; width:48px; left:15px; }
       .tools-orbit::before { width:185px;height:185px; }
       .job-counter { width:105px;height:105px; }
       .tool { width:44px;height:44px;font-size:22px; }
@@ -366,6 +367,24 @@
       background: #0f766e;
       color: white;
     }
+
+    .madkhal-wallet {
+      margin-top: 16px;
+      padding: 18px;
+      border-radius: 22px;
+      background: linear-gradient(145deg,#fffdf6,#eef8f6);
+      border: 1px solid #dbe8e6;
+      box-shadow: 0 12px 30px rgba(20,40,40,.10);
+    }
+    .madkhal-wallet-head { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .madkhal-wallet-balance { font-size:24px; font-weight:900; color:#0f766e; }
+    .madkhal-wallet-note { margin:8px 0 14px; color:#5b6767; font-size:13px; line-height:1.7; }
+    .payment-options { display:grid; gap:9px; }
+    .payment-option { width:100%; text-align:right; padding:13px 14px; border-radius:15px; background:#fff; border:1px solid #dce7e5; font-weight:800; color:#172121; }
+    .payment-option.active { border:2px solid #0f766e; background:#eaf8f5; }
+    .wallet-confirm { width:100%; margin-top:12px; }
+    .wallet-compat { margin-top:10px; font-size:11px; color:#718080; line-height:1.6; }
+
 
     .secondary-btn {
       background: white;
@@ -914,7 +933,7 @@
     }
 
   </style>
-<style id="madkhal-dastoor-visual-v2">.madkhal-hero-scene{position:relative;min-height:520px;overflow:hidden;border-radius:28px;background:linear-gradient(110deg,#d8c6aa,#eadfc9 42%,#b99d77);box-shadow:0 18px 50px rgba(0,0,0,.22)}.madkhal-door{position:absolute;right:4%;top:5%;width:min(46%,360px);height:90%;transform:perspective(900px) rotateY(-7deg);background:linear-gradient(90deg,rgba(38,21,10,.55),transparent 10%,transparent 90%,rgba(20,10,5,.55)),repeating-linear-gradient(90deg,rgba(75,39,17,.16) 0 8px,rgba(255,255,255,.035) 8px 12px),linear-gradient(100deg,#6d3e20,#9a6134 45%,#5d321a);box-shadow:-22px 24px 45px rgba(0,0,0,.35);z-index:3}.madkhal-door-gap{position:absolute;right:30%;top:5%;width:11%;height:90%;background:radial-gradient(ellipse at 45% 48%,#fff0b5 0%,rgba(255,221,143,.7) 38%,transparent 78%);box-shadow:0 0 55px rgba(255,220,140,.55);z-index:2}.madkhal-light-beam{position:absolute;right:22%;top:18%;width:45%;height:64%;background:linear-gradient(105deg,rgba(255,234,177,.42),rgba(255,244,205,.12),transparent 72%);clip-path:polygon(15% 0,100% 28%,100% 76%,0 100%);filter:blur(3px);z-index:1}.madkhal-tools{position:absolute;left:4%;top:50%;width:min(47%,370px);aspect-ratio:1;transform:translateY(-50%);border-radius:50%;z-index:4}.madkhal-tool{position:absolute;width:22%;aspect-ratio:1;display:grid;place-items:center;border-radius:50%;background:rgba(255,250,238,.72);box-shadow:0 9px 18px rgba(0,0,0,.16);font-size:clamp(28px,5vw,48px)}.madkhal-tool:nth-child(1){left:39%;top:0}.madkhal-tool:nth-child(2){right:3%;top:22%}.madkhal-tool:nth-child(3){right:8%;bottom:14%}.madkhal-tool:nth-child(4){left:39%;bottom:0}.madkhal-tool:nth-child(5){left:3%;bottom:15%}.madkhal-tool:nth-child(6){left:0;top:23%}.madkhal-job-counter{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:31%;aspect-ratio:1;min-width:115px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:rgba(255,250,239,.92);border:4px solid rgba(128,91,45,.25);box-shadow:0 12px 30px rgba(0,0,0,.2);z-index:6}.madkhal-job-counter strong{font-size:clamp(30px,6vw,55px);line-height:1}.madkhal-job-counter span{font-size:clamp(12px,2vw,16px);margin-top:8px}.madkhal-hero-copy{position:absolute;left:50%;top:7%;width:38%;transform:translateX(-50%);text-align:center;z-index:7}.madkhal-hero-copy h1{margin:0;font-size:clamp(30px,5vw,52px)}.madkhal-hero-copy p{margin:8px 0;font-size:clamp(14px,2.2vw,19px)}@media(max-width:700px){.madkhal-hero-scene{min-height:430px}.madkhal-door{width:43%;right:2%}.madkhal-tools{width:56%;left:1%}.madkhal-hero-copy{width:46%}.madkhal-job-counter{width:34%;min-width:92px}.madkhal-tool{font-size:30px}}</style></head>
+<style id="madkhal-dastoor-visual-v2">.madkhal-hero-scene{display:none;position:relative;min-height:520px;overflow:hidden;border-radius:28px;background:linear-gradient(110deg,#d8c6aa,#eadfc9 42%,#b99d77);box-shadow:0 18px 50px rgba(0,0,0,.22)}.madkhal-door{position:absolute;right:4%;top:5%;width:min(46%,360px);height:90%;transform:perspective(900px) rotateY(-7deg);background:linear-gradient(90deg,rgba(38,21,10,.55),transparent 10%,transparent 90%,rgba(20,10,5,.55)),repeating-linear-gradient(90deg,rgba(75,39,17,.16) 0 8px,rgba(255,255,255,.035) 8px 12px),linear-gradient(100deg,#6d3e20,#9a6134 45%,#5d321a);box-shadow:-22px 24px 45px rgba(0,0,0,.35);z-index:3}.madkhal-door-gap{position:absolute;right:30%;top:5%;width:11%;height:90%;background:radial-gradient(ellipse at 45% 48%,#fff0b5 0%,rgba(255,221,143,.7) 38%,transparent 78%);box-shadow:0 0 55px rgba(255,220,140,.55);z-index:2}.madkhal-light-beam{position:absolute;right:22%;top:18%;width:45%;height:64%;background:linear-gradient(105deg,rgba(255,234,177,.42),rgba(255,244,205,.12),transparent 72%);clip-path:polygon(15% 0,100% 28%,100% 76%,0 100%);filter:blur(3px);z-index:1}.madkhal-tools{position:absolute;left:4%;top:50%;width:min(47%,370px);aspect-ratio:1;transform:translateY(-50%);border-radius:50%;z-index:4}.madkhal-tool{position:absolute;width:22%;aspect-ratio:1;display:grid;place-items:center;border-radius:50%;background:rgba(255,250,238,.72);box-shadow:0 9px 18px rgba(0,0,0,.16);font-size:clamp(28px,5vw,48px)}.madkhal-tool:nth-child(1){left:39%;top:0}.madkhal-tool:nth-child(2){right:3%;top:22%}.madkhal-tool:nth-child(3){right:8%;bottom:14%}.madkhal-tool:nth-child(4){left:39%;bottom:0}.madkhal-tool:nth-child(5){left:3%;bottom:15%}.madkhal-tool:nth-child(6){left:0;top:23%}.madkhal-job-counter{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:31%;aspect-ratio:1;min-width:115px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:rgba(255,250,239,.92);border:4px solid rgba(128,91,45,.25);box-shadow:0 12px 30px rgba(0,0,0,.2);z-index:6}.madkhal-job-counter strong{font-size:clamp(30px,6vw,55px);line-height:1}.madkhal-job-counter span{font-size:clamp(12px,2vw,16px);margin-top:8px}.madkhal-hero-copy{position:absolute;left:50%;top:7%;width:38%;transform:translateX(-50%);text-align:center;z-index:7}.madkhal-hero-copy h1{margin:0;font-size:clamp(30px,5vw,52px)}.madkhal-hero-copy p{margin:8px 0;font-size:clamp(14px,2.2vw,19px)}@media(max-width:700px){.madkhal-hero-scene{min-height:430px}.madkhal-door{width:43%;right:2%}.madkhal-tools{width:56%;left:1%}.madkhal-hero-copy{width:46%}.madkhal-job-counter{width:34%;min-width:92px}.madkhal-tool{font-size:30px}}</style></head>
 
 <body><section class="madkhal-hero-scene" aria-label="هوية مَدخَل"><div class="madkhal-light-beam"></div><div class="madkhal-door-gap"></div><div class="madkhal-door"></div><div class="madkhal-hero-copy"><h1>مَدخَل 🚪</h1><p>بوابتك إلى فرص العمل المناسبة</p></div><div class="madkhal-tools"><div class="madkhal-tool">💻</div><div class="madkhal-tool">📱</div><div class="madkhal-tool">📖</div><div class="madkhal-tool">✏️</div><div class="madkhal-tool">🧭</div><div class="madkhal-tool">🔨</div><div class="madkhal-job-counter"><strong id="madkhalJobCount">0</strong><span>فرصة متاحة</span></div></div></section>
 
@@ -977,6 +996,7 @@
     </div>
 
     <div class="hero-actions">
+      <button id="madkhalInstallButton" class="secondary-btn" hidden onclick="installMadkhalApp()">📲 ثبّت مَدخَل على هاتفك</button>
       <button class="primary-btn" onclick="openWorker()">💼 ابدأ البحث عن فرصة مناسبة</button>
       <button class="secondary-btn" onclick="openEmployer()">🏢 لدي فرصة عمل</button>
     </div>
@@ -1986,10 +2006,32 @@
     <button
       class="primary-btn"
       style="width:100%;"
-      onclick="startSubscriptionRequest()"
+      onclick="openSubscriptionWallet()"
     >
-      🔔 أريد الاشتراك
+      💳 الاشتراك ومحفظة الدفع — $1
     </button>
+
+    <div id="madkhalWallet" class="madkhal-wallet" hidden>
+      <div class="madkhal-wallet-head">
+        <strong>💳 محفظة مَدخَل</strong>
+        <span class="madkhal-wallet-balance">$1</span>
+      </div>
+      <p class="madkhal-wallet-note">
+        قيمة الاشتراك الشهري <strong>$1</strong>. اختر وسيلة الدفع المناسبة، ثم أكّد طلب الاشتراك.
+        المحفظة مصممة لتقبل الربط لاحقًا مع شام كاش ووسائل الدفع المحلية والإقليمية في الشرق الأوسط دون تغيير تجربة المستخدم.
+      </p>
+      <div class="payment-options">
+        <button class="payment-option" data-method="sham_cash" onclick="selectMadkhalPayment(this)">💵 شام كاش</button>
+        <button class="payment-option" data-method="regional_wallet" onclick="selectMadkhalPayment(this)">📱 محفظة دفع محلية / إقليمية</button>
+        <button class="payment-option" data-method="bank_card" onclick="selectMadkhalPayment(this)">💳 بطاقة بنكية / بوابة دفع</button>
+      </div>
+      <button class="primary-btn wallet-confirm" onclick="confirmMadkhalWalletSubscription()">
+        ✅ تأكيد الاشتراك $1
+      </button>
+      <div class="wallet-compat">
+        وسائل الدفع الظاهرة هنا هي واجهة ربط. لن يتم خصم أي مبلغ فعلي قبل توصيل بوابة الدفع واعتمادها.
+      </div>
+    </div>
 
   </div>
 
@@ -5618,6 +5660,33 @@ function openSubscription() {
 }
 
 
+let madkhalSelectedPayment = null;
+
+function openSubscriptionWallet() {
+  const wallet = document.getElementById("madkhalWallet");
+  if (wallet) wallet.hidden = false;
+  if (wallet) wallet.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function selectMadkhalPayment(button) {
+  document.querySelectorAll(".payment-option").forEach(el => el.classList.remove("active"));
+  button.classList.add("active");
+  madkhalSelectedPayment = button.getAttribute("data-method");
+  localStorage.setItem("madkhal_payment_method", madkhalSelectedPayment || "");
+}
+
+function confirmMadkhalWalletSubscription() {
+  if (!madkhalSelectedPayment) {
+    madkhalSelectedPayment = localStorage.getItem("madkhal_payment_method") || null;
+  }
+  if (!madkhalSelectedPayment) {
+    showToast("💳 اختر وسيلة الدفع أولًا.");
+    return;
+  }
+  localStorage.setItem("madkhal_payment_amount_usd", "1");
+  startSubscriptionRequest();
+}
+
 function startSubscriptionRequest() {
 
   const current =
@@ -6894,7 +6963,28 @@ window.addEventListener("beforeinstallprompt", event => {
   event.preventDefault();
   madkhalInstallPrompt = event;
   localStorage.setItem("madkhal_install_available", "1");
+  showMadkhalInstallButton();
 });
+
+function showMadkhalInstallButton() {
+  const btn = document.getElementById("madkhalInstallButton");
+  if (btn && madkhalInstallPrompt) btn.hidden = false;
+}
+
+async function installMadkhalApp() {
+  if (!madkhalInstallPrompt) {
+    showToast("📱 افتح قائمة المتصفح واختر إضافة إلى الشاشة الرئيسية إذا لم يظهر التثبيت هنا.");
+    return;
+  }
+  madkhalInstallPrompt.prompt();
+  const choice = await madkhalInstallPrompt.userChoice;
+  if (choice && choice.outcome === "accepted") {
+    localStorage.setItem("madkhal_install_requested", "1");
+  }
+  madkhalInstallPrompt = null;
+  const btn = document.getElementById("madkhalInstallButton");
+  if (btn) btn.hidden = true;
+}
 
 window.addEventListener("appinstalled", () => {
   localStorage.setItem("madkhal_app_installed", "1");
