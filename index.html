@@ -2666,31 +2666,34 @@ function scrollToScreenPosition(target, anchorId) {
 
   requestAnimationFrame(() => {
 
-    requestAnimationFrame(() => {
+    const anchor = anchorId
+      ? document.getElementById(anchorId)
+      : null;
 
-      const anchor = anchorId
-        ? document.getElementById(anchorId)
-        : null;
+    const element = anchor || target;
 
-      const element = anchor || target;
-      if (!element) return;
+    if (!element) return;
 
-      const top =
-        window.pageYOffset +
-        element.getBoundingClientRect().top -
-        12;
+    const header = document.querySelector("header");
 
-      window.scrollTo({
-        top: Math.max(0, top),
-        behavior: "smooth"
-      });
+    const headerHeight = header
+      ? header.getBoundingClientRect().height
+      : 0;
 
+    const top =
+      window.scrollY +
+      element.getBoundingClientRect().top -
+      headerHeight -
+      8;
+
+    window.scrollTo({
+      top: Math.max(0, top),
+      behavior: "smooth"
     });
 
   });
 
 }
-
 
 function showScreen(id, anchorId = null) {
 
