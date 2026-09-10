@@ -16,7 +16,7 @@
     content="مَدخَل — سوق العمل لحظة بلحظة"
   >
 
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="./manifest.json">
 
   <title>مَدخَل 🚪</title>
 
@@ -115,6 +115,61 @@
         opacity: 1;
         transform: translateY(0);
       }
+    }
+
+    .madkhal-install-bar {
+      position: sticky;
+      top: 63px;
+      z-index: 45;
+      margin: 10px 16px 0;
+      padding: 11px 12px;
+      border: 1px solid #bfe1dc;
+      border-radius: 18px;
+      background: rgba(255,255,255,.97);
+      box-shadow: 0 8px 22px rgba(20,40,40,.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .madkhal-install-text {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+      line-height: 1.35;
+    }
+
+    .madkhal-install-text strong {
+      color: #0f766e;
+      font-size: 13px;
+    }
+
+    .madkhal-install-text span {
+      color: #687575;
+      font-size: 11px;
+    }
+
+    @media (max-width: 430px) {
+      .madkhal-install-bar {
+        top: 60px;
+        padding: 9px 10px;
+      }
+      .madkhal-install-text span {
+        display: none;
+      }
+      .madkhal-install-button {
+        padding: 9px 11px;
+      }
+    }
+
+    .madkhal-install-button {
+      flex: 0 0 auto;
+      padding: 10px 13px;
+      border-radius: 13px;
+      white-space: nowrap;
+      font-size: 12px;
     }
 
     .hero {
@@ -217,7 +272,7 @@
       height: 270px;
       border-radius: 7px 7px 0 0;
       background: linear-gradient(90deg,#4a2b1c,#8a5a35 22%,#5d351f 55%,#9a6840 82%,#432619);
-      box-shadow: 14px 16px 30px rgba(55,35,20,.28);
+      box-shadow: 18px 18px 34px rgba(55,35,20,.34);
       overflow: visible;
     }
 
@@ -237,10 +292,10 @@
       width: 132px;
       height: 255px;
       transform-origin: left center;
-      transform: perspective(700px) rotateY(-13deg);
+      transform: perspective(700px) rotateY(-30deg);
       border-radius: 3px 8px 0 0;
       background: repeating-linear-gradient(90deg,rgba(255,255,255,.045) 0 7px,rgba(0,0,0,.055) 8px 15px), linear-gradient(105deg,#6d3e24,#a86f42 35%,#6b3b22 72%,#3e2417);
-      box-shadow: -9px 8px 20px rgba(30,18,10,.35), inset 0 0 0 2px rgba(35,20,12,.35);
+      box-shadow: -15px 10px 26px rgba(30,18,10,.42), 10px 8px 28px rgba(255,221,143,.16), inset 0 0 0 2px rgba(35,20,12,.35);
     }
 
     .real-door::before {
@@ -255,11 +310,11 @@
       position: absolute;
       top: 20px;
       left: 22px;
-      width: 42px;
+      width: 64px;
       height: 245px;
-      background: linear-gradient(90deg,rgba(255,250,214,.98),rgba(255,225,146,.7),rgba(255,255,255,0));
-      filter: blur(.4px);
-      box-shadow: 0 0 34px rgba(255,211,100,.62);
+      background: linear-gradient(90deg,rgba(255,252,226,1),rgba(255,226,145,.82),rgba(255,255,255,0));
+      filter: blur(.5px);
+      box-shadow: 0 0 48px rgba(255,211,100,.72), 18px 0 35px rgba(255,238,177,.30);
       transform: skewY(-2deg);
     }
 
@@ -342,7 +397,7 @@
       .hero-stage { min-height: 315px; }
       .door-frame { width: 125px; height: 245px; }
       .real-door { width: 108px; height: 230px; }
-      .door-gap { height: 220px; width:34px; left:18px; }
+      .door-gap { height: 220px; width:50px; left:18px; }
       .tools-orbit::before { width:185px;height:185px; }
       .job-counter { width:105px;height:105px; }
       .tool { width:44px;height:44px;font-size:22px; }
@@ -935,6 +990,14 @@
   </div>
 
 </header>
+
+<div id="madkhalInstallBar" class="madkhal-install-bar hidden" role="region" aria-label="تثبيت مَدخَل على الهاتف">
+  <div class="madkhal-install-text">
+    <strong>📲 ثبّت مَدخَل على هاتفك</strong>
+    <span>ليصبح الوصول إلى المنصة أسرع مثل التطبيق.</span>
+  </div>
+  <button id="madkhalInstallButton" class="primary-btn madkhal-install-button" type="button">تثبيت الآن</button>
+</div>
 
 <main>
 
@@ -2631,6 +2694,10 @@ function scrollToScreenPosition(target, anchorId) {
 
 function showScreen(id, anchorId = null) {
 
+  const current = document.querySelector(".screen.active");
+  const sameScreen = !!(current && current.id === id);
+  const savedScroll = window.pageYOffset;
+
   document
     .querySelectorAll(".screen")
     .forEach(screen => {
@@ -2668,10 +2735,14 @@ function showScreen(id, anchorId = null) {
   );
 
 
-  scrollToScreenPosition(
-    target,
-    anchorId
-  );
+  if (!sameScreen) {
+    scrollToScreenPosition(
+      target,
+      anchorId
+    );
+  } else {
+    requestAnimationFrame(() => window.scrollTo(0, savedScroll));
+  }
 
 
   if (id === "accountScreen") {
@@ -4715,6 +4786,125 @@ const opportunities = [
 
 
 /* =========================================================
+   مَدخَل — محرك الفرص الموحد من public.jobs
+   يقرأ جميع المصادر النشطة بدل حصر الواجهة في WorkLink فقط.
+========================================================= */
+
+let madkhalRealJobs = [];
+let madkhalRealJobsLoaded = false;
+let madkhalRealJobsLoading = null;
+
+function madkhalSourceName(source) {
+  const names = {
+    "himalayas": "Himalayas",
+    "onjob": "OnJob",
+    "gulfjobs": "GulfJobs",
+    "myself.ae": "myself.ae",
+    "worklink": "WorkLink",
+    "jobicy": "Jobicy",
+    "fao": "FAO",
+    "UN Careers": "UN Careers"
+  };
+  return names[String(source || "").trim()] || String(source || "المصدر الأصلي").trim() || "المصدر الأصلي";
+}
+
+function madkhalNormalizeDbJob(job) {
+  if (!job || !job.title) return null;
+  const stableKey = String(job.source_job_id ?? job.id ?? job.source_url ?? job.canonical_url ?? "").trim();
+  if (!stableKey) return null;
+
+  const source = String(job.source || "").trim();
+  const categoryText = [job.title, job.description, job.category, job.company].filter(Boolean).join(" ");
+  const categoryRaw = String(job.category || "").trim();
+  const knownCategory = opportunityCategories.includes(categoryRaw) ? categoryRaw : guessOpportunityCategory(categoryText);
+  const min = job.salary_min;
+  const max = job.salary_max;
+  const currency = String(job.salary_currency || "").trim();
+  const hasMin = min !== null && min !== undefined && min !== "";
+  const hasMax = max !== null && max !== undefined && max !== "";
+  let salary = "حسب المصدر";
+  if (hasMin && hasMax) salary = `${min} - ${max}${currency ? " " + currency : ""}`;
+  else if (hasMin) salary = `من ${min}${currency ? " " + currency : ""}`;
+  else if (hasMax) salary = `حتى ${max}${currency ? " " + currency : ""}`;
+
+  return {
+    id: `db-${source || "source"}-${stableKey}`,
+    source_id: job.id,
+    source_job_id: job.source_job_id || null,
+    icon: source === "himalayas" ? "🌐" : source === "gulfjobs" ? "🌍" : source === "myself.ae" ? "🇦🇪" : source === "UN Careers" ? "🏛️" : "💼",
+    title: String(job.title),
+    company: String(job.company || "حسب المصدر"),
+    location: String(job.location || job.country || "غير محدد"),
+    country: String(job.country || ""),
+    type: formatWorkType(job.job_type),
+    category: knownCategory,
+    salary,
+    description: String(job.description || "فرصة عمل من المصدر الأصلي."),
+    external_link: String(job.source_url || job.canonical_url || ""),
+    canonical_link: String(job.canonical_url || job.source_url || ""),
+    source,
+    source_name: madkhalSourceName(source),
+    posted_at: job.posted_at || null,
+    updated_at: job.updated_at || null,
+    expires_at: job.expires_at || null
+  };
+}
+
+async function loadMadkhalRealJobs(force = false) {
+  if (madkhalRealJobsLoading && !force) return madkhalRealJobsLoading;
+  if (madkhalRealJobsLoaded && !force) return madkhalRealJobs;
+  if (!supabaseClient) return [];
+
+  madkhalRealJobsLoading = (async () => {
+    try {
+      const pageSize = 1000;
+      let from = 0;
+      const allRows = [];
+      while (true) {
+        const { data, error } = await supabaseClient
+          .from("jobs")
+          .select("id,source,source_job_id,title,company,description,location,country,job_type,category,salary_min,salary_max,salary_currency,source_url,canonical_url,posted_at,updated_at,expires_at,status")
+          .eq("status", "active")
+          .order("id", { ascending: true })
+          .range(from, from + pageSize - 1);
+        if (error) throw error;
+        const rows = Array.isArray(data) ? data : [];
+        allRows.push(...rows);
+        if (rows.length < pageSize) break;
+        from += pageSize;
+      }
+
+      const seen = new Set();
+      madkhalRealJobs = allRows.map(madkhalNormalizeDbJob).filter(job => {
+        if (!job || seen.has(job.id)) return false;
+        seen.add(job.id);
+        return true;
+      });
+      madkhalRealJobsLoaded = true;
+      console.info("Madkhal real jobs loaded:", madkhalRealJobs.length);
+      return madkhalRealJobs;
+    } catch (error) {
+      console.warn("Madkhal real jobs:", error);
+      madkhalRealJobsLoaded = false;
+      return [];
+    } finally {
+      madkhalRealJobsLoading = null;
+    }
+  })();
+
+  return madkhalRealJobsLoading;
+}
+
+function getMyselfAeOpportunities() {
+  return madkhalRealJobs.filter(job => String(job.source).toLowerCase() === "myself.ae");
+}
+
+function getMadkhalRealOpportunities() {
+  return Array.isArray(madkhalRealJobs) ? madkhalRealJobs : [];
+}
+
+
+/* =========================================================
    WorkLink — وظائف قاعدة Supabase
 ========================================================= */
 
@@ -4785,68 +4975,31 @@ function getWorklinkOpportunities() { return Array.isArray(worklinkJobs) ? workl
 function getAllVisibleOpportunities() {
 
   const employerVacancies =
-    getLocalArray(
-      LOCAL_KEYS.vacancies
-    )
-    .filter(
-      vacancy =>
-        vacancy.status ===
-        "open"
-    )
-    .map(
-      vacancy => ({
+    getLocalArray(LOCAL_KEYS.vacancies)
+      .filter(vacancy => vacancy.status === "open")
+      .map(vacancy => ({
+        id: vacancy.id,
+        icon: "🏢",
+        title: vacancy.title,
+        company: vacancy.employer_name,
+        location: vacancy.location,
+        type: formatWorkType(vacancy.work_type),
+        category: guessOpportunityCategory((vacancy.title || "") + " " + (vacancy.required_skills || "")),
+        salary: vacancy.salary || "حسب الاتفاق",
+        description: vacancy.description,
+        employerVacancy: true,
+        source: "صاحب العمل",
+        source_name: "صاحب العمل"
+      }));
 
-        id:
-          vacancy.id,
-
-        icon:
-          "🏢",
-
-        title:
-          vacancy.title,
-
-        company:
-          vacancy.employer_name,
-
-        location:
-          vacancy.location,
-
-        type:
-          formatWorkType(
-            vacancy.work_type
-          ),
-
-        category:
-          guessOpportunityCategory(
-            vacancy.title +
-            " " +
-            vacancy.required_skills
-          ),
-
-        salary:
-          vacancy.salary ||
-          "حسب الاتفاق",
-
-        description:
-          vacancy.description,
-
-        employerVacancy:
-          true,
-
-        source:
-          "صاحب العمل"
-
-      })
-    );
-
+  const realJobs = getMadkhalRealOpportunities();
+  const fallbackDemo = (!madkhalRealJobsLoaded || !realJobs.length) ? opportunities : [];
 
   return [
-    ...opportunities,
+    ...fallbackDemo,
     ...employerVacancies,
-    ...getMyselfAeOpportunities(),
-    ...getWorklinkOpportunities()
+    ...realJobs
   ];
-
 }
 
 
@@ -5007,6 +5160,7 @@ function renderCategories() {
 
     currentCategory =
       "الكل";
+    madkhalJobDisplayLimit = 60;
 
     renderCategories();
     renderOpportunities();
@@ -5048,6 +5202,7 @@ function renderCategories() {
 
             currentCategory =
               category;
+            madkhalJobDisplayLimit = 60;
 
             renderCategories();
             renderOpportunities();
@@ -5153,6 +5308,8 @@ function calculateMatchScore(
 }
 
 
+let madkhalJobDisplayLimit = 60;
+
 function renderOpportunities() {
 
   const container =
@@ -5249,6 +5406,10 @@ function renderOpportunities() {
   }
 
 
+  const totalMatches = list.length;
+  const visibleList = list.slice(0, madkhalJobDisplayLimit);
+
+
   if (!list.length) {
 
     container.innerHTML = `
@@ -5274,7 +5435,7 @@ function renderOpportunities() {
   }
 
 
-  list.forEach(
+  visibleList.forEach(
     item => {
 
       const div =
@@ -5296,11 +5457,7 @@ function renderOpportunities() {
       const sourceText =
         item.employerVacancy
           ? "🏢 فرصة مقدمة من صاحب العمل"
-          : item.source === "myself.ae"
-            ? "🌐 المصدر: myself.ae"
-            : item.source === "worklink"
-              ? "🌐 المصدر: WorkLink"
-              : "🌐 فرصة من المصدر الأصلي";
+          : `🌐 المصدر: ${item.source_name || madkhalSourceName(item.source)}`;
 
 
       div.innerHTML = `
@@ -5373,6 +5530,21 @@ function renderOpportunities() {
     }
   );
 
+  if (totalMatches > visibleList.length) {
+    const more = document.createElement("button");
+    more.className = "secondary-btn";
+    more.style.cssText = "width:100%;margin-top:10px;";
+    more.type = "button";
+    more.textContent = `⬇️ عرض المزيد (${Math.min(madkhalJobDisplayLimit, totalMatches)} من ${totalMatches})`;
+    more.onclick = () => {
+      const before = window.pageYOffset;
+      madkhalJobDisplayLimit += 60;
+      renderOpportunities();
+      requestAnimationFrame(() => window.scrollTo(0, before));
+    };
+    container.appendChild(more);
+  }
+
 }
 
 
@@ -5413,16 +5585,9 @@ function renderMadkhalJobCounter() {
   const number = document.getElementById("jobCounterNumber");
   const label = document.getElementById("jobCounterLabel");
   if (!number || !label) return;
-  const states = [
-    [madkhalJobStats.total, "فرصة متاحة الآن"],
-    [madkhalJobStats.fresh, "فرصة جديدة"],
-    [madkhalJobStats.expired, "فرصة انتهت" ]
-  ];
-  let index = Number(number.dataset.counterIndex || 0) % states.length;
-  const [value, text] = states[index];
-  number.textContent = Number.isFinite(value) ? value.toLocaleString("ar-EG") : "—";
-  label.textContent = text;
-  number.dataset.counterIndex = String((index + 1) % states.length);
+  const value = Number(madkhalJobStats.total);
+  number.textContent = Number.isFinite(value) && value > 0 ? value.toLocaleString("ar-EG") : "—";
+  label.textContent = "فرصة متاحة الآن";
 }
 
 function startMadkhalJobCounter() {
@@ -5433,23 +5598,13 @@ function startMadkhalJobCounter() {
 }
 
 async function openOpportunities() {
-
-  showScreen(
-    "opportunitiesScreen",
-    "jobSearch"
-  );
-
-
-  currentCategory =
-    "الكل";
-
-
+  showScreen("opportunitiesScreen", "jobSearch");
+  currentCategory = "الكل";
   renderCategories();
   renderOpportunities();
-  if (typeof loadMyselfAeJobs === "function") await loadMyselfAeJobs();
-  await loadWorklinkJobs();
+  await loadMadkhalRealJobs();
+  renderCategories();
   renderOpportunities();
-
 }
 
 
@@ -6922,20 +7077,70 @@ function showNonSubscriberPrompt() {
 startMadkhalJobCounter();
 
 
+window.addEventListener("load", () => {
+  showNonSubscriberPrompt();
+});
+
+/* =========================================================
+   تثبيت مَدخَل على الهاتف (PWA)
+========================================================= */
+
 let madkhalInstallPrompt = null;
+
+function madkhalIsInstalled() {
+  return window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true ||
+    localStorage.getItem("madkhal_app_installed") === "1";
+}
+
+function hideMadkhalInstallBar() {
+  const bar = document.getElementById("madkhalInstallBar");
+  if (bar) bar.classList.add("hidden");
+}
+
+function showMadkhalInstallBar() {
+  const bar = document.getElementById("madkhalInstallBar");
+  const button = document.getElementById("madkhalInstallButton");
+  if (!bar || !button || madkhalIsInstalled() || !madkhalInstallPrompt) return;
+  bar.classList.remove("hidden");
+}
+
 window.addEventListener("beforeinstallprompt", event => {
   event.preventDefault();
   madkhalInstallPrompt = event;
   localStorage.setItem("madkhal_install_available", "1");
+  showMadkhalInstallBar();
 });
 
 window.addEventListener("appinstalled", () => {
   localStorage.setItem("madkhal_app_installed", "1");
+  madkhalInstallPrompt = null;
+  hideMadkhalInstallBar();
   showToast("🚪 تم تثبيت مَدخَل على هاتفك.");
 });
 
-window.addEventListener("load", () => {
-  showNonSubscriberPrompt();
+document.addEventListener("DOMContentLoaded", () => {
+  const button = document.getElementById("madkhalInstallButton");
+  if (!button) return;
+  button.addEventListener("click", async () => {
+    if (!madkhalInstallPrompt) return;
+    const prompt = madkhalInstallPrompt;
+    madkhalInstallPrompt = null;
+    try {
+      await prompt.prompt();
+      const choice = await prompt.userChoice;
+      if (choice && choice.outcome === "accepted") {
+        showToast("📲 بدأ تثبيت مَدخَل. سيختفي زر التثبيت عند تأكيد المتصفح للتثبيت.");
+      } else {
+        madkhalInstallPrompt = prompt;
+        showMadkhalInstallBar();
+      }
+    } catch (e) {
+      madkhalInstallPrompt = prompt;
+      showMadkhalInstallBar();
+    }
+  });
+  if (madkhalIsInstalled()) hideMadkhalInstallBar();
 });
 
 /* =========================================================
@@ -6952,7 +7157,7 @@ if (
 
       navigator.serviceWorker
         .register(
-          "/service-worker.js"
+          "./service-worker.js"
         )
         .then(() => {
 
@@ -6999,6 +7204,17 @@ document.addEventListener(
     loadAccount();
 
     renderSubscriptionStatus();
+
+    setTimeout(async () => {
+      try {
+        await loadMadkhalRealJobs();
+        renderCategories();
+        renderOpportunities();
+        renderMadkhalJobCounter();
+      } catch (e) {
+        console.warn("Madkhal jobs startup:", e);
+      }
+    }, 150);
 
   }
 );
