@@ -1,0 +1,1152 @@
+name: ArabJobs Import
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: "30 2 * * *"
+
+jobs:
+  import-arabjobs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      # Number of ArabJobs search pages per run.
+      # 20 jobs are normally shown per page.
+      PAGES_PER_RUN: "10"
+
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4
+
+      - name: Import ArabJobs jobs
+        run: |
+          python - <<'PY'
+          import os
+          import re
+          import time
+          import hashlib
+          from datetime import datetime, timezone
+
+          import requests
+          from bs4 import BeautifulSoup
+
+
+          # ============================================================
+          # CONFIGURATION
+          # ============================================================
+
+          BASE_URL = "https://www.arabjobs.com"
+
+          SEARCH_URL = (
+              "https://www.arabjobs.com/en/jobs/search"
+          )
+
+          SUPABASE_URL = os.environ.get(
+              "SUPABASE_URL",
+              ""
+          ).rstrip("/")
+
+          SUPABASE_KEY = os.environ.get(
+              "SUPABASE_SERVICE_ROLE_KEY",
+              ""
+          )
+
+          PAGES_PER_RUN = int(
+              os.environ.get(
+                  "PAGES_PER_RUN",
+                  "10"
+              )
+          )
+
+          if not SUPABASE_URL:
+              raise SystemExit(
+                  "ERROR: SUPABASE_URL secret is missing"
+              )
+
+          if not SUPABASE_KEY:
+              raise SystemExit(
+                  "ERROR: SUPABASE_SERVICE_ROLE_KEY secret is missing"
+              )
+
+
+          # ============================================================
+          # HTTP SESSION
+          # ============================================================
+
+          session = requests.Session()
+
+          session.headers.update({
+              "User-Agent": (
+                  "Mozilla/5.0 (X11; Linux x86_64) "
+                  "AppleWebKit/537.36 "
+                  "(KHTML, like Gecko) "
+                  "Chrome/131.0.0.0 Safari/537.36"
+              ),
+              "Accept": (
+                  "text/html,application/xhtml+xml,"
+                  "application/xml;q=0.9,*/*;q=0.8"
+              ),
+              "Accept-Language": "en-US,en;q=0.9"
+          })
+
+
+          # ============================================================
+          # SUPABASE HEADERS
+          # ============================================================
+
+          supabase_headers = {
+              "apikey": SUPABASE_KEY,
+              "Authorization": f"Bearer {SUPABASE_KEY}",
+              "Content-Type": "application/json",
+              "Prefer": "resolution=merge-duplicates,return=minimal"
+          }
+
+
+          # ============================================================
+          # HELPERS
+          # ============================================================
+
+          def clean(value):
+              if value is None:
+                  return None
+
+              value = re.sub(
+                  r"\s+",
+                  " ",
+                  str(value)
+              ).strip()
+
+              return value or None
+
+
+          def parse_number(value):
+              if not value:
+                  return None
+
+              match = re.search(
+                  r"[\d][\d,]*(?:\.\d+)?",
+                  value
+              )
+
+              if not match:
+                  return None
+
+              try:
+                  return float(
+                      match.group(0).replace(",", "")
+                  )
+              except ValueError:
+                  return None
+
+
+          def get_lines(soup):
+              text = soup.get_text(
+                  "\n",
+                  strip=True
+              )
+
+              return [
+                  clean(line)
+                  for line in text.splitlines()
+                  if clean(line)
+              ]
+
+
+          def find_exact_index(lines, value):
+              value = value.lower()
+
+              for i, line in enumerate(lines):
+                  if line.lower() == value:
+                      return i
+
+              return None
+
+
+          def find_section(
+              lines,
+              start_label,
+              stop_labels
+          ):
+              start = find_exact_index(
+                  lines,
+                  start_label
+              )
+
+              if start is None:
+                  return ""
+
+              stop_set = {
+                  x.lower()
+                  for x in stop_labels
+              }
+
+              result = []
+
+              for line in lines[start + 1:]:
+                  if line.lower() in stop_set:
+                      break
+
+                  result.append(line)
+
+              return "\n".join(result).strip()
+
+
+          def extract_country_from_url(url):
+              match = re.search(
+                  r"/en/jobs/j/([^/]+)/([^/]+)/(\d+)/?$",
+                  url,
+                  re.IGNORECASE
+              )
+
+              if not match:
+                  return None
+
+              return clean(
+                  match.group(1).replace("-", " ")
+              )
+
+
+          def normalize_country(country):
+              if not country:
+                  return None
+
+              value = country.strip().lower()
+
+              aliases = {
+                  "uae": "United Arab Emirates",
+                  "united arab emirates": (
+                      "United Arab Emirates"
+                  ),
+                  "ksa": "Saudi Arabia",
+                  "saudi": "Saudi Arabia",
+                  "saudi arabia": "Saudi Arabia",
+                  "egypt": "Egypt",
+                  "qatar": "Qatar",
+                  "kuwait": "Kuwait",
+                  "oman": "Oman",
+                  "bahrain": "Bahrain",
+                  "iraq": "Iraq",
+                  "jordan": "Jordan",
+                  "lebanon": "Lebanon",
+                  "syria": "Syria",
+                  "palestine": "Palestine",
+                  "yemen": "Yemen",
+                  "libya": "Libya",
+                  "tunisia": "Tunisia",
+                  "algeria": "Algeria",
+                  "morocco": "Morocco",
+                  "sudan": "Sudan",
+                  "mauritania": "Mauritania",
+                  "djibouti": "Djibouti",
+                  "somalia": "Somalia",
+                  "comoros": "Comoros"
+              }
+
+              return aliases.get(
+                  value,
+                  country.strip()
+              )
+
+
+          # ============================================================
+          # GEOGRAPHIC CLASSIFICATION
+          # ============================================================
+
+          MENA_COUNTRIES = {
+              "egypt",
+              "saudi arabia",
+              "united arab emirates",
+              "qatar",
+              "kuwait",
+              "oman",
+              "bahrain",
+              "iraq",
+              "jordan",
+              "lebanon",
+              "syria",
+              "palestine",
+              "yemen",
+              "libya",
+              "tunisia",
+              "algeria",
+              "morocco",
+              "sudan",
+              "mauritania",
+              "djibouti",
+              "somalia",
+              "comoros"
+          }
+
+
+          def classify_geo(
+              country,
+              location,
+              description
+          ):
+              country_text = (
+                  country or ""
+              ).strip().lower()
+
+              location_text = (
+                  location or ""
+              ).strip().lower()
+
+              description_text = (
+                  description or ""
+              ).strip().lower()
+
+              combined = (
+                  country_text
+                  + " "
+                  + location_text
+                  + " "
+                  + description_text
+              )
+
+              if country_text == "syria":
+                  return (
+                      "SYRIA",
+                      "Syria",
+                      "ArabJobs country is Syria"
+                  )
+
+              if country_text in MENA_COUNTRIES:
+                  return (
+                      "MENA",
+                      country,
+                      "ArabJobs country is within MENA"
+                  )
+
+              # Explicit remote indicators.
+              remote_patterns = [
+                  r"\bremote\b",
+                  r"\bwork from home\b",
+                  r"\bhome[- ]based\b",
+                  r"\bfully remote\b",
+                  r"\b100% remote\b",
+                  r"\banywhere\b",
+                  r"\bwork[- ]from[- ]anywhere\b",
+                  r"\bworldwide remote\b",
+                  r"\bglobal remote\b"
+              ]
+
+              remote_match = any(
+                  re.search(
+                      pattern,
+                      combined,
+                      re.IGNORECASE
+                  )
+                  for pattern in remote_patterns
+              )
+
+              # A generic "worldwide" by itself is NOT enough.
+              if remote_match:
+                  # If a specific MENA country is explicitly
+                  # mentioned as the location, keep it MENA.
+                  if country_text in MENA_COUNTRIES:
+                      return (
+                          "MENA",
+                          country,
+                          "Remote-compatible job explicitly located "
+                          "in a MENA country"
+                      )
+
+                  return (
+                      "REMOTE_GLOBAL",
+                      "Remote",
+                      "Explicit remote/work-from-anywhere wording"
+                  )
+
+              return (
+                  "OUTSIDE_SCOPE",
+                  country,
+                  "No Syria, MENA, or explicit global remote signal"
+              )
+
+
+          # ============================================================
+          # EXTRACT ONE JOB
+          # ============================================================
+
+          def extract_job(job_url):
+              response = session.get(
+                  job_url,
+                  timeout=30,
+                  allow_redirects=True
+              )
+
+              response.raise_for_status()
+
+              soup = BeautifulSoup(
+                  response.text,
+                  "html.parser"
+              )
+
+              lines = get_lines(soup)
+
+              # --------------------------------------------------------
+              # TITLE
+              # --------------------------------------------------------
+
+              title = None
+
+              h1 = soup.find("h1")
+
+              if h1:
+                  title = clean(
+                      h1.get_text(
+                          " ",
+                          strip=True
+                      )
+                  )
+
+              if not title:
+                  title_tag = soup.find("title")
+
+                  if title_tag:
+                      title = clean(
+                          title_tag.get_text(
+                              " ",
+                              strip=True
+                          )
+                      )
+
+                      title = re.sub(
+                          r"\s*\|\s*ArabJobs\.com.*$",
+                          "",
+                          title,
+                          flags=re.IGNORECASE
+                      ).strip()
+
+              if not title:
+                  return None
+
+
+              # --------------------------------------------------------
+              # TITLE POSITION
+              # --------------------------------------------------------
+
+              title_index = find_exact_index(
+                  lines,
+                  title
+              )
+
+              # Some pages have a title slightly different
+              # from the H1 spacing.
+              if title_index is None:
+                  for i, line in enumerate(lines):
+                      if (
+                          title.lower() in line.lower()
+                          or line.lower() in title.lower()
+                      ):
+                          title_index = i
+                          break
+
+
+              # --------------------------------------------------------
+              # COMPANY
+              # --------------------------------------------------------
+
+              company = None
+
+              if title_index is not None:
+                  candidates = lines[
+                      title_index + 1:
+                      title_index + 5
+                  ]
+
+                  ignored = {
+                      "posted in",
+                      "apply for job",
+                      "views",
+                      "job description",
+                      "job category",
+                      "job requirements"
+                  }
+
+                  for candidate in candidates:
+                      if (
+                          candidate
+                          and candidate.lower()
+                          not in ignored
+                      ):
+                          # Avoid taking the location line
+                          # as the company.
+                          if not re.search(
+                              r",\s*[A-Za-z ]+$",
+                              candidate
+                          ):
+                              company = candidate
+                              break
+
+              # Fallback using page structure.
+              if not company and h1:
+                  for element in h1.find_all_next(
+                      limit=12
+                  ):
+                      value = clean(
+                          element.get_text(
+                              " ",
+                              strip=True
+                          )
+                      )
+
+                      if (
+                          value
+                          and value != title
+                          and len(value) < 200
+                      ):
+                          if not re.search(
+                              r"\bChina\b|\bEgypt\b|"
+                              r"\bSaudi\b|\bUAE\b|"
+                              r"\bQatar\b|\bKuwait\b|"
+                              r"\bOman\b|\bBahrain\b|"
+                              r"\bIraq\b|\bJordan\b|"
+                              r"\bLebanon\b|\bSyria\b",
+                              value,
+                              re.IGNORECASE
+                          ):
+                              company = value
+                              break
+
+
+              # --------------------------------------------------------
+              # LOCATION
+              # --------------------------------------------------------
+
+              location = None
+
+              if title_index is not None:
+                  for candidate in lines[
+                      title_index + 1:
+                      title_index + 6
+                  ]:
+                      if not candidate:
+                          continue
+
+                      if (
+                          candidate == company
+                          or candidate.lower()
+                          in {
+                              "posted in",
+                              "apply for job",
+                              "views"
+                          }
+                      ):
+                          continue
+
+                      if (
+                          "," in candidate
+                          or re.search(
+                              r"\bRemote\b|\bChina\b|"
+                              r"\bEgypt\b|\bSaudi\b|"
+                              r"\bUAE\b|\bQatar\b|"
+                              r"\bKuwait\b|\bOman\b|"
+                              r"\bBahrain\b|\bIraq\b|"
+                              r"\bJordan\b|\bLebanon\b|"
+                              r"\bSyria\b",
+                              candidate,
+                              re.IGNORECASE
+                          )
+                      ):
+                          location = candidate
+                          break
+
+
+              # --------------------------------------------------------
+              # COUNTRY
+              # --------------------------------------------------------
+
+              country = normalize_country(
+                  extract_country_from_url(
+                      response.url
+                  )
+              )
+
+              # --------------------------------------------------------
+              # POSTED DATE
+              # --------------------------------------------------------
+
+              posted_at = None
+
+              posted_index = find_exact_index(
+                  lines,
+                  "Posted In"
+              )
+
+              if posted_index is not None:
+                  if posted_index + 1 < len(lines):
+                      date_value = lines[
+                          posted_index + 1
+                      ]
+
+                      match = re.search(
+                          r"(\d{1,2})/(\d{1,2})/(\d{4})",
+                          date_value
+                      )
+
+                      if match:
+                          day = int(
+                              match.group(1)
+                          )
+
+                          month = int(
+                              match.group(2)
+                          )
+
+                          year = int(
+                              match.group(3)
+                          )
+
+                          posted_at = (
+                              f"{year:04d}-"
+                              f"{month:02d}-"
+                              f"{day:02d}"
+                              f"T00:00:00+00:00"
+                          )
+
+
+              # --------------------------------------------------------
+              # JOB TYPE
+              # --------------------------------------------------------
+
+              job_type = None
+
+              job_type_index = find_exact_index(
+                  lines,
+                  "Job Type"
+              )
+
+              if job_type_index is not None:
+                  if job_type_index + 1 < len(lines):
+                      job_type = lines[
+                          job_type_index + 1
+                      ]
+
+
+              # --------------------------------------------------------
+              # SALARY
+              # --------------------------------------------------------
+
+              salary_min = None
+              salary_max = None
+              salary_currency = None
+
+              salary_index = find_exact_index(
+                  lines,
+                  "Salary"
+              )
+
+              if salary_index is not None:
+                  salary_lines = lines[
+                      salary_index:
+                      salary_index + 10
+                  ]
+
+                  for line in salary_lines:
+                      low = line.lower()
+
+                      if low.startswith("min:"):
+                          salary_min = parse_number(
+                              line
+                          )
+
+                      elif low.startswith("max:"):
+                          salary_max = parse_number(
+                              line
+                          )
+
+                      currencies = [
+                          "USD",
+                          "EUR",
+                          "SAR",
+                          "AED",
+                          "QAR",
+                          "KWD",
+                          "OMR",
+                          "BHD",
+                          "EGP"
+                      ]
+
+                      for currency in currencies:
+                          if re.search(
+                              rf"\b{currency}\b",
+                              line,
+                              re.IGNORECASE
+                          ):
+                              salary_currency = currency
+
+
+              # --------------------------------------------------------
+              # DESCRIPTION
+              # --------------------------------------------------------
+
+              description = find_section(
+                  lines,
+                  "Job Description",
+                  [
+                      "Job Category",
+                      "Job Requirements"
+                  ]
+              )
+
+              # --------------------------------------------------------
+              # CATEGORY
+              # --------------------------------------------------------
+
+              category = find_section(
+                  lines,
+                  "Job Category",
+                  [
+                      "Job Requirements"
+                  ]
+              )
+
+              if category:
+                  category = category.replace(
+                      "\n",
+                      " | "
+                  )
+
+
+              # --------------------------------------------------------
+              # SOURCE JOB ID
+              # --------------------------------------------------------
+
+              id_match = re.search(
+                  r"/(\d+)/?$",
+                  response.url
+              )
+
+              if not id_match:
+                  return None
+
+              source_job_id = id_match.group(1)
+
+
+              # --------------------------------------------------------
+              # GEO
+              # --------------------------------------------------------
+
+              (
+                  geo_class,
+                  geo_region,
+                  geo_reason
+              ) = classify_geo(
+                  country,
+                  location,
+                  description
+              )
+
+
+              # --------------------------------------------------------
+              # DEDUPE HASH
+              # --------------------------------------------------------
+
+              dedupe_hash = hashlib.sha256(
+                  (
+                      "arabjobs|"
+                      + source_job_id
+                  ).encode("utf-8")
+              ).hexdigest()
+
+
+              # --------------------------------------------------------
+              # RECORD
+              # --------------------------------------------------------
+
+              return {
+                  "source": "arabjobs",
+                  "source_job_id": source_job_id,
+                  "title": title,
+                  "company": company,
+                  "description": (
+                      description
+                      if description
+                      else None
+                  ),
+                  "location": location,
+                  "country": country,
+                  "job_type": job_type,
+                  "category": category,
+                  "salary_min": salary_min,
+                  "salary_max": salary_max,
+                  "salary_currency": salary_currency,
+                  "source_url": response.url,
+                  "canonical_url": response.url,
+                  "posted_at": posted_at,
+                  "status": "active",
+                  "dedupe_hash": dedupe_hash,
+                  "last_checked_at": (
+                      datetime.now(
+                          timezone.utc
+                      ).isoformat()
+                  ),
+                  "geo_scope": (
+                      "Syria/MENA/Remote"
+                      if geo_class in {
+                          "SYRIA",
+                          "MENA",
+                          "REMOTE_GLOBAL"
+                      }
+                      else "outside_initial_scope"
+                  ),
+                  "geo_region": geo_region,
+                  "geo_class": geo_class,
+                  "geo_reason": geo_reason
+              }
+
+
+          # ============================================================
+          # GET JOB LINKS FROM SEARCH PAGE
+          # ============================================================
+
+          def get_job_links(page_number):
+              if page_number == 1:
+                  url = SEARCH_URL
+              else:
+                  url = (
+                      SEARCH_URL
+                      + "?page="
+                      + str(page_number)
+                  )
+
+              response = session.get(
+                  url,
+                  timeout=30,
+                  allow_redirects=True
+              )
+
+              response.raise_for_status()
+
+              soup = BeautifulSoup(
+                  response.text,
+                  "html.parser"
+              )
+
+              pattern = re.compile(
+                  r"/en/jobs/j/[^/]+/[^/]+/\d+/?$",
+                  re.IGNORECASE
+              )
+
+              links = []
+
+              for a in soup.find_all(
+                  "a",
+                  href=True
+              ):
+                  href = a["href"].strip()
+
+                  if href.startswith(
+                      "https://www.arabjobs.com"
+                  ):
+                      full_url = href
+
+                  elif href.startswith("/"):
+                      full_url = (
+                          BASE_URL
+                          + href
+                      )
+
+                  else:
+                      continue
+
+                  path = full_url.replace(
+                      BASE_URL,
+                      ""
+                  )
+
+                  if pattern.search(path):
+                      if full_url not in links:
+                          links.append(full_url)
+
+              return links
+
+
+          # ============================================================
+          # MAIN IMPORT
+          # ============================================================
+
+          print()
+          print("========================================")
+          print("ArabJobs FULL IMPORT")
+          print("========================================")
+          print("Pages this run:", PAGES_PER_RUN)
+          print("Jobs per page: approximately 20")
+          print()
+
+          all_links = []
+
+          for page in range(
+              1,
+              PAGES_PER_RUN + 1
+          ):
+              try:
+                  links = get_job_links(page)
+
+                  print(
+                      f"PAGE {page}: "
+                      f"{len(links)} job links"
+                  )
+
+                  for link in links:
+                      if link not in all_links:
+                          all_links.append(link)
+
+              except Exception as error:
+                  print(
+                      f"PAGE {page}: ERROR: {error}"
+                  )
+
+              time.sleep(0.7)
+
+
+          print()
+          print(
+              "TOTAL UNIQUE JOB LINKS:",
+              len(all_links)
+          )
+
+
+          if not all_links:
+              raise SystemExit(
+                  "ERROR: No ArabJobs job links found"
+              )
+
+
+          # ============================================================
+          # IMPORT COUNTERS
+          # ============================================================
+
+          discovered = 0
+          extracted = 0
+          accepted = 0
+          rejected = 0
+          failed = 0
+          inserted_or_updated = 0
+
+          geo_counts = {
+              "SYRIA": 0,
+              "MENA": 0,
+              "REMOTE_GLOBAL": 0,
+              "OUTSIDE_SCOPE": 0
+          }
+
+
+          # ============================================================
+          # PROCESS JOBS
+          # ============================================================
+
+          for number, job_url in enumerate(
+              all_links,
+              start=1
+          ):
+              discovered += 1
+
+              print()
+              print(
+                  f"[{number}/{len(all_links)}]"
+              )
+              print(job_url)
+
+              try:
+                  record = extract_job(
+                      job_url
+                  )
+
+                  if not record:
+                      failed += 1
+
+                      print(
+                          "RESULT: extraction failed"
+                      )
+
+                      continue
+
+                  extracted += 1
+
+                  geo_class = record[
+                      "geo_class"
+                  ]
+
+                  geo_counts[
+                      geo_class
+                  ] = (
+                      geo_counts.get(
+                          geo_class,
+                          0
+                      ) + 1
+                  )
+
+                  print(
+                      "TITLE:",
+                      record["title"]
+                  )
+
+                  print(
+                      "COUNTRY:",
+                      record["country"]
+                  )
+
+                  print(
+                      "GEO:",
+                      record["geo_class"]
+                  )
+
+                  # --------------------------------------------------
+                  # Only import jobs suitable for Madkhal's
+                  # initial geographic scope.
+                  # --------------------------------------------------
+
+                  if geo_class not in {
+                      "SYRIA",
+                      "MENA",
+                      "REMOTE_GLOBAL"
+                  }:
+                      rejected += 1
+
+                      print(
+                          "RESULT: rejected "
+                          "(outside initial scope)"
+                      )
+
+                      time.sleep(0.4)
+                      continue
+
+                  accepted += 1
+
+                  # --------------------------------------------------
+                  # Upsert into Supabase.
+                  # --------------------------------------------------
+
+                  insert_response = session.post(
+                      f"{SUPABASE_URL}/rest/v1/jobs",
+                      headers=supabase_headers,
+                      json=record,
+                      timeout=30
+                  )
+
+                  if not insert_response.ok:
+                      print(
+                          "SUPABASE ERROR:",
+                          insert_response.status_code
+                      )
+
+                      print(
+                          insert_response.text[:1000]
+                      )
+
+                      failed += 1
+
+                  else:
+                      inserted_or_updated += 1
+
+                      print(
+                          "RESULT: imported/updated"
+                      )
+
+              except Exception as error:
+                  failed += 1
+
+                  print(
+                      "RESULT: ERROR:",
+                      str(error)
+                  )
+
+              # Respectful delay between job pages.
+              time.sleep(0.6)
+
+
+          # ============================================================
+          # FINAL SUMMARY
+          # ============================================================
+
+          print()
+          print("========================================")
+          print("ARABJOBS IMPORT SUMMARY")
+          print("========================================")
+
+          print(
+              "JOB LINKS DISCOVERED:",
+              discovered
+          )
+
+          print(
+              "JOB PAGES EXTRACTED:",
+              extracted
+          )
+
+          print(
+              "ACCEPTED FOR MADKHAL:",
+              accepted
+          )
+
+          print(
+              "IMPORTED/UPDATED:",
+              inserted_or_updated
+          )
+
+          print(
+              "REJECTED OUTSIDE SCOPE:",
+              rejected
+          )
+
+          print(
+              "FAILED:",
+              failed
+          )
+
+          print()
+          print("GEO CLASSIFICATION")
+          print(
+              "SYRIA:",
+              geo_counts.get(
+                  "SYRIA",
+                  0
+              )
+          )
+
+          print(
+              "MENA:",
+              geo_counts.get(
+                  "MENA",
+                  0
+              )
+          )
+
+          print(
+              "REMOTE_GLOBAL:",
+              geo_counts.get(
+                  "REMOTE_GLOBAL",
+                  0
+              )
+          )
+
+          print(
+              "OUTSIDE_SCOPE:",
+              geo_counts.get(
+                  "OUTSIDE_SCOPE",
+                  0
+              )
+          )
+
+          print()
+          print(
+              "ArabJobs import run completed."
+          )
+          print(
+              "No existing Madkhal source was modified."
+          )
+          PY
