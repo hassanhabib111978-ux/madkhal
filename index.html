@@ -8084,5 +8084,60 @@ document.addEventListener(
 
 </script>
 
-\n<script>\n/* MADKHAL_NAVIGATION_FIX_V1 */\n(function () {\n  "use strict";\n  function madkhalFixNavigationPosition() {\n    var active = document.querySelector(".screen.active");\n    if (!active) return;\n    window.requestAnimationFrame(function () {\n      var header = document.querySelector(".header");\n      var top = active.getBoundingClientRect().top + window.pageYOffset;\n      var offset = header ? header.getBoundingClientRect().height + 10 : 10;\n      window.scrollTo({ top: Math.max(0, top - offset), behavior: "smooth" });\n    });\n  }\n  document.addEventListener("click", function (event) {\n    var el = event.target && event.target.closest ? event.target.closest("button, a") : null;\n    if (!el) return;\n    var text = (el.textContent || "").trim();\n    var onclick = el.getAttribute("onclick") || "";\n    var navigation = /أبحث عن عمل|لدي فرصة عمل|الاشتراك|التقييم|ملف|البحث عن عمل|حسابي|الرئيسية|فرصة عمل|تقييم|اشتراك/i.test(text) || /showScreen|openSubscription|openEvaluation|worker|profile|assessment|subscription/i.test(onclick);\n    if (!navigation) return;\n    window.setTimeout(madkhalFixNavigationPosition, 120);\n  }, false);\n  window.addEventListener("hashchange", function () {\n    window.setTimeout(madkhalFixNavigationPosition, 80);\n  });\n})();\n</script>\n</body>
+\n<script>\n/* MADKHAL_NAVIGATION_FIX_V1 */\n(function () {\n  "use strict";\n  function madkhalFixNavigationPosition() {\n    var active = document.querySelector(".screen.active");\n    if (!active) return;\n    window.requestAnimationFrame(function () {\n      var header = document.querySelector(".header");\n      var top = active.getBoundingClientRect().top + window.pageYOffset;\n      var offset = header ? header.getBoundingClientRect().height + 10 : 10;\n      window.scrollTo({ top: Math.max(0, top - offset), behavior: "smooth" });\n    });\n  }\n  document.addEventListener("click", function (event) {\n    var el = event.target && event.target.closest ? event.target.closest("button, a") : null;\n    if (!el) return;\n    var text = (el.textContent || "").trim();\n    var onclick = el.getAttribute("onclick") || "";\n    var navigation = /أبحث عن عمل|لدي فرصة عمل|الاشتراك|التقييم|ملف|البحث عن عمل|حسابي|الرئيسية|فرصة عمل|تقييم|اشتراك/i.test(text) || /showScreen|openSubscription|openEvaluation|worker|profile|assessment|subscription/i.test(onclick);\n    if (!navigation) return;\n    window.setTimeout(madkhalFixNavigationPosition, 120);\n  }, false);\n  window.addEventListener("hashchange", function () {\n    window.setTimeout(madkhalFixNavigationPosition, 80);\n  });\n})();\n</script>\n
+<script>
+/* MADKHAL_NAVIGATION_FIX_FINAL */
+(function () {
+  "use strict";
+  function scrollTarget(el) {
+    if (!el) return;
+    var header = document.querySelector(".header");
+    var bar = document.querySelector(".madkhal-install-bar");
+    var offset = (header ? header.getBoundingClientRect().height : 0) + (bar ? bar.getBoundingClientRect().height + 8 : 0) + 12;
+    var top = el.getBoundingClientRect().top + window.pageYOffset - offset;
+    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  }
+  function afterNavigation(focusId) {
+    var active = document.querySelector(".screen.active");
+    if (!active) return;
+    window.requestAnimationFrame(function () {
+      var target = focusId ? (document.getElementById(focusId) || active) : active;
+      scrollTarget(target);
+      if (focusId) {
+        var field = document.getElementById(focusId);
+        if (field && typeof field.focus === "function") {
+          window.setTimeout(function () { field.focus({ preventScroll: true }); }, 180);
+        }
+      }
+      window.setTimeout(function () {
+        target = focusId ? (document.getElementById(focusId) || active) : active;
+        scrollTarget(target);
+      }, 300);
+    });
+  }
+  var originalShowScreen = window.showScreen;
+  if (typeof originalShowScreen === "function" && !originalShowScreen.__madkhalFixed) {
+    function fixedShowScreen(id, anchorId) {
+      var result = originalShowScreen.apply(this, arguments);
+      window.setTimeout(function () { afterNavigation(anchorId); }, 20);
+      return result;
+    }
+    fixedShowScreen.__madkhalFixed = true;
+    window.showScreen = fixedShowScreen;
+  }
+  ["openProfile", "openSubscription", "openEvaluation", "openEmployer", "openWorker"].forEach(function (name) {
+    var original = window[name];
+    if (typeof original !== "function" || original.__madkhalFixed) return;
+    var wrapped = function () {
+      var result = original.apply(this, arguments);
+      window.setTimeout(function () { afterNavigation(); }, 25);
+      return result;
+    };
+    wrapped.__madkhalFixed = true;
+    window[name] = wrapped;
+  });
+})();
+</script>
+
+</body>
 </html>
