@@ -1,0 +1,723 @@
+name: ArabJobs Import Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  import-one-arabjobs-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4
+
+      - name: Read and import one ArabJobs job
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          python - <<'PY'
+          import os
+          import re
+          import hashlib
+          import requests
+          from bs4 import BeautifulSoup
+          from datetime import datetime, timezone
+
+          BASE_URL = "https://www.arabjobs.com"
+          SEARCH_URL = "https://www.arabjobs.com/en/jobs/search"
+
+          SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
+          SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+
+          if not SUPABASE_URL:
+              raise SystemExit("ERROR: SUPABASE_URL secret is missing")
+
+          if not SUPABASE_KEY:
+              raise SystemExit(
+                  "ERROR: SUPABASE_SERVICE_ROLE_KEY secret is missing"
+              )
+
+          headers = {
+              "User-Agent": (
+                  "Mozilla/5.0 (X11; Linux x86_64) "
+                  "AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/131.0.0.0 Safari/537.36"
+              ),
+              "Accept": (
+                  "text/html,application/xhtml+xml,"
+                  "application/xml;q=0.9,*/*;q=0.8"
+              ),
+              "Accept-Language": "en-US,en;q=0.9"
+          }
+
+          print("========================================")
+          print("ArabJobs → Supabase import test")
+          print("========================================")
+
+          # --------------------------------------------------
+          # 1. Read search page
+          # --------------------------------------------------
+
+          print()
+          print("STEP 1: Reading ArabJobs search page")
+          print("URL:", SEARCH_URL)
+
+          response = requests.get(
+              SEARCH_URL,
+              headers=headers,
+              timeout=30,
+              allow_redirects=True
+          )
+
+          print("HTTP status:", response.status_code)
+          print("Bytes:", len(response.content))
+
+          response.raise_for_status()
+
+          soup = BeautifulSoup(response.text, "html.parser")
+
+          pattern = re.compile(
+              r"/en/jobs/j/[^/]+/[^/]+/\d+/?$",
+              re.IGNORECASE
+          )
+
+          links = []
+
+          for a in soup.find_all("a", href=True):
+              href = a["href"].strip()
+
+              if href.startswith("https://www.arabjobs.com"):
+                  full_url = href
+              elif href.startswith("/"):
+                  full_url = BASE_URL + href
+              else:
+                  continue
+
+              path = full_url.replace(BASE_URL, "")
+
+              if pattern.search(path):
+                  if full_url not in links:
+                      links.append(full_url)
+
+          print("JOB LINKS FOUND:", len(links))
+
+          if not links:
+              raise SystemExit(
+                  "ERROR: No ArabJobs job links were found"
+              )
+
+          # Use first job only.
+          job_url = links[0]
+
+          print()
+          print("STEP 2: Selected one job")
+          print("JOB URL:", job_url)
+
+          # --------------------------------------------------
+          # 2. Read job detail page
+          # --------------------------------------------------
+
+          job_response = requests.get(
+              job_url,
+              headers=headers,
+              timeout=30,
+              allow_redirects=True
+          )
+
+          print("Job HTTP status:", job_response.status_code)
+          print("Final URL:", job_response.url)
+          print("Bytes:", len(job_response.content))
+
+          job_response.raise_for_status()
+
+          job_soup = BeautifulSoup(
+              job_response.text,
+              "html.parser"
+          )
+
+          # --------------------------------------------------
+          # 3. Extract visible page text
+          # --------------------------------------------------
+
+          text = job_soup.get_text(
+              "\n",
+              strip=True
+          )
+
+          lines = [
+              line.strip()
+              for line in text.splitlines()
+              if line.strip()
+          ]
+
+          # Remove obvious navigation duplicates where useful.
+          print("TEXT LINES:", len(lines))
+
+          # --------------------------------------------------
+          # Helper functions
+          # --------------------------------------------------
+
+          def find_after(label, default=None):
+              for i, line in enumerate(lines):
+                  if line.strip().lower() == label.lower():
+                      if i + 1 < len(lines):
+                          return lines[i + 1].strip()
+              return default
+
+          def find_section(start_label, stop_labels):
+              start = None
+
+              for i, line in enumerate(lines):
+                  if line.strip().lower() == start_label.lower():
+                      start = i + 1
+                      break
+
+              if start is None:
+                  return ""
+
+              collected = []
+
+              for line in lines[start:]:
+                  low = line.lower()
+
+                  if any(
+                      low == stop.lower()
+                      for stop in stop_labels
+                  ):
+                      break
+
+                  collected.append(line)
+
+              return "\n".join(collected).strip()
+
+          def parse_number(value):
+              if not value:
+                  return None
+
+              match = re.search(
+                  r"[\d][\d,]*(?:\.\d+)?",
+                  value
+              )
+
+              if not match:
+                  return None
+
+              raw = match.group(0).replace(",", "")
+
+              try:
+                  return float(raw)
+              except ValueError:
+                  return None
+
+          # --------------------------------------------------
+          # 4. Extract title
+          # --------------------------------------------------
+
+          title = ""
+
+          h1 = job_soup.find("h1")
+
+          if h1:
+              title = h1.get_text(
+                  " ",
+                  strip=True
+              )
+
+          if not title:
+              title = find_after(
+                  "Researcher on Iran (Fluent in Persian)",
+                  ""
+              )
+
+          if not title and job_soup.title:
+              title = job_soup.title.get_text(
+                  " ",
+                  strip=True
+              )
+
+          # Remove common page suffix if title came from <title>.
+          title = re.sub(
+              r"\s*\|\s*ArabJobs\.com.*$",
+              "",
+              title,
+              flags=re.IGNORECASE
+          ).strip()
+
+          # --------------------------------------------------
+          # 5. Extract company
+          # --------------------------------------------------
+
+          company = None
+
+          # The company normally appears immediately after
+          # the job title in the visible page structure.
+          if h1:
+              current = h1.find_next()
+
+              for _ in range(10):
+                  if current is None:
+                      break
+
+                  value = current.get_text(
+                      " ",
+                      strip=True
+                  )
+
+                  if value and value != title:
+                      if len(value) < 200:
+                          company = value
+                          break
+
+                  current = current.find_next()
+
+          # Fallback: page lines.
+          if not company:
+              try:
+                  title_index = next(
+                      i for i, x in enumerate(lines)
+                      if x.strip() == title.strip()
+                  )
+
+                  if title_index + 1 < len(lines):
+                      candidate = lines[title_index + 1]
+
+                      if (
+                          candidate.lower()
+                          not in {
+                              "toggle navigation",
+                              "find jobs"
+                          }
+                      ):
+                          company = candidate
+              except StopIteration:
+                  pass
+
+          # --------------------------------------------------
+          # 6. Extract location
+          # --------------------------------------------------
+
+          location = None
+          country = None
+
+          try:
+              title_index = next(
+                  i for i, x in enumerate(lines)
+                  if x.strip() == title.strip()
+              )
+
+              candidates = lines[
+                  title_index + 1:
+                  title_index + 5
+              ]
+
+              for candidate in candidates:
+                  low = candidate.lower()
+
+                  if (
+                      "china" in low
+                      or "egypt" in low
+                      or "saudi" in low
+                      or "uae" in low
+                      or "emirates" in low
+                      or "qatar" in low
+                      or "kuwait" in low
+                      or "oman" in low
+                      or "bahrain" in low
+                      or "iraq" in low
+                      or "jordan" in low
+                      or "lebanon" in low
+                      or "syria" in low
+                  ):
+                      location = candidate
+
+                      country_match = re.search(
+                          r"(China|Egypt|Saudi Arabia|UAE|"
+                          r"United Arab Emirates|Qatar|Kuwait|"
+                          r"Oman|Bahrain|Iraq|Jordan|Lebanon|Syria)",
+                          candidate,
+                          re.IGNORECASE
+                      )
+
+                      if country_match:
+                          country = country_match.group(1)
+
+                      break
+
+          except StopIteration:
+              pass
+
+          # --------------------------------------------------
+          # 7. Posted date
+          # --------------------------------------------------
+
+          posted_at = None
+
+          try:
+              posted_index = next(
+                  i for i, x in enumerate(lines)
+                  if x.strip().lower() == "posted in"
+              )
+
+              if posted_index + 1 < len(lines):
+                  date_value = lines[posted_index + 1]
+
+                  match = re.match(
+                      r"(\d{1,2})/(\d{1,2})/(\d{4})",
+                      date_value
+                  )
+
+                  if match:
+                      day, month, year = match.groups()
+
+                      posted_at = (
+                          f"{year}-{int(month):02d}-"
+                          f"{int(day):02d}T00:00:00+00:00"
+                      )
+
+          except StopIteration:
+              pass
+
+          # --------------------------------------------------
+          # 8. Job type
+          # --------------------------------------------------
+
+          job_type = None
+
+          try:
+              job_type_index = next(
+                  i for i, x in enumerate(lines)
+                  if x.strip().lower() == "job type"
+              )
+
+              if job_type_index + 1 < len(lines):
+                  job_type = lines[job_type_index + 1]
+
+          except StopIteration:
+              pass
+
+          # --------------------------------------------------
+          # 9. Salary
+          # --------------------------------------------------
+
+          salary_min = None
+          salary_max = None
+          salary_currency = None
+
+          try:
+              salary_index = next(
+                  i for i, x in enumerate(lines)
+                  if x.strip().lower() == "salary"
+              )
+
+              salary_lines = lines[
+                  salary_index:
+                  salary_index + 8
+              ]
+
+              for line in salary_lines:
+                  low = line.lower()
+
+                  if low.startswith("min:"):
+                      salary_min = parse_number(line)
+
+                  elif low.startswith("max:"):
+                      salary_max = parse_number(line)
+
+                  if "usd" in low:
+                      salary_currency = "USD"
+                  elif "eur" in low:
+                      salary_currency = "EUR"
+                  elif "sar" in low:
+                      salary_currency = "SAR"
+                  elif "aed" in low:
+                      salary_currency = "AED"
+                  elif "qar" in low:
+                      salary_currency = "QAR"
+                  elif "kwd" in low:
+                      salary_currency = "KWD"
+                  elif "omr" in low:
+                      salary_currency = "OMR"
+                  elif "bhd" in low:
+                      salary_currency = "BHD"
+
+          except StopIteration:
+              pass
+
+          # --------------------------------------------------
+          # 10. Description
+          # --------------------------------------------------
+
+          description = find_section(
+              "Job Description",
+              [
+                  "Job Category",
+                  "Job Requirements"
+              ]
+          )
+
+          # --------------------------------------------------
+          # 11. Category
+          # --------------------------------------------------
+
+          category = find_section(
+              "Job Category",
+              [
+                  "Job Requirements"
+              ]
+          )
+
+          if category:
+              category = category.replace(
+                  "\n",
+                  " | "
+              )
+
+          # --------------------------------------------------
+          # 12. Source job ID
+          # --------------------------------------------------
+
+          match = re.search(
+              r"/(\d+)/?$",
+              job_response.url
+          )
+
+          source_job_id = (
+              match.group(1)
+              if match
+              else None
+          )
+
+          if not source_job_id:
+              raise SystemExit(
+                  "ERROR: Could not extract ArabJobs job ID"
+              )
+
+          # --------------------------------------------------
+          # 13. Geo classification
+          # --------------------------------------------------
+
+          country_lower = (country or "").lower()
+          location_lower = (location or "").lower()
+
+          mena_countries = {
+              "egypt",
+              "saudi arabia",
+              "uae",
+              "united arab emirates",
+              "qatar",
+              "kuwait",
+              "oman",
+              "bahrain",
+              "iraq",
+              "jordan",
+              "lebanon",
+              "syria"
+          }
+
+          if "syria" in country_lower:
+              geo_class = "SYRIA"
+              geo_region = "Syria"
+              geo_reason = "ArabJobs location explicitly identifies Syria"
+
+          elif country_lower in mena_countries:
+              geo_class = "MENA"
+              geo_region = country
+              geo_reason = (
+                  "ArabJobs location explicitly identifies a "
+                  "MENA country"
+              )
+
+          else:
+              geo_class = "OUTSIDE_SCOPE"
+              geo_region = country
+              geo_reason = (
+                  "ArabJobs location is outside the initial "
+                  "Syria/MENA geographic scope"
+              )
+
+          # --------------------------------------------------
+          # 14. Dedupe hash
+          # --------------------------------------------------
+
+          dedupe_source = (
+              f"arabjobs|{source_job_id}|"
+              f"{job_response.url}"
+          )
+
+          dedupe_hash = hashlib.sha256(
+              dedupe_source.encode("utf-8")
+          ).hexdigest()
+
+          # --------------------------------------------------
+          # 15. Prepare Supabase record
+          # --------------------------------------------------
+
+          record = {
+              "source": "arabjobs",
+              "source_job_id": source_job_id,
+              "title": title,
+              "company": company,
+              "description": description or None,
+              "location": location,
+              "country": country,
+              "job_type": job_type,
+              "category": category or None,
+              "salary_min": salary_min,
+              "salary_max": salary_max,
+              "salary_currency": salary_currency,
+              "source_url": job_response.url,
+              "canonical_url": job_response.url,
+              "posted_at": posted_at,
+              "status": "active",
+              "dedupe_hash": dedupe_hash,
+              "last_checked_at": datetime.now(
+                  timezone.utc
+              ).isoformat(),
+              "geo_scope": (
+                  "Syria/MENA"
+                  if geo_class in {"SYRIA", "MENA"}
+                  else "outside_initial_scope"
+              ),
+              "geo_region": geo_region,
+              "geo_class": geo_class,
+              "geo_reason": geo_reason
+          }
+
+          # --------------------------------------------------
+          # 16. Print extracted fields
+          # --------------------------------------------------
+
+          print()
+          print("========================================")
+          print("EXTRACTED FIELDS")
+          print("========================================")
+
+          print("source:", record["source"])
+          print("source_job_id:", record["source_job_id"])
+          print("title:", record["title"])
+          print("company:", record["company"])
+          print("location:", record["location"])
+          print("country:", record["country"])
+          print("job_type:", record["job_type"])
+          print("category:", record["category"])
+          print("salary_min:", record["salary_min"])
+          print("salary_max:", record["salary_max"])
+          print("salary_currency:", record["salary_currency"])
+          print("posted_at:", record["posted_at"])
+          print("geo_class:", record["geo_class"])
+          print("geo_region:", record["geo_region"])
+          print("geo_reason:", record["geo_reason"])
+          print("source_url:", record["source_url"])
+
+          print()
+          print("DESCRIPTION SAMPLE:")
+          print((description or "")[:500])
+
+          # --------------------------------------------------
+          # 17. Check if this job already exists
+          # --------------------------------------------------
+
+          rest_headers = {
+              "apikey": SUPABASE_KEY,
+              "Authorization": f"Bearer {SUPABASE_KEY}",
+              "Content-Type": "application/json"
+          }
+
+          check_url = (
+              f"{SUPABASE_URL}/rest/v1/jobs"
+              f"?source=eq.arabjobs"
+              f"&source_job_id=eq.{source_job_id}"
+              f"&select=id,source,source_job_id,title"
+          )
+
+          check_response = requests.get(
+              check_url,
+              headers=rest_headers,
+              timeout=30
+          )
+
+          print()
+          print("SUPABASE EXISTING CHECK STATUS:",
+                check_response.status_code)
+
+          check_response.raise_for_status()
+
+          existing = check_response.json()
+
+          if existing:
+              print()
+              print("RESULT: JOB ALREADY EXISTS")
+              print("Existing record:")
+              print(existing[0])
+
+              raise SystemExit(0)
+
+          # --------------------------------------------------
+          # 18. Insert exactly one job
+          # --------------------------------------------------
+
+          insert_url = (
+              f"{SUPABASE_URL}/rest/v1/jobs"
+          )
+
+          insert_headers = {
+              **rest_headers,
+              "Prefer": "return=representation"
+          }
+
+          print()
+          print("STEP 3: INSERTING ONE JOB INTO SUPABASE")
+          print("Table: public.jobs")
+
+          insert_response = requests.post(
+              insert_url,
+              headers=insert_headers,
+              json=record,
+              timeout=30
+          )
+
+          print(
+              "SUPABASE INSERT STATUS:",
+              insert_response.status_code
+          )
+
+          if not insert_response.ok:
+              print()
+              print("SUPABASE ERROR:")
+              print(insert_response.text)
+
+              raise SystemExit(
+                  "ERROR: Supabase insert failed"
+              )
+
+          inserted = insert_response.json()
+
+          print()
+          print("========================================")
+          print("RESULT: SUCCESS")
+          print("========================================")
+
+          print("ONE ArabJobs job was inserted successfully.")
+          print()
+
+          if inserted:
+              row = inserted[0]
+
+              print("SUPABASE ID:", row.get("id"))
+              print("SOURCE:", row.get("source"))
+              print("SOURCE JOB ID:",
+                    row.get("source_job_id"))
+              print("TITLE:", row.get("title"))
+
+          print()
+          print("No bulk import was performed.")
+          print("No existing source was modified.")
+          PY
