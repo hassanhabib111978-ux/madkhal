@@ -19,30 +19,50 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
+          import subprocess
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          marker = '/* MADKHAL_NAVIGATION_FIX_V1 */'
+          marker = '/* MADKHAL_NAVIGATION_FIX_V2 */'
           if marker in s:
-              print('Navigation fix already present')
+              print('Navigation V2 already present')
               raise SystemExit(0)
-          patch = r'''\n<script>\n/* MADKHAL_NAVIGATION_FIX_V1 */\n(function () {\n  "use strict";\n  function madkhalFixNavigationPosition() {\n    var active = document.querySelector(".screen.active");\n    if (!active) return;\n    window.requestAnimationFrame(function () {\n      var header = document.querySelector(".header");\n      var top = active.getBoundingClientRect().top + window.pageYOffset;\n      var offset = header ? header.getBoundingClientRect().height + 10 : 10;\n      window.scrollTo({ top: Math.max(0, top - offset), behavior: "smooth" });\n    });\n  }\n  document.addEventListener("click", function (event) {\n    var el = event.target && event.target.closest ? event.target.closest("button, a") : null;\n    if (!el) return;\n    var text = (el.textContent || "").trim();\n    var onclick = el.getAttribute("onclick") || "";\n    var navigation = /أبحث عن عمل|لدي فرصة عمل|الاشتراك|التقييم|ملف|البحث عن عمل|حسابي|الرئيسية|فرصة عمل|تقييم|اشتراك/i.test(text) || /showScreen|openSubscription|openEvaluation|worker|profile|assessment|subscription/i.test(onclick);\n    if (!navigation) return;\n    window.setTimeout(madkhalFixNavigationPosition, 120);\n  }, false);\n  window.addEventListener("hashchange", function () {\n    window.setTimeout(madkhalFixNavigationPosition, 80);\n  });\n})();\n</script>\n'''
+          patch = '''
+<script>
+/* MADKHAL_NAVIGATION_FIX_V2 */
+(function () {
+  "use strict";
+  function madkhalFixNavigationPosition() {
+    var active = document.querySelector(".screen.active");
+    if (!active) return;
+    window.requestAnimationFrame(function () {
+      var header = document.querySelector(".header");
+      var top = active.getBoundingClientRect().top + window.pageYOffset;
+      var offset = header ? header.getBoundingClientRect().height + 10 : 10;
+      window.scrollTo({ top: Math.max(0, top - offset), behavior: "smooth" });
+    });
+  }
+  document.addEventListener("click", function (event) {
+    var el = event.target && event.target.closest ? event.target.closest("button, a") : null;
+    if (!el) return;
+    var text = (el.textContent || "").trim();
+    var onclick = el.getAttribute("onclick") || "";
+    var navigation = /أبحث عن عمل|لدي فرصة عمل|الاشتراك|التقييم|ملف|البحث عن عمل|حسابي|الرئيسية|فرصة عمل|تقييم|اشتراك/i.test(text) || /showScreen|openSubscription|openEvaluation|worker|profile|assessment|subscription/i.test(onclick);
+    if (!navigation) return;
+    window.setTimeout(madkhalFixNavigationPosition, 120);
+  }, false);
+  window.addEventListener("hashchange", function () {
+    window.setTimeout(madkhalFixNavigationPosition, 80);
+  });
+})();
+</script>
+'''
           if '</body>' not in s:
               raise SystemExit('Cannot find </body> in index.html')
           s = s.replace('</body>', patch + '</body>', 1)
           p.write_text(s, encoding='utf-8')
-          print('Navigation fix inserted')
-
-      - name: Commit fix
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html
-          if git diff --cached --quiet; then
-            echo "No changes"
-            exit 0
-          fi
-          git commit -m "Madkhal navigation auto-fix [skip ci]"
-          git push
-
-# one-time navigation repair
+          subprocess.run(['git','config','user.name','github-actions[bot]'], check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'], check=True)
+          subprocess.run(['git','add','index.html'], check=True)
+          subprocess.run(['git','commit','-m','Madkhal navigation auto-fix [skip ci]'], check=True)
+          subprocess.run(['git','push'], check=True)
+          print('Navigation V2 committed')
