@@ -2662,59 +2662,115 @@ function updateBottomNavigation(screenId) {
 }
 
 
+function getMadkhalStickyOffset() {
+
+  let offset = 8;
+
+  const header =
+    document.querySelector(".header");
+
+  if (header) {
+    offset += header.getBoundingClientRect().height;
+  }
+
+  const installBar =
+    document.getElementById("madkhalInstallBar");
+
+  if (
+    installBar &&
+    !installBar.classList.contains("hidden")
+  ) {
+    offset += installBar.getBoundingClientRect().height + 10;
+  }
+
+  return offset;
+
+}
+
+
 function scrollToScreenPosition(target, anchorId) {
+
+  if (!target) return;
 
   requestAnimationFrame(() => {
 
-    const anchor = anchorId
-      ? document.getElementById(anchorId)
-      : null;
+    requestAnimationFrame(() => {
 
-    const element = anchor || target;
+      const anchor = anchorId
+        ? document.getElementById(anchorId)
+        : null;
 
-    if (!element) return;
+      const element = anchor || target;
 
-    const header = document.querySelector("header");
+      if (!element) return;
 
-    const headerHeight = header
-      ? header.getBoundingClientRect().height
-      : 0;
+      const absoluteTop =
+        window.pageYOffset +
+        element.getBoundingClientRect().top;
 
-    const top =
-      window.scrollY +
-      element.getBoundingClientRect().top -
-      headerHeight -
-      8;
+      const offset =
+        getMadkhalStickyOffset();
 
-    window.scrollTo({
-      top: Math.max(0, top),
-      behavior: "smooth"
+      const destination =
+        Math.max(0, absoluteTop - offset);
+
+      /*
+       * الانتقال هنا فوري وليس smooth:
+       * كل شاشة تُعرض وحدها، لذلك يجب أن يبدأ
+       * العرض من موضعها الحقيقي دون أن يعيد
+       * المتصفح تحريك الصفحة إلى موضع الزر السابق.
+       */
+      window.scrollTo({
+        top: destination,
+        behavior: "auto"
+      });
+
+      /*
+       * تثبيت الموضع مرة إضافية بعد اكتمال
+       * إعادة الرسم، خصوصًا على الهاتف.
+       */
+      requestAnimationFrame(() => {
+
+        const finalTop =
+          window.pageYOffset +
+          element.getBoundingClientRect().top;
+
+        const finalDestination =
+          Math.max(
+            0,
+            finalTop - getMadkhalStickyOffset()
+          );
+
+        window.scrollTo({
+          top: finalDestination,
+          behavior: "auto"
+        });
+
+      });
+
     });
 
   });
 
 }
 
+
 function showScreen(id, anchorId = null) {
 
-  const current = document.querySelector(".screen.active");
-  const sameScreen = !!(current && current.id === id);
-  const savedScroll = window.pageYOffset;
+  const current =
+    document.querySelector(".screen.active");
 
-  document
-    .querySelectorAll(".screen")
-    .forEach(screen => {
+  const sameScreen =
+    !!(
+      current &&
+      current.id === id
+    );
 
-      screen.classList.remove(
-        "active"
-      );
-
-    });
-
+  const savedScroll =
+    window.pageYOffset;
 
   const target =
     document.getElementById(id);
-
 
   if (!target) {
 
@@ -2727,25 +2783,67 @@ function showScreen(id, anchorId = null) {
 
   }
 
+  /*
+   * إيقاف scroll anchoring أثناء تبديل
+   * الشاشات حتى لا يعيد المتصفح الصفحة
+   * إلى موضع الزر الذي تم الضغط عليه.
+   */
+  const previousOverflowAnchor =
+    document.documentElement.style
+      .overflowAnchor;
+
+  document.documentElement.style
+    .overflowAnchor = "none";
+
+  document
+    .querySelectorAll(".screen")
+    .forEach(screen => {
+
+      screen.classList.remove(
+        "active"
+      );
+
+    });
 
   target.classList.add(
     "active"
   );
 
-
   updateBottomNavigation(
     id
   );
 
-
   if (!sameScreen) {
+
     scrollToScreenPosition(
       target,
       anchorId
     );
+
   } else {
-    requestAnimationFrame(() => window.scrollTo(0, savedScroll));
+
+    requestAnimationFrame(() => {
+
+      window.scrollTo({
+        top: savedScroll,
+        behavior: "auto"
+      });
+
+    });
+
   }
+
+  /*
+   * إعادة scroll anchoring بعد أن يستقر
+   * تبديل الشاشة وإعادة الرسم.
+   */
+  setTimeout(() => {
+
+    document.documentElement.style
+      .overflowAnchor =
+        previousOverflowAnchor;
+
+  }, 450);
 
 
   if (id === "accountScreen") {
