@@ -1,12 +1,12 @@
-/* جبران — النواة الصوتية الأولى لمَدخَل */
+/* جبران — مرافق مَدخَل */
 (function () {
   'use strict';
 
   const STYLE = `
     #jibran-assistant {
       position: fixed;
-      left: 14px;
-      bottom: 92px;
+      top: 76px;
+      right: 14px;
       z-index: 9999;
       direction: rtl;
       font-family: Arial, Tahoma, sans-serif;
@@ -14,21 +14,24 @@
     #jibran-button {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       border: 1px solid #cfe4e1;
       border-radius: 999px;
-      padding: 10px 13px;
-      background: rgba(255,255,255,.97);
+      padding: 9px 12px;
+      background: rgba(255,255,255,.96);
       color: #0f766e;
-      box-shadow: 0 8px 24px rgba(20,40,40,.14);
+      box-shadow: 0 7px 20px rgba(20,40,40,.12);
       font-weight: 800;
+      font-size: 13px;
       cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
     }
+    #jibran-button:hover { box-shadow: 0 9px 24px rgba(20,40,40,.16); }
     #jibran-button:active { transform: scale(.97); }
     #jibran-panel {
       display: none;
       width: min(300px, calc(100vw - 28px));
-      margin-bottom: 8px;
+      margin-top: 8px;
       padding: 14px;
       border: 1px solid #dbe8e6;
       border-radius: 18px;
@@ -38,10 +41,16 @@
     #jibran-panel.open { display: block; }
     #jibran-panel strong { color:#0f766e; display:block; margin-bottom:5px; }
     #jibran-panel p { margin:0; color:#536161; line-height:1.7; font-size:13px; }
+    @media (max-width: 430px) {
+      #jibran-assistant { top: 70px; right: 10px; }
+      #jibran-button { padding: 8px 10px; font-size: 12px; }
+    }
   `;
 
   function injectStyle() {
+    if (document.getElementById('jibran-style')) return;
     const style = document.createElement('style');
+    style.id = 'jibran-style';
     style.textContent = STYLE;
     document.head.appendChild(style);
   }
@@ -93,7 +102,7 @@
 
   window.MadkhalJibran = {
     speak,
-    version: '0.1.0',
+    version: '0.2.0',
     role: 'مرافق ودليل ذكي — صلاحيات محدودة'
   };
 })();
