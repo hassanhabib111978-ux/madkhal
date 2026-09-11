@@ -1,4 +1,3 @@
-# Simple workflow for deploying static content to GitHub Pages
 name: Deploy static content to Pages
 
 on:
@@ -25,58 +24,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Correct navigation patch
+      - name: One-time navigation repair
         shell: python
         run: |
           from pathlib import Path
-          import subprocess
+          import re, subprocess
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          marker = '/* MADKHAL_NAVIGATION_FIX_V2 */'
-          if marker not in s:
-              patch = '''
-<script>
-/* MADKHAL_NAVIGATION_FIX_V2 */
-(function () {
-  "use strict";
-  function madkhalFixNavigationPosition() {
-    var active = document.querySelector(".screen.active");
-    if (!active) return;
-    window.requestAnimationFrame(function () {
-      var header = document.querySelector(".header");
-      var top = active.getBoundingClientRect().top + window.pageYOffset;
-      var offset = header ? header.getBoundingClientRect().height + 10 : 10;
-      window.scrollTo({ top: Math.max(0, top - offset), behavior: "smooth" });
-    });
-  }
-  document.addEventListener("click", function (event) {
-    var el = event.target && event.target.closest ? event.target.closest("button, a") : null;
-    if (!el) return;
-    var text = (el.textContent || "").trim();
-    var onclick = el.getAttribute("onclick") || "";
-    var navigation = /أبحث عن عمل|لدي فرصة عمل|الاشتراك|التقييم|ملف|البحث عن عمل|حسابي|الرئيسية|فرصة عمل|تقييم|اشتراك/i.test(text) || /showScreen|openSubscription|openEvaluation|worker|profile|assessment|subscription/i.test(onclick);
-    if (!navigation) return;
-    window.setTimeout(madkhalFixNavigationPosition, 120);
-  }, false);
-  window.addEventListener("hashchange", function () {
-    window.setTimeout(madkhalFixNavigationPosition, 80);
-  });
-})();
-</script>
-'''
-              if '</body>' not in s:
-                  raise SystemExit('Cannot find </body> in index.html')
-              s = s.replace('</body>', patch + '</body>', 1)
-              p.write_text(s, encoding='utf-8')
-              subprocess.run(['git','config','user.name','github-actions[bot]'], check=True)
-              subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'], check=True)
-              subprocess.run(['git','add','index.html'], check=True)
-              subprocess.run(['git','commit','-m','Madkhal navigation auto-fix [skip ci]'], check=True)
-              subprocess.run(['git','push'], check=True)
-              print('Navigation V2 committed')
-          else:
-              print('Navigation V2 already present')
-
+          # Remove both experimental navigation patches if present.
+          s = re.sub(r'\s*<script>\s*/\* MADKHAL_NAVIGATION_FIX_V1 \*/.*?</script>\s*', '\n', s, flags=re.S)
+          s = re.sub(r'\s*<script>\s*/\* MADKHAL_NAVIGATION_FIX_V2 \*/.*?</script>\s*', '\n', s, flags=re.S)
+          patch = '''\n<script>\n/* MADKHAL_NAVIGATION_FIX_FINAL */\n(function () {\n  "use strict";\n  function madkhalScrollTo(el) {\n    if (!el) return;\n    var header = document.querySelector(".header");\n    var installBar = document.querySelector(".madkhal-install-bar");\n    var offset = (header ? header.getBoundingClientRect().height : 0) + (installBar ? installBar.getBoundingClientRect().height + 8 : 0) + 12;\n    var top = el.getBoundingClientRect().top + window.pageYOffset - offset;\n    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });\n  }\n  function madkhalAfterNavigation(focusId) {\n    var active = document.querySelector(".screen.active");\n    if (!active) return;\n    window.requestAnimationFrame(function () {\n      madkhalScrollTo(focusId ? document.getElementById(focusId) || active : active);\n      if (focusId) {\n        var field = document.getElementById(focusId);\n        if (field && typeof field.focus === "function") {\n          window.setTimeout(function () { field.focus({ preventScroll: true }); }, 180);\n        }\n      }\n      window.setTimeout(function () {\n        var target = focusId ? document.getElementById(focusId) || active : active;\n        madkhalScrollTo(target);\n      }, 260);\n    });\n  }\n  var originalShowScreen = window.showScreen;\n  if (typeof originalShowScreen === "function" && !originalShowScreen.__madkhalFixed) {\n    function fixedShowScreen(id, anchorId) {\n      var result = originalShowScreen.apply(this, arguments);\n      window.setTimeout(function () { madkhalAfterNavigation(anchorId); }, 20);\n      return result;\n    }\n    fixedShowScreen.__madkhalFixed = true;\n    window.showScreen = fixedShowScreen;\n  }\n  ["openProfile", "openSubscription", "openEvaluation", "openEmployer", "openWorker"].forEach(function (name) {\n    var original = window[name];\n    if (typeof original !== "function" || original.__madkhalFixed) return;\n    var wrapped = function () {\n      var result = original.apply(this, arguments);\n      window.setTimeout(function () { madkhalAfterNavigation(); }, 25);\n      return result;\n    };\n    wrapped.__madkhalFixed = true;\n    window[name] = wrapped;\n  });\n  document.addEventListener("click", function (event) {\n    var el = event.target && event.target.closest ? event.target.closest("button, a") : null;\n    if (!el) return;\n    var onclick = el.getAttribute("onclick") || "";\n    if (!/showScreen|openProfile|openSubscription|openEvaluation|openEmployer|openWorker/.test(onclick)) return;\n    window.setTimeout(function () { madkhalAfterNavigation(); }, 300);\n  }, false);\n})();\n</script>\n'''
+          if '</body>' not in s:
+              raise SystemExit('Cannot find </body> in index.html')
+          s = s.replace('</body>', patch + '</body>', 1)
+          p.write_text(s, encoding='utf-8')
+          subprocess.run(['git','config','user.name','github-actions[bot]'], check=True)\n          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'], check=True)\n          subprocess.run(['git','add','index.html'], check=True)\n          subprocess.run(['git','commit','-m','Repair Madkhal navigation [skip ci]'], check=True)\n          subprocess.run(['git','push'], check=True)\n
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
@@ -86,5 +49,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
-
-# final trigger
