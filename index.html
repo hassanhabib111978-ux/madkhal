@@ -1121,7 +1121,7 @@
     </p>
 
     <div class="premium-price">
-      $1 شهريًا
+      دولار ونصف شهريًا
     </div>
 
     <button
@@ -2017,11 +2017,18 @@
       والتنبيهات عند ظهور فرص جديدة
       تتوافق مع ملفك وتفضيلاتك.
 
+      قيمة الاشتراك هي دولار ونصف شهريًا،
+      مقابل استمرار المتابعة اللحظية للفرص المناسبة.
+      هذه المتابعة تعتمد على خدمات وسرفرات مدفوعة الأجر
+      عند الحاجة، مثل خدمات الاستضافة وقواعد البيانات
+      وخدمات الإشعارات والمعالجة التي تُستخدم لإبقاء
+      المتابعة والمطابقة والتنبيهات تعمل بصورة مستمرة.
+
     </p>
 
 
     <div class="premium-price">
-      $1 / شهر
+      دولار ونصف شهريًا
     </div>
 
 
@@ -2174,7 +2181,7 @@
       style="width:100%;margin-top:12px;"
       onclick="openSubscription()"
     >
-      🔔 الاشتراك — $1 شهريًا
+      🔔 الاشتراك — دولار ونصف شهريًا
     </button>
 
   </div>
@@ -4730,7 +4737,7 @@ function renderAssessmentResult(
       </p>
 
       <div class="premium-price">
-        $1 / شهر
+        دولار ونصف شهريًا
       </div>
 
       <button
@@ -7171,7 +7178,7 @@ function showNonSubscriberPrompt() {
   if (Date.now() - last < 3 * 24 * 60 * 60 * 1000) return;
   localStorage.setItem("madkhal_promo_notice_at", String(Date.now()));
   setTimeout(() => {
-    showToast("🔔 تريد أن يبحث مَدخَل عن الفرص الجديدة بدلًا منك؟ المتابعة المستمرة بـ $1 شهريًا.");
+    showToast("🔔 تريد أن يبحث مَدخَل عن الفرص الجديدة بدلًا منك؟ المتابعة المستمرة بـ دولار ونصف شهريًا.");
   }, 1800);
 }
 
@@ -8140,5 +8147,6 @@ document.addEventListener(
 })();
 </script>
 
+<!-- MADKHAL_SUBSCRIPTION_TEXT_V1 -->
 </body>
 </html>
