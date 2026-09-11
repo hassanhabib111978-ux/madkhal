@@ -102,7 +102,7 @@
 
   window.MadkhalJibran = {
     speak,
-    version: '0.2.0',
+    version: '0.2.1',
     role: 'مرافق ودليل ذكي — صلاحيات محدودة'
   };
 })();
