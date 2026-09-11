@@ -2,27 +2,21 @@
 name: Deploy static content to Pages
 
 on:
-  # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  # Single deploy job since we're just deploying
   deploy:
     environment:
       name: github-pages
@@ -31,13 +25,196 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Fix Madkhal navigation and clean temporary files
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          old = '''function scrollToScreenPosition(target, anchorId) {
+
+  if (!target) return;
+
+  requestAnimationFrame(() => {
+
+    requestAnimationFrame(() => {
+
+      const anchor = anchorId
+        ? document.getElementById(anchorId)
+        : null;
+
+      const element = anchor || target;
+
+      if (!element) return;
+
+      const absoluteTop =
+        window.pageYOffset +
+        element.getBoundingClientRect().top;
+
+      const offset =
+        getMadkhalStickyOffset();
+
+      const destination =
+        Math.max(0, absoluteTop - offset);
+
+      /*
+       * الانتقال هنا فوري وليس smooth:
+       * كل شاشة تُعرض وحدها، لذلك يجب أن يبدأ
+       * العرض من موضعها الحقيقي دون أن يعيد
+       * المتصفح تحريك الصفحة إلى موضع الزر السابق.
+       */
+      window.scrollTo({
+        top: destination,
+        behavior: "auto"
+      });
+
+      /*
+       * تثبيت الموضع مرة إضافية بعد اكتمال
+       * إعادة الرسم، خصوصًا على الهاتف.
+       */
+      requestAnimationFrame(() => {
+
+        const finalTop =
+          window.pageYOffset +
+          element.getBoundingClientRect().top;
+
+        const finalDestination =
+          Math.max(
+            0,
+            finalTop - getMadkhalStickyOffset()
+          );
+
+        window.scrollTo({
+          top: finalDestination,
+          behavior: "auto"
+        });
+
+      });
+
+    });
+
+  });
+
+}'''
+
+          new = '''function scrollToScreenPosition(target, anchorId) {
+
+  if (!target) return;
+
+  const go = () => {
+    const anchor = anchorId
+      ? document.getElementById(anchorId)
+      : null;
+
+    const element = anchor || target;
+    if (!element) return;
+
+    const offset = getMadkhalStickyOffset();
+    const rect = element.getBoundingClientRect();
+    const destination = Math.max(
+      0,
+      window.pageYOffset + rect.top - offset
+    );
+
+    window.scrollTo({
+      top: destination,
+      left: 0,
+      behavior: "auto"
+    });
+
+    if (anchor && typeof anchor.focus === "function") {
+      try {
+        anchor.focus({ preventScroll: true });
+      } catch (_) {
+        anchor.focus();
+      }
+    }
+  };
+
+  requestAnimationFrame(() => {
+    go();
+    setTimeout(go, 60);
+    setTimeout(go, 220);
+  });
+
+}'''
+
+          if old not in s:
+              raise SystemExit('navigation helper block not found')
+          s = s.replace(old, new, 1)
+
+          old2 = '''  if (!sameScreen) {
+
+    scrollToScreenPosition(
+      target,
+      anchorId
+    );
+
+  } else {
+
+    requestAnimationFrame(() => {
+
+      window.scrollTo({
+        top: savedScroll,
+        behavior: "auto"
+      });
+
+    });
+
+  }'''
+
+          new2 = '''  if (!sameScreen) {
+
+    scrollToScreenPosition(
+      target,
+      anchorId
+    );
+
+  } else if (anchorId) {
+
+    scrollToScreenPosition(
+      target,
+      anchorId
+    );
+
+  } else {
+
+    window.scrollTo({
+      top: savedScroll,
+      left: 0,
+      behavior: "auto"
+    });
+
+  }'''
+
+          if old2 not in s:
+              raise SystemExit('showScreen scroll branch not found')
+          s = s.replace(old2, new2, 1)
+
+          p.write_text(s, encoding='utf-8')
+          PY
+
+          rm -f .github/workflows/madkhal-navigation-fix.yml madkhal-navigation-trigger.txt
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/madkhal-navigation-fix.yml madkhal-navigation-trigger.txt
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Fix Madkhal screen navigation"
+          git push
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
           path: '.'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
