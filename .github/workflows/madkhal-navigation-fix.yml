@@ -44,3 +44,5 @@ jobs:
           fi
           git commit -m "Madkhal navigation auto-fix [skip ci]"
           git push
+
+# one-time navigation repair
