@@ -8084,5 +8084,5 @@ document.addEventListener(
 
 </script>
 
-</body>
+\n<script>\n/* MADKHAL_NAVIGATION_FIX_V1 */\n(function () {\n  "use strict";\n  function madkhalFixNavigationPosition() {\n    var active = document.querySelector(".screen.active");\n    if (!active) return;\n    window.requestAnimationFrame(function () {\n      var header = document.querySelector(".header");\n      var top = active.getBoundingClientRect().top + window.pageYOffset;\n      var offset = header ? header.getBoundingClientRect().height + 10 : 10;\n      window.scrollTo({ top: Math.max(0, top - offset), behavior: "smooth" });\n    });\n  }\n  document.addEventListener("click", function (event) {\n    var el = event.target && event.target.closest ? event.target.closest("button, a") : null;\n    if (!el) return;\n    var text = (el.textContent || "").trim();\n    var onclick = el.getAttribute("onclick") || "";\n    var navigation = /أبحث عن عمل|لدي فرصة عمل|الاشتراك|التقييم|ملف|البحث عن عمل|حسابي|الرئيسية|فرصة عمل|تقييم|اشتراك/i.test(text) || /showScreen|openSubscription|openEvaluation|worker|profile|assessment|subscription/i.test(onclick);\n    if (!navigation) return;\n    window.setTimeout(madkhalFixNavigationPosition, 120);\n  }, false);\n  window.addEventListener("hashchange", function () {\n    window.setTimeout(madkhalFixNavigationPosition, 80);\n  });\n})();\n</script>\n</body>
 </html>
