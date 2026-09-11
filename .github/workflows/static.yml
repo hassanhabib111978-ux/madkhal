@@ -1,111 +1,96 @@
-name: Deploy static content to Pages
+name: Madkhal navigation repair
 
 on:
   push:
-    branches: ["main"]
-  workflow_dispatch:
+    branches:
+      - main
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  repair:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: One-time navigation repair
-        shell: python
+      - name: Repair navigation
         run: |
+          python3 - <<'PY'
           from pathlib import Path
           import re
           import subprocess
+
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
           s = re.sub(r'\s*<script>\s*/\* MADKHAL_NAVIGATION_FIX_V1 \*/.*?</script>\s*', '\n', s, flags=re.S)
           s = re.sub(r'\s*<script>\s*/\* MADKHAL_NAVIGATION_FIX_V2 \*/.*?</script>\s*', '\n', s, flags=re.S)
           s = re.sub(r'\s*<script>\s*/\* MADKHAL_NAVIGATION_FIX_FINAL \*/.*?</script>\s*', '\n', s, flags=re.S)
-          patch = '''
-<script>
-/* MADKHAL_NAVIGATION_FIX_FINAL */
-(function () {
-  "use strict";
-  function scrollTarget(el) {
-    if (!el) return;
-    var header = document.querySelector(".header");
-    var bar = document.querySelector(".madkhal-install-bar");
-    var offset = (header ? header.getBoundingClientRect().height : 0) + (bar ? bar.getBoundingClientRect().height + 8 : 0) + 12;
-    var top = el.getBoundingClientRect().top + window.pageYOffset - offset;
-    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-  }
-  function afterNavigation(focusId) {
-    var active = document.querySelector(".screen.active");
-    if (!active) return;
-    window.requestAnimationFrame(function () {
-      var target = focusId ? (document.getElementById(focusId) || active) : active;
-      scrollTarget(target);
-      if (focusId) {
-        var field = document.getElementById(focusId);
-        if (field && typeof field.focus === "function") {
-          window.setTimeout(function () { field.focus({ preventScroll: true }); }, 180);
-        }
-      }
-      window.setTimeout(function () {
-        target = focusId ? (document.getElementById(focusId) || active) : active;
-        scrollTarget(target);
-      }, 300);
-    });
-  }
-  var originalShowScreen = window.showScreen;
-  if (typeof originalShowScreen === "function" && !originalShowScreen.__madkhalFixed) {
-    function fixedShowScreen(id, anchorId) {
-      var result = originalShowScreen.apply(this, arguments);
-      window.setTimeout(function () { afterNavigation(anchorId); }, 20);
-      return result;
-    }
-    fixedShowScreen.__madkhalFixed = true;
-    window.showScreen = fixedShowScreen;
-  }
-  ["openProfile", "openSubscription", "openEvaluation", "openEmployer", "openWorker"].forEach(function (name) {
-    var original = window[name];
-    if (typeof original !== "function" || original.__madkhalFixed) return;
-    var wrapped = function () {
-      var result = original.apply(this, arguments);
-      window.setTimeout(function () { afterNavigation(); }, 25);
-      return result;
-    };
-    wrapped.__madkhalFixed = true;
-    window[name] = wrapped;
-  });
-})();
-</script>
-'''
+
+          patch = r'''
+          <script>
+          /* MADKHAL_NAVIGATION_FIX_FINAL */
+          (function () {
+            "use strict";
+            function scrollTarget(el) {
+              if (!el) return;
+              var header = document.querySelector(".header");
+              var bar = document.querySelector(".madkhal-install-bar");
+              var offset = (header ? header.getBoundingClientRect().height : 0) + (bar ? bar.getBoundingClientRect().height + 8 : 0) + 12;
+              var top = el.getBoundingClientRect().top + window.pageYOffset - offset;
+              window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+            }
+            function afterNavigation(focusId) {
+              var active = document.querySelector(".screen.active");
+              if (!active) return;
+              window.requestAnimationFrame(function () {
+                var target = focusId ? (document.getElementById(focusId) || active) : active;
+                scrollTarget(target);
+                if (focusId) {
+                  var field = document.getElementById(focusId);
+                  if (field && typeof field.focus === "function") {
+                    window.setTimeout(function () { field.focus({ preventScroll: true }); }, 180);
+                  }
+                }
+                window.setTimeout(function () {
+                  target = focusId ? (document.getElementById(focusId) || active) : active;
+                  scrollTarget(target);
+                }, 300);
+              });
+            }
+            var originalShowScreen = window.showScreen;
+            if (typeof originalShowScreen === "function" && !originalShowScreen.__madkhalFixed) {
+              function fixedShowScreen(id, anchorId) {
+                var result = originalShowScreen.apply(this, arguments);
+                window.setTimeout(function () { afterNavigation(anchorId); }, 20);
+                return result;
+              }
+              fixedShowScreen.__madkhalFixed = true;
+              window.showScreen = fixedShowScreen;
+            }
+            ["openProfile", "openSubscription", "openEvaluation", "openEmployer", "openWorker"].forEach(function (name) {
+              var original = window[name];
+              if (typeof original !== "function" || original.__madkhalFixed) return;
+              var wrapped = function () {
+                var result = original.apply(this, arguments);
+                window.setTimeout(function () { afterNavigation(); }, 25);
+                return result;
+              };
+              wrapped.__madkhalFixed = true;
+              window[name] = wrapped;
+            });
+          })();
+          </script>
+          '''
+
           if '</body>' not in s:
               raise SystemExit('Cannot find </body> in index.html')
-          s = s.replace('</body>', patch + '</body>', 1)
+          s = s.replace('</body>', patch + '\n</body>', 1)
           p.write_text(s, encoding='utf-8')
+
           subprocess.run(['git', 'config', 'user.name', 'github-actions[bot]'], check=True)
           subprocess.run(['git', 'config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com'], check=True)
           subprocess.run(['git', 'add', 'index.html'], check=True)
           subprocess.run(['git', 'commit', '-m', 'Repair Madkhal navigation [skip ci]'], check=True)
           subprocess.run(['git', 'push'], check=True)
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: '.'
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
