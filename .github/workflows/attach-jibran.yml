@@ -1,6 +1,7 @@
 name: Attach Jibran companion
 on:
-  workflow_dispatch:
+  push:
+    branches: ["main"]
 permissions:
   contents: write
 jobs:
