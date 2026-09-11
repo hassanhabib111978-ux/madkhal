@@ -1,0 +1,39 @@
+name: Madkhal subscription text fix
+
+on:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update subscription wording
+        shell: python
+        run: |
+          from pathlib import Path
+          import subprocess
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          marker = 'MADKHAL_SUBSCRIPTION_TEXT_V1'
+          if marker in s:
+              raise SystemExit('already fixed')
+          s = s.replace('$1 / شهر', 'دولار ونصف شهريًا')
+          s = s.replace('$1 شهريًا', 'دولار ونصف شهريًا')
+          s = s.replace('🔔 الاشتراك — $1 شهريًا', '🔔 الاشتراك — دولار ونصف شهريًا')
+          old = '''      البحث الأساسي مجاني.\n      الاشتراك مخصص للمتابعة المستمرة\n      والتنبيهات عند ظهور فرص جديدة\n      تتوافق مع ملفك وتفضيلاتك.'''
+          new = '''      البحث الأساسي مجاني.\n      الاشتراك مخصص للمتابعة المستمرة\n      والتنبيهات عند ظهور فرص جديدة\n      تتوافق مع ملفك وتفضيلاتك.\n\n      قيمة الاشتراك هي دولار ونصف شهريًا،\n      مقابل استمرار المتابعة اللحظية للفرص المناسبة.\n      هذه المتابعة تعتمد على خدمات وسرفرات مدفوعة الأجر\n      عند الحاجة، مثل خدمات الاستضافة وقواعد البيانات\n      وخدمات الإشعارات والمعالجة التي تُستخدم لإبقاء\n      المتابعة والمطابقة والتنبيهات تعمل بصورة مستمرة.'''
+          if old not in s:
+              raise SystemExit('subscription description block not found')
+          s = s.replace(old, new, 1)
+          s = s.replace('</body>', '<!-- ' + marker + ' -->\n</body>', 1)
+          p.write_text(s, encoding='utf-8')
+          subprocess.run(['git','config','user.name','github-actions[bot]'], check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'], check=True)
+          subprocess.run(['git','add','index.html'], check=True)
+          subprocess.run(['git','commit','-m','Update subscription price wording [skip ci]'], check=True)
+          subprocess.run(['git','push'], check=True)
