@@ -1,0 +1,88 @@
+name: Patch real jobs display
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch index.html
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          old = s
+          start = s.find('async function loadMadkhalRealJobs(force = false) {')
+          end = s.find('\nfunction getMyselfAeOpportunities()', start)
+          if start < 0 or end < 0:
+              raise SystemExit('loadMadkhalRealJobs block not found')
+          new = r'''async function loadMadkhalRealJobs(force = false) {
+  if (madkhalRealJobsLoading && !force) return madkhalRealJobsLoading;
+  if (madkhalRealJobsLoaded && !force) return madkhalRealJobs;
+  if (!supabaseClient) return [];
+
+  madkhalRealJobsLoading = (async () => {
+    try {
+      const pageSize = 200;
+      const { data, error } = await supabaseClient
+        .from("jobs")
+        .select("id,source,source_job_id,title,company,location,country,job_type,category,salary_min,salary_max,salary_currency,source_url,canonical_url,posted_at,updated_at,expires_at,status")
+        .eq("status", "active")
+        .order("created_at", { ascending: false })
+        .range(0, pageSize - 1);
+      if (error) throw error;
+
+      const rows = Array.isArray(data) ? data : [];
+      const seen = new Set();
+      madkhalRealJobs = rows.map(madkhalNormalizeDbJob).filter(job => {
+        if (!job || seen.has(job.id)) return false;
+        seen.add(job.id);
+        return true;
+      });
+      madkhalRealJobsLoaded = true;
+      console.info("Madkhal real jobs loaded:", madkhalRealJobs.length);
+      return madkhalRealJobs;
+    } catch (error) {
+      console.warn("Madkhal real jobs:", error);
+      madkhalRealJobsLoaded = false;
+      return [];
+    } finally {
+      madkhalRealJobsLoading = null;
+    }
+  })();
+
+  return madkhalRealJobsLoading;
+}
+
+async function refreshMadkhalRealJobsHourly() {
+  await loadMadkhalRealJobs(true);
+  renderCategories();
+  renderOpportunities();
+}
+
+setInterval(refreshMadkhalRealJobsHourly, 60 * 60 * 1000);
+'''
+          s = s[:start] + new + s[end:]
+          s = s.replace('const fallbackDemo = (!madkhalRealJobsLoaded || !realJobs.length) ? opportunities : [];', 'const fallbackDemo = [];')
+          s = s.replace('source: "external_demo",', 'source: opportunity.source || "external",')
+          p.write_text(s, encoding='utf-8')
+          if s == old:
+              raise SystemExit('No changes made')
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Show 200 real jobs from Supabase" || exit 0
+          git push
+      - name: Remove one-time workflow
+        if: success()
+        run: |
+          rm -f .github/workflows/patch-real-jobs.yml
+          git add -u .github/workflows/patch-real-jobs.yml
+          git commit -m "Remove one-time patch workflow" || exit 0
+          git push
