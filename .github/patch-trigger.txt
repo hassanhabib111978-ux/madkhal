@@ -1,0 +1,1 @@
+Temporary trigger for the Madkhal real-jobs and applicant-identity patch workflow.
