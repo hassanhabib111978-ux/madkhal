@@ -6,7 +6,8 @@
     #jibran-assistant {
       position: fixed;
       top: 78px;
-      right: 14px;
+      left: 14px;
+      right: auto;
       z-index: 9999;
       direction: rtl;
       font-family: Arial, Tahoma, sans-serif;
@@ -32,12 +33,12 @@
     #jibran-button:active { transform: scale(.97); }
     #jibran-button[aria-pressed="true"] { box-shadow: 0 9px 24px rgba(20,40,40,.18); }
     @media (max-width: 430px) {
-      #jibran-assistant { top: 70px; right: 10px; }
+      #jibran-assistant { top: 70px; left: 10px; right: auto; }
       #jibran-button { padding: 8px 11px; font-size: 12px; }
     }
   `;
 
-  const WELCOME = 'مرحبًا بك. أنا جُهينة، المساعدة الذكية في مَدْخَل. سأرافقك بهدوء ووضوح في رحلتك للعثور على فرصة العمل المناسبة لك.';
+  const WELCOME = 'مرحبًا بك. أنا جُهينة، المساعدة الذكية في مَدْخَلْ. سأرافقك بهدوء ووضوح في رحلتك للعثور على فرصة العمل المناسبة لك.';
 
   function injectStyle() {
     if (document.getElementById('jibran-style')) return;
@@ -110,7 +111,7 @@
 
   window.MadkhalJibran = {
     speak,
-    version: '0.3.1',
+    version: '0.3.2',
     role: 'المساعد الذكي — جُهينة — مرافق ودليل بصوت أنثوي هادئ'
   };
 })();
