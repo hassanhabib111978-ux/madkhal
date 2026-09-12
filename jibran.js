@@ -42,6 +42,8 @@
   const ERROR_WORDS = /(خطأ|فشل|تعذر|تعذّر|غير صالح|غير صحيح|مطلوب|يجب|لا يمكن|حدث خطأ|حدثت مشكلة|يرجى|اختر|أدخل|أكمِل|اكمل)/i;
   let lastMessage = '';
   let lastMessageAt = 0;
+  let activeGuidance = '';
+  let activeGuidanceAt = 0;
 
   function injectStyle() {
     if (document.getElementById('jibran-style')) return;
@@ -80,38 +82,70 @@
     return true;
   }
 
-  function speakError(message) {
+  function rememberGuidance(message) {
     const raw = String(message || '').replace(/\s+/g, ' ').trim();
-    if (!raw || !ERROR_WORDS.test(raw)) return;
+    if (!raw || !ERROR_WORDS.test(raw)) return false;
     const now = Date.now();
-    if (raw === lastMessage && now - lastMessageAt < 2500) return;
+    if (raw === lastMessage && now - lastMessageAt < 2500) return false;
     lastMessage = raw;
     lastMessageAt = now;
-    let short = raw;
-    if (raw.length > 90) short = 'حدث خطأ. راجعي البيانات وحاولي مرة أخرى.';
-    else if (/مطلوب|يجب|أدخل|أكمِل|اكمل|اختر/i.test(raw)) short = raw;
-    else if (/فشل|تعذر|تعذّر|لا يمكن|حدث خطأ|حدثت مشكلة/i.test(raw)) short = 'حدث خطأ. حاولي مرة أخرى.';
-    speak(short, {rate: 0.92});
+    if (raw.length > 90) activeGuidance = 'حدث خطأ. راجعي البيانات وحاولي مرة أخرى.';
+    else if (/مطلوب|يجب|أدخل|أكمِل|اكمل|اختر/i.test(raw)) activeGuidance = raw;
+    else activeGuidance = 'حدث خطأ. حاولي مرة أخرى.';
+    activeGuidanceAt = now;
+    speak(activeGuidance, {rate: 0.92});
+    return true;
+  }
+
+  function scanNodeForError(node) {
+    if (!node || node.nodeType !== Node.ELEMENT_NODE) return;
+    if (node.id === 'jibran-assistant' || (node.closest && node.closest('#jibran-assistant'))) return;
+    const candidates = [];
+    if (node.matches && node.matches('[role="alert"], [aria-live], .error, .error-message, .field-error, .validation-error, .invalid-feedback')) {
+      candidates.push(node.textContent || '');
+    }
+    if (node.querySelectorAll) {
+      node.querySelectorAll('[role="alert"], [aria-live], .error, .error-message, .field-error, .validation-error, .invalid-feedback').forEach(el => candidates.push(el.textContent || ''));
+    }
+    candidates.forEach(text => rememberGuidance(text));
+  }
+
+  function watchVisibleErrors() {
+    if (!('MutationObserver' in window)) return;
+    const observer = new MutationObserver(function (mutations) {
+      for (const mutation of mutations) {
+        if (mutation.type === 'characterData') {
+          const parent = mutation.target.parentElement;
+          if (parent) scanNodeForError(parent);
+        } else {
+          mutation.addedNodes && mutation.addedNodes.forEach(scanNodeForError);
+          if (mutation.target && mutation.target.nodeType === Node.ELEMENT_NODE) scanNodeForError(mutation.target);
+        }
+      }
+    });
+    observer.observe(document.body, {subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['class', 'aria-invalid']});
   }
 
   function watchErrors() {
     document.addEventListener('invalid', function () {
-      speak('أكملي الحقل المطلوب.', {rate: 0.92});
+      rememberGuidance('أكملي الحقل المطلوب.');
     }, true);
 
     const originalAlert = window.alert;
     window.alert = function (message) {
-      speakError(message);
+      rememberGuidance(message);
       return originalAlert.apply(window, arguments);
     };
 
     window.addEventListener('error', function () {
-      speak('حدث خطأ. حاولي مرة أخرى.', {rate: 0.92});
+      rememberGuidance('حدث خطأ. حاولي مرة أخرى.');
     });
 
     window.addEventListener('unhandledrejection', function () {
-      speak('تعذر إكمال الخطوة. حاولي مرة أخرى.', {rate: 0.92});
+      rememberGuidance('تعذر إكمال الخطوة. حاولي مرة أخرى.');
     });
+
+    watchVisibleErrors();
   }
 
   function mount() {
@@ -135,7 +169,9 @@
         button.setAttribute('aria-pressed', 'false');
         return;
       }
-      const started = speak(WELCOME);
+      const now = Date.now();
+      const recentGuidance = activeGuidance && now - activeGuidanceAt < 15000;
+      const started = speak(recentGuidance ? activeGuidance : WELCOME);
       button.setAttribute('aria-pressed', started ? 'true' : 'false');
     });
   }
@@ -148,7 +184,7 @@
 
   window.MadkhalJibran = {
     speak,
-    version: '0.4.0',
+    version: '0.5.0',
     role: 'المساعد الذكي — جُهينة — مرافق مختصر لمسار مَدخَل'
   };
 })();
