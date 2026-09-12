@@ -1,16 +1,18 @@
-const CACHE_NAME = "madkhal-v3";
+const CACHE_NAME = "madkhal-v4";
+
+const BASE_URL = new URL("./", self.registration.scope);
+const INDEX_URL = new URL("index.html", BASE_URL).href;
+const MANIFEST_URL = new URL("manifest.json", BASE_URL).href;
 
 const FILES_TO_CACHE = [
-  "/",
-  "/index.html",
-  "/manifest.json"
+  BASE_URL.href,
+  INDEX_URL,
+  MANIFEST_URL
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(FILES_TO_CACHE);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(FILES_TO_CACHE))
   );
 
   self.skipWaiting();
@@ -18,13 +20,13 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
+    caches.keys().then((cacheNames) =>
+      Promise.all(
         cacheNames
           .filter((name) => name !== CACHE_NAME)
           .map((name) => caches.delete(name))
-      );
-    })
+      )
+    )
   );
 
   self.clients.claim();
@@ -33,19 +35,19 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.mode === "navigate") {
     event.respondWith(
-      fetch(event.request)
+      fetch(event.request, { cache: "no-store" })
         .then((response) => {
-          const responseClone = response.clone();
-
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put("/index.html", responseClone);
-          });
-
+          if (response && response.ok) {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(INDEX_URL, responseClone);
+            });
+          }
           return response;
         })
-        .catch(() => {
-          return caches.match("/index.html");
-        })
+        .catch(() => caches.match(event.request).then((cached) => {
+          return cached || caches.match(INDEX_URL);
+        }))
     );
 
     return;
