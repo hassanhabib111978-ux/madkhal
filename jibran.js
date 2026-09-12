@@ -212,7 +212,7 @@
         return;
       }
       const now = Date.now();
-      const recentGuidance = activeGuidance && now - activeGuidanceAt < 3000;
+      const recentGuidance = activeGuidance && now - activeGuidanceAt < 15000;
       const started = speak(recentGuidance ? activeGuidance : WELCOME);
       button.setAttribute('aria-pressed', started ? 'true' : 'false');
     });
@@ -226,7 +226,7 @@
 
   window.MadkhalJibran = {
     speak,
-    version: '0.6.0',
+    version: '0.6.1',
     role: 'المساعد الذكي — جُهينة — مرافق مختصر لمسار مَدخَل'
   };
 })();
