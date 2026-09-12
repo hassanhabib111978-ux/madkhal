@@ -1,10 +1,11 @@
 name: Patch real jobs display
 on:
-  workflow_dispatch:
+  push:
 permissions:
   contents: write
 jobs:
   patch:
+    if: ${{ github.event.head_commit.message != 'Show 200 real jobs from Supabase' && github.event.head_commit.message != 'Remove one-time workflow' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -12,10 +13,8 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
-          import re
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          old = s
           start = s.find('async function loadMadkhalRealJobs(force = false) {')
           end = s.find('\nfunction getMyselfAeOpportunities()', start)
           if start < 0 or end < 0:
@@ -70,8 +69,6 @@ setInterval(refreshMadkhalRealJobsHourly, 60 * 60 * 1000);
           s = s.replace('const fallbackDemo = (!madkhalRealJobsLoaded || !realJobs.length) ? opportunities : [];', 'const fallbackDemo = [];')
           s = s.replace('source: "external_demo",', 'source: opportunity.source || "external",')
           p.write_text(s, encoding='utf-8')
-          if s == old:
-              raise SystemExit('No changes made')
       - name: Commit patch
         run: |
           git config user.name "github-actions[bot]"
@@ -80,9 +77,8 @@ setInterval(refreshMadkhalRealJobsHourly, 60 * 60 * 1000);
           git commit -m "Show 200 real jobs from Supabase" || exit 0
           git push
       - name: Remove one-time workflow
-        if: success()
         run: |
           rm -f .github/workflows/patch-real-jobs.yml
           git add -u .github/workflows/patch-real-jobs.yml
-          git commit -m "Remove one-time patch workflow" || exit 0
+          git commit -m "Remove one-time workflow" || exit 0
           git push
