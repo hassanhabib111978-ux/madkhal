@@ -21,19 +21,23 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Inject Madkhal runtime fix
+      - name: Inject Madkhal runtime fixes
         shell: python
         run: |
           from pathlib import Path
           p = Path("index.html")
           s = p.read_text(encoding="utf-8")
-          tag = '<script src="./madkhal-fix.js"></script>'
-          if tag not in s:
-              if "</body>" not in s:
-                  raise SystemExit("index.html has no closing body tag")
-              s = s.replace("</body>", tag + "\n</body>", 1)
-              p.write_text(s, encoding="utf-8")
-          print("Madkhal runtime fix injected")
+          tags = [
+              '<script src="./madkhal-fix.js"></script>',
+              '<script src="./madkhal-description-fix.js"></script>'
+          ]
+          if "</body>" not in s:
+              raise SystemExit("index.html has no closing body tag")
+          for tag in tags:
+              if tag not in s:
+                  s = s.replace("</body>", tag + "\n</body>", 1)
+          p.write_text(s, encoding="utf-8")
+          print("Madkhal runtime fixes injected")
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
