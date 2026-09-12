@@ -1,0 +1,114 @@
+name: Apply Madkhal fixes
+on:
+  push:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch index.html
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, subprocess
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          if 'MADKHAL_FIX_V2_APPLIED' in s:
+              print('Already patched')
+              raise SystemExit(0)
+          start=s.find('async function loadMadkhalRealJobs(force = false) {')
+          end=s.find('\n}\n\nfunction getMyselfAeOpportunities', start)
+          if start < 0 or end < 0: raise SystemExit('Could not find real jobs loader')
+          loader='''async function loadMadkhalRealJobs(force = false) {
+  if (madkhalRealJobsLoading && !force) return madkhalRealJobsLoading;
+  if (madkhalRealJobsLoaded && !force) return madkhalRealJobs;
+  if (!supabaseClient) return [];
+  madkhalRealJobsLoading = (async () => {
+    try {
+      const pageSize = 60;
+      const { data, error } = await supabaseClient.from("jobs")
+        .select("id,source,source_job_id,title,company,description,location,country,job_type,category,salary_min,salary_max,salary_currency,source_url,canonical_url,posted_at,updated_at,expires_at,status")
+        .eq("status", "active").order("created_at", { ascending: false }).range(0, pageSize - 1);
+      if (error) throw error;
+      const rows = Array.isArray(data) ? data : [];
+      const seen = new Set();
+      madkhalRealJobs = rows.map(madkhalNormalizeDbJob).filter(job => { if (!job || seen.has(job.id)) return false; seen.add(job.id); return true; });
+      madkhalRealJobsLoaded = true;
+      return madkhalRealJobs;
+    } catch (error) { console.warn("Madkhal real jobs:", error); madkhalRealJobsLoaded = false; return []; }
+    finally { madkhalRealJobsLoading = null; }
+  })();
+  return madkhalRealJobsLoading;
+}
+let madkhalRealJobsRefreshTimer = null;
+function startMadkhalJobsTenMinuteRefresh() {
+  if (madkhalRealJobsRefreshTimer) clearInterval(madkhalRealJobsRefreshTimer);
+  madkhalRealJobsRefreshTimer = setInterval(async () => {
+    try { await loadMadkhalRealJobs(true); if (document.getElementById("opportunitiesScreen")?.classList.contains("active")) { renderCategories(); renderOpportunities(); } }
+    catch (e) { console.warn("Madkhal 10-minute refresh:", e); }
+  }, 10 * 60 * 1000);
+}
+startMadkhalJobsTenMinuteRefresh();
+'''
+          s=s[:start]+loader+s[end+3:]
+          s=re.sub(r'const opportunities = \[.*?\n\];', 'const opportunities = [];', s, count=1, flags=re.S)
+          s=s.replace('const fallbackDemo = (!madkhalRealJobsLoaded || !realJobs.length) ? opportunities : [];', 'const fallbackDemo = [];')
+          old='''async function openOpportunities() {
+  showScreen("opportunitiesScreen", "jobSearch");
+  currentCategory = "الكل";
+  renderCategories();
+  renderOpportunities();
+  await loadMadkhalRealJobs();
+  renderCategories();
+  renderOpportunities();
+}'''
+          new='''async function openOpportunities() {
+  showScreen("opportunitiesScreen", "jobSearch");
+  currentCategory = "الكل";
+  renderCategories();
+  const container = document.getElementById("opportunitiesList");
+  if (container) container.innerHTML = '<div class="card"><div class="empty-state">⏳ جارٍ تحميل الوظائف الحقيقية من المصادر...</div></div>';
+  await loadMadkhalRealJobs();
+  renderCategories();
+  renderOpportunities();
+}'''
+          if old in s: s=s.replace(old,new,1)
+          marker='''  <div class="form-group">\n\n    <label>\n      المؤهل\n    </label>'''
+          identity='''  <div class="form-group"><label>الاسم الأول</label><input id="workerFirstName" type="text" placeholder="الاسم الأول"></div>
+  <div class="form-group"><label>اسم الأب</label><input id="workerFatherName" type="text" placeholder="اسم الأب"></div>
+  <div class="form-group"><label>اسم العائلة / الكنية</label><input id="workerFamilyName" type="text" placeholder="اسم العائلة / الكنية"></div>
+  <div class="form-group"><label>اسم الأم</label><input id="workerMotherName" type="text" placeholder="اسم الأم"></div>
+  <div class="form-group"><label>تاريخ التولد</label><input id="workerBirthDate" type="date"></div>\n\n'''
+          if marker in s and 'id="workerFirstName"' not in s: s=s.replace(marker, identity+marker, 1)
+          a=s.find('window.applyOpportunity = async function (id) {')
+          b=s.find('\n  /* ---------------------------------------------------------\n     الاشتراك', a)
+          if a < 0 or b < 0: raise SystemExit('Could not find application function')
+          app='''window.applyOpportunity = async function (id) {
+    const opportunity = findOpportunityById(id);
+    if (!opportunity) { showToast("❌ لم يتم العثور على الفرصة."); return; }
+    const vals = ["first_name","father_name","family_name","mother_name","birth_date"].map(k => localStorage.getItem("madkhal_profile_"+k)||"");
+    const modal=document.createElement("div"); modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:9999;display:flex;align-items:flex-end;justify-content:center;padding:12px;";
+    modal.innerHTML=`<div style="background:#fff;border-radius:22px;padding:18px;width:min(700px,100%);max-height:90vh;overflow:auto;direction:rtl"><h3>📩 بيانات المتقدم</h3><p style="color:#657070;font-size:13px">هذه البيانات تميز المتقدمين المتشابهة أسماؤهم.</p><div class="form-group"><label>الاسم الأول *</label><input id="applyFirstName" value="${escapeHtml(vals[0])}"></div><div class="form-group"><label>اسم الأب *</label><input id="applyFatherName" value="${escapeHtml(vals[1])}"></div><div class="form-group"><label>اسم العائلة / الكنية *</label><input id="applyFamilyName" value="${escapeHtml(vals[2])}"></div><div class="form-group"><label>اسم الأم *</label><input id="applyMotherName" value="${escapeHtml(vals[3])}"></div><div class="form-group"><label>تاريخ التولد *</label><input id="applyBirthDate" type="date" value="${escapeHtml(vals[4])}"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button id="applyConfirmButton" class="primary-btn" type="button">تأكيد التقديم</button><button id="applyCancelButton" class="secondary-btn" type="button">إلغاء</button></div></div>`;
+    document.body.appendChild(modal); modal.querySelector("#applyCancelButton").onclick=()=>modal.remove();
+    modal.querySelector("#applyConfirmButton").onclick=async()=>{
+      const firstName=document.getElementById("applyFirstName")?.value.trim()||"", fatherName=document.getElementById("applyFatherName")?.value.trim()||"", familyName=document.getElementById("applyFamilyName")?.value.trim()||"", motherName=document.getElementById("applyMotherName")?.value.trim()||"", birthDate=document.getElementById("applyBirthDate")?.value||"";
+      if(!firstName||!fatherName||!familyName||!motherName||!birthDate){showToast("⚠️ أكمل بيانات المتقدم الخمسة.");return;}
+      localStorage.setItem("madkhal_profile_first_name",firstName);localStorage.setItem("madkhal_profile_father_name",fatherName);localStorage.setItem("madkhal_profile_family_name",familyName);localStorage.setItem("madkhal_profile_mother_name",motherName);localStorage.setItem("madkhal_profile_birth_date",birthDate);
+      const fullName=[firstName,fatherName,familyName].join(" ");localStorage.setItem("madkhal_profile_name",fullName);
+      const applications=getLocalArray(LOCAL_KEYS.applications); if(applications.some(x=>String(x.job_id)===String(opportunity.id))){modal.remove();showToast("ℹ️ سبق أن سجلت طلب تقديم على هذه الفرصة.");return;}
+      const source=opportunity.employerVacancy?"employer":(opportunity.source||"external");
+      const application={id:createId(),job_id:opportunity.id,remote_job_id:opportunity.source_id||null,title:opportunity.title,company:opportunity.company||"",location:opportunity.location||"",source,status:"submitted",applicant_first_name:firstName,applicant_father_name:fatherName,applicant_family_name:familyName,applicant_mother_name:motherName,applicant_birth_date:birthDate,created_at:new Date().toISOString()};
+      applications.push(application);setLocalArray(LOCAL_KEYS.applications,applications);
+      try{const user=await madkhalSessionUser();if(user){const {data,error}=await supabaseClient.from(MADKHAL_TABLES.applications).insert({user_id:user.id,job_id:opportunity.source_id||(opportunity.employerVacancy?opportunity.id:null),job_title:opportunity.title,company:opportunity.company||"",location:opportunity.location||null,source,status:"submitted",applicant_first_name:firstName,applicant_father_name:fatherName,applicant_family_name:familyName,applicant_mother_name:motherName,applicant_birth_date:birthDate,created_at:application.created_at}).select().maybeSingle();if(error)throw error;if(data)application.remote_id=data.id;}}catch(e){console.warn("Madkhal application sync:",e)}
+      modal.remove();showToast(`📩 تم تسجيل طلبك على: ${opportunity.title}`);loadAccount();if(opportunity.external_link&&/^https?:\\/\\//i.test(String(opportunity.external_link)))setTimeout(()=>window.open(String(opportunity.external_link),"_blank","noopener,noreferrer"),350);
+    };
+  };
+'''
+          s=s[:a]+app+s[b:]
+          s=s.replace('</body>','<!-- MADKHAL_FIX_V2_APPLIED -->\n</body>')
+          p.write_text(s,encoding='utf-8')
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True);subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True);subprocess.run(['git','add','index.html'],check=True);r=subprocess.run(['git','commit','-m','Apply Madkhal jobs and applicant identity fix']);
+          if r.returncode==0: subprocess.run(['git','push'],check=True)
+          PY
