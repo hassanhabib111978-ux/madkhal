@@ -1,11 +1,11 @@
-name: Patch real jobs display
+name: Patch jobs refresh and applicant identity fields
 on:
   push:
 permissions:
   contents: write
 jobs:
   patch:
-    if: ${{ github.event.head_commit.message != 'Show 200 real jobs from Supabase' && github.event.head_commit.message != 'Remove one-time workflow' }}
+    if: ${{ github.event.head_commit.message != 'Patch jobs refresh and applicant identity fields' && github.event.head_commit.message != 'Apply jobs and applicant fields' && github.event.head_commit.message != 'Remove one-time workflow' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -13,23 +13,26 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
+          import re
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
+
+          # 1) Real jobs: 60 at a time, refreshed every 10 minutes.
           start = s.find('async function loadMadkhalRealJobs(force = false) {')
           end = s.find('\nfunction getMyselfAeOpportunities()', start)
           if start < 0 or end < 0:
               raise SystemExit('loadMadkhalRealJobs block not found')
-          new = r'''async function loadMadkhalRealJobs(force = false) {
+          new_loader = r'''async function loadMadkhalRealJobs(force = false) {
   if (madkhalRealJobsLoading && !force) return madkhalRealJobsLoading;
   if (madkhalRealJobsLoaded && !force) return madkhalRealJobs;
   if (!supabaseClient) return [];
 
   madkhalRealJobsLoading = (async () => {
     try {
-      const pageSize = 200;
+      const pageSize = 60;
       const { data, error } = await supabaseClient
         .from("jobs")
-        .select("id,source,source_job_id,title,company,location,country,job_type,category,salary_min,salary_max,salary_currency,source_url,canonical_url,posted_at,updated_at,expires_at,status")
+        .select("id,source,source_job_id,title,company,description,location,country,job_type,category,salary_min,salary_max,salary_currency,source_url,canonical_url,posted_at,updated_at,expires_at,status")
         .eq("status", "active")
         .order("created_at", { ascending: false })
         .range(0, pageSize - 1);
@@ -57,24 +60,323 @@ jobs:
   return madkhalRealJobsLoading;
 }
 
-async function refreshMadkhalRealJobsHourly() {
-  await loadMadkhalRealJobs(true);
-  renderCategories();
-  renderOpportunities();
+let madkhalRealJobsRefreshTimer = null;
+function startMadkhalJobsTenMinuteRefresh() {
+  if (madkhalRealJobsRefreshTimer) return;
+  madkhalRealJobsRefreshTimer = setInterval(async () => {
+    if (!supabaseClient) return;
+    try {
+      await loadMadkhalRealJobs(true);
+      const screen = document.getElementById("opportunitiesScreen");
+      if (screen?.classList.contains("active")) {
+        renderCategories();
+        renderOpportunities();
+      }
+    } catch (e) {
+      console.warn("Madkhal 10-minute jobs refresh:", e);
+    }
+  }, 10 * 60 * 1000);
 }
-
-setInterval(refreshMadkhalRealJobsHourly, 60 * 60 * 1000);
+startMadkhalJobsTenMinuteRefresh();
 '''
-          s = s[:start] + new + s[end:]
+          s = s[:start] + new_loader + s[end:]
+
+          # Never show fake/demo jobs.
           s = s.replace('const fallbackDemo = (!madkhalRealJobsLoaded || !realJobs.length) ? opportunities : [];', 'const fallbackDemo = [];')
           s = s.replace('source: "external_demo",', 'source: opportunity.source || "external",')
+          s = s.replace('madkhalJobDisplayLimit = 60;', 'madkhalJobDisplayLimit = 60;')
+          s = s.replace('madkhalJobDisplayLimit += 60;', 'madkhalJobDisplayLimit += 60;')
+
+          # Do not render fake cards before the real first batch arrives.
+          old_open = '''async function openOpportunities() {
+  showScreen("opportunitiesScreen", "jobSearch");
+  currentCategory = "الكل";
+  renderCategories();
+  renderOpportunities();
+  await loadMadkhalRealJobs();
+  renderCategories();
+  renderOpportunities();
+}'''
+          new_open = '''async function openOpportunities() {
+  showScreen("opportunitiesScreen", "jobSearch");
+  currentCategory = "الكل";
+  renderCategories();
+  const container = document.getElementById("opportunitiesList");
+  if (container) container.innerHTML = '<div class="card"><div class="empty-state">⏳ جارٍ تحميل الوظائف الحقيقية من المصادر...</div></div>';
+  await loadMadkhalRealJobs();
+  renderCategories();
+  renderOpportunities();
+}'''
+          if old_open in s:
+              s = s.replace(old_open, new_open)
+
+          # 2) Add identity fields to the worker profile form.
+          marker = '''  <div class="form-group">
+
+    <label>
+      المؤهل
+    </label>'''
+          identity_html = '''  <div class="form-group">
+
+    <label>الاسم الأول</label>
+    <input id="workerFirstName" type="text" placeholder="مثال: محمد">
+
+  </div>
+
+  <div class="form-group">
+
+    <label>اسم الأب</label>
+    <input id="workerFatherName" type="text" placeholder="مثال: أحمد">
+
+  </div>
+
+  <div class="form-group">
+
+    <label>الكنية / اسم العائلة</label>
+    <input id="workerFamilyName" type="text" placeholder="مثال: الحبيب">
+
+  </div>
+
+  <div class="form-group">
+
+    <label>اسم الأم</label>
+    <input id="workerMotherName" type="text" placeholder="اسم الأم الثلاثي إن أمكن">
+
+  </div>
+
+  <div class="form-group">
+
+    <label>تاريخ التولد</label>
+    <input id="workerBirthDate" type="date">
+
+  </div>
+
+  <div class="form-group">
+
+    <label>
+      المؤهل
+    </label>'''
+          if marker in s and 'id="workerFirstName"' not in s:
+              s = s.replace(marker, identity_html, 1)
+
+          # 3) Replace profile local-field mapping so the new data persists on the device.
+          old_fields = '''    workerName:
+      "madkhal_profile_name",
+
+    workerQualification:
+      "madkhal_profile_qualification",'''
+          new_fields = '''    workerName:
+      "madkhal_profile_name",
+
+    workerFirstName:
+      "madkhal_profile_first_name",
+
+    workerFatherName:
+      "madkhal_profile_father_name",
+
+    workerFamilyName:
+      "madkhal_profile_family_name",
+
+    workerMotherName:
+      "madkhal_profile_mother_name",
+
+    workerBirthDate:
+      "madkhal_profile_birth_date",
+
+    workerQualification:
+      "madkhal_profile_qualification",'''
+          s = s.replace(old_fields, new_fields, 1)
+
+          # 4) Update the real saveWorker implementation.
+          save_start = s.find('window.saveWorker = async function () {')
+          save_end = s.find('\n  /* ---------------------------------------------------------\n     تسجيل فرصة صاحب العمل', save_start)
+          if save_start < 0 or save_end < 0:
+              raise SystemExit('window.saveWorker block not found')
+          save_block = s[save_start:save_end]
+          save_block = save_block.replace('const name = document.getElementById("workerName")?.value.trim() || "";', 'const firstName = document.getElementById("workerFirstName")?.value.trim() || "";\n    const fatherName = document.getElementById("workerFatherName")?.value.trim() || "";\n    const familyName = document.getElementById("workerFamilyName")?.value.trim() || "";\n    const motherName = document.getElementById("workerMotherName")?.value.trim() || "";\n    const birthDate = document.getElementById("workerBirthDate")?.value || "";\n    const name = [firstName, fatherName, familyName].filter(Boolean).join(" ") || document.getElementById("workerName")?.value.trim() || "";')
+          save_block = save_block.replace('if (!name || !skill || !location) {', 'if (!firstName || !fatherName || !familyName || !motherName || !birthDate || !skill || !location) {')
+          save_block = save_block.replace('showToast("⚠️ اكتب الاسم والمهارة والمكان أولًا.");', 'showToast("⚠️ أكمل الاسم الأول واسم الأب والكنية واسم الأم وتاريخ التولد والمهارة والمكان.");', 1)
+          save_block = save_block.replace('const local = {\n      full_name: name,', 'const local = {\n      full_name: name,\n      first_name: firstName,\n      father_name: fatherName,\n      family_name: familyName,\n      mother_name: motherName,\n      birth_date: birthDate,')
+          save_block = save_block.replace('full_name: name,\n          qualification:', 'full_name: name,\n          first_name: firstName,\n          father_name: fatherName,\n          family_name: familyName,\n          mother_name: motherName,\n          birth_date: birthDate || null,\n          qualification:')
+          s = s[:save_start] + save_block + s[save_end:]
+
+          # 5) Load the identity fields from Supabase into the profile form.
+          mapping_old = '''      workerName:
+        data.full_name,
+
+      workerQualification:'''
+          mapping_new = '''      workerName:
+        data.full_name,
+
+      workerFirstName:
+        data.first_name || "",
+
+      workerFatherName:
+        data.father_name || "",
+
+      workerFamilyName:
+        data.family_name || "",
+
+      workerMotherName:
+        data.mother_name || "",
+
+      workerBirthDate:
+        data.birth_date || "",
+
+      workerQualification:'''
+          s = s.replace(mapping_old, mapping_new, 1)
+          s = s.replace('"full_name,qualification,profession,skills,location,work_type"', '"full_name,first_name,father_name,family_name,mother_name,birth_date,qualification,profession,skills,location,work_type"', 1)
+
+          # 6) Application form: collect the same identifying data before recording an application.
+          app_start = s.find('window.applyOpportunity = async function (id) {')
+          app_end = s.find('\n  /* ---------------------------------------------------------\n     الاشتراك', app_start)
+          if app_start < 0 or app_end < 0:
+              raise SystemExit('window.applyOpportunity block not found')
+          app_new = r'''window.applyOpportunity = async function (id) {
+    const opportunity = findOpportunityById(id);
+    if (!opportunity) {
+      showToast("❌ لم يتم العثور على الفرصة.");
+      return;
+    }
+
+    const profile = {
+      firstName: localStorage.getItem("madkhal_profile_first_name") || "",
+      fatherName: localStorage.getItem("madkhal_profile_father_name") || "",
+      familyName: localStorage.getItem("madkhal_profile_family_name") || "",
+      motherName: localStorage.getItem("madkhal_profile_mother_name") || "",
+      birthDate: localStorage.getItem("madkhal_profile_birth_date") || ""
+    };
+
+    const overlay = document.createElement("div");
+    overlay.id = "madkhalApplicationModal";
+    overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto;";
+    overlay.innerHTML = `
+      <div class="card" style="width:100%;max-width:520px;max-height:92vh;overflow:auto;">
+        <h2>📩 طلب التقديم</h2>
+        <p>يرجى تأكيد بياناتك كما ستظهر لصاحب العمل. هذه البيانات تساعد على تمييز المتقدمين الذين يحملون الاسم نفسه.</p>
+        <div class="form-group"><label>الاسم الأول</label><input id="appFirstName" type="text" value="${escapeHtml(profile.firstName)}" placeholder="محمد"></div>
+        <div class="form-group"><label>اسم الأب</label><input id="appFatherName" type="text" value="${escapeHtml(profile.fatherName)}" placeholder="أحمد"></div>
+        <div class="form-group"><label>الكنية / اسم العائلة</label><input id="appFamilyName" type="text" value="${escapeHtml(profile.familyName)}" placeholder="الحبيب"></div>
+        <div class="form-group"><label>اسم الأم</label><input id="appMotherName" type="text" value="${escapeHtml(profile.motherName)}" placeholder="اسم الأم"></div>
+        <div class="form-group"><label>تاريخ التولد</label><input id="appBirthDate" type="date" value="${escapeHtml(profile.birthDate)}"></div>
+        <div style="display:flex;gap:10px;margin-top:12px;">
+          <button id="appConfirmButton" class="primary-btn" style="flex:1;">📩 تأكيد التقديم</button>
+          <button id="appCancelButton" class="secondary-btn" style="flex:1;">إلغاء</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    document.getElementById("appCancelButton")?.addEventListener("click", () => overlay.remove());
+    document.getElementById("appConfirmButton")?.addEventListener("click", async () => {
+      const firstName = document.getElementById("appFirstName")?.value.trim() || "";
+      const fatherName = document.getElementById("appFatherName")?.value.trim() || "";
+      const familyName = document.getElementById("appFamilyName")?.value.trim() || "";
+      const motherName = document.getElementById("appMotherName")?.value.trim() || "";
+      const birthDate = document.getElementById("appBirthDate")?.value || "";
+      if (!firstName || !fatherName || !familyName || !motherName || !birthDate) {
+        showToast("⚠️ أكمل بيانات المتقدم الخمسة قبل التقديم.");
+        return;
+      }
+
+      localStorage.setItem("madkhal_profile_first_name", firstName);
+      localStorage.setItem("madkhal_profile_father_name", fatherName);
+      localStorage.setItem("madkhal_profile_family_name", familyName);
+      localStorage.setItem("madkhal_profile_mother_name", motherName);
+      localStorage.setItem("madkhal_profile_birth_date", birthDate);
+      localStorage.setItem("madkhal_profile_name", [firstName, fatherName, familyName].join(" "));
+
+      const name = [firstName, fatherName, familyName].join(" ");
+      const applications = getLocalArray(LOCAL_KEYS.applications);
+      const alreadyApplied = applications.some(a => String(a.job_id) === String(opportunity.id));
+      if (alreadyApplied) {
+        overlay.remove();
+        showToast("ℹ️ سبق أن سجلت طلب تقديم على هذه الفرصة.");
+        return;
+      }
+
+      const application = {
+        id: createId(),
+        job_id: opportunity.id,
+        remote_job_id: opportunity.remote_id || (opportunity.employerVacancy ? opportunity.id : null),
+        title: opportunity.title,
+        company: opportunity.company || opportunity.employer_name || "صاحب فرصة",
+        location: opportunity.location || "",
+        applicant_first_name: firstName,
+        applicant_father_name: fatherName,
+        applicant_family_name: familyName,
+        applicant_mother_name: motherName,
+        applicant_birth_date: birthDate,
+        applicant_name: name,
+        source: opportunity.employerVacancy ? "employer" : (opportunity.source || "external"),
+        status: "submitted",
+        created_at: madkhalNow()
+      };
+      applications.push(application);
+      setLocalArray(LOCAL_KEYS.applications, applications);
+
+      const notifications = getLocalArray(LOCAL_KEYS.notifications);
+      notifications.push({ id: createId(), type: "application", message: `تم تسجيل طلب التقديم على ${opportunity.title}`, created_at: application.created_at });
+      setLocalArray(LOCAL_KEYS.notifications, notifications);
+
+      const button = document.getElementById("appConfirmButton");
+      if (button) { button.disabled = true; button.textContent = "⏳ جارٍ تسجيل الطلب..."; }
+      try {
+        const user = await madkhalSessionUser();
+        if (user) {
+          const { data, error } = await supabaseClient
+            .from(MADKHAL_TABLES.applications)
+            .insert({
+              user_id: user.id,
+              job_id: opportunity.remote_id || (opportunity.employerVacancy ? opportunity.id : null),
+              job_title: opportunity.title,
+              company: opportunity.company || opportunity.employer_name || "صاحب فرصة",
+              location: opportunity.location || null,
+              seeker_id: user.id,
+              vacancy_id: opportunity.employerVacancy ? opportunity.id : null,
+              message: `المتقدم: ${name}`,
+              source: application.source,
+              status: "submitted",
+              applicant_first_name: firstName,
+              applicant_father_name: fatherName,
+              applicant_family_name: familyName,
+              applicant_mother_name: motherName,
+              applicant_birth_date: birthDate,
+              created_at: application.created_at
+            })
+            .select()
+            .maybeSingle();
+          if (error) throw error;
+          if (data) application.remote_id = data.id;
+          await madkhalInsert(MADKHAL_TABLES.notifications, {
+            user_id: user.id,
+            type: "application",
+            message: `تم تسجيل طلب التقديم على ${application.title}`,
+            created_at: application.created_at,
+            read: false
+          });
+        }
+      } catch (e) {
+        console.warn("Madkhal application sync:", e);
+      }
+
+      overlay.remove();
+      showToast(`📩 تم تسجيل طلبك على: ${opportunity.title}`);
+      loadAccount();
+      if (opportunity.external_link && /^https?:\/\//i.test(opportunity.external_link)) {
+        setTimeout(() => window.open(opportunity.external_link, "_blank", "noopener,noreferrer"), 350);
+      }
+    });
+  };'''
+          s = s[:app_start] + app_new + s[app_end:]
+
           p.write_text(s, encoding='utf-8')
+
       - name: Commit patch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Show 200 real jobs from Supabase" || exit 0
+          git commit -m "Apply jobs and applicant fields" || exit 0
           git push
       - name: Remove one-time workflow
         run: |
