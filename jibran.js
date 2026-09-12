@@ -37,7 +37,7 @@
     }
   `;
 
-  const WELCOME = 'مرحبًا بك. أنا جُهينة، المساعدة الذكية في مَدخَل. سأرافقك بهدوء ووضوح في رحلتك للعثور على فرصة العمل المناسبة لك.';
+  const WELCOME = 'مرحبًا بك. أنا جُهينة، المساعدة الذكية في مَدْخَل. سأرافقك بهدوء ووضوح في رحلتك للعثور على فرصة العمل المناسبة لك.';
 
   function injectStyle() {
     if (document.getElementById('jibran-style')) return;
@@ -58,7 +58,7 @@
 
   function speak(text) {
     if (!('speechSynthesis' in window)) {
-      alert('الصوت غير مدعوم في هذا المتصفح. جرّب Chrome على الهاتف.');
+      alert('الصوت غير مدعوم في هذا المتصفح. جرّبي Chrome على الهاتف.');
       return false;
     }
     window.speechSynthesis.cancel();
@@ -110,7 +110,7 @@
 
   window.MadkhalJibran = {
     speak,
-    version: '0.3.0',
-    role: 'المساعد الذكي — مرافق ودليل بصوت أنثوي هادئ'
+    version: '0.3.1',
+    role: 'المساعد الذكي — جُهينة — مرافق ودليل بصوت أنثوي هادئ'
   };
 })();
