@@ -40,6 +40,7 @@
 
   const WELCOME = 'مرحبًا بك. أنا جُهينة، المساعدة الذكية في مَدْخَلْ.';
   const ERROR_WORDS = /(خطأ|فشل|تعذر|تعذّر|غير صالح|غير صحيح|مطلوب|يجب|لا يمكن|حدث خطأ|حدثت مشكلة|يرجى|اختر|أدخل|أكمِل|اكمل)/i;
+  const ERROR_SELECTORS = '[role="alert"], [aria-live="assertive"], [aria-live="polite"], .error, .error-message, .field-error, .validation-error, .invalid-feedback, .form-error, .text-danger';
   let lastMessage = '';
   let lastMessageAt = 0;
   let activeGuidance = '';
@@ -97,33 +98,74 @@
     return true;
   }
 
-  function scanNodeForError(node) {
-    if (!node || node.nodeType !== Node.ELEMENT_NODE) return;
-    if (node.id === 'jibran-assistant' || (node.closest && node.closest('#jibran-assistant'))) return;
-    const candidates = [];
-    if (node.matches && node.matches('[role="alert"], [aria-live], .error, .error-message, .field-error, .validation-error, .invalid-feedback')) {
-      candidates.push(node.textContent || '');
+  function textOf(el) {
+    if (!el || el.nodeType !== Node.ELEMENT_NODE) return '';
+    const text = (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim();
+    if (!text || text.length > 140) return '';
+    return text;
+  }
+
+  function inspectElement(el) {
+    if (!el || el.nodeType !== Node.ELEMENT_NODE) return false;
+    if (el.id === 'jibran-assistant' || (el.closest && el.closest('#jibran-assistant'))) return false;
+
+    const direct = textOf(el);
+    if (el.matches && el.matches(ERROR_SELECTORS) && direct) {
+      return rememberGuidance(direct);
     }
-    if (node.querySelectorAll) {
-      node.querySelectorAll('[role="alert"], [aria-live], .error, .error-message, .field-error, .validation-error, .invalid-feedback').forEach(el => candidates.push(el.textContent || ''));
+
+    if (el.querySelectorAll) {
+      const matches = el.querySelectorAll(ERROR_SELECTORS);
+      for (const child of matches) {
+        const text = textOf(child);
+        if (text && rememberGuidance(text)) return true;
+      }
     }
-    candidates.forEach(text => rememberGuidance(text));
+
+    return false;
+  }
+
+  function inspectMutationTarget(target) {
+    if (!target) return false;
+    const el = target.nodeType === Node.ELEMENT_NODE ? target : target.parentElement;
+    if (!el) return false;
+
+    if (inspectElement(el)) return true;
+
+    const text = textOf(el);
+    if (text && text.length <= 100 && ERROR_WORDS.test(text)) {
+      const children = el.children ? Array.from(el.children) : [];
+      if (!children.length || children.length <= 2) return rememberGuidance(text);
+    }
+    return false;
   }
 
   function watchVisibleErrors() {
-    if (!('MutationObserver' in window)) return;
+    if (!('MutationObserver' in window) || !document.body) return;
     const observer = new MutationObserver(function (mutations) {
       for (const mutation of mutations) {
         if (mutation.type === 'characterData') {
-          const parent = mutation.target.parentElement;
-          if (parent) scanNodeForError(parent);
+          if (inspectMutationTarget(mutation.target)) break;
         } else {
-          mutation.addedNodes && mutation.addedNodes.forEach(scanNodeForError);
-          if (mutation.target && mutation.target.nodeType === Node.ELEMENT_NODE) scanNodeForError(mutation.target);
+          if (mutation.addedNodes) {
+            let found = false;
+            mutation.addedNodes.forEach(node => {
+              if (!found && node.nodeType === Node.ELEMENT_NODE) found = inspectElement(node);
+              if (!found && node.nodeType === Node.TEXT_NODE) found = inspectMutationTarget(node);
+            });
+            if (found) break;
+          }
+          if (inspectMutationTarget(mutation.target)) break;
         }
       }
     });
-    observer.observe(document.body, {subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['class', 'aria-invalid']});
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ['class', 'aria-invalid', 'role', 'aria-live']
+    });
   }
 
   function watchErrors() {
@@ -170,7 +212,7 @@
         return;
       }
       const now = Date.now();
-      const recentGuidance = activeGuidance && now - activeGuidanceAt < 15000;
+      const recentGuidance = activeGuidance && now - activeGuidanceAt < 3000;
       const started = speak(recentGuidance ? activeGuidance : WELCOME);
       button.setAttribute('aria-pressed', started ? 'true' : 'false');
     });
@@ -184,7 +226,7 @@
 
   window.MadkhalJibran = {
     speak,
-    version: '0.5.0',
+    version: '0.6.0',
     role: 'المساعد الذكي — جُهينة — مرافق مختصر لمسار مَدخَل'
   };
 })();
