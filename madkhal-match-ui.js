@@ -1,0 +1,14 @@
+/* MADKHAL_MATCH_UI_V1 */
+(function(){"use strict";
+const $=id=>document.getElementById(id);
+function supa(){return window.supabaseClient||null;}
+async function user(){try{const s=supa();if(!s)return null;const r=await s.auth.getSession();return r?.data?.session?.user||null;}catch(e){return null;}}
+async function workerId(){const u=await user();if(!u)return null;const r=await supa().from("worker_profiles").select("id").eq("user_id",u.id).maybeSingle();return r?.data?.id||null;}
+function toast(t){if(typeof showToast==='function')showToast(t);else alert(t);}
+async function loadWorkerMatches(){const s=supa();if(!s)return;const wid=await workerId();if(!wid)return;const r=await s.from("match_requests").select("id,vacancy_id,match_score,status,employer_interested_at,worker_response_at,contact_opened_at,interview_at,offer_at,hired_at,worker_note").eq("worker_profile_id",wid).order("created_at",{ascending:false}).limit(30);if(r.error){console.warn('Madkhal matches',r.error);return;}renderWorkerMatches(r.data||[]);}
+function renderWorkerMatches(rows){let box=$("madkhalMatchesBox");if(!box){const target=$("workerScreen")||document.body;box=document.createElement('div');box.id='madkhalMatchesBox';box.className='card';target.appendChild(box);}if(!rows.length){box.innerHTML='<h3>🔎 المطابقات والمتابعة</h3><p>ستظهر هنا الطلبات عندما يجد مَدخَل فرصة مناسبة ويطلب صاحب العمل التواصل.</p>';return;}box.innerHTML='<h3>🔎 المطابقات والمتابعة</h3>'+rows.map(r=>{const score=r.match_score!=null?Math.round(Number(r.match_score))+"%":"—";let action='';if(r.status==='employer_interested')action='<button class="primary-btn" data-mr="'+r.id+'" data-answer="yes">أوافق على التواصل</button> <button class="secondary-btn" data-mr="'+r.id+'" data-answer="no">لا أرغب</button>';return '<div class="card" style="margin:10px 0"><strong>مطابقة '+score+'</strong><p>الحالة: '+label(r.status)+'</p>'+action+'</div>';}).join('');box.querySelectorAll('[data-mr]').forEach(b=>b.onclick=()=>answer(b.dataset.mr,b.dataset.answer==='yes'))}
+function label(s){return ({employer_interested:'صاحب العمل مهتم — بانتظار موافقتك',accepted:'تمت الموافقة المتبادلة',declined:'لم تتم الموافقة',contact_opened:'تم فتح التواصل',interview:'مقابلة',offer:'عرض عمل',hired:'تم التوظيف',closed:'مغلقة'})[s]||s||'جديدة';}
+async function answer(id,ok){const s=supa();const now=new Date().toISOString();const status=ok?'accepted':'declined';const r=await s.from('match_requests').update({status,worker_response_at:now,worker_note:ok?'أوافق على التواصل':'لا أرغب بالتواصل',updated_at:now}).eq('id',id);if(r.error){toast('تعذر تحديث الطلب الآن.');return;}toast(ok?'✅ تمت موافقتك. يمكن فتح التواصل بعد اكتمال الموافقة المتبادلة.':'تم تسجيل عدم رغبتك بالتواصل.');loadWorkerMatches();}
+window.madkhalLoadMatches=loadWorkerMatches;
+document.addEventListener('DOMContentLoaded',()=>setTimeout(loadWorkerMatches,900));
+})();
