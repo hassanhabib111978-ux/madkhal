@@ -33,6 +33,7 @@ jobs:
               '<script src="./madkhal-description-fix.js"></script>',
               '<script src="./madkhal-ui-fix.js"></script>',
               '<script src="./madkhal-translate.js"></script>',
+              '<script src="./madkhal-subscription-base-cleanup.js"></script>',
               '<script src="./madkhal-consent-subscriptions.js"></script>',
               '<script src="./madkhal-match-ui.js"></script>',
               '<script src="./madkhal-evaluation-ui.js"></script>'
