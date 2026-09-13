@@ -1,4 +1,4 @@
-/* MADKHAL_RUNTIME_FIX_V2 */
+/* MADKHAL_RUNTIME_FIX_V3 */
 (function () {
   "use strict";
 
@@ -113,7 +113,18 @@
     currentCategory = "الكل"; madkhalJobDisplayLimit = 60;
     const container = document.getElementById("opportunitiesList");
     if (container) container.innerHTML = '<div class="card"><div class="empty-state">⏳ جارٍ تحميل 60 فرصة حقيقية صالحة للمنطقة...</div></div>';
+    /* Fix: every navigation into the opportunities page must begin at its top. */
+    requestAnimationFrame(function () {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    });
     await realJobs(false); renderCategories(); renderOpportunities();
+    requestAnimationFrame(function () {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    });
   };
 
   let refreshStarted = false;
