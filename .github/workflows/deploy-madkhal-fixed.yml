@@ -39,7 +39,8 @@ jobs:
               '<script src="./madkhal-match-ui.js"></script>',
               '<script src="./madkhal-evaluation-ui.js"></script>',
               '<script src="./madkhal-home-subscription-cleanup.js"></script>',
-              '<script src="./madkhal-home-counter.js"></script>'
+              '<script src="./madkhal-home-counter.js"></script>',
+              '<script src="./madkhal-startup-home-guard.js"></script>'
           ]
           if "</body>" not in s:
               raise SystemExit("index.html has no closing body tag")
