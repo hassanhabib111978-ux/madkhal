@@ -32,7 +32,8 @@ jobs:
               '<script src="./madkhal-fix.js"></script>',
               '<script src="./madkhal-description-fix.js"></script>',
               '<script src="./madkhal-ui-fix.js"></script>',
-              '<script src="./madkhal-translate.js"></script>'
+              '<script src="./madkhal-translate.js"></script>',
+              '<script src="./madkhal-consent-subscriptions.js"></script>'
           ]
           if "</body>" not in s:
               raise SystemExit("index.html has no closing body tag")
@@ -40,7 +41,7 @@ jobs:
               if tag not in s:
                   s = s.replace("</body>", tag + "\n</body>", 1)
           p.write_text(s, encoding="utf-8")
-          print("Madkhal region, jobs, description, mobile UI and Arabic translation fixes injected")
+          print("Madkhal runtime layers injected")
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
