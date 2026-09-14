@@ -1,18 +1,18 @@
-const CACHE_NAME = "madkhal-v5";
+const CACHE_NAME = "madkhal-v6";
 
 const BASE_URL = new URL("./", self.registration.scope);
 const INDEX_URL = new URL("index.html", BASE_URL).href;
 const MANIFEST_URL = new URL("manifest.json", BASE_URL).href;
-const ICON_URL = new URL("icon-192.png", BASE_URL).href;
+const ICON_192_URL = new URL("icon-192.png", BASE_URL).href;
+const ICON_512_URL = new URL("icon-512.svg", BASE_URL).href;
 
-const FILES_TO_CACHE = [BASE_URL.href, INDEX_URL, MANIFEST_URL, ICON_URL];
+const FILES_TO_CACHE = [BASE_URL.href, INDEX_URL, MANIFEST_URL, ICON_192_URL, ICON_512_URL];
 
 const NAVIGATION_PATCH = `
 <script id="madkhal-navigation-patch">
 (function(){
   if (window.__MADKHAL_NAV_PATCH__) return;
   window.__MADKHAL_NAV_PATCH__ = true;
-
   function offset(){
     var n = 8;
     var h = document.querySelector('.header');
@@ -21,7 +21,6 @@ const NAVIGATION_PATCH = `
     if (b && !b.classList.contains('hidden')) n += b.getBoundingClientRect().height + 10;
     return n;
   }
-
   function settle(id, anchorId){
     var target = anchorId ? document.getElementById(anchorId) : document.getElementById(id);
     if (!target) return;
@@ -35,7 +34,6 @@ const NAVIGATION_PATCH = `
       });
     });
   }
-
   if (typeof window.showScreen === 'function') {
     var originalShowScreen = window.showScreen;
     window.showScreen = function(id, anchorId){
@@ -45,7 +43,6 @@ const NAVIGATION_PATCH = `
       return result;
     };
   }
-
   document.addEventListener('click', function(event){
     var button = event.target.closest && event.target.closest('button');
     if (!button) return;
