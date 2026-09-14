@@ -45,7 +45,7 @@ jobs:
               '<script src="./madkhal-worker-save-fix.js?v=1"></script>',
               '<script src="./madkhal-confirm-repeat-fix.js?v=3"></script>',
               '<script src="./madkhal-native-confirm-fix.js?v=1"></script>',
-              '<script src="./madkhal-navigation-fix-v2.js?v=1"></script>',
+              '<script src="./madkhal-navigation-fix-v2.js?v=3"></script>',
               '<script src="./madkhal-stability-fix.js?v=3"></script>',
               '<script src="./madkhal-employer-db-fix.js?v=1"></script>',
               '<script src="./madkhal-jobs-data-fix.js?v=1"></script>'
@@ -62,7 +62,7 @@ jobs:
               if tag not in s:
                   s = s.replace("</body>", tag + "\n</body>", 1)
           p.write_text(s, encoding="utf-8")
-          print("Madkhal runtime layers injected with navigation, payment, employer and job-data fixes")
+          print("Madkhal runtime layers injected with centralized stability and data fixes")
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
