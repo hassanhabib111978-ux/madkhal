@@ -32,7 +32,7 @@ jobs:
               '<script src="./madkhal-fix.js"></script>',
               '<script src="./madkhal-description-fix.js"></script>',
               '<script src="./madkhal-ui-fix.js"></script>',
-              '<script src="./madkhal-translate.js"></script>',
+              '<script src="./madkhal-translate.js?v=2"></script>',
               '<script src="./madkhal-consent-subscriptions.js?v=9"></script>',
               '<script src="./madkhal-payment-flow-v2.js"></script>',
               '<script src="./madkhal-screen-visibility-fix.js?v=2"></script>',
@@ -48,7 +48,7 @@ jobs:
           if "</body>" not in s:
               raise SystemExit("index.html has no closing body tag")
           for tag in tags:
-              base = tag.split("?")[0].replace("<script src=\"", "").replace("\"></script>", "")
+              base = tag.split("?")[0].replace('<script src="', '').replace('"></script>', '')
               old_prefix = '<script src="' + base + '"'
               for line in list(s.splitlines()):
                   if old_prefix in line and line.strip().startswith('<script src='):
