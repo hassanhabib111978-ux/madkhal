@@ -1,4 +1,4 @@
-const CACHE_NAME = "madkhal-v7";
+const CACHE_NAME = "madkhal-v8";
 
 const BASE_URL = new URL("./", self.registration.scope);
 const INDEX_URL = new URL("index.html", BASE_URL).href;
@@ -39,7 +39,7 @@ const NAVIGATION_PATCH = `
 
   function cleanupFakeXTree(){
     try {
-      var keys = ['madkhal_vacancies','madkhalVacancies','vacancies'];
+      var keys = ['madkhal_demo_vacancies','madkhal_vacancies','madkhalVacancies','vacancies'];
       keys.forEach(function(key){
         var raw = localStorage.getItem(key);
         if (!raw) return;
@@ -49,7 +49,7 @@ const NAVIGATION_PATCH = `
         var before = arr.length;
         arr = arr.filter(function(v){
           var t = String((v && (v.title || v.job_title || v.name)) || '').trim().toLowerCase();
-          return t !== 'اكس تري' && t !== 'اكس تري' && t !== 'x tree' && t !== 'x-tree' && t !== 'x  tree';
+          return t !== 'اكس تري' && t !== 'x tree' && t !== 'x-tree' && t !== 'x  tree';
         });
         if (arr.length !== before) localStorage.setItem(key, JSON.stringify(arr));
       });
