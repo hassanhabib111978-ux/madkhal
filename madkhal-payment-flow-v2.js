@@ -1,14 +1,53 @@
-/* MADKHAL_PAYMENT_FLOW_V2 */
+/* MADKHAL_PAYMENT_FLOW_V3 */
 (function(){"use strict";
 const $=id=>document.getElementById(id);
 const supa=()=>window.supabaseClient||null;
 async function profileId(){try{const s=supa();if(!s)return null;const u=(await s.auth.getSession())?.data?.session?.user;if(!u)return null;const r=await s.from("profiles").select("id").eq("auth_user_id",u.id).maybeSingle();return r?.data?.id||null;}catch(e){return null;}}
 function statusText(t){const el=$("madkhalPaymentStatus");if(el){el.style.display="block";el.textContent=t;}}
-function navigate(id){try{if(typeof window.showScreen==="function")window.showScreen(id);else{document.querySelectorAll(".screen").forEach(x=>x.style.display="none");const s=$(id);if(s)s.style.display="block";}}catch(e){} requestAnimationFrame(()=>{window.scrollTo({top:0,left:0,behavior:"auto"});document.documentElement.scrollTop=0;document.body.scrollTop=0;});}
-async function createPayment(){const s=supa();const chosen=document.querySelector('input[name="madkhalPaymentProvider"]:checked');if(!chosen){statusText("⚠️ اختر وسيلة الدفع أولاً.");return;}const pid=await profileId();if(!pid){statusText("⚠️ يجب تسجيل الدخول أولاً حتى نربط الاشتراك بحسابك.");return;}const btn=$("madkhalConfirmPayment");if(btn)btn.disabled=true;try{const r=await s.from("payment_intents").insert({user_id:pid,amount:1,currency:"USD",purpose:"subscription",status:"pending",provider:chosen.value,metadata:{product:"madkhal_worker_monthly",version:"dastoor-v2",provider_label:chosen.parentElement?.innerText?.trim()||chosen.value}}).select("id").maybeSingle();if(r.error)throw r.error;const id=r.data?.id||"";localStorage.setItem("madkhal_worker_payment_intent",id);localStorage.setItem("madkhal_worker_payment_provider",chosen.value);statusText("✅ تم تسجيل طلب الدفع. بانتظار التحقق من عملية الدفع؛ لن نعرض نجاح الاشتراك قبل التأكيد الفعلي.");if(btn)btn.disabled=false;watchPayment(id,pid);}catch(e){console.warn("payment flow",e);statusText("⚠️ تعذر تسجيل عملية الدفع الآن. حاول مرة أخرى.");if(btn)btn.disabled=false;}}
+function navigate(id){if(typeof window.showScreen==="function")window.showScreen(id);}
+async function createPayment(){
+  const s=supa();
+  const chosen=document.querySelector('input[name="madkhalPaymentProvider"]:checked');
+  if(!chosen){statusText("⚠️ اختر وسيلة الدفع أولاً.");return;}
+  const pid=await profileId();
+  if(!pid){statusText("⚠️ يجب تسجيل الدخول أولاً حتى نربط الاشتراك بحسابك.");return;}
+  const btn=$("madkhalConfirmPayment");
+  if(btn){btn.disabled=true;btn.dataset.madkhalPaymentBound="1";}
+  try{
+    const r=await s.from("payment_intents").insert({user_id:pid,amount:1,currency:"USD",purpose:"worker_subscription",status:"pending",provider:chosen.value,metadata:{product:"madkhal_worker_monthly",version:"dastoor-v2",provider_label:chosen.parentElement?.innerText?.trim()||chosen.value}}).select("id").maybeSingle();
+    if(r.error)throw r.error;
+    const id=r.data?.id||"";
+    localStorage.setItem("madkhal_worker_payment_intent",id);
+    localStorage.setItem("madkhal_worker_payment_provider",chosen.value);
+    statusText("✅ تم تسجيل طلب الدفع. بانتظار التحقق من عملية الدفع؛ لن نعرض نجاح الاشتراك قبل التأكيد الفعلي.");
+    if(btn)btn.disabled=false;
+    watchPayment(id,pid);
+  }catch(e){console.warn("payment flow",e);statusText("⚠️ تعذر تسجيل عملية الدفع الآن. حاول مرة أخرى.");if(btn)btn.disabled=false;}
+}
 let timer=null;
-async function watchPayment(id,pid){if(timer)clearInterval(timer);const check=async()=>{try{const s=supa();if(!s)return;const p=await s.from("payment_intents").select("status,paid_at,verified_at").eq("id",id).maybeSingle();if(p.data?.status==="paid"&&p.data.verified_at){if(timer)clearInterval(timer);navigate("madkhalWorkerSubscriptionSuccessScreen");return;}const sub=await s.from("subscriptions").select("status,starts_at,ends_at").eq("user_id",pid).eq("audience","worker").maybeSingle();if(sub.data?.status==="active"){if(timer)clearInterval(timer);navigate("madkhalWorkerSubscriptionSuccessScreen");}}catch(e){console.warn("payment verification check",e);}};await check();timer=setInterval(check,5000);}
-function bind(){const b=$("madkhalConfirmPayment");if(b){b.onclick=createPayment;b.__madkhalV2=true;}const intent=localStorage.getItem("madkhal_worker_payment_intent");if(intent){profileId().then(pid=>{if(pid)watchPayment(intent,pid);});}}
-function start(){setTimeout(bind,700);setTimeout(bind,1800);}
+async function watchPayment(id,pid){
+  if(!id||!pid)return;
+  if(timer)clearInterval(timer);
+  const check=async()=>{
+    try{
+      const s=supa();if(!s)return;
+      const p=await s.from("payment_intents").select("status,paid_at,verified_at").eq("id",id).maybeSingle();
+      if(p.data?.status==="paid"&&p.data.verified_at){if(timer)clearInterval(timer);navigate("madkhalWorkerSubscriptionSuccessScreen");return;}
+      const sub=await s.from("subscriptions").select("status,starts_at,ends_at").eq("user_id",pid).eq("audience","worker").maybeSingle();
+      if(sub.data?.status==="active"){if(timer)clearInterval(timer);navigate("madkhalWorkerSubscriptionSuccessScreen");}
+    }catch(e){console.warn("payment verification check",e);}
+  };
+  await check();
+  timer=setInterval(check,5000);
+}
+function bind(){
+  const b=$("madkhalConfirmPayment");
+  if(b){b.onclick=createPayment;b.__madkhalV2=true;}
+  const intent=localStorage.getItem("madkhal_worker_payment_intent");
+  if(intent)profileId().then(pid=>{if(pid)watchPayment(intent,pid);});
+}
+window.madkhalCreatePayment=createPayment;
+window.madkhalWatchPayment=watchPayment;
+function start(){setTimeout(bind,700);setTimeout(bind,1800);setInterval(bind,2500);}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start);else start();
 })();
