@@ -1,12 +1,15 @@
 {
+  "id": "./",
   "name": "مَدخَل - إلى سوق العمل الإلكتروني",
   "short_name": "مَدخَل",
   "description": "منصة مَدخَل إلى سوق العمل الإلكتروني",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#0f766e",
+  "prefer_related_applications": false,
   "dir": "rtl",
   "lang": "ar",
   "icons": [
@@ -17,10 +20,10 @@
       "purpose": "any maskable"
     },
     {
-      "src": "./icon-512.png",
+      "src": "./icon-512.svg",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ]
 }
