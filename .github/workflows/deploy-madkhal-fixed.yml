@@ -45,7 +45,8 @@ jobs:
               '<script src="./madkhal-worker-save-fix.js?v=1"></script>',
               '<script src="./madkhal-confirm-repeat-fix.js?v=2"></script>',
               '<script src="./madkhal-native-confirm-fix.js?v=1"></script>',
-              '<script src="./madkhal-navigation-fix-v2.js?v=1"></script>'
+              '<script src="./madkhal-navigation-fix-v2.js?v=1"></script>',
+              '<script src="./madkhal-stability-fix.js?v=1"></script>'
           ]
           if "</body>" not in s:
               raise SystemExit("index.html has no closing body tag")
@@ -59,7 +60,7 @@ jobs:
               if tag not in s:
                   s = s.replace("</body>", tag + "\n</body>", 1)
           p.write_text(s, encoding="utf-8")
-          print("Madkhal runtime layers injected with cache-busting versions")
+          print("Madkhal runtime layers injected with centralized stability fix")
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
