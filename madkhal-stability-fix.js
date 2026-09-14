@@ -1,4 +1,4 @@
-/* MADKHAL_STABILITY_FIX_V2 */
+/* MADKHAL_STABILITY_FIX_V3 */
 (function(){
   "use strict";
 
@@ -8,20 +8,16 @@
   const BLOCKED_AFTER_SAVE=new Set(["accountScreen","homeScreen","workerScreen"]);
 
   function activeScreen(){ return document.querySelector(".screen.active"); }
-
   function stickyOffset(){
     const h=document.querySelector(".header");
     const b=document.querySelector(".madkhal-install-bar");
-    return (h?h.getBoundingClientRect().height:0)
-      +(b&&getComputedStyle(b).display!=="none"?b.getBoundingClientRect().height+10:0)+12;
+    return (h?h.getBoundingClientRect().height:0)+(b&&getComputedStyle(b).display!=="none"?b.getBoundingClientRect().height+10:0)+12;
   }
-
   function scrollElement(el,behavior="auto"){
     if(!el)return;
     const top=el.getBoundingClientRect().top+window.pageYOffset-stickyOffset();
     window.scrollTo({top:Math.max(0,top),left:0,behavior});
   }
-
   function forceCompletion(){
     const s=document.getElementById(COMPLETION);
     if(!s)return false;
@@ -32,7 +28,6 @@
     s.style.display="block";
     return true;
   }
-
   function stabilize(id,anchorId){
     requestAnimationFrame(function(){
       setTimeout(function(){
@@ -48,7 +43,7 @@
       },90);
     });
   }
-
+  window.madkhalStabilizeNavigation=stabilize;
   function wrapShowScreen(){
     const base=window.showScreen;
     if(typeof base!=="function"||base.__madkhalStability)return false;
@@ -66,7 +61,6 @@
     window.showScreen=wrapped;
     return true;
   }
-
   function wrapNavigate(){
     const base=window.navigate;
     if(typeof base!=="function"||base.__madkhalStability)return false;
@@ -84,7 +78,6 @@
     window.navigate=wrapped;
     return true;
   }
-
   function markSaveClick(e){
     const t=e.target&&e.target.closest?t.closest("button,a,[onclick]"):null;
     if(!t)return;
@@ -98,31 +91,19 @@
       sessionStorage.setItem(SAVE_LOCK,"1");
     }catch(_){ }
   }
-
   function finalPass(){
     try{
       const lock=sessionStorage.getItem(SAVE_LOCK)==="1"||sessionStorage.getItem(SAVE_REQUEST)==="1";
-      if(lock&&document.getElementById(COMPLETION)){
-        const s=document.getElementById(COMPLETION);
-        if(s.classList.contains("active")){
-          requestAnimationFrame(function(){scrollElement(s,"auto");});
-        }
-      }
+      const s=document.getElementById(COMPLETION);
+      if(lock&&s&&s.classList.contains("active"))requestAnimationFrame(function(){scrollElement(s,"auto");});
     }catch(_){ }
   }
-
   function start(){
     document.addEventListener("click",markSaveClick,true);
-    wrapShowScreen();
-    wrapNavigate();
-    setTimeout(wrapShowScreen,100);
-    setTimeout(wrapNavigate,100);
-    setTimeout(wrapShowScreen,500);
-    setTimeout(wrapNavigate,500);
-    setTimeout(finalPass,900);
-    setTimeout(finalPass,1500);
+    wrapShowScreen();wrapNavigate();
+    setTimeout(wrapShowScreen,100);setTimeout(wrapNavigate,100);
+    setTimeout(wrapShowScreen,500);setTimeout(wrapNavigate,500);
+    setTimeout(finalPass,900);setTimeout(finalPass,1500);
   }
-
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});
-  else start();
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();
