@@ -1,4 +1,4 @@
-const CACHE_NAME = "madkhal-v8";
+const CACHE_NAME = "madkhal-v9";
 
 const BASE_URL = new URL("./", self.registration.scope);
 const INDEX_URL = new URL("index.html", BASE_URL).href;
@@ -56,7 +56,40 @@ const NAVIGATION_PATCH = `
     } catch(e) {}
   }
 
+  function ensureFreeSaveConfirmation(){
+    if (document.getElementById('madkhalFreeSaveConfirmation')) return;
+    var main = document.querySelector('main');
+    if (!main) return;
+    var screen = document.createElement('section');
+    screen.id = 'madkhalFreeSaveConfirmation';
+    screen.className = 'screen';
+    screen.innerHTML = `
+      <div class="card" style="text-align:center;padding:28px 20px;margin-top:20px;">
+        <div style="font-size:46px;margin-bottom:10px;">✅</div>
+        <h2 style="margin:0 0 12px;color:#0f766e;">تم إتمام العملية المجانية بنجاح</h2>
+        <p style="margin:0 0 12px;line-height:1.9;color:#596666;">تم حفظ بياناتك بنجاح، وأصبحت جاهزًا لطلب الفرص المناسبة.</p>
+        <p style="margin:0 0 22px;line-height:1.9;color:#596666;">يمكنك الاستمرار مجانًا. الاشتراك الشهري اختياري وليس إلزاميًا، ويمنحك مزايا إضافية مثل المتابعة المستمرة، المطابقة التلقائية مع الفرص الجديدة، الترتيب والتنبيهات.</p>
+        <button type="button" class="primary-btn" id="madkhalFreeSaveSubscribe" style="width:100%;">⭐ الاشتراك</button>
+      </div>`;
+    main.appendChild(screen);
+    var btn = document.getElementById('madkhalFreeSaveSubscribe');
+    if (btn) btn.addEventListener('click', function(){
+      if (typeof window.openSubscription === 'function') window.openSubscription();
+      else if (typeof window.showScreen === 'function') window.showScreen('subscriptionScreen');
+    });
+  }
+
+  function showFreeSaveConfirmation(){
+    ensureFreeSaveConfirmation();
+    var screen = document.getElementById('madkhalFreeSaveConfirmation');
+    if (!screen) return;
+    document.querySelectorAll('.screen.active').forEach(function(el){ el.classList.remove('active'); });
+    screen.classList.add('active');
+    setTimeout(function(){ settle('madkhalFreeSaveConfirmation'); }, 30);
+  }
+
   cleanupFakeXTree();
+  ensureFreeSaveConfirmation();
 
   if (typeof window.showScreen === 'function') {
     var originalShowScreen = window.showScreen;
@@ -73,16 +106,21 @@ const NAVIGATION_PATCH = `
     if (!button) return;
 
     var text = String(button.textContent || '').replace(/\s+/g, ' ').trim();
+
     if (text.indexOf('لدي فرصة عمل') !== -1) {
       event.preventDefault();
       event.stopImmediatePropagation();
-      if (typeof window.openEmployer === 'function') {
-        window.openEmployer();
-      } else if (typeof window.showScreen === 'function') {
-        window.showScreen('employerScreen', 'employerName');
-      }
+      if (typeof window.openEmployer === 'function') window.openEmployer();
+      else if (typeof window.showScreen === 'function') window.showScreen('employerScreen', 'employerName');
       setTimeout(function(){ settle('employerScreen', 'employerName'); }, 60);
       setTimeout(function(){ settle('employerScreen', 'employerName'); }, 280);
+      return;
+    }
+
+    if (text.indexOf('حفظ البيانات لطلب الوظيفة') !== -1) {
+      setTimeout(function(){
+        showFreeSaveConfirmation();
+      }, 650);
       return;
     }
 
@@ -92,7 +130,7 @@ const NAVIGATION_PATCH = `
       var anchor = active.id === 'profileScreen' ? document.getElementById('workerName') : active;
       if (!anchor) return;
       var top = window.pageYOffset + anchor.getBoundingClientRect().top - offset();
-      window.scrollTo({top: Math.max(0, top), behavior:'auto'});
+      window.scrollTo({top:Math.max(0, top), behavior:'auto'});
       if (active.id === 'profileScreen' && anchor.id === 'workerName') {
         try { anchor.focus({preventScroll:true}); } catch(e) {}
       }
