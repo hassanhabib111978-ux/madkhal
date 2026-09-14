@@ -1,16 +1,30 @@
-/* MADKHAL_CONFIRM_REPEAT_FIX_V1 */
+/* MADKHAL_CONFIRM_REPEAT_FIX_V2 */
 (function(){
   "use strict";
   const FLAG="madkhal_worker_confirmed";
   const SCREEN="madkhalWorkerCompletionScreen";
+  function hideOtherScreens(){
+    document.querySelectorAll(".screen").forEach(function(el){
+      if(el.id!==SCREEN){
+        el.classList.remove("active");
+        el.style.display="none";
+      }
+    });
+  }
   function showCompletionAgain(){
     try{
       if(localStorage.getItem(FLAG)!=="1") return;
       if(typeof window.madkhalEnsureWorkerScreens==="function") window.madkhalEnsureWorkerScreens();
-      if(typeof window.showScreen==="function") window.showScreen(SCREEN);
+      hideOtherScreens();
       const s=document.getElementById(SCREEN);
-      if(s){s.style.display="block";s.classList.add("active");}
-      requestAnimationFrame(function(){window.scrollTo({top:0,left:0,behavior:"auto"});document.documentElement.scrollTop=0;document.body.scrollTop=0;});
+      if(!s) return;
+      s.style.display="block";
+      s.classList.add("active");
+      requestAnimationFrame(function(){
+        window.scrollTo({top:0,left:0,behavior:"auto"});
+        document.documentElement.scrollTop=0;
+        document.body.scrollTop=0;
+      });
     }catch(e){console.warn("Madkhal repeat confirmation:",e);}
   }
   function install(){
