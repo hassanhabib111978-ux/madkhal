@@ -1,17 +1,28 @@
-/* MADKHAL_SCREEN_VISIBILITY_FIX_V1 */
+/* MADKHAL_SCREEN_VISIBILITY_FIX_V2 */
 (function(){"use strict";
-  const IDS=["madkhalWorkerCompletionScreen","madkhalWorkerPaymentScreen","madkhalWorkerSubscriptionSuccessScreen"];
-  function release(){IDS.forEach(function(id){const el=document.getElementById(id);if(el)el.style.removeProperty("display");});}
+  function enforce(){
+    const active=document.querySelector(".screen.active");
+    if(!active)return;
+    document.querySelectorAll(".screen").forEach(function(el){
+      if(el===active){el.style.display="block";}
+      else{el.classList.remove("active");el.style.display="none";}
+    });
+  }
   function start(){
-    release();
+    enforce();
     const original=window.showScreen;
     if(typeof original==="function"&&!original.__madkhalVisibilityFixed){
-      const fixed=function(id){release();const r=original.apply(this,arguments);requestAnimationFrame(release);setTimeout(release,30);return r;};
+      const fixed=function(id){
+        const r=original.apply(this,arguments);
+        requestAnimationFrame(enforce);
+        setTimeout(enforce,40);
+        return r;
+      };
       fixed.__madkhalVisibilityFixed=true;
       window.showScreen=fixed;
     }
-    setTimeout(release,600);
-    setTimeout(release,1200);
+    setTimeout(enforce,250);
+    setTimeout(enforce,800);
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start);else start();
 })();
