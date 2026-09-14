@@ -1,4 +1,4 @@
-/* MADKHAL_PAYMENT_FLOW_V3 */
+/* MADKHAL_PAYMENT_FLOW_V4 */
 (function(){"use strict";
 const $=id=>document.getElementById(id);
 const supa=()=>window.supabaseClient||null;
@@ -14,12 +14,16 @@ async function createPayment(){
   const btn=$("madkhalConfirmPayment");
   if(btn){btn.disabled=true;btn.dataset.madkhalPaymentBound="1";}
   try{
-    const r=await s.from("payment_intents").insert({user_id:pid,amount:1,currency:"USD",purpose:"worker_subscription",status:"pending",provider:chosen.value,metadata:{product:"madkhal_worker_monthly",version:"dastoor-v2",provider_label:chosen.parentElement?.innerText?.trim()||chosen.value}}).select("id").maybeSingle();
+    // Payment creation is server-authorized through the protected RPC.
+    // The DB remains the authority for amount, purpose and provider verification.
+    const r=await s.rpc("create_subscription_payment_intent");
     if(r.error)throw r.error;
-    const id=r.data?.id||"";
+    const row=Array.isArray(r.data)?r.data[0]:r.data;
+    const id=row?.payment_intent_id||"";
+    if(!id)throw new Error("payment_intent_missing");
     localStorage.setItem("madkhal_worker_payment_intent",id);
-    localStorage.setItem("madkhal_worker_payment_provider",chosen.value);
-    statusText("✅ تم تسجيل طلب الدفع. بانتظار التحقق من عملية الدفع؛ لن نعرض نجاح الاشتراك قبل التأكيد الفعلي.");
+    localStorage.setItem("madkhal_worker_payment_provider",row?.provider||chosen.value||"shamcash");
+    statusText("✅ تم تسجيل طلب الدفع بقيمة الاشتراك الشهرية. بانتظار التحقق الفعلي؛ لن نعرض نجاح الاشتراك قبل التأكيد.");
     if(btn)btn.disabled=false;
     watchPayment(id,pid);
   }catch(e){console.warn("payment flow",e);statusText("⚠️ تعذر تسجيل عملية الدفع الآن. حاول مرة أخرى.");if(btn)btn.disabled=false;}
@@ -42,7 +46,7 @@ async function watchPayment(id,pid){
 }
 function bind(){
   const b=$("madkhalConfirmPayment");
-  if(b){b.onclick=createPayment;b.__madkhalV2=true;}
+  if(b){b.onclick=createPayment;b.__madkhalV4=true;}
   const intent=localStorage.getItem("madkhal_worker_payment_intent");
   if(intent)profileId().then(pid=>{if(pid)watchPayment(intent,pid);});
 }
