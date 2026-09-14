@@ -34,7 +34,7 @@ jobs:
               '<script src="./madkhal-ui-fix.js"></script>',
               '<script src="./madkhal-translate.js?v=2"></script>',
               '<script src="./madkhal-consent-subscriptions.js?v=9"></script>',
-              '<script src="./madkhal-payment-flow-v2.js?v=3"></script>',
+              '<script src="./madkhal-payment-flow-v2.js?v=4"></script>',
               '<script src="./madkhal-screen-visibility-fix.js?v=2"></script>',
               '<script src="./madkhal-match-ui.js"></script>',
               '<script src="./madkhal-evaluation-ui.js?v=4"></script>',
