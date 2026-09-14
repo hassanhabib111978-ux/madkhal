@@ -1,4 +1,4 @@
-/* MADKHAL_STARTUP_HOME_GUARD_V5 */
+/* MADKHAL_STARTUP_HOME_GUARD_V6 */
 (function(){"use strict";
   const FLAG="madkhal_worker_completion_requested";
   const LOCK="madkhal_worker_completion_lock";
@@ -9,6 +9,8 @@
     if(!t)return;
     const code=t.getAttribute("onclick")||"";
     if(/confirmWorker\s*\(/.test(code)){
+      e.preventDefault();
+      if(t.tagName==="BUTTON")t.type="button";
       sessionStorage.setItem(FLAG,"1");
       sessionStorage.setItem(LOCK,"1");
     }
