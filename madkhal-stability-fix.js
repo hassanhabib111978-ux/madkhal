@@ -1,4 +1,4 @@
-/* MADKHAL_STABILITY_FIX_V1 */
+/* MADKHAL_STABILITY_FIX_V2 */
 (function(){
   "use strict";
 
@@ -89,8 +89,7 @@
     const t=e.target&&e.target.closest?t.closest("button,a,[onclick]"):null;
     if(!t)return;
     const code=t.getAttribute("onclick")||"";
-    const text=(t.innerText||t.textContent||"").replace(/\s+/g," ").trim();
-    const isSave=t.id==="saveWorkerButton"||/saveWorker\s*\(/.test(code)||/^💾\s*حفظ/.test(text);
+    const isSave=t.id==="saveWorkerButton"||/saveWorker\s*\(/.test(code);
     if(!isSave)return;
     e.preventDefault();
     if(t.tagName==="BUTTON")t.type="button";
@@ -103,9 +102,10 @@
   function finalPass(){
     try{
       const lock=sessionStorage.getItem(SAVE_LOCK)==="1"||sessionStorage.getItem(SAVE_REQUEST)==="1";
-      if(lock){
-        if(forceCompletion()){
-          requestAnimationFrame(function(){scrollElement(document.getElementById(COMPLETION),"auto");});
+      if(lock&&document.getElementById(COMPLETION)){
+        const s=document.getElementById(COMPLETION);
+        if(s.classList.contains("active")){
+          requestAnimationFrame(function(){scrollElement(s,"auto");});
         }
       }
     }catch(_){ }
