@@ -1,4 +1,4 @@
-const CACHE_NAME = "madkhal-v6";
+const CACHE_NAME = "madkhal-v7";
 
 const BASE_URL = new URL("./", self.registration.scope);
 const INDEX_URL = new URL("index.html", BASE_URL).href;
@@ -13,6 +13,7 @@ const NAVIGATION_PATCH = `
 (function(){
   if (window.__MADKHAL_NAV_PATCH__) return;
   window.__MADKHAL_NAV_PATCH__ = true;
+
   function offset(){
     var n = 8;
     var h = document.querySelector('.header');
@@ -21,6 +22,7 @@ const NAVIGATION_PATCH = `
     if (b && !b.classList.contains('hidden')) n += b.getBoundingClientRect().height + 10;
     return n;
   }
+
   function settle(id, anchorId){
     var target = anchorId ? document.getElementById(anchorId) : document.getElementById(id);
     if (!target) return;
@@ -34,6 +36,28 @@ const NAVIGATION_PATCH = `
       });
     });
   }
+
+  function cleanupFakeXTree(){
+    try {
+      var keys = ['madkhal_vacancies','madkhalVacancies','vacancies'];
+      keys.forEach(function(key){
+        var raw = localStorage.getItem(key);
+        if (!raw) return;
+        var arr;
+        try { arr = JSON.parse(raw); } catch(e) { return; }
+        if (!Array.isArray(arr)) return;
+        var before = arr.length;
+        arr = arr.filter(function(v){
+          var t = String((v && (v.title || v.job_title || v.name)) || '').trim().toLowerCase();
+          return t !== 'اكس تري' && t !== 'اكس تري' && t !== 'x tree' && t !== 'x-tree' && t !== 'x  tree';
+        });
+        if (arr.length !== before) localStorage.setItem(key, JSON.stringify(arr));
+      });
+    } catch(e) {}
+  }
+
+  cleanupFakeXTree();
+
   if (typeof window.showScreen === 'function') {
     var originalShowScreen = window.showScreen;
     window.showScreen = function(id, anchorId){
@@ -43,9 +67,25 @@ const NAVIGATION_PATCH = `
       return result;
     };
   }
+
   document.addEventListener('click', function(event){
     var button = event.target.closest && event.target.closest('button');
     if (!button) return;
+
+    var text = String(button.textContent || '').replace(/\s+/g, ' ').trim();
+    if (text.indexOf('لدي فرصة عمل') !== -1) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      if (typeof window.openEmployer === 'function') {
+        window.openEmployer();
+      } else if (typeof window.showScreen === 'function') {
+        window.showScreen('employerScreen', 'employerName');
+      }
+      setTimeout(function(){ settle('employerScreen', 'employerName'); }, 60);
+      setTimeout(function(){ settle('employerScreen', 'employerName'); }, 280);
+      return;
+    }
+
     setTimeout(function(){
       var active = document.querySelector('.screen.active');
       if (!active) return;
