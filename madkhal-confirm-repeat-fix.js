@@ -1,4 +1,4 @@
-/* MADKHAL_CONFIRM_REPEAT_FIX_V2 */
+/* MADKHAL_CONFIRM_REPEAT_FIX_V3 */
 (function(){
   "use strict";
   const FLAG="madkhal_worker_confirmed";
@@ -20,16 +20,12 @@
       if(!s) return;
       s.style.display="block";
       s.classList.add("active");
-      requestAnimationFrame(function(){
-        window.scrollTo({top:0,left:0,behavior:"auto"});
-        document.documentElement.scrollTop=0;
-        document.body.scrollTop=0;
-      });
+      if(typeof window.madkhalStabilizeNavigation==="function") window.madkhalStabilizeNavigation(SCREEN,null);
     }catch(e){console.warn("Madkhal repeat confirmation:",e);}
   }
   function install(){
     const base=window.saveWorker;
-    if(typeof base!=="function"||base.__madkhalRepeatWrapped) return;
+    if(typeof base!=="function"||base.__madkhalRepeatWrapped)return;
     const wrapped=async function(){
       const result=await base.apply(this,arguments);
       if(localStorage.getItem(FLAG)==="1") setTimeout(showCompletionAgain,320);
