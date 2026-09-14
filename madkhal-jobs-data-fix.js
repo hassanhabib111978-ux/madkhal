@@ -1,4 +1,4 @@
-/* MADKHAL_JOBS_DATA_FIX_V1 */
+/* MADKHAL_JOBS_DATA_FIX_V2 */
 (function(){
   "use strict";
   async function loadAll(force=false){
@@ -9,15 +9,28 @@
       try{
         const nowIso=new Date().toISOString();
         const rows=[];let from=0;const pageSize=1000;
+        const scope="geo_class.in.(MENA,SYRIA),geo_region.in.(middle_east,Middle East & North Africa,Syria)";
         while(true){
-          const q=await supabaseClient.from("jobs").select("id,source,source_job_id,title,company,description,location,country,job_type,category,salary_min,salary_max,salary_currency,source_url,canonical_url,posted_at,updated_at,expires_at,status,geo_scope,geo_region,geo_class").eq("status","active").or("expires_at.is.null,expires_at.gt."+nowIso).range(from,from+pageSize-1);
+          const q=await supabaseClient.from("jobs")
+            .select("id,source,source_job_id,title,company,description,location,country,job_type,category,salary_min,salary_max,salary_currency,source_url,canonical_url,posted_at,updated_at,expires_at,status,geo_scope,geo_region,geo_class")
+            .eq("status","active")
+            .or("expires_at.is.null,expires_at.gt."+nowIso)
+            .or(scope)
+            .range(from,from+pageSize-1);
           if(q.error)throw q.error;
           const page=Array.isArray(q.data)?q.data:[];rows.push(...page);
           if(page.length<pageSize)break;
           from+=pageSize;
         }
         const seen=new Set();
-        madkhalRealJobs=rows.map(typeof madkhalNormalizeDbJob==="function"?madkhalNormalizeDbJob:x=>x).filter(function(job){if(!job||seen.has(job.id))return false;if(job.expires_at&&new Date(job.expires_at).getTime()<=Date.now())return false;seen.add(job.id);return true;});
+        madkhalRealJobs=rows.map(typeof madkhalNormalizeDbJob==="function"?madkhalNormalizeDbJob:x=>x).filter(function(job){
+          if(!job||seen.has(job.id))return false;
+          if(job.expires_at&&new Date(job.expires_at).getTime()<=Date.now())return false;
+          const cls=String(job.geo_class||"").toUpperCase();
+          const region=String(job.geo_region||"").toLowerCase();
+          if(cls!=="MENA"&&cls!=="SYRIA"&&region!=="middle_east"&&region!=="middle east & north africa"&&region!=="syria")return false;
+          seen.add(job.id);return true;
+        });
         madkhalRealJobsLoaded=true;
         return madkhalRealJobs;
       }catch(e){console.warn("Madkhal jobs data fix:",e);madkhalRealJobsLoaded=false;return [];}finally{madkhalRealJobsLoading=null;}
