@@ -1,4 +1,4 @@
-const CACHE_NAME = "madkhal-v9";
+const CACHE_NAME = "madkhal-v10";
 
 const BASE_URL = new URL("./", self.registration.scope);
 const INDEX_URL = new URL("index.html", BASE_URL).href;
@@ -119,7 +119,8 @@ const NAVIGATION_PATCH = `
 
     if (text.indexOf('حفظ البيانات لطلب الوظيفة') !== -1) {
       setTimeout(function(){
-        showFreeSaveConfirmation();
+        if (typeof window.openSubscription === 'function') window.openSubscription();
+        else if (typeof window.showScreen === 'function') window.showScreen('subscriptionScreen');
       }, 650);
       return;
     }
