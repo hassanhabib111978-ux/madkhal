@@ -42,7 +42,7 @@ jobs:
               '<script src="./madkhal-home-subscription-cleanup.js"></script>',
               '<script src="./madkhal-home-counter.js?v=2"></script>',
               '<script src="./madkhal-startup-home-guard.js?v=6"></script>',
-              '<script src="./madkhal-worker-save-fix.js?v=1"></script>',
+              '<script src="./madkhal-worker-save-fix.js?v=2"></script>',
               '<script src="./madkhal-confirm-repeat-fix.js?v=3"></script>',
               '<script src="./madkhal-native-confirm-fix.js?v=1"></script>',
               '<script src="./madkhal-navigation-fix-v2.js?v=4"></script>',
