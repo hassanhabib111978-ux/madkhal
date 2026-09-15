@@ -1,23 +1,10 @@
-/* MADKHAL_WORKER_SAVE_FIX_V2 */
-(function(){"use strict";
-  const FLAG="madkhal_worker_completion_requested";
-  const LOCK="madkhal_worker_completion_lock";
+/* MADKHAL_WORKER_SAVE_FIX_V3 */
+(function(){
+  "use strict";
   const SCREEN="madkhalWorkerCompletionScreen";
   const PAYMENT="madkhalWorkerPaymentScreen";
-
-  function mark(e){
-    const t=e.target&&e.target.closest?t.closest("button,[onclick]"):null;
-    if(!t)return;
-    const code=t.getAttribute("onclick")||"";
-    const isSave=t.id==="saveWorkerButton"||/saveWorker\s*\(/.test(code)||/^\s*💾?\s*حفظ/.test((t.innerText||"").trim());
-    if(!isSave)return;
-    e.preventDefault();
-    if(t.tagName==="BUTTON")t.type="button";
-    try{
-      sessionStorage.setItem(FLAG,"1");
-      sessionStorage.setItem(LOCK,"1");
-    }catch(_){ }
-  }
+  const ACCOUNT="accountScreen";
+  let saving=false;
 
   function ensureCompletion(){
     let s=document.getElementById(SCREEN);
@@ -35,7 +22,11 @@
       e.stopImmediatePropagation();
       const target=document.getElementById(PAYMENT);
       if(typeof window.showScreen==="function"&&target)window.showScreen(PAYMENT);
-      else if(target){document.querySelectorAll(".screen").forEach(x=>{x.classList.remove("active");x.style.display="none";});target.classList.add("active");target.style.display="block";}
+      else if(target){
+        document.querySelectorAll(".screen").forEach(x=>{x.classList.remove("active");x.style.display="none";});
+        target.classList.add("active");
+        target.style.display="block";
+      }
     },true);
     return s;
   }
@@ -47,41 +38,43 @@
       x.classList.remove("active");
       x.style.display="none";
     });
-    s.style.display="block";
     s.classList.add("active");
+    s.style.display="block";
     try{localStorage.setItem("madkhal_worker_confirmed","1");}catch(_){ }
   }
 
-  async function verifySaved(){
-    try{
-      const db=window.supabaseClient;
-      if(!db)return false;
-      const session=(await db.auth.getSession()).data.session;
-      const uid=session&&session.user&&session.user.id;
-      if(!uid)return false;
-      const r=await db.from("worker_profiles").select("id,user_id,full_name,profession,location").eq("user_id",uid).maybeSingle();
-      return !!r.data&&!r.error;
-    }catch(_){return false;}
+  function protectAccountNavigation(){
+    const original=window.showScreen;
+    if(typeof original!=="function"||original.__madkhalWorkerSaveGuard)return;
+    const guarded=function(id){
+      if(saving&&id===ACCOUNT)return;
+      return original.apply(this,arguments);
+    };
+    guarded.__madkhalWorkerSaveGuard=true;
+    window.showScreen=guarded;
   }
 
   function wrap(){
+    protectAccountNavigation();
     const original=window.saveWorker;
     if(typeof original!=="function"||original.__madkhalWorkerSaveFix)return;
     const wrapped=async function(){
-      try{sessionStorage.setItem(FLAG,"1");sessionStorage.setItem(LOCK,"1");}catch(_){ }
-      const result=await original.apply(this,arguments);
-      setTimeout(async function(){
-        if(await verifySaved())showCompletion();
-      },850);
-      return result;
+      saving=true;
+      try{
+        const result=await original.apply(this,arguments);
+        setTimeout(function(){showCompletion();},40);
+        return result;
+      }finally{
+        setTimeout(function(){saving=false;},900);
+      }
     };
     wrapped.__madkhalWorkerSaveFix=true;
     window.saveWorker=wrapped;
   }
 
-  document.addEventListener("click",mark,true);
   wrap();
   setTimeout(wrap,100);
-  setTimeout(wrap,500);
-  setTimeout(wrap,1000);
+  setTimeout(wrap,300);
+  setTimeout(wrap,700);
+  setTimeout(wrap,1200);
 })();
