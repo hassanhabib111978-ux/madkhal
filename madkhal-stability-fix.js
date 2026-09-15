@@ -8,7 +8,7 @@
   const SAVE_REQUEST="madkhal_worker_completion_requested";
 
   function markSaveClick(e){
-    const t=e.target&&e.target.closest?t.target.closest("button,a,[onclick]"):null;
+    const t=e.target&&e.target.closest?e.target.closest("button,a,[onclick]"):null;
     if(!t)return;
     const code=t.getAttribute("onclick")||"";
     const isSave=t.id==="saveWorkerButton"||/saveWorker\s*\(/.test(code);
