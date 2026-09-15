@@ -1,4 +1,4 @@
-/* MADKHAL_WORKER_SAVE_FIX_V3 */
+/* MADKHAL_WORKER_SAVE_FIX_V4 */
 (function(){
   "use strict";
   const SCREEN="madkhalWorkerCompletionScreen";
@@ -72,9 +72,23 @@
     window.saveWorker=wrapped;
   }
 
+  function bindSaveButton(){
+    const b=document.getElementById("saveWorkerButton");
+    if(!b||b.__madkhalWorkerSaveButtonBound)return;
+    b.__madkhalWorkerSaveButtonBound=true;
+    b.addEventListener("click",function(e){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      wrap();
+      if(typeof window.saveWorker==="function")window.saveWorker();
+    },true);
+  }
+
+  ensureCompletion();
   wrap();
-  setTimeout(wrap,100);
-  setTimeout(wrap,300);
-  setTimeout(wrap,700);
-  setTimeout(wrap,1200);
+  bindSaveButton();
+  setTimeout(function(){wrap();bindSaveButton();ensureCompletion();},100);
+  setTimeout(function(){wrap();bindSaveButton();ensureCompletion();},300);
+  setTimeout(function(){wrap();bindSaveButton();ensureCompletion();},700);
+  setTimeout(function(){wrap();bindSaveButton();ensureCompletion();},1200);
 })();
