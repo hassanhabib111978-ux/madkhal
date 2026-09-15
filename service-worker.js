@@ -1,4 +1,4 @@
-const CACHE_NAME = "madkhal-v10";
+const CACHE_NAME = "madkhal-v11";
 
 const BASE_URL = new URL("./", self.registration.scope);
 const INDEX_URL = new URL("index.html", BASE_URL).href;
@@ -105,7 +105,11 @@ const NAVIGATION_PATCH = `
     var button = event.target.closest && event.target.closest('button');
     if (!button) return;
 
-    var text = String(button.textContent || '').replace(/\s+/g, ' ').trim();
+    /* The worker-save flow has its own targeted handler. Do not let the
+       generic profile-screen scroll correction move it back to workerName. */
+    if (button.id === 'saveWorkerButton') return;
+
+    var text = String(button.textContent || '').replace(/\\s+/g, ' ').trim();
 
     if (text.indexOf('لدي فرصة عمل') !== -1) {
       event.preventDefault();
