@@ -3,7 +3,9 @@
   "use strict";
 
   function handle(e){
-    const t=e.target&&e.target.closest?t=e.target.closest("button.option[onclick=\"openAssessmentScreen()\"]"):null;
+    const t=e.target&&e.target.closest
+      ? e.target.closest('button.option[onclick="openAssessmentScreen()"]')
+      : null;
     if(!t)return;
 
     e.preventDefault();
