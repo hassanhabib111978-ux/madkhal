@@ -83,8 +83,14 @@
       var name = (document.getElementById('workerName')?.value || '').trim();
       var skill = (document.getElementById('workerSkill')?.value || '').trim();
       var location = (document.getElementById('workerLocation')?.value || '').trim();
+      var occupationUri = (document.getElementById('madkhalOccupationUri')?.value || '').trim();
 
-      if (!name || !skill || !location) return;
+      if (!name || !skill || !location || !occupationUri) {
+        if (!occupationUri) {
+          alert('يرجى اختيار المهنة من قائمة مَدخَل المعتمدة قبل حفظ الطلب.');
+        }
+        return;
+      }
 
       event.preventDefault();
       event.stopImmediatePropagation();
@@ -118,10 +124,147 @@
     }, true);
   }
 
-  // jibran.js is loaded at the end of index.html, after the app code exists.
-  installWorkerSaveFlowFix();
+  function installArabicOccupationPicker() {
+    if (window.__MADKHAL_ESCO_PICKER__) return;
+    window.__MADKHAL_ESCO_PICKER__ = true;
 
-  // Keep the PWA registration exactly as before.
+    function addStyles() {
+      if (document.getElementById('madkhal-esco-picker-style')) return;
+      var style = document.createElement('style');
+      style.id = 'madkhal-esco-picker-style';
+      style.textContent = `
+        #madkhalEscoPicker{position:relative;margin:12px 0 14px}
+        #madkhalEscoPicker label{display:block;margin-bottom:7px;font-weight:800;font-size:13px}
+        #madkhalOccupationSearch{width:100%;padding:13px 14px;border:1px solid #cfe4e1;border-radius:14px;background:#fff;outline:none}
+        #madkhalOccupationSearch:focus{border-color:#0f766e;box-shadow:0 0 0 3px rgba(15,118,110,.08)}
+        #madkhalOccupationResults{display:none;position:absolute;z-index:80;left:0;right:0;top:74px;max-height:260px;overflow:auto;background:#fff;border:1px solid #dbe8e6;border-radius:14px;box-shadow:0 12px 28px rgba(20,40,40,.15)}
+        .madkhal-esco-option{display:block;width:100%;text-align:right;background:#fff;padding:12px 14px;border-bottom:1px solid #edf2f1;color:#172121}
+        .madkhal-esco-option:last-child{border-bottom:0}
+        .madkhal-esco-option strong{display:block;color:#0f766e;font-size:13px;margin-bottom:3px}
+        .madkhal-esco-option span{font-size:10px;color:#788383}
+        #madkhalOccupationStatus{font-size:11px;color:#6b7777;margin-top:5px}
+      `;
+      document.head.appendChild(style);
+    }
+
+    function buildPicker() {
+      var skill = document.getElementById('workerSkill');
+      if (!skill || document.getElementById('madkhalEscoPicker')) return;
+      addStyles();
+
+      var box = document.createElement('div');
+      box.id = 'madkhalEscoPicker';
+      box.innerHTML = `
+        <label for="madkhalOccupationSearch">المهنة المعتمدة</label>
+        <input id="madkhalOccupationSearch" type="search" autocomplete="off" placeholder="ابحث عن مهنتك بالعربية…">
+        <input id="madkhalOccupationUri" type="hidden">
+        <input id="madkhalOccupationLabel" type="hidden">
+        <div id="madkhalOccupationResults"></div>
+        <div id="madkhalOccupationStatus">اختر المهنة من قائمة مَدخَل حتى تدخل في التقييم والمطابقة.</div>
+      `;
+      skill.parentNode.insertBefore(box, skill);
+
+      var search = document.getElementById('madkhalOccupationSearch');
+      var results = document.getElementById('madkhalOccupationResults');
+      var status = document.getElementById('madkhalOccupationStatus');
+      var timer = null;
+
+      async function runSearch(text) {
+        if (!window.supabaseClient || typeof window.supabaseClient.rpc !== 'function') {
+          status.textContent = 'تعذر الاتصال بقائمة المهن حاليًا.';
+          return;
+        }
+        status.textContent = 'جاري البحث…';
+        var response = await window.supabaseClient.rpc('search_madkhal_occupations', {
+          search_text: text || '',
+          result_limit: 20
+        });
+        if (response.error) {
+          console.warn('ESCO occupation search:', response.error);
+          status.textContent = 'تعذر تحميل المهن حاليًا.';
+          return;
+        }
+        results.innerHTML = '';
+        (response.data || []).forEach(function (item) {
+          var button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'madkhal-esco-option';
+          button.innerHTML = '<strong>' + escapeHtml(item.preferred_label) + '</strong><span>ISCO: ' + escapeHtml(item.isco_group || '') + '</span>';
+          button.addEventListener('click', function () {
+            search.value = item.preferred_label || '';
+            document.getElementById('madkhalOccupationUri').value = item.concept_uri || '';
+            document.getElementById('madkhalOccupationLabel').value = item.preferred_label || '';
+            status.textContent = '✓ تم اختيار المهنة وستدخل في التقييم والمطابقة.';
+            results.style.display = 'none';
+          });
+          results.appendChild(button);
+        });
+        results.style.display = results.children.length ? 'block' : 'none';
+        status.textContent = results.children.length ? 'اختر المهنة المناسبة من النتائج.' : 'لم نجد مهنة مطابقة؛ جرّب كلمة أخرى.';
+      }
+
+      search.addEventListener('input', function () {
+        document.getElementById('madkhalOccupationUri').value = '';
+        document.getElementById('madkhalOccupationLabel').value = '';
+        clearTimeout(timer);
+        timer = setTimeout(function () { runSearch(search.value.trim()); }, 180);
+      });
+      search.addEventListener('focus', function () { runSearch(search.value.trim()); });
+      document.addEventListener('click', function (event) {
+        if (!box.contains(event.target)) results.style.display = 'none';
+      });
+
+      window.__MADKHAL_ESCCO_READY__ = true;
+    }
+
+    function escapeHtml(value) {
+      return String(value == null ? '' : value).replace(/[&<>'"]/g, function (c) {
+        return ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'})[c];
+      });
+    }
+
+    function wrapSaveWorkerForOccupation() {
+      if (window.__MADKHAL_ESCO_SAVE_WRAPPED__ || typeof window.saveWorker !== 'function') return;
+      window.__MADKHAL_ESCO_SAVE_WRAPPED__ = true;
+      var originalSaveWorker = window.saveWorker;
+      window.saveWorker = async function () {
+        var result = await originalSaveWorker.apply(this, arguments);
+        var uri = (document.getElementById('madkhalOccupationUri')?.value || '').trim();
+        var label = (document.getElementById('madkhalOccupationLabel')?.value || '').trim();
+        if (!uri || !label || !window.supabaseClient) return result;
+        try {
+          var auth = await window.supabaseClient.auth.getUser();
+          var user = auth && auth.data && auth.data.user;
+          if (!user) return result;
+          var saved = await window.supabaseClient.from('worker_profiles').update({
+            occupation_uri: uri,
+            occupation_label: label
+          }).eq('user_id', user.id);
+          if (saved.error) console.warn('Madkhal ESCO occupation save:', saved.error);
+        } catch (error) {
+          console.warn('Madkhal ESCO occupation save:', error);
+        }
+        return result;
+      };
+    }
+
+    function boot() {
+      buildPicker();
+      wrapSaveWorkerForOccupation();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', boot, { once: true });
+    } else {
+      boot();
+    }
+    window.addEventListener('load', boot, { once: true });
+    setTimeout(boot, 400);
+  }
+
+  installWorkerSaveFlowFix();
+  installArabicOccupationPicker();
+
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
       navigator.serviceWorker.register('./service-worker.js', { scope: './' })
