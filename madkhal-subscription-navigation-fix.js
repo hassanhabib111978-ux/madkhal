@@ -1,7 +1,8 @@
-/* MADKHAL_SUBSCRIPTION_NAVIGATION_FIX_V1 */
+/* MADKHAL_SUBSCRIPTION_NAVIGATION_FIX_V2 */
 (function(){
   "use strict";
   const TARGET="madkhalWorkerSubscribeFinal";
+  const REQUEST_TEXT="حفظ البيانات لطلب الوظيفة";
   const SCREEN="madkhalWorkerPaymentScreen";
   let busy=false;
   function offset(){
@@ -42,10 +43,17 @@
   }
   document.addEventListener('click',function(e){
     const b=e.target&&e.target.closest?e.target.closest('#'+TARGET):null;
-    if(!b)return;
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    go();
+    if(b){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      go();
+      return;
+    }
+    const button=e.target&&e.target.closest?e.target.closest('button'):null;
+    if(!button)return;
+    const text=String(button.textContent||'').replace(/\s+/g,' ').trim();
+    if(text.indexOf(REQUEST_TEXT)===-1)return;
+    setTimeout(go,700);
   },true);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});
   else bind();
