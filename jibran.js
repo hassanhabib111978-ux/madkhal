@@ -1,8 +1,6 @@
 (function () {
   'use strict';
 
-  if (!('serviceWorker' in navigator)) return;
-
   function installWorkerSaveFlowFix() {
     if (window.__MADKHAL_WORKER_SAVE_FIX__) return;
     window.__MADKHAL_WORKER_SAVE_FIX__ = true;
@@ -84,9 +82,7 @@
       var skill = (document.getElementById('workerSkill')?.value || '').trim();
       var location = (document.getElementById('workerLocation')?.value || '').trim();
 
-      if (!name || !skill || !location) {
-        return;
-      }
+      if (!name || !skill || !location) return;
 
       event.preventDefault();
       event.stopImmediatePropagation();
@@ -94,49 +90,45 @@
       if (window.__MADKHAL_WORKER_SAVE_FLOW__) return;
       window.__MADKHAL_WORKER_SAVE_FLOW__ = true;
 
+      var result = null;
       try {
-        if (typeof window.saveWorker !== 'function') {
-          window.__MADKHAL_WORKER_SAVE_FLOW__ = false;
-          return;
-        }
-
-        var result;
-        try {
+        if (typeof window.saveWorker === 'function') {
           result = window.saveWorker();
-        } catch (error) {
-          console.warn('Madkhal worker save fix:', error);
+        } else {
+          throw new Error('saveWorker not found');
         }
-
-        Promise.resolve(result).finally(function () {
-          setTimeout(function () {
-            showConfirmation();
-            window.__MADKHAL_WORKER_SAVE_FLOW__ = false;
-          }, 150);
-        });
       } catch (error) {
         console.warn('Madkhal worker save fix:', error);
+      }
+
+      Promise.resolve(result).then(function () {
         setTimeout(function () {
           showConfirmation();
           window.__MADKHAL_WORKER_SAVE_FLOW__ = false;
-        }, 500);
-      }
+        }, 150);
+      }, function (error) {
+        console.warn('Madkhal worker save rejection:', error);
+        setTimeout(function () {
+          showConfirmation();
+          window.__MADKHAL_WORKER_SAVE_FLOW__ = false;
+        }, 150);
+      });
     }, true);
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', installWorkerSaveFlowFix, { once: true });
-  } else {
-    installWorkerSaveFlowFix();
-  }
+  // jibran.js is loaded at the end of index.html, after the app code exists.
+  installWorkerSaveFlowFix();
 
-  window.addEventListener('load', function () {
-    installWorkerSaveFlowFix();
-    navigator.serviceWorker.register('./service-worker.js', { scope: './' })
-      .then(function (registration) {
-        console.log('مَدخَل PWA: Service Worker registered', registration.scope);
-      })
-      .catch(function (error) {
-        console.warn('مَدخَل PWA: Service Worker registration failed', error);
-      });
-  });
+  // Keep the PWA registration exactly as before.
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./service-worker.js', { scope: './' })
+        .then(function (registration) {
+          console.log('مَدخَل PWA: Service Worker registered', registration.scope);
+        })
+        .catch(function (error) {
+          console.warn('مَدخَل PWA: Service Worker registration failed', error);
+        });
+    });
+  }
 })();
