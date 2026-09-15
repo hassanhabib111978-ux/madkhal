@@ -1,4 +1,4 @@
-const CACHE_NAME = "madkhal-v11";
+const CACHE_NAME = "madkhal-v12";
 
 const BASE_URL = new URL("./", self.registration.scope);
 const INDEX_URL = new URL("index.html", BASE_URL).href;
@@ -94,6 +94,7 @@ const NAVIGATION_PATCH = `
   if (typeof window.showScreen === 'function') {
     var originalShowScreen = window.showScreen;
     window.showScreen = function(id, anchorId){
+      if (window.__MADKHAL_FREE_SAVE_FLOW__ && id !== 'madkhalFreeSaveConfirmation') return;
       var result = originalShowScreen.apply(this, arguments);
       setTimeout(function(){ settle(id, anchorId); }, 60);
       setTimeout(function(){ settle(id, anchorId); }, 280);
@@ -101,15 +102,33 @@ const NAVIGATION_PATCH = `
     };
   }
 
+  function runWorkerSaveAndConfirm(){
+    if (window.__MADKHAL_FREE_SAVE_FLOW__) return;
+    window.__MADKHAL_FREE_SAVE_FLOW__ = true;
+    try {
+      if (typeof window.saveWorker === 'function') {
+        var result = window.saveWorker();
+        Promise.resolve(result).catch(function(e){ console.warn('Madkhal worker save:', e); });
+      }
+    } catch(e) {
+      console.warn('Madkhal worker save:', e);
+    }
+    setTimeout(showFreeSaveConfirmation, 1200);
+    setTimeout(showFreeSaveConfirmation, 1900);
+    setTimeout(function(){ window.__MADKHAL_FREE_SAVE_FLOW__ = false; }, 2600);
+  }
+
   document.addEventListener('click', function(event){
     var button = event.target.closest && event.target.closest('button');
     if (!button) return;
-
-    /* The worker-save flow has its own targeted handler. Do not let the
-       generic profile-screen scroll correction move it back to workerName. */
-    if (button.id === 'saveWorkerButton') return;
-
     var text = String(button.textContent || '').replace(/\\s+/g, ' ').trim();
+
+    if (button.id === 'saveWorkerButton' || text.indexOf('حفظ البيانات لطلب الوظيفة') !== -1) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      runWorkerSaveAndConfirm();
+      return;
+    }
 
     if (text.indexOf('لدي فرصة عمل') !== -1) {
       event.preventDefault();
@@ -118,14 +137,6 @@ const NAVIGATION_PATCH = `
       else if (typeof window.showScreen === 'function') window.showScreen('employerScreen', 'employerName');
       setTimeout(function(){ settle('employerScreen', 'employerName'); }, 60);
       setTimeout(function(){ settle('employerScreen', 'employerName'); }, 280);
-      return;
-    }
-
-    if (text.indexOf('حفظ البيانات لطلب الوظيفة') !== -1) {
-      setTimeout(function(){
-        if (typeof window.openSubscription === 'function') window.openSubscription();
-        else if (typeof window.showScreen === 'function') window.showScreen('subscriptionScreen');
-      }, 650);
       return;
     }
 
