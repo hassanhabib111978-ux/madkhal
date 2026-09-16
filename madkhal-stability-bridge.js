@@ -34,6 +34,13 @@
     });
   }
 
+  function showApplicationSuccessMessage() {
+    const message = 'تم تسجيل طلبك بنجاح وبشكل مجاني.\n\nيمكنك الاستفادة من كل المزايا الأساسية والتقديم على الوظيفة مجانًا.\n\nوإذا رغبت في الحصول على ميزة المطابقة المستمرة والتقييمات والتنبيهات عند توافر فرص تناسب مهاراتك، يمكنك الاشتراك بقيمة دولار واحد شهريًا، وهو اشتراك غير ملزم.';
+    if (window.confirm(message + '\n\nهل ترغب في تسجيل طلب الاشتراك الآن؟')) {
+      if (typeof window.startSubscriptionRequest === 'function') window.startSubscriptionRequest();
+    }
+  }
+
   window.submitEmployerVacancy = async function () {
     const c = client();
     const user = await sessionUser();
@@ -105,7 +112,7 @@
         applications.push({ id:crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), job_id:opportunity.id, remote_id:result.data, title:opportunity.title, company:opportunity.company || 'صاحب فرصة', location:opportunity.location || '', source:opportunity.employerVacancy ? 'employer' : 'external', status:opportunity.employerVacancy ? 'worker_pending' : 'applied', created_at:now() });
         localStorage.setItem('madkhal_applications', JSON.stringify(applications));
       }
-      showToast(opportunity.employerVacancy ? '📩 تم إرسال طلبك، وسيصل لصاحب الفرصة.' : '📩 تم تسجيل تقديمك، ويمكنك متابعة حالته من حسابك.');
+      showApplicationSuccessMessage();
       if (opportunity.external_link && /^https?:\/\//i.test(String(opportunity.external_link))) setTimeout(() => window.open(String(opportunity.external_link),'_blank','noopener,noreferrer'),350);
       if (typeof loadAccount === 'function') loadAccount();
     } catch (e) {
