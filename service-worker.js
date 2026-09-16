@@ -1,4 +1,4 @@
-const CACHE_NAME = "madkhal-v14";
+const CACHE_NAME = "madkhal-v15";
 
 const BASE_URL = new URL("./", self.registration.scope);
 const INDEX_URL = new URL("index.html", BASE_URL).href;
@@ -13,6 +13,12 @@ const FILES_TO_CACHE = [
   ICON_192_URL,
   ICON_512_URL
 ];
+
+function cleanIndex(html) {
+  // The final navigation handler in index.html is the single active navigation layer.
+  // Remove the older V1 handler at delivery time so both cannot compete for scroll position.
+  return html.replace(/\\s*<script>\\s*\\/\\* MADKHAL_NAVIGATION_FIX_V1 \\/\\*[\\s\\S]*?<\\/script>\\s*/i, '\\n');
+}
 
 self.addEventListener("install", event => {
   event.waitUntil(
@@ -38,9 +44,16 @@ self.addEventListener("fetch", event => {
   if (event.request.mode === "navigate") {
     event.respondWith(
       fetch(event.request, { cache: "no-store" })
-        .then(response => {
-          if (response && response.ok) return response;
-          return caches.match(INDEX_URL);
+        .then(async response => {
+          if (!response || !response.ok) return caches.match(INDEX_URL);
+          const type = response.headers.get("content-type") || "";
+          if (!type.includes("text/html")) return response;
+          const html = cleanIndex(await response.text());
+          return new Response(html, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: response.headers
+          });
         })
         .catch(() => caches.match(INDEX_URL))
     );
