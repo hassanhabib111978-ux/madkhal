@@ -1,15 +1,18 @@
-const CACHE_NAME = "madkhal-v17";
+const CACHE_NAME = "madkhal-v18";
 
 const BASE_URL = new URL("./", self.registration.scope);
 const INDEX_URL = new URL("index.html", BASE_URL).href;
 const MANIFEST_URL = new URL("manifest.json", BASE_URL).href;
 const ICON_192_URL = new URL("icon-192.png", BASE_URL).href;
 const ICON_512_URL = new URL("icon-512.svg", BASE_URL).href;
+const WORKER_SAVE_MESSAGE_URL = new URL("madkhal-worker-save-message.js", BASE_URL).href;
 
-const FILES_TO_CACHE = [BASE_URL.href, INDEX_URL, MANIFEST_URL, ICON_192_URL, ICON_512_URL];
+const FILES_TO_CACHE = [BASE_URL.href, INDEX_URL, MANIFEST_URL, ICON_192_URL, ICON_512_URL, WORKER_SAVE_MESSAGE_URL];
 
 function cleanIndex(html) {
-  return html.replace(/\s*<script>\s*\/\* MADKHAL_NAVIGATION_FIX_V1 \*\/[\s\S]*?<\/script>\s*/i, "\n");
+  return html
+    .replace(/\s*<script>\s*\/\* MADKHAL_NAVIGATION_FIX_V1 \*\/[\s\S]*?<\/script>\s*/i, "\n")
+    .replace(/\s*<\/body>/i, '\n<script src="./madkhal-worker-save-message.js" defer></script>\n</body>');
 }
 
 self.addEventListener("install", event => {
