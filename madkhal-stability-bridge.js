@@ -10,9 +10,7 @@
     const c = client();
     if (!c) return null;
     const { data } = await c.auth.getSession();
-    if (data?.session?.user) return data.session.user;
-    const { data: anon } = await c.auth.signInAnonymously();
-    return anon?.user || null;
+    return data?.session?.user || null;
   }
 
   async function ownProfile(user) {
@@ -44,7 +42,7 @@
   window.submitEmployerVacancy = async function () {
     const c = client();
     const user = await sessionUser();
-    if (!c || !user) { showToast('⚠️ تعذر الاتصال بالحساب.'); return; }
+    if (!c || !user) { showToast('⚠️ يجب تسجيل الدخول أولًا.'); return; }
     const employerName = document.getElementById('employerName')?.value.trim() || '';
     const title = document.getElementById('vacancyTitle')?.value.trim() || '';
     const location = document.getElementById('vacancyLocation')?.value.trim() || '';
