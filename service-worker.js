@@ -1,4 +1,4 @@
-const CACHE_NAME = "madkhal-v19";
+const CACHE_NAME = "madkhal-v20";
 
 const BASE_URL = new URL("./", self.registration.scope);
 const INDEX_URL = new URL("index.html", BASE_URL).href;
