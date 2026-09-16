@@ -1,11 +1,13 @@
 (() => {
   'use strict';
-  // Kept at the original path for compatibility with index.html.
-  // Navigation is intentionally handled by the main application only.
+  // Compatibility loader: keeps index.html unchanged while loading
+  // the non-conflicting live and stability layers.
   if (window.__MADKHAL_UI_BRIDGE_READY__) return;
   window.__MADKHAL_UI_BRIDGE_READY__ = true;
-  const script = document.createElement('script');
-  script.src = './madkhal-live-bridge.js';
-  script.defer = true;
-  document.head.appendChild(script);
+  ['./madkhal-live-bridge.js', './madkhal-stability-bridge.js'].forEach(src => {
+    const script = document.createElement('script');
+    script.src = src;
+    script.defer = true;
+    document.head.appendChild(script);
+  });
 })();
