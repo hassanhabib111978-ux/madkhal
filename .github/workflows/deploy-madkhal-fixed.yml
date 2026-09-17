@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Verify unified Madkhal runtime
+      - name: Verify and integrate unified Madkhal runtime
         shell: python
         run: |
           from pathlib import Path
@@ -35,23 +35,82 @@ jobs:
                   raise SystemExit(f"Missing runtime file: {name}")
           if "madkhal-navigation-fix-v2.js" in s:
               raise SystemExit("Obsolete navigation layer must not be shipped")
-          s = s.replace(required, '<script src="./madkhal-ui-bridge.js?v=2" defer></script>', 1)
+          s = s.replace(required, '<script src="./madkhal-ui-bridge.js?v=3" defer></script>', 1)
           s = s.replace("دولار ونصف", "دولار واحد")
           p.write_text(s, encoding="utf-8")
 
-          # Jibran remains available for its assistant functionality, but its
-          # legacy worker UI wrappers are not part of the unified flow.
           j = Path("jibran.js")
           js = j.read_text(encoding="utf-8")
           save_call = "  installWorkerSaveFlowFix();"
-          if save_call not in js:
-              raise SystemExit("Expected legacy Jibran save wrapper call was not found")
-          js = js.replace(save_call, "  // Unified Madkhal UI owns worker saving and completion navigation.")
+          if save_call in js:
+              js = js.replace(save_call, "  // Unified Madkhal UI owns worker saving and completion navigation.")
           occupation_call = "  installArabicOccupationPicker();"
           if occupation_call in js:
               js = js.replace(occupation_call, "  // Unified worker form intentionally uses the agreed simple nine-field flow.")
           j.write_text(js, encoding="utf-8")
-          print("Unified runtime verified; legacy worker UI wrappers disabled; old price text normalized")
+
+          bridge = Path("madkhal-ui-bridge.js")
+          bs = bridge.read_text(encoding="utf-8")
+          marker = "  function install(){"
+          if "MADKHAL_EMPLOYER_FLOW_V1" not in bs:
+              block = r'''  /* MADKHAL_EMPLOYER_FLOW_V1 — integrated into the single UI authority. */
+  function ensureEmployerScreen(){
+    let s=document.getElementById('madkhalEmployerScreen');
+    if(s)return s;
+    const main=document.querySelector('main'); if(!main)return null;
+    s=document.createElement('section'); s.id='madkhalEmployerScreen'; s.className='screen';
+    s.innerHTML=`
+      <button class="back" type="button" id="madkhalEmployerBack">↩️ العودة إلى الرئيسية</button>
+      <div class="employer-box"><h2>🏢 نشر فرصة عمل</h2><p>أدخل تفاصيل الفرصة، وسيتم حفظها في مَدخَل لتظهر للباحثين المناسبين.</p></div>
+      <div class="form-group"><label for="employerCompany">اسم الشركة / صاحب العمل</label><input id="employerCompany" type="text" placeholder="اسم الشركة أو صاحب العمل"></div>
+      <div class="form-group"><label for="employerTitle">المسمى الوظيفي</label><input id="employerTitle" type="text" placeholder="مثال: محاسب، مهندس، موظف مبيعات"></div>
+      <div class="form-group"><label for="employerLocation">مكان العمل</label><input id="employerLocation" type="text" placeholder="المدينة / الدولة"></div>
+      <div class="form-group"><label for="employerCountry">الدولة</label><input id="employerCountry" type="text" placeholder="مثال: سوريا"></div>
+      <div class="form-group"><label for="employerJobType">نوع العمل</label><select id="employerJobType"><option value="full_time">دوام كامل</option><option value="part_time">دوام جزئي</option><option value="contract">عقد</option><option value="remote">عن بُعد</option><option value="internship">تدريب</option></select></div>
+      <div class="form-group"><label for="employerCategory">المجال</label><input id="employerCategory" type="text" placeholder="مثال: المحاسبة أو البرمجة"></div>
+      <div class="form-group"><label for="employerSkills">المهارات المطلوبة</label><input id="employerSkills" type="text" placeholder="مثال: Excel، محاسبة، خبرة مبيعات"></div>
+      <div class="form-group"><label for="employerQualification">الشهادة المطلوبة</label><input id="employerQualification" type="text" placeholder="مثال: بكالوريوس"></div>
+      <div class="form-group"><label for="employerSalary">الراتب / العملة</label><input id="employerSalary" type="text" placeholder="مثال: 500–700 USD"></div>
+      <div class="form-group"><label for="employerNumber">عدد المطلوب</label><input id="employerNumber" type="number" min="1" max="999" value="1" inputmode="numeric"></div>
+      <div class="form-group"><label for="employerExpiry">تاريخ انتهاء استقبال الطلبات</label><input id="employerExpiry" type="date"></div>
+      <div class="form-group"><label for="employerDescription">وصف الفرصة</label><textarea id="employerDescription" maxlength="5000" placeholder="المهام، المتطلبات، وطريقة التقديم"></textarea></div>
+      <button id="madkhalEmployerSave" class="primary-btn madkhal-clear-btn" type="button">📢 نشر الفرصة</button>
+      <div id="madkhalEmployerStatus"></div>`;
+    main.appendChild(s);
+    s.querySelector('#madkhalEmployerBack')?.addEventListener('click',()=>window.showScreen('homeScreen'));
+    s.querySelector('#madkhalEmployerSave')?.addEventListener('click',saveEmployerVacancy);
+    return s;
+  }
+  async function saveEmployerVacancy(){
+    const s=ensureEmployerScreen(); if(!s)return;
+    const v={company:document.getElementById('employerCompany')?.value.trim()||'',title:document.getElementById('employerTitle')?.value.trim()||'',location:document.getElementById('employerLocation')?.value.trim()||'',country:document.getElementById('employerCountry')?.value.trim()||'',jobType:document.getElementById('employerJobType')?.value||'',category:document.getElementById('employerCategory')?.value.trim()||'',skills:document.getElementById('employerSkills')?.value.trim()||'',qualification:document.getElementById('employerQualification')?.value.trim()||'',salary:document.getElementById('employerSalary')?.value.trim()||'',number:Math.max(1,Number(document.getElementById('employerNumber')?.value||1)),expiry:document.getElementById('employerExpiry')?.value||'',description:document.getElementById('employerDescription')?.value.trim()||''};
+    if(!v.title||!v.location||!v.country||!v.skills||!v.description){toast('⚠️ أكمل المسمى الوظيفي والمكان والدولة والمهارات والوصف.');return;}
+    const b=document.getElementById('madkhalEmployerSave');if(b){b.disabled=true;b.textContent='⏳ جارٍ نشر الفرصة...';}
+    try{
+      const c=client(); const u=await user(); if(!c||!u)throw new Error('AUTH_REQUIRED');
+      let pr=await c.from('profiles').select('id').eq('auth_user_id',u.id).maybeSingle(); if(pr.error)throw pr.error;
+      if(pr.data){const r=await c.from('profiles').update({full_name:v.company||'صاحب عمل',role:'employer'}).eq('id',pr.data.id).eq('auth_user_id',u.id);if(r.error)throw r.error;}
+      else{const r=await c.from('profiles').insert({auth_user_id:u.id,full_name:v.company||'صاحب عمل',role:'employer'}).select('id').maybeSingle();if(r.error)throw r.error;pr={data:r.data};}
+      if(!pr.data?.id)throw new Error('EMPLOYER_PROFILE_REQUIRED');
+      const payload={employer_id:pr.data.id,title:v.title,company_name:v.company||null,description:v.description,location:v.location,country:v.country,job_type:v.jobType||null,category:v.category||null,required_skills:v.skills,required_qualification:v.qualification||null,number_needed:v.number,status:'open',visibility:'private_match_only',expires_at:v.expiry?v.expiry+'T23:59:59Z':null,updated_at:now()};
+      const r=await c.from('employer_vacancies').insert(payload).select('id').maybeSingle(); if(r.error)throw r.error;
+      if(!r.data?.id)throw new Error('VACANCY_NOT_SAVED');
+      const n=arr(L.notifications);n.push({id:String(Date.now()),type:'employer',message:`تم نشر فرصة ${v.title} بنجاح`,created_at:now()});setArr(L.notifications,n);
+      s.innerHTML=`<div class="card" style="text-align:center;padding:30px 20px"><div style="font-size:48px">✅</div><h2 style="color:#0f766e">تم نشر الفرصة بنجاح</h2><p style="line-height:1.9">أصبحت الفرصة محفوظة في مَدخَل ويمكن للباحثين المطابقين الوصول إليها.</p><div style="display:grid;gap:10px"><button class="primary-btn madkhal-clear-btn" type="button" id="madkhalEmployerSee">🔎 مشاهدة الفرص</button><button class="secondary-btn madkhal-clear-btn" type="button" id="madkhalEmployerHome">↩️ العودة إلى الرئيسية</button></div></div>`;
+      s.querySelector('#madkhalEmployerSee')?.addEventListener('click',()=>window.openOpportunities());s.querySelector('#madkhalEmployerHome')?.addEventListener('click',()=>window.showScreen('homeScreen'));window.showScreen('madkhalEmployerScreen');
+    }catch(e){console.warn('Madkhal employer vacancy:',e);toast(e?.message==='AUTH_REQUIRED'?'❌ تعذر تسجيل الدخول.':'❌ تعذر نشر الفرصة. تحقق من البيانات والصلاحيات.');}
+    finally{if(b){b.disabled=false;b.textContent='📢 نشر الفرصة';}}
+  }
+  window.openEmployer=function(){ensureEmployerScreen();window.showScreen('madkhalEmployerScreen','employerTitle');};
+
+'''
+              if marker not in bs:
+                  raise SystemExit("Unified install marker not found")
+              bs = bs.replace(marker, block + marker, 1)
+              bridge.write_text(bs, encoding="utf-8")
+              print("Employer flow integrated into madkhal-ui-bridge.js")
+          else:
+              print("Employer flow already integrated")
       - name: Inject data compatibility layer only
         shell: python
         run: |
