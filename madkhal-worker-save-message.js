@@ -1,8 +1,8 @@
-/* MADKHAL_WORKER_SAVE_MESSAGE_V4 */
+/* MADKHAL_WORKER_SAVE_MESSAGE_V5 */
 (function () {
   'use strict';
-  if (window.__MADKHAL_WORKER_SAVE_MESSAGE_V4__) return;
-  window.__MADKHAL_WORKER_SAVE_MESSAGE_V4__ = true;
+  if (window.__MADKHAL_WORKER_SAVE_MESSAGE_V5__) return;
+  window.__MADKHAL_WORKER_SAVE_MESSAGE_V5__ = true;
 
   function getClient() {
     if (window.supabaseClient && typeof window.supabaseClient.from === 'function') return window.supabaseClient;
@@ -44,23 +44,23 @@
 
   async function verifyConfirmation() {
     var screen = document.getElementById('madkhalFreeSaveConfirmation');
-    if (!screen || !screen.classList.contains('active') || screen.dataset.madkhalVerified === '1') return;
-    screen.dataset.madkhalVerified = 'checking';
+    if (!screen || !screen.classList.contains('active') || screen.dataset.madkhalVerified === '1' || screen.dataset.madkhalVerifying === '1') return;
+    screen.dataset.madkhalVerifying = '1';
     try {
       var ok = await saveWasReallyCompleted();
       if (ok) {
         screen.dataset.madkhalVerified = '1';
-        return;
+      } else {
+        screen.dataset.madkhalVerified = '0';
+        restoreWorkerScreen();
+        var status = document.getElementById('madkhalOccupationStatus');
+        if (status) status.textContent = 'لم يتم حفظ ملف الباحث بنجاح. راجع البيانات وحاول الحفظ مرة أخرى.';
+        alert('لم يتم تأكيد حفظ ملف الباحث في قاعدة البيانات. لم نعتبر العملية ناجحة.');
       }
-      screen.dataset.madkhalVerified = '0';
-      restoreWorkerScreen();
-      var status = document.getElementById('madkhalOccupationStatus');
-      if (status) status.textContent = 'لم يتم حفظ ملف الباحث بنجاح. راجع البيانات وحاول الحفظ مرة أخرى.';
-      alert('لم يتم تأكيد حفظ ملف الباحث في قاعدة البيانات. لم نعتبر العملية ناجحة.');
     } catch (error) {
       console.warn('Madkhal save verification:', error);
-      screen.dataset.madkhalVerified = 'checking';
-      setTimeout(verifyConfirmation, 1200);
+    } finally {
+      screen.dataset.madkhalVerifying = '0';
     }
   }
 
@@ -68,8 +68,7 @@
     var screen = document.getElementById('madkhalFreeSaveConfirmation');
     if (!screen) return;
     var card = screen.querySelector('.card');
-    if (!card) return;
-    if (screen.dataset.madkhalMessageV4 === '1') return;
+    if (!card || screen.dataset.madkhalMessageV5 === '1') return;
 
     card.innerHTML = `
       <div style="text-align:center;padding:4px 0;">
@@ -91,13 +90,13 @@
         <p style="margin:0 0 20px;line-height:1.95;color:#596666;">
           إذا رغبت، يمكنك الاشتراك في خدمة المتابعة المستمرة، وعندها يقوم مَدخَل بالبحث المستمر عن الفرص الجديدة، وتقييم مدى ملاءمتها لملفك ومهاراتك، وإجراء المطابقة، ثم إرسال تنبيه إليك عند ظهور فرصة مناسبة.
         </p>
-        <button type="button" id="madkhalFreeSaveSubscribeV4" class="primary-btn" style="width:100%;">
+        <button type="button" id="madkhalFreeSaveSubscribeV5" class="primary-btn" style="width:100%;">
           ⭐ الاشتراك في المتابعة المستمرة — دولار واحد شهريًا
         </button>
       </div>`;
 
-    screen.dataset.madkhalMessageV4 = '1';
-    var subscribe = document.getElementById('madkhalFreeSaveSubscribeV4');
+    screen.dataset.madkhalMessageV5 = '1';
+    var subscribe = document.getElementById('madkhalFreeSaveSubscribeV5');
     if (subscribe) subscribe.addEventListener('click', function (event) {
       event.preventDefault();
       event.stopPropagation();
@@ -107,12 +106,8 @@
   }
 
   render();
-  new MutationObserver(function () {
-    render();
-    verifyConfirmation();
-  }).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
   setTimeout(render, 300);
   setTimeout(render, 1000);
-  setTimeout(verifyConfirmation, 500);
-  setTimeout(verifyConfirmation, 1500);
+  setTimeout(verifyConfirmation, 700);
+  setTimeout(verifyConfirmation, 1800);
 })();
