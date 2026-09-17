@@ -1,14 +1,75 @@
-/* MADKHAL_WORKER_SAVE_MESSAGE_V3 */
+/* MADKHAL_WORKER_SAVE_MESSAGE_V4 */
 (function () {
   'use strict';
-  if (window.__MADKHAL_WORKER_SAVE_MESSAGE_V3__) return;
-  window.__MADKHAL_WORKER_SAVE_MESSAGE_V3__ = true;
+  if (window.__MADKHAL_WORKER_SAVE_MESSAGE_V4__) return;
+  window.__MADKHAL_WORKER_SAVE_MESSAGE_V4__ = true;
+
+  function getClient() {
+    if (window.supabaseClient && typeof window.supabaseClient.from === 'function') return window.supabaseClient;
+    if (window.supabase && typeof window.supabase.createClient === 'function') {
+      try {
+        window.supabaseClient = window.supabase.createClient(
+          'https://qbufsdpdobuicpljnssr.supabase.co',
+          'sb_publishable_mcPmNU2CGJkiSbfgOD6gOg_9RNMNlEY'
+        );
+        return window.supabaseClient;
+      } catch (_) {}
+    }
+    return null;
+  }
+
+  async function saveWasReallyCompleted() {
+    var client = getClient();
+    if (!client) return false;
+    var sessionResult = await client.auth.getSession();
+    var user = sessionResult && sessionResult.data && sessionResult.data.session && sessionResult.data.session.user;
+    if (!user) return false;
+    var result = await client.from('worker_profiles')
+      .select('id,full_name,location,occupation_uri,profession')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if (result.error || !result.data) return false;
+    var p = result.data;
+    return !!(String(p.full_name || '').trim() && String(p.location || '').trim() &&
+      (String(p.occupation_uri || '').trim() || String(p.profession || '').trim()));
+  }
+
+  function restoreWorkerScreen() {
+    var confirmation = document.getElementById('madkhalFreeSaveConfirmation');
+    if (confirmation) confirmation.classList.remove('active');
+    var worker = document.getElementById('workerScreen') || document.getElementById('workerProfileScreen');
+    if (worker) worker.classList.add('active');
+    window.__MADKHAL_WORKER_SAVE_FLOW__ = false;
+  }
+
+  async function verifyConfirmation() {
+    var screen = document.getElementById('madkhalFreeSaveConfirmation');
+    if (!screen || !screen.classList.contains('active') || screen.dataset.madkhalVerified === '1') return;
+    screen.dataset.madkhalVerified = 'checking';
+    try {
+      var ok = await saveWasReallyCompleted();
+      if (ok) {
+        screen.dataset.madkhalVerified = '1';
+        return;
+      }
+      screen.dataset.madkhalVerified = '0';
+      restoreWorkerScreen();
+      var status = document.getElementById('madkhalOccupationStatus');
+      if (status) status.textContent = 'لم يتم حفظ ملف الباحث بنجاح. راجع البيانات وحاول الحفظ مرة أخرى.';
+      alert('لم يتم تأكيد حفظ ملف الباحث في قاعدة البيانات. لم نعتبر العملية ناجحة.');
+    } catch (error) {
+      console.warn('Madkhal save verification:', error);
+      screen.dataset.madkhalVerified = 'checking';
+      setTimeout(verifyConfirmation, 1200);
+    }
+  }
 
   function render() {
     var screen = document.getElementById('madkhalFreeSaveConfirmation');
     if (!screen) return;
     var card = screen.querySelector('.card');
     if (!card) return;
+    if (screen.dataset.madkhalMessageV4 === '1') return;
 
     card.innerHTML = `
       <div style="text-align:center;padding:4px 0;">
@@ -30,14 +91,13 @@
         <p style="margin:0 0 20px;line-height:1.95;color:#596666;">
           إذا رغبت، يمكنك الاشتراك في خدمة المتابعة المستمرة، وعندها يقوم مَدخَل بالبحث المستمر عن الفرص الجديدة، وتقييم مدى ملاءمتها لملفك ومهاراتك، وإجراء المطابقة، ثم إرسال تنبيه إليك عند ظهور فرصة مناسبة.
         </p>
-        <button type="button" id="madkhalFreeSaveSubscribeV3" class="primary-btn" style="width:100%;">
+        <button type="button" id="madkhalFreeSaveSubscribeV4" class="primary-btn" style="width:100%;">
           ⭐ الاشتراك في المتابعة المستمرة — دولار واحد شهريًا
         </button>
       </div>`;
 
-    screen.dataset.madkhalMessageV3 = '1';
-
-    var subscribe = document.getElementById('madkhalFreeSaveSubscribeV3');
+    screen.dataset.madkhalMessageV4 = '1';
+    var subscribe = document.getElementById('madkhalFreeSaveSubscribeV4');
     if (subscribe) subscribe.addEventListener('click', function (event) {
       event.preventDefault();
       event.stopPropagation();
@@ -46,10 +106,13 @@
     });
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render, { once: true });
-  else render();
-  new MutationObserver(render).observe(document.documentElement, { childList: true, subtree: true });
+  render();
+  new MutationObserver(function () {
+    render();
+    verifyConfirmation();
+  }).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
   setTimeout(render, 300);
   setTimeout(render, 1000);
-  setTimeout(render, 2500);
+  setTimeout(verifyConfirmation, 500);
+  setTimeout(verifyConfirmation, 1500);
 })();
