@@ -27,23 +27,20 @@ jobs:
           from pathlib import Path
           p = Path("index.html")
           s = p.read_text(encoding="utf-8")
-          required = [
-              '<script src="./madkhal-ui-bridge.js" defer></script>',
-              '<script src="./jibran.js"></script>'
-          ]
-          for tag in required:
-              if tag not in s:
-                  raise SystemExit(f"Missing core runtime reference: {tag}")
+          required = '<script src="./madkhal-ui-bridge.js" defer></script>'
+          if required not in s:
+              raise SystemExit(f"Missing core runtime reference: {required}")
           for name in ["madkhal-ui-bridge.js", "jibran.js", "madkhal-jobs-data-fix.js"]:
               if not Path(name).exists():
                   raise SystemExit(f"Missing runtime file: {name}")
           if "madkhal-navigation-fix-v2.js" in s:
               raise SystemExit("Obsolete navigation layer must not be shipped")
+          s = s.replace(required, '<script src="./madkhal-ui-bridge.js?v=2" defer></script>', 1)
           s = s.replace("دولار ونصف", "دولار واحد")
           p.write_text(s, encoding="utf-8")
 
           # Jibran remains available for its assistant functionality, but its
-          # legacy worker-save/occupation wrappers are not part of the UI flow.
+          # legacy worker UI wrappers are not part of the unified flow.
           j = Path("jibran.js")
           js = j.read_text(encoding="utf-8")
           save_call = "  installWorkerSaveFlowFix();"
@@ -54,7 +51,7 @@ jobs:
           if occupation_call in js:
               js = js.replace(occupation_call, "  // Unified worker form intentionally uses the agreed simple nine-field flow.")
           j.write_text(js, encoding="utf-8")
-          print("Unified runtime verified; legacy worker wrappers disabled; old price text normalized")
+          print("Unified runtime verified; legacy worker UI wrappers disabled; old price text normalized")
       - name: Inject data compatibility layer only
         shell: python
         run: |
