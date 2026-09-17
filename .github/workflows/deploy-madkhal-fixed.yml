@@ -42,7 +42,15 @@ jobs:
           s = s.replace("دولار ونصف شهريًا", "دولار واحد شهريًا")
           s = s.replace("دولار ونصف شهريًا.", "دولار واحد شهريًا.")
           p.write_text(s, encoding="utf-8")
-          print("Core runtime verified and subscription price normalized")
+
+          j = Path("jibran.js")
+          js = j.read_text(encoding="utf-8")
+          obsolete_call = "  installWorkerSaveFlowFix();"
+          if obsolete_call not in js:
+              raise SystemExit("Expected obsolete Jibran save wrapper was not found")
+          js = js.replace(obsolete_call, "  // Worker completion is handled by the verified core worker-save layer.")
+          j.write_text(js, encoding="utf-8")
+          print("Core runtime verified; price normalized; obsolete Jibran save wrapper disabled")
       - name: Inject only the two required compatibility layers
         shell: python
         run: |
