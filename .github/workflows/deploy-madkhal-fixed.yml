@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Verify core Madkhal runtime
+      - name: Verify and normalize core Madkhal runtime
         shell: python
         run: |
           from pathlib import Path
@@ -39,7 +39,10 @@ jobs:
                   raise SystemExit(f"Missing runtime file: {name}")
           if "madkhal-navigation-fix-v2.js" in s:
               raise SystemExit("Obsolete navigation layer must not be shipped")
-          print("Madkhal core runtime verified")
+          s = s.replace("دولار ونصف شهريًا", "دولار واحد شهريًا")
+          s = s.replace("دولار ونصف شهريًا.", "دولار واحد شهريًا.")
+          p.write_text(s, encoding="utf-8")
+          print("Core runtime verified and subscription price normalized")
       - name: Inject only the two required compatibility layers
         shell: python
         run: |
