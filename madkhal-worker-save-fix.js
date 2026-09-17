@@ -1,8 +1,7 @@
-/* MADKHAl_WORKER_SAVE_FIX_V5 */
+/* MADKHAL_WORKER_SAVE_FIX_V6 */
 (function(){
   "use strict";
   const SCREEN="madkhalWorkerCompletionScreen";
-  const PAYMENT="madkhalWorkerPaymentScreen";
   const ACCOUNT="accountScreen";
   let saving=false;
 
@@ -32,6 +31,26 @@
     }
   }
 
+  function openSubscriptionSafely(){
+    if(typeof window.openSubscription==="function"){
+      window.openSubscription();
+      return;
+    }
+    const target=document.getElementById("subscriptionScreen");
+    if(target){
+      document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
+      target.classList.add("active");
+      target.style.display="block";
+      try{window.scrollTo({top:0,behavior:"auto"});}catch(_){ }
+      if(typeof window.renderSubscriptionStatus==="function")window.renderSubscriptionStatus();
+    }
+  }
+
+  function returnToOpportunities(){
+    if(typeof window.openOpportunities==="function")window.openOpportunities();
+    else if(typeof window.showScreen==="function")window.showScreen("opportunitiesScreen");
+  }
+
   function ensureCompletion(){
     let s=document.getElementById(SCREEN);
     if(s)return s;
@@ -40,17 +59,24 @@
     s=document.createElement("section");
     s.id=SCREEN;
     s.className="screen";
-    s.innerHTML='<div class="card" style="text-align:center;padding:28px 20px;margin-top:20px"><div style="font-size:46px;margin-bottom:10px">✅</div><h2 style="margin:0 0 12px;color:#0f766e">تم حفظ بياناتك بنجاح</h2><p style="margin:0 0 12px;line-height:1.9;color:#596666">تم حفظ ملفك المهني في مَدخَل، وأصبح جاهزًا للاستفادة من المطابقة مع الفرص المناسبة.</p><p style="margin:0 0 22px;line-height:1.9;color:#596666">يمكنك المتابعة مجانًا، أو تفعيل الاشتراك الشهري بقيمة <strong>$1</strong> للحصول على المتابعة المستمرة والمطابقة التلقائية والتنبيهات والترتيب.</p><button type="button" class="primary-btn" id="madkhalWorkerCompletionSubscribe" style="width:100%">⭐ الاشتراك الشهري — $1</button></div>';
+    s.innerHTML='<div class="card" style="text-align:center;padding:28px 20px;margin-top:20px">'+
+      '<div style="font-size:46px;margin-bottom:10px">✅</div>'+
+      '<h2 style="margin:0 0 12px;color:#0f766e">تم حفظ ملفك المهني بنجاح</h2>'+
+      '<p style="margin:0 0 12px;line-height:1.9;color:#596666">تم حفظ بياناتك في مَدخَل، وأصبح ملفك جاهزًا لاستخدامه في البحث والمطابقة مع الفرص المناسبة.</p>'+
+      '<p style="margin:0 0 22px;line-height:1.9;color:#596666">يمكنك الآن متابعة البحث والتقديم مجانًا. وإذا أردت أن يتابع مَدخَل الفرص الجديدة نيابةً عنك، فهناك اشتراك اختياري بقيمة <strong>$1 شهريًا</strong> يشمل المتابعة المستمرة والمطابقة التلقائية والتنبيهات والترتيب.</p>'+
+      '<button type="button" class="primary-btn" id="madkhalWorkerCompletionSubscribe" style="width:100%">⭐ الانتقال إلى الاشتراك — $1 شهريًا</button>'+
+      '<button type="button" class="secondary-btn" id="madkhalWorkerCompletionContinue" style="width:100%;margin-top:10px">🔎 متابعة البحث عن الفرص</button>'+ 
+      '</div>';
     main.appendChild(s);
     const b=s.querySelector("#madkhalWorkerCompletionSubscribe");
     if(b)b.addEventListener("click",function(e){
       e.preventDefault();e.stopImmediatePropagation();
-      const target=document.getElementById(PAYMENT);
-      if(typeof window.showScreen==="function"&&target)window.showScreen(PAYMENT);
-      else if(target){
-        document.querySelectorAll(".screen").forEach(x=>{x.classList.remove("active");x.style.display="none";});
-        target.classList.add("active");target.style.display="block";
-      }
+      openSubscriptionSafely();
+    },true);
+    const c=s.querySelector("#madkhalWorkerCompletionContinue");
+    if(c)c.addEventListener("click",function(e){
+      e.preventDefault();e.stopImmediatePropagation();
+      returnToOpportunities();
     },true);
     return s;
   }
@@ -59,7 +85,8 @@
     const s=ensureCompletion();
     if(!s)return;
     document.querySelectorAll(".screen").forEach(function(x){x.classList.remove("active");x.style.display="none";});
-    s.classList.add("active");s.style.display="block";
+    s.classList.add("active");
+    s.style.display="block";
     try{localStorage.setItem("madkhal_worker_confirmed","1");}catch(_){ }
   }
 
