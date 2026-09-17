@@ -32,16 +32,73 @@ jobs:
           for name in ["madkhal-ui-bridge.js","jibran.js","madkhal-jobs-data-fix.js"]:
               if not Path(name).exists(): raise SystemExit(f"Missing runtime file: {name}")
           if "madkhal-navigation-fix-v2.js" in s: raise SystemExit("Obsolete navigation layer must not be shipped")
-          s=s.replace(required,'<script src="./madkhal-ui-bridge.js?v=5" defer></script>',1)
+          s=s.replace(required,'<script src="./madkhal-ui-bridge.js?v=6" defer></script>',1)
           s=s.replace("دولار ونصف","دولار واحد")
           p.write_text(s,encoding="utf-8")
           j=Path("jibran.js"); js=j.read_text(encoding="utf-8")
           if "  installWorkerSaveFlowFix();" in js: js=js.replace("  installWorkerSaveFlowFix();","  // Unified Madkhal UI owns worker saving and completion navigation.")
           if "  installArabicOccupationPicker();" in js: js=js.replace("  installArabicOccupationPicker();","  // Unified worker form intentionally uses the agreed simple nine-field flow.")
           j.write_text(js,encoding="utf-8")
+
+          bridge=Path("madkhal-ui-bridge.js")
+          bs=bridge.read_text(encoding="utf-8")
+          marker="  function install(){"
+          employer_marker="/* MADKHAL_EMPLOYER_FLOW_V1 */"
+          if employer_marker not in bs:
+              block=r'''  /* MADKHAL_EMPLOYER_FLOW_V1 */
+  function parseEmployerSalary(value){
+    const text=String(value||'').trim();
+    const nums=(text.match(/\d+(?:[.,]\d+)?/g)||[]).map(x=>Number(String(x).replace(',','.'))).filter(Number.isFinite);
+    let currency='';
+    if(/\$|USD|دولار/i.test(text)) currency='USD';
+    else if(/AED|درهم/i.test(text)) currency='AED';
+    else if(/SAR|ريال/i.test(text)) currency='SAR';
+    else if(/QAR/i.test(text)) currency='QAR';
+    else if(/KWD|دينار/i.test(text)) currency='KWD';
+    return {min:nums[0]??null,max:nums.length>1?nums[1]:null,currency};
+  }
+  window.openEmployer=function(){window.showScreen('employerScreen','employerName');};
+  window.submitEmployerVacancy=async function(){
+    const value=id=>document.getElementById(id)?.value?.trim()||'';
+    const employerName=value('employerName'),title=value('vacancyTitle'),location=value('vacancyLocation'),workType=document.getElementById('vacancyWorkType')?.value||'',skills=value('vacancySkills'),qualification=value('vacancyQualification'),description=value('vacancyDescription');
+    const numberNeeded=Math.max(1,Number(document.getElementById('vacancyNumber')?.value||1));
+    const salary=value('vacancySalary');
+    if(!employerName||!title||!location||!workType||!skills||!description){toast('⚠️ أكمل بيانات فرصة العمل الأساسية.');return;}
+    const button=document.querySelector('#employerScreen button[onclick="submitEmployerVacancy()"]');
+    if(button){button.disabled=true;button.textContent='⏳ جارٍ تسجيل الفرصة...';}
+    try{
+      const c=client();const u=await user();if(!c||!u)throw new Error('AUTH_REQUIRED');
+      const parsed=parseEmployerSalary(salary);
+      const r=await c.rpc('create_employer_vacancy',{p_employer_name:employerName,p_title:title,p_location:location,p_country:null,p_job_type:workType,p_required_skills:skills,p_required_qualification:qualification,p_number_needed:numberNeeded,p_salary_min:parsed.min,p_salary_max:parsed.max,p_salary_currency:parsed.currency,p_description:description});
+      if(r.error)throw r.error;
+      const remoteId=Array.isArray(r.data)?r.data[0]:r.data;
+      const local=getLocalArray('madkhal_demo_vacancies');
+      local.push({id:'remote_'+String(remoteId),remote_id:String(remoteId),employer_name:employerName,title,location,work_type:workType,required_skills:skills,required_qualification:qualification,number_needed:numberNeeded,salary:salary||'حسب الاتفاق',description,status:'open',visibility:'private_match_only',created_at:now(),updated_at:now()});
+      setLocalArray('madkhal_demo_vacancies',local);
+      toast('✅ تم تسجيل فرصة العمل في مَدخَل وبدأ تجهيزها للمطابقة.');
+      clearEmployerForm();
+      setTimeout(()=>window.showScreen('homeScreen'),700);
+    }catch(e){console.warn('Madkhal employer vacancy:',e);toast(e?.message==='AUTH_REQUIRED'?'❌ يلزم الاتصال بالحساب.':'❌ تعذر تسجيل فرصة العمل في قاعدة البيانات.');}
+    finally{if(button){button.disabled=false;button.textContent='📩 إرسال فرصة العمل إلى مَدخَل';}}
+  };
+
+'''
+              if marker not in bs: raise SystemExit("Unified runtime install marker not found")
+              bs=bs.replace(marker,block+marker,1)
+              bridge.write_text(bs,encoding="utf-8")
+
           tag='<script src="./madkhal-jobs-data-fix.js?v=3"></script>'
           if tag not in s: s=s.replace("</body>",tag+"\n</body>",1)
           p.write_text(s,encoding="utf-8")
+      - name: Validate runtime
+        shell: python
+        run: |
+          from pathlib import Path
+          b=Path("madkhal-ui-bridge.js").read_text(encoding="utf-8")
+          required=["MADKHAL_EMPLOYER_FLOW_V1","create_employer_vacancy","window.submitEmployerVacancy"]
+          for x in required:
+              if x not in b: raise SystemExit(f"Missing integrated employer runtime: {x}")
+          if b.count("MADKHAL_EMPLOYER_FLOW_V1") != 1: raise SystemExit("Employer runtime duplicated")
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
