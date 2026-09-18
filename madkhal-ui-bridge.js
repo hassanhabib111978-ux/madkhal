@@ -1,4 +1,5 @@
 /* MADKHAL_UI_BRIDGE_V2 — one integrated UI authority */
+/* deployment-refresh: 2026-09-18 */
 (() => {
   'use strict';
   if (window.__MADKHAL_UI_BRIDGE_V2__) return;
