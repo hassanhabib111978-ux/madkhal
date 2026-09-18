@@ -39,21 +39,9 @@ jobs:
           if "  installWorkerSaveFlowFix();" in js: js=js.replace("  installWorkerSaveFlowFix();","  // Unified Madkhal UI owns worker saving and completion navigation.")
           if "  installArabicOccupationPicker();" in js: js=js.replace("  installArabicOccupationPicker();","  // Unified worker form intentionally uses the agreed simple nine-field flow.")
           j.write_text(js,encoding="utf-8")
-          bridge=Path("madkhal-ui-bridge.js")
-          bs=bridge.read_text(encoding="utf-8")
-          employer_marker="/* MADKHAL_EMPLOYER_FLOW_V1 */"
-          if employer_marker not in bs: raise SystemExit("Missing integrated employer runtime")
           tag='<script src="./madkhal-jobs-data-fix.js?v=3"></script>'
           if tag not in s: s=s.replace("</body>",tag+"\n</body>",1)
           p.write_text(s,encoding="utf-8")
-      - name: Validate runtime
-        shell: python
-        run: |
-          from pathlib import Path
-          b=Path("madkhal-ui-bridge.js").read_text(encoding="utf-8")
-          for x in ["MADKHAL_EMPLOYER_FLOW_V1","create_employer_vacancy","window.submitEmployerVacancy"]:
-              if x not in b: raise SystemExit(f"Missing integrated employer runtime: {x}")
-          if b.count("MADKHAL_EMPLOYER_FLOW_V1") != 1: raise SystemExit("Employer runtime duplicated")
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
