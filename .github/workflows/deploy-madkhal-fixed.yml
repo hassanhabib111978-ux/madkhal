@@ -33,7 +33,7 @@ jobs:
           for name in ["madkhal-ui-bridge.js","jibran.js","madkhal-jobs-data-fix.js"]:
               if not Path(name).exists(): raise SystemExit(f"Missing runtime file: {name}")
           if "madkhal-navigation-fix-v2.js" in s: raise SystemExit("Obsolete navigation layer must not be shipped")
-          s=s.replace(required,'<script src="./madkhal-ui-bridge.js?v=7" defer></script>',1)
+          s=s.replace(required,'<script src="./madkhal-ui-bridge.js?v=9" defer></script>',1)
           s=s.replace("دولار ونصف","دولار واحد")
           p.write_text(s,encoding="utf-8")
           j=Path("jibran.js"); js=j.read_text(encoding="utf-8")
