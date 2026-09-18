@@ -171,6 +171,48 @@
   window.openProfile=function(){buildWorkerForm();window.showScreen('profileScreen','workerFirstName');};
   window.saveWorker=unifiedSaveWorker;
 
+  function parseSalary(v){
+    const m=String(v||'').replace(/,/g,'').match(/(\\d+(?:\\.\\d+)?)/g);return m&&m.length?Number(m[0]):null;
+  }
+  function employerForm(){return {
+    name:document.getElementById('employerName')?.value.trim()||'',
+    title:document.getElementById('vacancyTitle')?.value.trim()||'',
+    location:document.getElementById('vacancyLocation')?.value.trim()||'',
+    type:document.getElementById('vacancyWorkType')?.value||'',
+    skills:document.getElementById('vacancySkills')?.value.trim()||'',
+    qualification:document.getElementById('vacancyQualification')?.value.trim()||'',
+    number:Math.max(1,parseInt(document.getElementById('vacancyNumber')?.value||'1',10)||1),
+    salary:document.getElementById('vacancySalary')?.value.trim()||'',
+    description:document.getElementById('vacancyDescription')?.value.trim()||''
+  };}
+  async function unifiedSubmitEmployerVacancy(){
+    const p=employerForm();
+    if(!p.name||!p.title||!p.location){toast('⚠️ أكمل اسم الشركة والمسمى الوظيفي ومكان العمل.');return;}
+    const b=document.querySelector('#employerScreen button[onclick="submitEmployerVacancy()"]');
+    if(b){b.disabled=true;b.textContent='⏳ جارٍ حفظ فرصة العمل...';}
+    try{
+      const c=client();if(!c)throw new Error('SUPABASE_NOT_CONNECTED');
+      const u=await user();if(!u)throw new Error('AUTH_REQUIRED');
+      const salary=parseSalary(p.salary);
+      const r=await c.rpc('create_employer_vacancy',{p_employer_name:p.name,p_title:p.title,p_location:p.location,p_country:'',p_job_type:p.type,p_required_skills:p.skills,p_required_qualification:p.qualification,p_number_needed:p.number,p_salary_min:salary,p_salary_max:salary,p_salary_currency:salary?'USD':'',p_description:p.description});
+      if(r.error)throw r.error;
+      const vacancyId=Array.isArray(r.data)?r.data[0]:r.data;
+      if(!vacancyId)throw new Error('VACANCY_NOT_SAVED');
+      toast('✅ تم حفظ فرصة العمل بنجاح وبدأت مَدخَل تجهيز المطابقة.');
+      const box=document.createElement('div');box.className='card';box.style.cssText='margin-top:14px;text-align:center';box.innerHTML='<h3 style="color:#0f766e">✅ تم حفظ فرصة العمل</h3><p style="line-height:1.9">ستستخدم مَدخَل الفرصة لمطابقة الباحثين المناسبين.</p><button class="primary-btn" style="width:100%;margin-top:10px" type="button">🏠 العودة إلى الرئيسية</button>';document.getElementById('employerScreen')?.appendChild(box);box.querySelector('button')?.addEventListener('click',()=>window.showScreen('homeScreen'));
+    }catch(e){
+      console.warn('Madkhal employer save:',e);
+      const msg=String(e?.message||e?.error_description||'').toLowerCase();
+      if(msg.includes('authentication_required'))toast('❌ لم يتم تسجيل الدخول. أعد المحاولة.');
+      else if(msg.includes('required_fields_missing'))toast('❌ أكمل الحقول الأساسية المطلوبة.');
+      else if(msg.includes('row-level security')||msg.includes('permission denied'))toast('❌ لا توجد صلاحية لحفظ الفرصة حاليًا.');
+      else if(msg.includes('supabase_not_connected'))toast('❌ قاعدة البيانات غير متاحة الآن.');
+      else toast('❌ تعذر حفظ فرصة العمل: '+String(e?.message||'خطأ غير معروف').slice(0,120));
+    }finally{if(b){b.disabled=false;b.textContent='📩 إرسال فرصة العمل إلى مَدخَل';}}
+  }
+  window.openEmployer=function(){window.showScreen('employerScreen','employerName');};
+  window.submitEmployerVacancy=unifiedSubmitEmployerVacancy;
+
   let unifiedCategory='الكل';let currentDetailId=null;
   function allJobs(){
     let list=[];try{if(typeof window.getAllVisibleOpportunities==='function')list=window.getAllVisibleOpportunities();}catch(e){console.warn('Madkhal opportunity source:',e);}
@@ -211,16 +253,40 @@
   function applicationExists(id){return arr(L.applications).some(a=>String(a.job_id)===String(id));}
   async function applyOpportunityUnified(id){
     if(!read(L.name)){toast('👤 احفظ ملفك المهني أولًا.');window.openProfile();return;}
-    const job=allJobs().find(j=>String(j.id)===String(id));if(!job){toast('❌ لم يتم العثور على الفرصة.');return;}if(applicationExists(job.id)){toast('ℹ️ سبق تسجيل طلبك على هذه الفرصة.');return;}
-    let remote=false;try{const c=client();const u=await user();if(!c||!u)throw new Error('AUTH_REQUIRED');
-      if(job.employerVacancy){let vacancyId=job.remote_id||job.id;if(String(vacancyId).startsWith('remote_'))vacancyId=String(vacancyId).slice(7);const r=await c.rpc('apply_to_employer_vacancy',{p_vacancy_id:vacancyId});if(r.error)throw r.error;remote=true;}
-      else{const jobId=job.source_id||job.remote_id;if(jobId){const r=await c.rpc('record_external_job_application',{p_job_id:jobId});if(r.error)throw r.error;remote=true;}}
-    }catch(e){console.warn('Madkhal application remote:',e);}
-    const apps=arr(L.applications);apps.push({id:(crypto.randomUUID?crypto.randomUUID():String(Date.now())),job_id:job.id,remote_job_id:job.source_id||job.remote_id||null,title:job.title,company:job.company||'',location:job.location||'',source:job.employerVacancy?'employer':(job.source||'external'),status:'applied',created_at:now()});setArr(L.applications,apps);
-    const ns=arr(L.notifications);ns.push({id:String(Date.now()),type:'application',message:`تم تسجيل طلب التقديم على ${job.title}`,created_at:now()});setArr(L.notifications,ns);
-    toast(remote?'✅ تم تسجيل طلبك بنجاح.':'✅ تم حفظ طلب التقديم على هذا الجهاز.');
-    if(job.external_link&&/^https?:\/\//i.test(String(job.external_link)))setTimeout(()=>window.open(String(job.external_link),'_blank','noopener,noreferrer'),250);
-    window.openOpportunities();
+    const job=allJobs().find(j=>String(j.id)===String(id));
+    if(!job){toast('❌ لم يتم العثور على الفرصة.');return;}
+    if(applicationExists(job.id)){toast('ℹ️ سبق تسجيل طلبك على هذه الفرصة.');return;}
+    try{
+      const c=client();if(!c)throw new Error('SUPABASE_NOT_CONNECTED');
+      const u=await user();if(!u)throw new Error('AUTH_REQUIRED');
+      let remoteId=null;
+      if(job.employerVacancy){
+        let vacancyId=job.remote_id||job.source_id||job.id;
+        if(String(vacancyId).startsWith('remote_'))vacancyId=String(vacancyId).slice(7);
+        const r=await c.rpc('apply_to_employer_vacancy',{p_vacancy_id:vacancyId});if(r.error)throw r.error;remoteId=Array.isArray(r.data)?r.data[0]:r.data;
+      }else{
+        /* jobs.id is the authoritative UUID used by record_external_job_application. */
+        const jobId=job.id;
+        if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(jobId)))throw new Error('INVALID_JOB_ID');
+        const r=await c.rpc('record_external_job_application',{p_job_id:jobId});if(r.error)throw r.error;remoteId=Array.isArray(r.data)?r.data[0]:r.data;
+      }
+      if(!remoteId)throw new Error('APPLICATION_NOT_SAVED');
+      const apps=arr(L.applications);apps.push({id:(crypto.randomUUID?crypto.randomUUID():String(Date.now())),job_id:job.id,remote_job_id:remoteId,title:job.title,company:job.company||'',location:job.location||'',source:job.employerVacancy?'employer':(job.source||'external'),status:'applied',created_at:now()});setArr(L.applications,apps);
+      const ns=arr(L.notifications);ns.push({id:String(Date.now()),type:'application',message:`تم تسجيل طلب التقديم على ${job.title}`,created_at:now()});setArr(L.notifications,ns);
+      toast('✅ تم تسجيل طلبك بنجاح.');
+      const link=job.external_link||job.source_url||job.canonical_url||'';
+      if(!job.employerVacancy&&/^https?:\\/\\//i.test(String(link)))setTimeout(()=>window.open(String(link),'_blank','noopener,noreferrer'),250);
+      window.openOpportunities();
+    }catch(e){
+      console.warn('Madkhal application save:',e);
+      const msg=String(e?.message||e?.error_description||'').toLowerCase();
+      if(msg.includes('profile_required')||msg.includes('worker_profile_required'))toast('❌ أكمل ملفك المهني أولًا ثم أعد التقديم.');
+      else if(msg.includes('job_not_available')||msg.includes('vacancy_not_open'))toast('❌ هذه الفرصة لم تعد متاحة للتقديم.');
+      else if(msg.includes('authentication_required'))toast('❌ تعذر تسجيل الدخول. أعد المحاولة.');
+      else if(msg.includes('invalid_job_id'))toast('❌ تعذر تحديد رقم الفرصة بشكل صحيح.');
+      else if(msg.includes('supabase_not_connected'))toast('❌ قاعدة البيانات غير متاحة الآن.');
+      else toast('❌ تعذر حفظ طلب التقديم: '+String(e?.message||'خطأ غير معروف').slice(0,120));
+    }
   }
   window.applyOpportunity=applyOpportunityUnified;
 
