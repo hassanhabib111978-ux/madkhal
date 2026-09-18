@@ -8,7 +8,7 @@
   const SUPABASE_KEY = 'sb_publishable_mcPmNU2CGJkiSbfgOD6gOg_9RNMNlEY';
   const L = {
     name:'madkhal_profile_name', first:'madkhal_profile_first_name', father:'madkhal_profile_father_name',
-    family:'madkhal_profile_family_name', birth:'madkhal_profile_birth_date', qualification:'madkhal_profile_qualification',
+    family:'madkhal_profile_family_name', mother:'madkhal_profile_mother_name', birth:'madkhal_profile_birth_date', qualification:'madkhal_profile_qualification',
     skill:'madkhal_profile_skill', field:'madkhal_profile_work_field', years:'madkhal_profile_experience_years',
     summary:'madkhal_profile_summary', location:'madkhal_profile_location', workType:'madkhal_profile_work_type',
     subscription:'madkhal_subscription', applications:'madkhal_applications', notifications:'madkhal_notifications', assessment:'madkhal_writing_assessment'
@@ -81,6 +81,7 @@
     const first=document.getElementById('workerFirstName')?.value.trim()||'';
     const father=document.getElementById('workerFatherName')?.value.trim()||'';
     const family=document.getElementById('workerFamilyName')?.value.trim()||'';
+    const mother=document.getElementById('workerMotherName')?.value.trim()||'';
     const birth=document.getElementById('workerBirthDate')?.value||'';
     const qualification=document.getElementById('workerQualification')?.value.trim()||'';
     const skill=document.getElementById('workerSkill')?.value.trim()||'';
@@ -89,17 +90,17 @@
     const summary=document.getElementById('workerSummary')?.value.trim()||'';
     const location=read(L.location);
     const workType=read(L.workType);
-    return {first,father,family,birth,qualification,skill,field,years,summary,location,workType,fullName:[first,father,family].filter(Boolean).join(' ').trim()};
+    return {first,father,family,mother,birth,qualification,skill,field,years,summary,location,workType,fullName:[first,father,family].filter(Boolean).join(' ').trim()};
   }
   function storeProfile(p){
-    write(L.first,p.first);write(L.father,p.father);write(L.family,p.family);write(L.birth,p.birth);write(L.name,p.fullName);
+    write(L.first,p.first);write(L.father,p.father);write(L.family,p.family);write(L.mother,p.mother);write(L.birth,p.birth);write(L.name,p.fullName);
     write(L.qualification,p.qualification);write(L.skill,p.skill);write(L.field,p.field);write(L.years,p.years);write(L.summary,p.summary);
     if(p.location)write(L.location,p.location); if(p.workType)write(L.workType,p.workType);
   }
   async function saveProfileRemote(p){
     const c=client();if(!c)throw new Error('SUPABASE_NOT_CONNECTED');
     const u=await user();if(!u)throw new Error('AUTH_REQUIRED');
-    let pr=await c.from('profiles').select('id').eq('auth_user_id',u.id).maybeSingle();
+    let pr=await c.from('profiles').select('id').eq('auth_user_id',u.id).limit(1).maybeSingle();
     if(pr.error)throw pr.error;
     if(pr.data){
       const r=await c.from('profiles').update({full_name:p.fullName,role:'seeker',main_skill:p.skill||null,bio:p.summary||null}).eq('id',pr.data.id).eq('auth_user_id',u.id);
@@ -108,22 +109,22 @@
       const r=await c.from('profiles').insert({auth_user_id:u.id,full_name:p.fullName,role:'seeker',main_skill:p.skill||null,bio:p.summary||null}).select('id').maybeSingle();
       if(r.error)throw r.error;
     }
-    const wp=await c.from('worker_profiles').select('id').eq('user_id',u.id).maybeSingle();
+    const wp=await c.from('worker_profiles').select('id').eq('user_id',u.id).limit(1).maybeSingle();
     if(wp.error)throw wp.error;
-    const payload={user_id:u.id,full_name:p.fullName,first_name:p.first||null,father_name:p.father||null,family_name:p.family||null,birth_date:p.birth||null,qualification:p.qualification||null,profession:p.field||p.skill||null,skills:p.skill||null,work_field:p.field||null,experience_years:p.years===''?null:Number(p.years),professional_summary:p.summary||null,location:p.location||null,work_type:p.workType||null,updated_at:now()};
+    const payload={user_id:u.id,full_name:p.fullName,first_name:p.first||null,father_name:p.father||null,family_name:p.family||null,mother_name:p.mother||null,birth_date:p.birth||null,qualification:p.qualification||null,profession:p.field||p.skill||null,skills:p.skill||null,work_field:p.field||null,experience_years:p.years===''?null:Number(p.years),professional_summary:p.summary||null,location:p.location||null,work_type:p.workType||null,updated_at:now()};
     const r=wp.data?.id?await c.from('worker_profiles').update(payload).eq('id',wp.data.id).eq('user_id',u.id).select('id').maybeSingle():await c.from('worker_profiles').insert(payload).select('id').maybeSingle();
     if(r.error)throw r.error;if(!r.data?.id)throw new Error('PROFILE_NOT_SAVED');
     write('madkhal_profile_user_id',u.id);write('madkhal_worker_profile_id',r.data.id);return r.data.id;
   }
 
   async function hydrateProfile(){
-    const map={workerFirstName:read(L.first),workerFatherName:read(L.father),workerFamilyName:read(L.family),workerBirthDate:read(L.birth),workerQualification:read(L.qualification),workerSkill:read(L.skill),workerWorkField:read(L.field),workerExperienceYears:read(L.years),workerSummary:read(L.summary)};
+    const map={workerFirstName:read(L.first),workerFatherName:read(L.father),workerFamilyName:read(L.family),workerMotherName:read(L.mother),workerBirthDate:read(L.birth),workerQualification:read(L.qualification),workerSkill:read(L.skill),workerWorkField:read(L.field),workerExperienceYears:read(L.years),workerSummary:read(L.summary)};
     Object.entries(map).forEach(([id,v])=>{const el=document.getElementById(id);if(el&&v)el.value=v;});
     const c=client();if(!c)return;const u=await user();if(!u)return;
-    const r=await c.from('worker_profiles').select('first_name,father_name,family_name,birth_date,full_name,qualification,profession,skills,work_field,experience_years,professional_summary,location,work_type').eq('user_id',u.id).maybeSingle();
+    const r=await c.from('worker_profiles').select('first_name,father_name,family_name,mother_name,birth_date,full_name,qualification,profession,skills,work_field,experience_years,professional_summary,location,work_type').eq('user_id',u.id).maybeSingle();
     if(r.error||!r.data)return;const d=r.data;
-    write(L.first,d.first_name||'');write(L.father,d.father_name||'');write(L.family,d.family_name||'');write(L.birth,d.birth_date||'');write(L.name,d.full_name||'');write(L.qualification,d.qualification||'');write(L.skill,d.skills||d.profession||'');write(L.field,d.work_field||d.profession||'');write(L.years,d.experience_years??'');write(L.summary,d.professional_summary||'');write(L.location,d.location||'');write(L.workType,d.work_type||'');
-    Object.entries({workerFirstName:d.first_name||'',workerFatherName:d.father_name||'',workerFamilyName:d.family_name||'',workerBirthDate:d.birth_date||'',workerQualification:d.qualification||'',workerSkill:d.skills||d.profession||'',workerWorkField:d.work_field||d.profession||'',workerExperienceYears:d.experience_years??'',workerSummary:d.professional_summary||''}).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v;});
+    write(L.first,d.first_name||'');write(L.father,d.father_name||'');write(L.family,d.family_name||'');write(L.mother,d.mother_name||'');write(L.birth,d.birth_date||'');write(L.name,d.full_name||'');write(L.qualification,d.qualification||'');write(L.skill,d.skills||d.profession||'');write(L.field,d.work_field||d.profession||'');write(L.years,d.experience_years??'');write(L.summary,d.professional_summary||'');write(L.location,d.location||'');write(L.workType,d.work_type||'');
+    Object.entries({workerFirstName:d.first_name||'',workerFatherName:d.father_name||'',workerFamilyName:d.family_name||'',workerMotherName:d.mother_name||'',workerBirthDate:d.birth_date||'',workerQualification:d.qualification||'',workerSkill:d.skills||d.profession||'',workerWorkField:d.work_field||d.profession||'',workerExperienceYears:d.experience_years??'',workerSummary:d.professional_summary||''}).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v;});
   }
 
   function buildWorkerForm(){
@@ -133,7 +134,7 @@
       <div class="card worker-profile-intro"><h2 style="margin:0 0 8px">👤 ملف الباحث عن فرصة</h2><p style="margin:0;line-height:1.8">املأ بياناتك بالترتيب. هذه البيانات هي أساس المطابقة مع الفرص.</p></div>
       <div class="form-group"><label for="workerFirstName">الاسم</label><input id="workerFirstName" type="text" autocomplete="given-name" placeholder="الاسم الأول"></div>
       <div class="form-group"><label for="workerFatherName">الأب</label><input id="workerFatherName" type="text" placeholder="اسم الأب"></div>
-      <div class="form-group"><label for="workerFamilyName">الكنية</label><input id="workerFamilyName" type="text" autocomplete="family-name" placeholder="اسم العائلة"></div>
+      <div class="form-group"><label for="workerFamilyName">الكنية</label><input id="workerFamilyName" type="text" autocomplete="family-name" placeholder="اسم العائلة"></div><div class="form-group"><label for="workerMotherName">اسم الأم</label><input id="workerMotherName" type="text" placeholder="اسم الأم"></div>
       <div class="form-group"><label for="workerBirthDate">التولد / تاريخ الميلاد</label><input id="workerBirthDate" type="date"></div>
       <div class="form-group"><label for="workerQualification">الشهادة</label><input id="workerQualification" type="text" placeholder="مثال: بكالوريوس أو ثانوية"></div>
       <div class="form-group"><label for="workerSkill">المهارة التي أتقنها</label><input id="workerSkill" type="text" placeholder="مثال: محاسبة، كهرباء، برمجة"></div>
