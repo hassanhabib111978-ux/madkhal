@@ -300,9 +300,80 @@ function categoryFor(j){const t=normalizeText([j.title,j.category,j.description]
 function visibleJob(j){return {id:j.id,title:String(j.title||"فرصة"),company:String(j.company||"حسب المصدر"),location:String(j.location||j.country||"غير محدد"),country:String(j.country||""),type:workType(j.job_type),category:categoryFor(j),description:String(j.description||"تفاصيل الوظيفة موجودة في المصدر الأصلي."),salary:salaryText(j),source:String(j.source||""),source_name:j.source_name,external_link:String(j.source_url||j.canonical_url||""),canonical_link:String(j.canonical_url||j.source_url||""),posted_at:j.posted_at||null,expires_at:j.expires_at||null}}
 function matchScore(job){const p=localProfile();if(!p.full_name&&!p.occupation_label&&!p.skills)return 35;const jt=normalizeText([job.title,job.description,job.category].join(" "));let s=30;const occ=normalizeText(p.occupation_label||"");if(occ){const ot=tokens(occ).filter(x=>x.length>=4&&!["مدير","مساعد","متخصص","عامل","عاملة"].includes(x));const hits=ot.filter(x=>jt.includes(x)).length;if(hits)s+=Math.min(30,10*hits);const aliases=aliasTermsFor(occ);if(aliases.some(a=>jt.includes(normalizeText(a))))s+=20}const skills=tokens(p.skills||"");const hits=skills.filter(x=>jt.includes(x)).length;s+=Math.min(20,5*hits);if(p.work_type&&p.work_type!=="any"){const wt=normalizeText(job.type);if((p.work_type==="remote"&&wt.includes("عن بعد"))||wt.includes(normalizeText(p.work_type)))s+=10}if(p.location){const loc=normalizeText(p.location);if(normalizeText(job.location).includes(loc)||normalizeText(job.country).includes(loc))s+=10}const a=getLS(LS.assessment,null);if(a&&Number(a.score)>0)s+=Math.min(5,Math.round(Number(a.score)/20));return Math.min(99,s)}
 function renderCategories(){const c=document.getElementById("categoryScroll");if(!c)return;const cats=["الكل"];const counts={};allVisibleJobs.map(visibleJob).forEach(j=>{counts[j.category]=(counts[j.category]||0)+1});Object.keys(counts).sort().forEach(k=>cats.push(k));c.innerHTML="";cats.forEach(x=>{const b=document.createElement("button");b.className="chip"+(currentCategory===x?" active":"");b.textContent=x+(x!=="الكل"&&counts[x]?" · "+counts[x]:"");b.onclick=()=>{currentCategory=x;renderCategories();renderOpportunities()};c.appendChild(b)})}
-function renderOpportunities(){const box=document.getElementById("opportunitiesList");if(!box)return;const q=normalizeText(document.getElementById("jobSearch")?.value||"");const loc=normalizeText(document.getElementById("jobLocation")?.value||"");let list=allVisibleJobs.map(visibleJob);if(currentCategory!=="الكل")list=list.filter(j=>j.category===currentCategory);if(q)list=list.filter(j=>normalizeText([j.title,j.company,j.description,j.category].join(" ")).includes(q)||tokens(q).some(t=>normalizeText([j.title,j.description].join(" ")).includes(t)));if(loc)list=list.filter(j=>normalizeText(j.location+" "+j.country).includes(loc));list.sort((a,b)=>matchScore(b)-matchScore(a));if(!list.length){box.innerHTML='<div class="card"><div class="empty">🔎 لا توجد فرص حاليًا ضمن نطاق مَدخَل بهذه المواصفات.<br>جرّب مهنة أو مكانًا آخر.</div></div>';return}box.innerHTML="";list.slice(0,80).forEach(j=>{const d=document.createElement("div");d.className="opportunity";d.innerHTML='<div class="opportunity-top"><div><h3>💼 '+escapeHtml(j.title)+'</h3><div style="font-weight:800">'+escapeHtml(j.company)+'</div><div class="opportunity-meta">📍 '+escapeHtml(j.location)+' · 💼 '+escapeHtml(j.type)+'</div><span class="tag">'+escapeHtml(j.category)+'</span><span class="tag">🌐 '+escapeHtml(j.source_name)+'</span><div class="match">🎯 مطابقة أولية: '+matchScore(j)+'%</div></div><div class="salary">'+escapeHtml(j.salary)+'</div></div><div class="source-note">'+escapeHtml(j.description.slice(0,260))+(j.description.length>260?"…":"")+'</div><button class="primary-btn" style="width:100%;margin-top:12px" onclick="openJobDetails(\''+String(j.id).replace(/\\/g,"\\\\").replace(/'/g,"\\'")+'\')">📄 عرض التفاصيل</button>';box.appendChild(d)})}
-function openJobDetails(id){const j=allVisibleJobs.find(x=>String(x.id)===String(id));if(!j)return;currentJob=visibleJob(j);showScreen("jobDetailsScreen");const box=document.getElementById("jobDetails");const applied=getLS(LS.applications,[]).some(a=>String(a.job_id)===String(currentJob.id));box.innerHTML='<div class="details-box"><h2>'+escapeHtml(currentJob.title)+'</h2><p style="font-weight:800;color:#334">'+escapeHtml(currentJob.company)+'</p><div class="info-strip">📍 '+escapeHtml(currentJob.location)+' · 💼 '+escapeHtml(currentJob.type)+' · '+escapeHtml(currentJob.source_name)+'</div><div class="info-strip">💰 '+escapeHtml(currentJob.salary)+'</div><h3 style="margin-top:16px">التفاصيل</h3><p>'+escapeHtml(currentJob.description)+'</p><div class="notice">هذه فرصة من المصدر الأصلي. عند التقديم سيسجل مَدخَل طلبك في سجل المتابعة ثم يفتح الرابط الأصلي للتقديم.</div><button class="'+(applied?"secondary-btn":"primary-btn")+'" style="width:100%;margin-top:13px" '+(applied?"disabled":"onclick="applyToCurrentJob()"")+'>'+ (applied?"✅ تم تسجيل التقديم":"📩 التقديم وتسجيل الطلب")+'</button></div>'}
-async function applyToCurrentJob(){if(!currentJob)return;const p=localProfile();if(!p.full_name||!p.occupation_uri){showToast("👤 أكمل ملفك المهني واختيار المهنة أولًا.");setTimeout(()=>openProfile(),500);return}const apps=getLS(LS.applications,[]);if(apps.some(a=>String(a.job_id)===String(currentJob.id))){showToast("ℹ️ سبق تسجيل هذا الطلب.");return}const item={id:"app_"+Date.now(),job_id:currentJob.id,title:currentJob.title,company:currentJob.company,location:currentJob.location,source:currentJob.source,status:"applied",created_at:now(),source_url:currentJob.external_link};apps.push(item);setLS(LS.applications,apps);try{const user=await sessionUser();if(user){const pid=await publicProfileId(user,p.full_name);if(pid){await supabaseClient.from("external_job_applications").upsert({profile_id:pid,job_id:currentJob.id,status:"applied",applied_at:now(),source_url:currentJob.external_link,updated_at:now()},{onConflict:"profile_id,job_id"})}await supabaseClient.from("notifications").insert({user_id:user.id,job_id:currentJob.id,channel:"in_app",title:"تم تسجيل طلب التقديم",body:"تم تسجيل طلبك على "+currentJob.title,opportunity_type:"job",created_at:now(),delivery_status:"pending"})}}catch(e){}addLocalNotification("📩 تم تسجيل طلب التقديم على "+currentJob.title,currentJob.id);showToast("✅ تم تسجيل طلبك وفتح المصدر الأصلي.");setTimeout(()=>{if(currentJob.external_link)window.open(currentJob.external_link,"_blank","noopener,noreferrer")},250);setTimeout(()=>showScreen("accountScreen"),650)}
+function renderOpportunities(){
+  const box=document.getElementById("opportunitiesList");
+  if(!box)return;
+  const q=normalizeText(document.getElementById("jobSearch")?.value||"");
+  const loc=normalizeText(document.getElementById("jobLocation")?.value||"");
+  let list=allVisibleJobs.map(visibleJob);
+  if(currentCategory!=="الكل")list=list.filter(j=>j.category===currentCategory);
+  if(q){
+    list=list.filter(j=>{
+      const text=normalizeText([j.title,j.company,j.description,j.category].join(" "));
+      return text.includes(q)||tokens(q).some(t=>text.includes(t));
+    });
+  }
+  if(loc)list=list.filter(j=>normalizeText(j.location+" "+j.country).includes(loc));
+  list.sort((a,b)=>matchScore(b)-matchScore(a));
+  if(!list.length){
+    box.innerHTML='<div class="card"><div class="empty">🔎 لا توجد فرص حاليًا ضمن نطاق مَدخَل بهذه المواصفات.<br>جرّب مهنة أو مكانًا آخر.</div></div>';
+    return;
+  }
+  box.innerHTML="";
+  list.slice(0,80).forEach(j=>{
+    const d=document.createElement("div");
+    d.className="opportunity";
+    d.innerHTML=`<div class="opportunity-top">
+      <div>
+        <h3>💼 ${escapeHtml(j.title)}</h3>
+        <div style="font-weight:800">${escapeHtml(j.company)}</div>
+        <div class="opportunity-meta">📍 ${escapeHtml(j.location)} · 💼 ${escapeHtml(j.type)}</div>
+        <span class="tag">${escapeHtml(j.category)}</span>
+        <span class="tag">🌐 ${escapeHtml(j.source_name)}</span>
+        <div class="match">🎯 مطابقة أولية: ${matchScore(j)}%</div>
+      </div>
+      <div class="salary">${escapeHtml(j.salary)}</div>
+    </div>
+    <div class="source-note">${escapeHtml(j.description.slice(0,260))}${j.description.length>260?"…":""}</div>`;
+    const btn=document.createElement("button");
+    btn.className="primary-btn";
+    btn.style.cssText="width:100%;margin-top:12px";
+    btn.type="button";
+    btn.textContent="📄 عرض التفاصيل";
+    btn.addEventListener("click",()=>openJobDetails(j.id));
+    d.appendChild(btn);
+    box.appendChild(d);
+  });
+}
+
+function openJobDetails(id){
+  const j=allVisibleJobs.find(x=>String(x.id)===String(id));
+  if(!j)return;
+  currentJob=visibleJob(j);
+  showScreen("jobDetailsScreen");
+  const box=document.getElementById("jobDetails");
+  const applied=getLS(LS.applications,[]).some(a=>String(a.job_id)===String(currentJob.id));
+  box.innerHTML=`<div class="details-box">
+    <h2>${escapeHtml(currentJob.title)}</h2>
+    <p style="font-weight:800;color:#334">${escapeHtml(currentJob.company)}</p>
+    <div class="info-strip">📍 ${escapeHtml(currentJob.location)} · 💼 ${escapeHtml(currentJob.type)} · ${escapeHtml(currentJob.source_name)}</div>
+    <div class="info-strip">💰 ${escapeHtml(currentJob.salary)}</div>
+    <h3 style="margin-top:16px">التفاصيل</h3>
+    <p>${escapeHtml(currentJob.description)}</p>
+    <div class="notice">هذه فرصة من المصدر الأصلي. عند التقديم سيسجل مَدخَل طلبك في سجل المتابعة ثم يفتح الرابط الأصلي للتقديم.</div>
+  </div>`;
+  const details=box.firstElementChild;
+  const btn=document.createElement("button");
+  btn.className=applied?"secondary-btn":"primary-btn";
+  btn.style.cssText="width:100%;margin-top:13px";
+  btn.type="button";
+  btn.disabled=!!applied;
+  btn.textContent=applied?"✅ تم تسجيل التقديم":"📩 التقديم وتسجيل الطلب";
+  if(!applied)btn.addEventListener("click",applyToCurrentJob);
+  details.appendChild(btn);
+}
+
+async function applyToCurrentJob(){if(!currentJob)return;const p=localProfile();if(!p.full_name||!p.occupation_uri){showToast("👤 أكمل ملفك المهني واختيار المهنة أولًا.");setTimeout(()=>openProfile(),500);return}const apps=getLS(LS.applications,[]);if(apps.some(a=>String(a.job_id)===String(currentJob.id))){showToast("ℹ️ سبق تسجيل هذا الطلب.");return}const item={id:"app_"+Date.now(),job_id:currentJob.id,title:currentJob.title,company:currentJob.company,location:currentJob.location,source:currentJob.source,status:"applied",created_at:now(),source_url:currentJob.external_link};apps.push(item);setLS(LS.applications,apps);try{const user=await sessionUser();if(user){const pid=await publicProfileId(user,p.full_name);if(pid){await supabaseClient.from("external_job_applications").insert({profile_id:pid,job_id:currentJob.id,status:"applied",applied_at:now(),source_url:currentJob.external_link,updated_at:now()})}await supabaseClient.from("notifications").insert({user_id:user.id,job_id:currentJob.id,channel:"in_app",title:"تم تسجيل طلب التقديم",body:"تم تسجيل طلبك على "+currentJob.title,opportunity_type:"job",created_at:now(),delivery_status:"pending"})}}catch(e){}addLocalNotification("📩 تم تسجيل طلب التقديم على "+currentJob.title,currentJob.id);showToast("✅ تم تسجيل طلبك وفتح المصدر الأصلي.");setTimeout(()=>{if(currentJob.external_link)window.open(currentJob.external_link,"_blank","noopener,noreferrer")},250);setTimeout(()=>showScreen("accountScreen"),650)}
 
 function addLocalNotification(message,jobId){const a=getLS(LS.notifications,[]);a.unshift({id:"n_"+Date.now()+Math.random(),message,job_id:jobId,created_at:now(),read:false});setLS(LS.notifications,a)}
 function generateLocalMatches(){const p=localProfile();if(!p.occupation_label)return;const matches=allVisibleJobs.map(visibleJob).map(j=>({j,s:matchScore(j)})).filter(x=>x.s>=70).sort((a,b)=>b.s-a.s).slice(0,5);const key="match_alerts_"+(p.occupation_uri||p.occupation_label);const old=getLS(key,[]);const seen=new Set(old.map(x=>String(x.job_id)));const fresh=matches.filter(x=>!seen.has(String(x.j.id)));if(fresh.length){const updated=fresh.map(x=>({job_id:x.j.id,score:x.s,created_at:now(),title:x.j.title})).concat(old).slice(0,20);setLS(key,updated);fresh.slice(0,3).forEach(x=>addLocalNotification("🎯 فرصة مناسبة لك: "+x.j.title+" — مطابقة "+x.s+"%",x.j.id))}}
