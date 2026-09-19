@@ -1,4 +1,4 @@
-const CACHE_NAME = "madkhal-v22";
+const CACHE_NAME = "madkhal-v23";
 
 // Stability mode: do not rewrite index.html at delivery time.
 // The previous worker modified the live HTML response and could leave the
