@@ -1,0 +1,158 @@
+name: upgrade-jibran
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Make Jibran useful
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path("index.html")
+          s=p.read_text(encoding="utf-8")
+          marker="MADKHAL_JIBRAN_USEFUL_2026_09_21"
+          if marker in s:
+              print("Jibran upgrade already present.")
+          else:
+              start=s.find("function askJibran(kind)")
+              end=s.find("function initOccupationPickers()", start)
+              if start<0 or end<0:
+                  raise SystemExit("Jibran section not found")
+              new=r'''/* MADKHAL_JIBRAN_USEFUL_2026_09_21 */
+function jibranTopJobs(limit=3){
+ const p=localProfile();
+ return allVisibleJobs.map(visibleJob).map(j=>({j,s:matchScore(j)})).sort((a,b)=>b.s-a.s).slice(0,limit);
+}
+function jibranAssessment(){
+ const a=getLS(LS.assessment,null);
+ if(!a||a.score==null)return null;
+ return a;
+}
+function jibranProfileText(p){
+ return p.full_name?
+   "ملفك محفوظ باسم "+p.full_name+"؛ المهنة: "+(p.occupation_label||"غير محددة")+"؛ المؤهل: "+(p.qualification||"غير محدد")+"؛ الخبرة: "+(p.experience_years??"غير محددة")+" سنة؛ المكان: "+(p.location||"غير محدد")+"؛ نوع العمل: "+workType(p.work_type)+"؛ المهارات: "+(p.skills||"لم تُحدد بعد")+".":
+   "لا يوجد ملف محفوظ بعد.";
+}
+function jibranScoreText(){
+ const a=jibranAssessment();
+ if(!a)return "لم يُحفظ تقييم مهني بعد.";
+ const strengths=(a.strengths||[]).filter(Boolean).join("، ")||"لا توجد نقاط قوة مسجلة بعد";
+ const improvements=(a.improvements||[]).filter(Boolean).join("، ")||"لا توجد ملاحظات";
+ return "تقييمك الحالي "+Math.round(Number(a.score))+"/100 ("+(a.level||"")+"). نقاط القوة: "+strengths+". وما يحتاج تطويرًا: "+improvements+".";
+}
+function jibranSetText(msg){
+ const h=document.getElementById("jibranHomeText");
+ const m=document.getElementById("jibranMainText");
+ const a=document.getElementById("jibranAccountText");
+ if(h)h.textContent=msg;
+ if(m)m.textContent=msg;
+ if(a)a.textContent=msg;
+}
+function askJibran(kind){
+ const p=localProfile();
+ let msg="";
+ if(kind==="profile") msg=p.full_name?
+   "ملفك محفوظ. "+jibranProfileText(p)+" إذا أردت دقة أعلى، حدّث المهارات والنبذة المهنية بما يصف خبرتك الفعلية.":
+   "ابدأ بالملف المهني واختر المهنة المعتمدة، ثم أضف المؤهل والخبرة والمهارات والمكان ونوع العمل.";
+ else if(kind==="jobs"){
+   const top=jibranTopJobs(3);
+   msg=top.length?
+     "لدي مَدخَل "+allVisibleJobs.length+" فرصة متاحة ضمن النطاق الحالي. وبحسب ملفك، هذه أقرب 3 فرص الآن: "+top.map(x=>x.j.title+" — "+x.j.company+" ("+x.s+"%)").join("، ")+". افتح التفاصيل قبل التقديم.":
+     "لا توجد فرص محملة حاليًا. افتح قسم الفرص لتحديثها.";
+ }
+ else if(kind==="match"){
+   const top=jibranTopJobs(3);
+   msg=top.length?
+     "المطابقة الأولية تعتمد على المهنة والمهارات ونوع العمل والمكان وتفاصيل الفرصة. أقرب النتائج الآن: "+top.map(x=>x.j.title+" ("+x.s+"%)").join("، ")+". النسبة مؤشر مطابقة وليست ضمانًا للقبول.":
+     "احفظ ملفك أولًا ثم أفتح لك أقرب الفرص.";
+ }
+ else if(kind==="score") msg=jibranScoreText();
+ else if(kind==="improve"){
+   const a=jibranAssessment();
+   msg=a?
+     "لرفع تقييمك، ركّز أولًا على: "+((a.improvements||[]).slice(0,4).join("، ")||"إضافة مهارات وخبرة وأمثلة عملية إلى الملف"))+".":
+     "بعد حفظ ملفك سيظهر لك التقييم والعوامل التي تحتاج إلى تطوير.";
+ }
+ else if(kind==="best"){
+   const top=jibranTopJobs(3);
+   const a=jibranAssessment();
+   if(!p.full_name||!p.occupation_label) msg="أكمل ملفك المهني واختر المهنة أولًا، وبعدها أحدد لك الفرص الأقرب.";
+   else if(!top.length) msg="لا توجد فرص متاحة حاليًا أستطيع مطابقتها مع ملفك.";
+   else msg="بحسب ملفك"+(a?" وتقييمك الحالي "+Math.round(Number(a.score))+"/100":"")+": أقرب فرصة حاليًا هي "+top[0].j.title+" لدى "+top[0].j.company+" — مطابقة أولية "+top[0].s+"%. وهناك أيضًا: "+top.slice(1).map(x=>x.j.title+" ("+x.s+"%)").join("، ")+"。";
+ }
+ else if(kind==="next") msg=p.occupation_label?
+   "خطوتك التالية: راجع أقرب الفرص، افتح تفاصيل المتطلبات، ثم قدّم على الفرصة التي تناسبك. إذا أردت المتابعة المستمرة والتنبيهات فعّل الاشتراك الاختياري.":
+   "خطوتك التالية: أكمل ملفك واختر مهنة مرتبطة بخبرتك.";
+ else msg=p.full_name?
+   "أنا جبران. أستطيع قراءة ملفك المحفوظ، شرح تقييمك، تحديد أقرب الفرص، اقتراح ما يحتاج تطويرًا، وإرشادك للخطوة التالية.":
+   "أنا جبران. ابدأ بملفك المهني، وسأستخدم بياناته لمساعدتك في التقييم والمطابقة والفرص.";
+ jibranSetText(msg);
+}
+function askJibranUser(){
+ const input=document.getElementById("jibranInput");
+ const q=normalizeText(input.value);
+ if(!q){showToast("✍️ اكتب سؤالك.");return}
+ const p=localProfile();
+ let ans="";
+ if(q.includes("اشتراك")||q.includes("دولار"))
+   ans="البحث عن الفرص مجاني والاشتراك اختياري. الاشتراك $1 شهريًا لمن يريد المتابعة والمطابقة والتنبيهات المستمرة.";
+ else if(q.includes("لماذا")&&(q.includes("تقييم")||q.includes("درجة")||q.includes("نسبة"))) ans=jibranScoreText();
+ else if(q.includes("طور")||q.includes("اطور")||q.includes("تحسين")||q.includes("أحسن")||q.includes("ضعيف")||q.includes("نقص")) askJibran("improve");
+ else if(q.includes("مناسبة")||q.includes("مناسب")||q.includes("أفضل فرصة")||q.includes("الفرصة المناسبة")||q.includes("حسب ملفي")||q.includes("حسب تقييمي")||q.includes("تقييمي")||q.includes("أقرب فرصة")) askJibran("best");
+ else if(q.includes("وظيفة")||q.includes("فرصة")||q.includes("شاغر")) askJibran("jobs");
+ else if(q.includes("مطابق")||q.includes("ملاءم")) askJibran("match");
+ else if(q.includes("ملف")||q.includes("بياناتي")||q.includes("مهاراتي")) askJibran("profile");
+ else if(q.includes("خطوة")||q.includes("ماذا أفعل")||q.includes("ماذا افعل")||q.includes("التالي")) askJibran("next");
+ else {
+   ans=p.full_name?
+     "أستطيع مساعدتك في أربعة أشياء: تقييم ملفك، معرفة ما يحتاج تطويرًا، تحديد أقرب الفرص، وتحديد خطوتك التالية. جرّب مثلًا: «لماذا تقييمي 70؟» أو «ما الفرصة المناسبة لي حسب ملفي؟»":
+     "ابدأ بملفك المهني. بعدها اسألني: «ما الفرصة المناسبة لي حسب ملفي؟» وسأقارن ملفك بالفرص المتاحة.";
+ }
+ if(ans)jibranSetText(ans);
+ input.value="";
+}
+function renderJibranContext(){
+ const p=localProfile();
+ const el=document.getElementById("jibranContext");
+ if(!el)return;
+ const a=jibranAssessment();
+ const top=jibranTopJobs(3);
+ el.innerHTML="<h3>سياق جبران الحالي</h3><p>"+escapeHtml(jibranProfileText(p))+"</p>"+
+   "<div class='notice'>"+escapeHtml(jibranScoreText())+"</div>"+
+   (top.length?"<div class='notice'><strong>أقرب الفرص:</strong> "+escapeHtml(top.map(x=>x.j.title+" ("+x.s+"%)").join("، "))+"</div>":"");
+}
+'''
+              s=s[:start]+new+s[end:]
+              # Add useful quick actions to existing Jibran action grids without touching other flows.
+              s=s.replace('<div class="jibran-actions"><button class="secondary-btn" onclick="askJibran(\'profile\')">كيف أبني ملفي؟</button><button class="secondary-btn" onclick="askJibran(\'jobs\')">كيف أجد فرصة؟</button></div>',
+                          '<div class="jibran-actions"><button class="secondary-btn" onclick="askJibran(\'profile\')">ملفي</button><button class="secondary-btn" onclick="askJibran(\'best\')">فرصتي المناسبة</button><button class="secondary-btn" onclick="askJibran(\'score\')">لماذا هذا التقييم؟</button><button class="secondary-btn" onclick="askJibran(\'improve\')">ماذا أطور؟</button></div>',1)
+              # Fix the accidental nested quote bug in payment buttons if still present.
+              s=s.replace('onclick="selectPaymentMethod("sham_cash")"','onclick="selectPaymentMethod(\'sham_cash\')"')
+              s=s.replace('onclick="selectPaymentMethod("syriatel_cash")"','onclick="selectPaymentMethod(\'syriatel_cash\')"')
+              s=s.replace('onclick="selectPaymentMethod("mtn_cash")"','onclick="selectPaymentMethod(\'mtn_cash\')"')
+              p.write_text(s,encoding="utf-8")
+          PY
+      - name: Deploy Pages
+        uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: "."
+      - uses: actions/deploy-pages@v4
+        id: deployment
+      - name: Commit upgrade
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "تفعيل جبران كمساعد مهني مفيد"
+          git push
