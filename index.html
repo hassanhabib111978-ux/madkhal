@@ -295,17 +295,29 @@ function renderExistingProfileStatus(p){const note=document.getElementById("prof
 
 function calculateAutomaticAssessment(p){
   const has=v=>String(v??"").trim().length>0;
-  const skills=String(p.skills||"").split(/[,،]+/).map(x=>x.trim()).filter(Boolean);
+  const skills=String(p.skills||"").split(/[,،]+/).map(x=>normalizeText(x)).filter(Boolean);
+  const occ=normalizeText(p.occupation_label||"");
+  const summary=normalizeText(p.professional_summary||"");
+  const qualification=normalizeText(p.qualification||"");
+  const exp=p.experience_years===""||p.experience_years==null?null:Number(p.experience_years);
+  const occWords=tokens(occ);
+  const skillHits=skills.filter(s=>occWords.some(w=>s.includes(w)||w.includes(s))).length;
+  const relevantSkills=skills.length?Math.round((skillHits/Math.max(1,Math.min(skills.length,4)))*100):0;
+  const experienceScore=exp===null?0:Math.min(100,Math.round(30+Math.min(exp,7)*10));
+  const profileCompleteness=[p.first_name,p.mother_name,p.birth_date,p.qualification,p.occupation_label,p.location,p.work_type,p.professional_summary].filter(has).length/8*100;
+  const summaryScore=summary.length>=120?100:summary.length>=60?75:summary.length>=25?50:0;
+  const qualificationScore=has(qualification)?75:0;
   const factors=[
-    {name:"اكتمال البيانات",score:(has(p.first_name)&&has(p.mother_name)&&has(p.birth_date)&&has(p.qualification)&&has(p.location)&&has(p.work_type))?100:Math.round(([p.first_name,p.mother_name,p.birth_date,p.qualification,p.location,p.work_type].filter(has).length/6)*100),weight:25},
-    {name:"وضوح المهنة",score:has(p.occupation_label)?100:0,weight:20},
-    {name:"الخبرة",score:p.experience_years!==null&&p.experience_years!==undefined&&p.experience_years!==""?Math.min(100,40+Number(p.experience_years)*15):30,weight:20},
-    {name:"المهارات",score:Math.min(100,skills.length*20),weight:20},
-    {name:"النبذة المهنية",score:has(p.professional_summary)?100:0,weight:15}
+    {name:"اكتمال الملف",score:Math.round(profileCompleteness),weight:15},
+    {name:"وضوح المهنة",score:occ?100:0,weight:20},
+    {name:"الخبرة المهنية",score:experienceScore,weight:20},
+    {name:"المهارات المرتبطة بالمهنة",score:Math.min(100,relevantSkills),weight:25},
+    {name:"المؤهل",score:qualificationScore,weight:10},
+    {name:"النبذة المهنية",score:summaryScore,weight:10}
   ];
   const score=Math.round(factors.reduce((s,f)=>s+(f.score*f.weight/100),0));
-  const level=score>=85?"جاهز بقوة":score>=70?"جاهز":"يحتاج استكمال";
-  return {score,level,skill:p.occupation_label||"الملف المهني",date:now(),factors,strengths:factors.filter(f=>f.score>=80).map(f=>f.name),improvements:factors.filter(f=>f.score<80).map(f=>f.name)};
+  const level=score>=85?"ملف قوي":score>=70?"ملف جيد":score>=50?"ملف قابل للتحسين":"يحتاج استكمال";
+  return {score,level,skill:p.occupation_label||"الملف المهني",date:now(),factors,strengths:factors.filter(f=>f.score>=75).map(f=>f.name),improvements:factors.filter(f=>f.score<75).map(f=>f.name),method:"تقييم مهني متعدد العوامل"};
 }
 function renderAutomaticAssessment(result){
   const box=document.getElementById("savedAssessmentText");
