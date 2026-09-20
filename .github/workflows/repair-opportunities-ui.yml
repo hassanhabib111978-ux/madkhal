@@ -4,6 +4,8 @@ on:
     branches: [main]
 permissions:
   contents: write
+  pages: write
+  id-token: write
 jobs:
   repair:
     runs-on: ubuntu-latest
@@ -16,19 +18,29 @@ jobs:
           p=Path("index.html")
           s=p.read_text(encoding="utf-8")
           if "MADKHAL_OPPORTUNITIES_FIX_2026-09-20" in s:
-              raise SystemExit(0)
-          marker="<!-- MADKHAL_OPPORTUNITIES_FIX_2026-09-20 -->\n"
-          s=marker+s
-          old='function salaryText(j){const a=j.salary_min,b=j.salary_max,c=j.salary_currency?String(j.salary_currency):"";'
-          new='function cleanSalaryCurrency(v){return String(v??"").replace(/<[^>]*>/g," ").replace(/&nbsp;/gi," ").replace(/\\s+/g," ").trim()}\nfunction salaryText(j){const a=j.salary_min,b=j.salary_max,c=cleanSalaryCurrency(j.salary_currency);'
-          if old in s:
-              s=s.replace(old,new,1)
-          css='.opportunity-top{min-width:0}.opportunity-top>div:first-child{min-width:0}.salary{color:var(--teal);font-weight:900;white-space:normal;max-width:42%;overflow-wrap:anywhere;word-break:break-word;text-align:left}'
-          anchor='.opportunity-top{display:flex;justify-content:space-between;gap:10px}'
-          if anchor in s:
-              s=s.replace(anchor,anchor+css,1)
-          p.write_text(s,encoding="utf-8")
+              print("Repair already present; continuing to deploy Pages.")
+          else:
+              marker="<!-- MADKHAL_OPPORTUNITIES_FIX_2026-09-20 -->\n"
+              s=marker+s
+              old='function salaryText(j){const a=j.salary_min,b=j.salary_max,c=j.salary_currency?String(j.salary_currency):"";'
+              new='function cleanSalaryCurrency(v){return String(v??"").replace(/<[^>]*>/g," ").replace(/&nbsp;/gi," ").replace(/\\s+/g," ").trim()}\nfunction salaryText(j){const a=j.salary_min,b=j.salary_max,c=cleanSalaryCurrency(j.salary_currency);'
+              if old in s:
+                  s=s.replace(old,new,1)
+              css='.opportunity-top{min-width:0}.opportunity-top>div:first-child{min-width:0}.salary{color:var(--teal);font-weight:900;white-space:normal;max-width:42%;overflow-wrap:anywhere;word-break:break-word;text-align:left}'
+              anchor='.opportunity-top{display:flex;justify-content:space-between;gap:10px}'
+              if anchor in s:
+                  s=s.replace(anchor,anchor+css,1)
+              p.write_text(s,encoding="utf-8")
           PY
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: "."
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
       - name: Commit repair
         run: |
           git config user.name "github-actions[bot]"
