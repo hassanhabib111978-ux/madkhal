@@ -27,7 +27,8 @@ jobs:
           s = p.read_text(encoding="utf-8")
           markers = [
               '<script src="./jibran-evaluation-enhancement.js"></script>',
-              '<script src="./subscription-install-link.js"></script>'
+              '<script src="./subscription-install-link.js"></script>',
+              '<script src="./payment-flexible-layer.js"></script>'
           ]
           for marker in markers:
               if marker not in s:
