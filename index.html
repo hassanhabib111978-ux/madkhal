@@ -87,7 +87,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <div class="jibran"><div class="jibran-title">🤖 جبران — مساعد مَدخَل</div><div id="jibranHomeText" class="jibran-bubble">اسألني عن ملفك أو عن كيفية الوصول إلى فرصة مناسبة.</div><div class="jibran-actions"><button class="secondary-btn" onclick="askJibran('profile')">كيف أبني ملفي؟</button><button class="secondary-btn" onclick="askJibran('jobs')">كيف أجد فرصة؟</button></div></div>
   <h2 class="section-title">رحلتك</h2>
   <div class="journey"><div class="journey-item"><span>👤</span>بياناتك</div><div class="journey-item"><span>🧠</span>مهاراتك</div><div class="journey-item"><span>🎯</span>المطابقة</div><div class="journey-item"><span>🔎</span>الفرص</div><div class="journey-item"><span>📩</span>التقديم</div><div class="journey-item"><span>🔔</span>المتابعة</div></div>
-  <div class="premium"><span class="premium-badge">🔔 المتابعة المستمرة</span><h3 style="margin-top:10px">المتابعة</h3><p>قيمة الاشتراك <strong>دولار واحد شهريًا</strong> مقابل المتابعة المستمرة، المطابقة والتنبيهات وحفظ البحث.</p><div class="price">$1 شهريًا</div><button class="primary-btn" style="width:100%" onclick="openSubscription()">🔔 الاشتراك</button></div>
+  <div class="premium"><span class="premium-badge">🔔 المتابعة الذكية</span><h3 style="margin-top:10px">البحث مجاني والاشتراك اختياري</h3><p><strong>يمكنك البحث عن فرص العمل واستعراضها والتقديم عليها مجانًا</strong>، والعودة للبحث بشكل دوري كلما رغبت. وإذا أردت أن يبحث مَدخَل عنك باستمرار، ويطابق ملفك مع الفرص الجديدة، ويرسل لك تنبيهات عند ظهور فرص مناسبة، يمكنك تفعيل الاشتراك.</p><div class="price">$1 شهريًا</div><button class="primary-btn" style="width:100%" onclick="openSubscription()">🔔 تفعيل المتابعة</button></div>
 </section>
 
 <section id="workerScreen" class="screen">
@@ -159,7 +159,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 
 <section id="subscriptionScreen" class="screen">
 <button class="back" onclick="showScreen('homeScreen')">→ العودة</button>
-<div class="premium"><span class="premium-badge">🔔 مَدخَل يبحث معك</span><h2 style="margin:10px 0 8px">المتابعة المستمرة</h2><p>البحث الأساسي مجاني. الاشتراك مخصص للمتابعة المستمرة والمطابقة والتنبيهات وحفظ البحث.</p><div class="price">$1 شهريًا</div><button class="primary-btn" style="width:100%" onclick="startSubscriptionRequest()">🔔 الاشتراك</button><div id="subscriptionStatus" class="notice"></div></div>
+<div class="premium"><span class="premium-badge">🔔 مَدخَل يبحث معك</span><h2 style="margin:10px 0 8px">البحث مجاني — والمتابعة اختيارية</h2><p><strong>البحث عن الفرص الموجودة مجاني بالكامل، والاشتراك ليس إلزاميًا.</strong> يمكنك البحث عن الفرص المتاحة واستعراضها والتقديم عليها مجانًا، والعودة للبحث بشكل دوري.</p><p style="margin-top:8px">وإذا أردت أن يبحث <strong>مَدخَل عنك</strong> باستمرار، ويجري المطابقة مع ملفك، ويرتب الفرص الأقرب إليك، ويرسل لك تنبيهات عند ظهور كل فرصة جديدة مناسبة، فيمكنك تفعيل المتابعة الذكية.</p><div class="price">$1 شهريًا</div><button class="primary-btn" style="width:100%" onclick="startSubscriptionRequest()">🔔 تفعيل المتابعة — $1 شهريًا</button><div id="subscriptionStatus" class="notice"></div></div>
 <div class="card"><h3>👛 محفظة مَدخَل</h3><p>مساحة الدفع ستكون مرتبطة بالاشتراك عند تفعيل مزود الدفع. لا يوجد افتراض لمزود دفع حاليًا.</p></div>
 </section>
 
@@ -168,7 +168,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 <div class="card"><h3>📊 تقييم مَدخَل</h3><div id="savedAssessmentText">لم يُحسب التقييم بعد.</div></div>
 <div class="card"><h3>🔔 التنبيهات</h3><div id="notificationsList"></div></div>
 <div class="card"><h3>📩 طلباتي</h3><div id="applicationsList"></div></div>
-<div class="card"><h3>🔔 الاشتراك والمتابعة</h3><div id="accountSubscriptionStatus" class="notice">الاشتراك غير مفعل.</div><button class="primary-btn" style="width:100%;margin-top:10px" onclick="openSubscription()">🔔 الاشتراك — دولار واحد شهريًا</button></div>
+<div class="card"><h3>🔔 المتابعة الذكية</h3><p>البحث عن الفرص الموجودة مجاني ولا يتطلب اشتراكًا. الاشتراك اختياري لمن يريد من مَدخَل أن يبحث ويطابق ويرسل التنبيهات باستمرار.</p><div id="accountSubscriptionStatus" class="notice">الاشتراك غير مفعل.</div><button class="primary-btn" style="width:100%;margin-top:10px" onclick="openSubscription()">🔔 تفاصيل المتابعة — $1 شهريًا</button></div>
 <div class="jibran"><div class="jibran-title">🤖 جبران</div><div id="jibranAccountText" class="jibran-bubble">أخبرني بما تريد معرفته عن ملفك أو فرصك.</div><div class="jibran-actions"><button class="secondary-btn" onclick="askJibran('match')">ما فرصي الأقرب؟</button><button class="secondary-btn" onclick="askJibran('next')">ما الخطوة التالية؟</button></div></div>
 </section>
 
@@ -276,6 +276,7 @@ function stickyOffset(){let x=10;const h=document.querySelector(".header");if(h)
 function updateNav(id){document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.screen===id))}
 function scrollToActive(id,focusId){const screen=document.getElementById(id);if(!screen)return;requestAnimationFrame(()=>{requestAnimationFrame(()=>{const target=focusId&&document.getElementById(focusId)?document.getElementById(focusId):screen;const y=Math.max(0,window.pageYOffset+target.getBoundingClientRect().top-stickyOffset());window.scrollTo(0,y);if(focusId){setTimeout(()=>{const f=document.getElementById(focusId);if(f)try{f.focus({preventScroll:true})}catch(e){f.focus()}},80)}})})}
 function showScreen(id,focusId){const target=document.getElementById(id);if(!target)return;currentScreen=id;document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id));updateNav(id);if(id==="accountScreen")loadAccount();if(id==="opportunitiesScreen"){renderCategories();renderOpportunities()}if(id==="subscriptionScreen")renderSubscription();if(id==="jibranScreen")renderJibranContext();scrollToActive(id,focusId)}
+function openSubscription(){showScreen("subscriptionScreen","subscriptionScreen")}
 function openWorker(){showScreen("workerScreen","workerScreen")}
 async function openProfile(){showScreen("profileScreen","workerFirstName");await loadProfile()}
 function openEmployer(){showScreen("employerScreen","employerName")}
