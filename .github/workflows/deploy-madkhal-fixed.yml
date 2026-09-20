@@ -19,6 +19,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Inject stable Jibran enhancement
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("index.html")
+          s = p.read_text(encoding="utf-8")
+          marker = '<script src="./jibran-evaluation-enhancement.js"></script>'
+          if marker not in s:
+              s = s.replace("</body>", marker + "\n</body>")
+          p.write_text(s, encoding="utf-8")
+          PY
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
