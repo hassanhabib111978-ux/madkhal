@@ -30,7 +30,8 @@ jobs:
               '<script src="./subscription-install-link.js"></script>',
               '<script src="./payment-flexible-layer.js"></script>',
               '<script src="./employer-flow-enhancement.js"></script>',
-              '<script src="./employer-dashboard.js"></script>'
+              '<script src="./employer-dashboard.js"></script>',
+              '<script src="./employer-dashboard-polish.js"></script>'
           ]
           for marker in markers:
               if marker not in s:
