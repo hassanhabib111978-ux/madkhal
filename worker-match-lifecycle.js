@@ -5,7 +5,7 @@ const esc=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 async function loadWorkerMatchCenter(){
  const u=await sessionUser(); if(!u){showToast('⚠️ سجّل الدخول أولًا.');return}
  const panel=$('workerMatchCenter'); if(!panel)return;
- panel.classList.remove('hidden'); panel.innerHTML='<div class="notice">⏳ جارٍ تحميل المطابقات...</div>';
+ panel.classList.remove('hidden'); panel.innerHTML='<div class="notice">⏳ جارٍ تحديث المطابقة...</div>'; try{await supabaseClient.rpc('process_my_worker_matches',{p_limit:200})}catch(e){console.warn('worker match processing',e)}
  await supabaseClient.rpc('create_worker_match_notifications',{p_limit:50});
  const r=await supabaseClient.rpc('get_my_worker_matches');
  if(r.error){panel.innerHTML='<div class="notice">⚠️ تعذر تحميل مسار المطابقات.</div>';return}
