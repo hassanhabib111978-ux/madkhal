@@ -57,7 +57,7 @@ async function loadCandidates(vacancyId,container){
 }
 function injectDashboard(){
   const form=el('submitVacancyButton')?.closest('.card'); if(!form||el('employerDashboardButton'))return;
-  const btn=document.createElement('button');btn.id='employerDashboardButton';btn.className='secondary-btn action-btn';btn.textContent='📊 لوحة صاحب الفرصة';btn.onclick=loadEmployerDashboard;
+  const btn=document.createElement('button');btn.id='employerDashboardButton';btn.className='secondary-btn action-btn';btn.textContent='📊 لوحة صاحب الفرصة';btn.onclick=()=>{loadEmployerDashboard();setTimeout(()=>document.getElementById('employerDashboardPanel')?.scrollIntoView({behavior:'smooth',block:'start'}),50)};
   const panel=document.createElement('div');panel.id='employerDashboardPanel';panel.className='card hidden';
   panel.style.marginTop='14px';
   form.parentElement.insertBefore(panel,form.nextSibling);
