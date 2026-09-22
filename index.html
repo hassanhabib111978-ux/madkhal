@@ -583,5 +583,6 @@ async function installMadkhal(){if(!installPromptEvent){showToast("📱 استخ
 
 document.addEventListener("DOMContentLoaded",async()=>{selectedSkills=getLS(LS.selectedSkills,[]);await loadJobs();updateJobCounter();await loadProfileRemote();generateLocalMatches();renderCategories();renderOpportunities();renderSkills();await loadAccount();initOccupationPickers();if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js",{scope:"./"}).catch(()=>{});});
 </script>
+<script src="./worker-match-lifecycle.js"></script>
 </body>
 </html>
