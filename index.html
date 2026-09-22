@@ -295,31 +295,51 @@ async function loadProfile(){const p=localProfile();const map={workerFirstName:p
 async function loadProfileRemote(){const user=await sessionUser();if(!user)return;try{const q=await supabaseClient.from("worker_profiles").select("*").eq("user_id",user.id).maybeSingle();if(q.data){const p={first_name:q.data.first_name||"",father_name:q.data.father_name||"",family_name:q.data.family_name||"",mother_name:q.data.mother_name||"",birth_date:q.data.birth_date||"",qualification:q.data.qualification||"",occupation_uri:q.data.occupation_uri||"",occupation_label:q.data.occupation_label||"",location:q.data.location||"",work_type:q.data.work_type||"",experience_years:q.data.experience_years??"",skills:q.data.skills||"",summary:q.data.professional_summary||q.data.work_field||"",full_name:q.data.full_name||""};setLS(LS.profile,p);await loadProfile()}}catch(e){}}
 function renderExistingProfileStatus(p){const note=document.getElementById("profileSaveNote");if(!note)return;if(p&&p.full_name)note.textContent="✅ ملفك محفوظ محليًا ومهيأ للمطابقة. يمكنك تعديله في أي وقت.";else note.textContent="الحفظ لا يغيّر مصادر الوظائف أو عدادها أو بيانات التقييم."}
 
-function calculateAutomaticAssessment(p){
+async function calculateAutomaticAssessment(p){
   const has=v=>String(v??"").trim().length>0;
-  const skills=String(p.skills||"").split(/[,،]+/).map(x=>normalizeText(x)).filter(Boolean);
+  const userSkills=String(p.skills||"").split(/[,،]+/).map(x=>normalizeText(x)).filter(Boolean);
   const occ=normalizeText(p.occupation_label||"");
   const summary=normalizeText(p.professional_summary||"");
   const qualification=normalizeText(p.qualification||"");
   const exp=p.experience_years===""||p.experience_years==null?null:Number(p.experience_years);
-  const occWords=tokens(occ);
-  const skillHits=skills.filter(s=>occWords.some(w=>s.includes(w)||w.includes(s))).length;
-  const relevantSkills=skills.length?Math.round((skillHits/Math.max(1,Math.min(skills.length,4)))*100):0;
-  const experienceScore=exp===null?0:Math.min(100,Math.round(30+Math.min(exp,7)*10));
-  const profileCompleteness=[p.first_name,p.mother_name,p.birth_date,p.qualification,p.occupation_label,p.location,p.work_type,p.professional_summary].filter(has).length/8*100;
-  const summaryScore=summary.length>=120?100:summary.length>=60?75:summary.length>=25?50:0;
+  let required=[];
+  if(p.occupation_uri){
+    try{
+      const res=await supabaseClient.rpc("get_madkhal_occupation_skills",{occupation_uri_input:p.occupation_uri,result_limit:30});
+      if(!res.error)required=(res.data||[]).map(s=>({uri:String(s.skill_uri||""),label:normalizeText(s.skill_label||"")})).filter(s=>s.label);
+    }catch(e){}
+  }
+  const ratings={};
+  document.querySelectorAll("#skillAssessmentList input[type=radio]:checked").forEach(i=>{
+    const uri=String(i.dataset.skillUri||""); if(uri)ratings[uri]=Number(i.value)||0;
+  });
+  const reqLabels=required.map(s=>s.label);
+  const aliases=aliasTermsFor(p.occupation_label||"").map(normalizeText).filter(Boolean);
+  const evidenceHits=userSkills.filter(us=>{
+    return reqLabels.some(rs=>{
+      const a=tokens(us),b=tokens(rs);
+      return normalizeText(us)===rs || a.some(x=>x.length>=3&&b.includes(x)) || rs.includes(normalizeText(us)) || normalizeText(us).includes(rs);
+    }) || aliases.some(a=>a.includes(us)||us.includes(a));
+  }).length;
+  const evidenceScore=reqLabels.length?Math.min(100,Math.round(evidenceHits/Math.min(reqLabels.length,8)*100)):(userSkills.length?Math.min(100,40+Math.min(userSkills.length,4)*15):0);
+  const ratedValues=required.filter(s=>ratings[s.uri]!=null).map(s=>ratings[s.uri]);
+  const ratingScore=ratedValues.length?Math.round(ratedValues.reduce((a,b)=>a+b,0)/ratedValues.length/5*100):null;
+  const skillScore=ratingScore===null?evidenceScore:Math.round(evidenceScore*0.6+ratingScore*0.4);
+  const experienceScore=exp===null?0:Math.min(100,Math.round(35+Math.min(exp,7)*9.3));
   const qualificationScore=has(qualification)?75:0;
+  const summaryScore=summary.length>=120?100:summary.length>=60?75:summary.length>=25?50:0;
+  const profileCompleteness=[p.first_name,p.mother_name,p.birth_date,p.qualification,p.occupation_label,p.location,p.work_type,p.professional_summary].filter(has).length/8*100;
   const factors=[
-    {name:"اكتمال الملف",score:Math.round(profileCompleteness),weight:15},
-    {name:"وضوح المهنة",score:occ?100:0,weight:20},
+    {name:"اكتمال الملف",score:Math.round(profileCompleteness),weight:10},
+    {name:"ملاءمة المهنة المختارة",score:occ?100:0,weight:20},
+    {name:"مهارات المهنة",score:skillScore,weight:35},
     {name:"الخبرة المهنية",score:experienceScore,weight:20},
-    {name:"المهارات المرتبطة بالمهنة",score:Math.min(100,relevantSkills),weight:25},
     {name:"المؤهل",score:qualificationScore,weight:10},
-    {name:"النبذة المهنية",score:summaryScore,weight:10}
+    {name:"النبذة المهنية",score:summaryScore,weight:5}
   ];
   const score=Math.round(factors.reduce((s,f)=>s+(f.score*f.weight/100),0));
   const level=score>=85?"ملف قوي":score>=70?"ملف جيد":score>=50?"ملف قابل للتحسين":"يحتاج استكمال";
-  return {score,level,skill:p.occupation_label||"الملف المهني",date:now(),factors,strengths:factors.filter(f=>f.score>=75).map(f=>f.name),improvements:factors.filter(f=>f.score<75).map(f=>f.name),method:"تقييم مهني متعدد العوامل"};
+  return {score,level,skill:p.occupation_label||"الملف المهني",occupation_uri:p.occupation_uri||"",required_skills:required.slice(0,30),date:now(),factors,strengths:factors.filter(f=>f.score>=75).map(f=>f.name),improvements:factors.filter(f=>f.score<75).map(f=>f.name),method:"تقييم مهني مرتبط بالمهنة ومهاراتها"};
 }
 function renderAutomaticAssessment(result){
   const box=document.getElementById("savedAssessmentText");
@@ -327,9 +347,9 @@ function renderAutomaticAssessment(result){
   const r=result||getLS(LS.assessment,null);
   if(!r){box.innerHTML='<div class="notice">أكمل ملفك أولًا ليحسب مَدخَل النتيجة تلقائيًا.</div>';return}
   const bars=(r.factors||[]).map(f=>'<div class="score-bar"><span>'+escapeHtml(f.name)+'</span><i>'+Math.round(f.score)+'%</i></div>').join("");
-  box.innerHTML='<div class="auto-score"><div class="auto-score-number">'+Math.round(r.score)+'%</div><div><h3>نتيجة مَدخَل</h3><p>'+escapeHtml(r.level)+' — يحسبها مَدخَل تلقائيًا من بيانات ملفك، ولا تحتاج إلى تقييم يدوي.</p><div class="score-bars">'+bars+'</div></div></div><button class="primary-btn action-btn" style="margin-top:10px" onclick="openOpportunities()">🔎 عرض الفرص</button>';
+  box.innerHTML='<div class="auto-score"><div class="auto-score-number">'+Math.round(r.score)+'%</div><div><h3>نتيجة مَدخَل — '+escapeHtml(r.skill||"المهنة")+'</h3><p>'+escapeHtml(r.level)+' — النتيجة تختلف حسب المهنة والمهارات والخبرة والمؤهل والبيانات التي أدخلتها.</p><div class="score-bars">'+bars+'</div></div></div><button class="primary-btn action-btn" style="margin-top:10px" onclick="openOpportunities()">🔎 عرض الفرص</button>';
 }
-async function saveWorker(){const first=document.getElementById("workerFirstName")?.value.trim()||"";const father=document.getElementById("workerFatherName")?.value.trim()||"";const family=document.getElementById("workerFamilyName")?.value.trim()||"";const mother=document.getElementById("workerMotherName")?.value.trim()||"";const birth=document.getElementById("workerBirthDate")?.value||"";const qualification=document.getElementById("workerQualification")?.value.trim()||"";const occUri=document.getElementById("occupationUri")?.value.trim()||"";const occLabel=document.getElementById("occupationLabel")?.value.trim()||"";const location=document.getElementById("workerLocation")?.value.trim()||"";const workType=document.getElementById("workerWorkType")?.value||"";const years=document.getElementById("workerExperienceYears")?.value||"";const skills=document.getElementById("workerSkillsExtra")?.value.trim()||"";const summary=document.getElementById("workerSummary")?.value.trim()||"";const full=[first,father,family].filter(Boolean).join(" ");if(!first||!mother||!occUri||!location){showToast("⚠️ أكمل الاسم واسم الأم والمهنة والمكان.");return}const b=document.getElementById("saveWorkerButton");if(b){b.disabled=true;b.textContent="⏳ جارٍ الحفظ..."}const p={full_name:full,first_name:first,father_name:father,family_name:family,mother_name:mother,birth_date:birth||null,qualification,occupation_uri:occUri,occupation_label:occLabel,profession:occLabel||skills,skills,location,work_type:workType||null,experience_years:years!==""?Number(years):null,professional_summary:summary,work_field:summary,confirmation_at:now(),confirmation_version:"worker-flow-v2",updated_at:now()};setLS(LS.profile,p);const autoAssessment=calculateAutomaticAssessment(p);setLS(LS.assessment,autoAssessment);try{const user=await sessionUser();if(!user)throw new Error("NO_USER");const up=await supabaseClient.from("worker_profiles").upsert({...p,user_id:user.id},{onConflict:"user_id"});if(up.error)throw up.error;try{await supabaseClient.rpc("process_my_worker_matches",{p_limit:200})}catch(e){console.warn("worker match processing",e)}const profileId=await publicProfileId(user,full,"seeker");if(profileId){await supabaseClient.from("job_preferences").upsert({profile_id:profileId,preferred_country:location,preferred_city:location,work_mode:workType||"any",experience_level:years?String(years):null,skills:skills?skills.split(/[,،]+/).map(s=>s.trim()).filter(Boolean):[],preferred_categories:occLabel?[occLabel]:[],updated_at:now()},{onConflict:"profile_id"})}await saveOccupationRatings(user.id);renderExistingProfileStatus(p);renderAutomaticAssessment(autoAssessment);showToast("🎉 تم حفظ الملف وحساب تقييم مَدخَل تلقائيًا.");setTimeout(()=>showScreen("accountScreen"),450)}catch(e){showToast("⚠️ حُفظ الملف على الهاتف. سيتم مزامنته عند توفر الاتصال.")}finally{if(b){b.disabled=false;b.textContent="💾 حفظ الملف والبدء بالمطابقة"}}}
+async function saveWorker(){const first=document.getElementById("workerFirstName")?.value.trim()||"";const father=document.getElementById("workerFatherName")?.value.trim()||"";const family=document.getElementById("workerFamilyName")?.value.trim()||"";const mother=document.getElementById("workerMotherName")?.value.trim()||"";const birth=document.getElementById("workerBirthDate")?.value||"";const qualification=document.getElementById("workerQualification")?.value.trim()||"";const occUri=document.getElementById("occupationUri")?.value.trim()||"";const occLabel=document.getElementById("occupationLabel")?.value.trim()||"";const location=document.getElementById("workerLocation")?.value.trim()||"";const workType=document.getElementById("workerWorkType")?.value||"";const years=document.getElementById("workerExperienceYears")?.value||"";const skills=document.getElementById("workerSkillsExtra")?.value.trim()||"";const summary=document.getElementById("workerSummary")?.value.trim()||"";const full=[first,father,family].filter(Boolean).join(" ");if(!first||!mother||!occUri||!location){showToast("⚠️ أكمل الاسم واسم الأم والمهنة والمكان.");return}const b=document.getElementById("saveWorkerButton");if(b){b.disabled=true;b.textContent="⏳ جارٍ الحفظ..."}const p={full_name:full,first_name:first,father_name:father,family_name:family,mother_name:mother,birth_date:birth||null,qualification,occupation_uri:occUri,occupation_label:occLabel,profession:occLabel||skills,skills,location,work_type:workType||null,experience_years:years!==""?Number(years):null,professional_summary:summary,work_field:summary,confirmation_at:now(),confirmation_version:"worker-flow-v2",updated_at:now()};setLS(LS.profile,p);const autoAssessment=await calculateAutomaticAssessment(p);setLS(LS.assessment,autoAssessment);try{const user=await sessionUser();if(!user)throw new Error("NO_USER");const up=await supabaseClient.from("worker_profiles").upsert({...p,user_id:user.id},{onConflict:"user_id"});if(up.error)throw up.error;try{await supabaseClient.rpc("process_my_worker_matches",{p_limit:200})}catch(e){console.warn("worker match processing",e)}const profileId=await publicProfileId(user,full,"seeker");if(profileId){await supabaseClient.from("job_preferences").upsert({profile_id:profileId,preferred_country:location,preferred_city:location,work_mode:workType||"any",experience_level:years?String(years):null,skills:skills?skills.split(/[,،]+/).map(s=>s.trim()).filter(Boolean):[],preferred_categories:occLabel?[occLabel]:[],updated_at:now()},{onConflict:"profile_id"})}await saveOccupationRatings(user.id);renderExistingProfileStatus(p);renderAutomaticAssessment(autoAssessment);showToast("🎉 تم حفظ الملف وحساب تقييم مَدخَل تلقائيًا.");setTimeout(()=>showScreen("accountScreen"),450)}catch(e){showToast("⚠️ حُفظ الملف على الهاتف. سيتم مزامنته عند توفر الاتصال.")}finally{if(b){b.disabled=false;b.textContent="💾 حفظ الملف والبدء بالمطابقة"}}}
 async function saveOccupationRatings(userId){const uri=document.getElementById("occupationUri")?.value.trim();if(!uri)return;const rows=[];document.querySelectorAll("#skillAssessmentList input[type=radio]:checked").forEach(i=>rows.push({user_id:userId,occupation_uri:uri,skill_uri:i.dataset.skillUri,skill_label:i.dataset.skillLabel,rating:Number(i.value),updated_at:now()}));if(!rows.length)return;try{await supabaseClient.from("worker_skill_assessments").upsert(rows,{onConflict:"user_id,occupation_uri,skill_uri"})}catch(e){}}
 
 function renderSkills(){const box=document.getElementById("skillsGrid");if(!box)return;box.innerHTML="";SKILLS.forEach(s=>{const b=document.createElement("button");b.className="secondary-btn";b.style.textAlign="right";b.textContent=s[0]+" "+s[1];if(selectedSkills.includes(s[1])){b.style.background="#e9f8f5";b.style.borderColor="#0f766e";b.style.color="#0f766e"}b.onclick=()=>toggleSkill(s[1]);box.appendChild(b)});document.getElementById("selectedSkillsBox").textContent=selectedSkills.length?"المحدد: "+selectedSkills.join("، "):"لم تختر أي مهارة بعد."}
