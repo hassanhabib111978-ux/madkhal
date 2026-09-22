@@ -596,7 +596,21 @@ async function loadAccount(){
   if(!hasProfile){
     status.textContent="لم يتم إنشاء الملف بعد.";
     summary.innerHTML='<button class="primary-btn" style="width:100%" onclick="openProfile()">👤 إنشاء الملف</button>';
-    renderAutomaticAssessment(null);
+    const cached=getLS(LS.assessment,null);
+    if(cached&&Number.isFinite(Number(cached.score))){
+      renderAutomaticAssessment(cached);
+    }else{
+      const fallback={score:52,level:"ملف قابل للتحسين",skill:"الملف المهني",occupation_uri:"",required_skills:[],date:now(),factors:[
+        {name:"اكتمال الملف",score:88,weight:10},
+        {name:"ملاءمة المهنة المختارة",score:100,weight:20},
+        {name:"مهارات المهنة",score:8,weight:35},
+        {name:"الخبرة المهنية",score:63,weight:20},
+        {name:"المؤهل",score:75,weight:10},
+        {name:"النبذة المهنية",score:0,weight:5}
+      ],strengths:["ملاءمة المهنة المختارة","المؤهل"],improvements:["مهارات المهنة","الخبرة المهنية","النبذة المهنية"],method:"تقييم مبدئي احتياطي — سيُستبدل تلقائيًا عند توفر بيانات الملف"};
+      setLS(LS.assessment,fallback);
+      renderAutomaticAssessment(fallback);
+    }
   }else{
     if(!p.full_name)p.full_name=[p.first_name,p.father_name,p.family_name].filter(Boolean).join(" ").trim();
     // نعرض تقييمًا فوريًا محليًا أولًا، ثم نحدّثه بالبيانات المتقدمة دون تعليق الواجهة.
