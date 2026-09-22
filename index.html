@@ -295,6 +295,30 @@ async function loadProfile(){const p=localProfile();const map={workerFirstName:p
 async function loadProfileRemote(){const user=await sessionUser();if(!user)return;try{const q=await supabaseClient.from("worker_profiles").select("*").eq("user_id",user.id).maybeSingle();if(q.data){const p={first_name:q.data.first_name||"",father_name:q.data.father_name||"",family_name:q.data.family_name||"",mother_name:q.data.mother_name||"",birth_date:q.data.birth_date||"",qualification:q.data.qualification||"",occupation_uri:q.data.occupation_uri||"",occupation_label:q.data.occupation_label||"",location:q.data.location||"",work_type:q.data.work_type||"",experience_years:q.data.experience_years??"",skills:q.data.skills||"",summary:q.data.professional_summary||q.data.work_field||"",full_name:q.data.full_name||""};setLS(LS.profile,p);await loadProfile()}}catch(e){}}
 function renderExistingProfileStatus(p){const note=document.getElementById("profileSaveNote");if(!note)return;if(p&&p.full_name)note.textContent="✅ ملفك محفوظ محليًا ومهيأ للمطابقة. يمكنك تعديله في أي وقت.";else note.textContent="الحفظ لا يغيّر مصادر الوظائف أو عدادها أو بيانات التقييم."}
 
+function calculateAutomaticAssessmentInstant(p){
+  const has=v=>String(v??"").trim().length>0;
+  const skills=String(p.skills||"").split(/[,،]+/).map(x=>normalizeText(x)).filter(Boolean);
+  const occ=normalizeText(p.occupation_label||"");
+  const qualification=normalizeText(p.qualification||"");
+  const summary=normalizeText(p.professional_summary||p.summary||"");
+  const exp=p.experience_years===""||p.experience_years==null?null:Number(p.experience_years);
+  const skillScore=skills.length?Math.min(100,40+Math.min(skills.length,4)*15):0;
+  const experienceScore=exp===null?0:Math.min(100,Math.round(35+Math.min(exp,7)*9.3));
+  const qualificationScore=has(qualification)?75:0;
+  const summaryScore=summary.length>=120?100:summary.length>=60?75:summary.length>=25?50:0;
+  const completeness=[p.first_name,p.mother_name,p.birth_date,p.qualification,p.occupation_label,p.location,p.work_type,p.professional_summary].filter(has).length/8*100;
+  const factors=[
+    {name:"اكتمال الملف",score:Math.round(completeness),weight:10},
+    {name:"ملاءمة المهنة المختارة",score:occ?100:0,weight:20},
+    {name:"مهارات المهنة",score:skillScore,weight:35},
+    {name:"الخبرة المهنية",score:experienceScore,weight:20},
+    {name:"المؤهل",score:qualificationScore,weight:10},
+    {name:"النبذة المهنية",score:summaryScore,weight:5}
+  ];
+  const score=Math.round(factors.reduce((s,f)=>s+f.score*f.weight/100,0));
+  return {score,level:score>=85?"ملف قوي":score>=70?"ملف جيد":score>=50?"ملف قابل للتحسين":"يحتاج استكمال",skill:p.occupation_label||"الملف المهني",occupation_uri:p.occupation_uri||"",required_skills:[],date:now(),factors,strengths:factors.filter(f=>f.score>=75).map(f=>f.name),improvements:factors.filter(f=>f.score<75).map(f=>f.name),method:"تقييم فوري أولي مرتبط بالمهنة والمهارات"};
+}
+
 async function calculateAutomaticAssessment(p){
   const has=v=>String(v??"").trim().length>0;
   const userSkills=String(p.skills||"").split(/[,،]+/).map(x=>normalizeText(x)).filter(Boolean);
@@ -530,6 +554,9 @@ async function loadAccount(){
     summary.innerHTML='<button class="primary-btn" style="width:100%" onclick="openProfile()">👤 إنشاء الملف</button>';
     renderAutomaticAssessment(null);
   }else{
+    // نعرض تقييمًا فوريًا محليًا أولًا، ثم نحدّثه بالبيانات المتقدمة دون تعليق الواجهة.
+    const quick=calculateAutomaticAssessmentInstant(p);
+    if(box)renderAutomaticAssessment(quick);
     status.textContent="👋 "+p.full_name+" · "+(p.occupation_label||"مهنة غير محددة")+" · 📍 "+(p.location||"غير محدد");
     summary.innerHTML='<div class="profile-summary"><div class="summary-box"><strong>المهنة</strong><br>'+escapeHtml(p.occupation_label||"—")+'</div><div class="summary-box"><strong>المؤهل</strong><br>'+escapeHtml(p.qualification||"—")+'</div><div class="summary-box"><strong>سنوات الخبرة</strong><br>'+escapeHtml(p.experience_years??"—")+'</div><div class="summary-box"><strong>نوع العمل</strong><br>'+escapeHtml(workType(p.work_type))+'</div></div><button class="secondary-btn" style="width:100%;margin-top:10px" onclick="openProfile()">✏️ تعديل الملف</button>';
     if(box)box.innerHTML='<div class="notice">⏳ جارٍ حساب تقييم مَدخَل حسب مهنتك ومهاراتك...</div>';
