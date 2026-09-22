@@ -400,7 +400,7 @@ function matchScore(job){
   const occ=normalizeText(p.occupation_label||"");
   let score=0;
 
-  // 40 نقطة: المهنة المطلوبة للفرصة — مع منع الخلط بين تخصصات التدريس.
+  // 40 نقطة: التخصص الدقيق. التقييم المهني العام لا يحول مدرس العربية إلى مدرس إنجليزية.
   if(occ){
     const teacherGroups=[
       {keys:["مدرس لغه عربيه","معلم لغه عربيه","مدرس عربي","معلم عربي","arabic teacher","arabic language teacher"],terms:["مدرس لغه عربيه","معلم لغه عربيه","مدرس عربي","معلم عربي","arabic teacher","arabic language teacher"]},
@@ -411,9 +411,8 @@ function matchScore(job){
     const og=groupFor(occ);
     if(og){
       const isMatch=og.terms.some(k=>titleCategory.includes(normalizeText(k)));
-      const hasOtherTeacher=teacherGroups.some(g=>g!==og&&g.terms.some(k=>titleCategory.includes(normalizeText(k))));
       if(isMatch)score+=40;
-      else if(hasOtherTeacher)score+=0;
+      // إعلان متعدد التخصصات: يمنح نقاط التخصص فقط إذا كان تخصص الباحث مذكورًا فعليًا.
     }else{
       const occTokens=tokens(occ).filter(x=>x.length>=3&&!["مدير","مساعد","متخصص","عامل","عاملة"].includes(x));
       const exactHits=occTokens.filter(x=>titleCategory.includes(x)).length;
@@ -424,14 +423,14 @@ function matchScore(job){
     }
   }
 
-  // 25 نقطة: المهارات
+  // 25 نقطة: مهارات مشتركة/مذكورة في الإعلان.
   const skills=tokens(p.skills||"").filter(x=>x.length>=3);
   if(skills.length){
     const skillHits=skills.filter(x=>text.includes(x)).length;
     score+=Math.min(25,Math.round(skillHits/Math.min(skills.length,5)*25));
   }
 
-  // 10 نقاط: الموقع
+  // 10 نقاط: الموقع.
   if(p.location){
     const loc=normalizeText(p.location);
     const jobLoc=normalizeText(job.location||"");
@@ -439,14 +438,14 @@ function matchScore(job){
     if(jobLoc.includes(loc)||jobCountry.includes(loc))score+=10;
   }
 
-  // 10 نقاط: نوع العمل
+  // 10 نقاط: نوع العمل.
   if(p.work_type&&p.work_type!=="any"){
     const wt=normalizeText(job.type||"");
     const wanted=normalizeText(p.work_type);
     if((p.work_type==="remote"&&wt.includes("عن بعد"))||wt.includes(wanted))score+=10;
   }
 
-  // 10 نقاط: الخبرة إذا ظهر شرط خبرة رقمي في الإعلان
+  // 10 نقاط: الخبرة عند وجود شرط خبرة رقمي.
   const exp=Number(p.experience_years);
   if(Number.isFinite(exp)&&exp>=0){
     const yearsText=text.match(/[0-9٠-٩]+\\s*(?:سنوات|سنة|years?|yrs?)/g)||[];
@@ -457,7 +456,7 @@ function matchScore(job){
     }
   }
 
-  // 5 نقاط: تقييم الملف العام، كعامل مساعد فقط
+  // 5 نقاط: التقييم المهني العام — عامل مساعد فقط، وليس بديلًا عن التخصص.
   const a=getLS(LS.assessment,null);
   if(a&&Number(a.score)>0)score+=Math.min(5,Math.round(Number(a.score)/20));
 
