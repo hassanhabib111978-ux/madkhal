@@ -9,7 +9,7 @@
 <meta name="description" content="مَدخَل — بوابتك إلى فرص العمل">
 <link rel="manifest" href="./manifest.json">
 <title>مَدخَل 🚪</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">document.addEventListener("DOMContentLoaded",()=>{const b=document.getElementById("clearJobSearch");if(b)b.addEventListener("click",clearJobSearch);});</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--teal:#0f766e;--teal2:#e8f7f4;--ink:#182222;--muted:#657171;--line:#dfe8e7;--bg:#f5f8f7;--card:#fff;--gold:#e8ba55;--shadow:0 10px 28px rgba(20,40,40,.07)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -149,7 +149,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 <section id="opportunitiesScreen" class="screen">
 <button class="back" onclick="showScreen('homeScreen')">→ العودة</button>
 <div class="card"><h2>🔎 فرص العمل</h2><p>هذه القائمة تعرض الفرص الفعلية المتاحة في نطاق مَدخَل: سوريا والشرق الأوسط. الوظائف خارج النطاق أو التجريبية لا تظهر هنا.</p></div>
-<div class="search-box card"><div class="form-group"><label>المهنة أو المهارة</label><div class="opportunity-search-wrap"><input id="jobSearch" type="text" autocomplete="off" placeholder="اكتب المهنة أو المهارة، مثل: محاسب أو Excel" oninput="renderOpportunities()"><button id="clearJobSearch" type="button" class="search-clear" aria-label="مسح البحث" title="مسح البحث">مسح</button></div></div><div class="form-group" style="margin-bottom:0"><label>المدينة أو البلد</label><input id="jobLocation" placeholder="مثال: دمشق، قطر" oninput="renderOpportunities()"></div></div>
+<div class="search-box card"><div class="form-group"><label>المهنة أو المهارة</label><div class="opportunity-search-wrap"><input id="jobSearch" type="text" autocomplete="off" placeholder="اكتب المهنة أو المهارة، مثل: محاسب أو Excel" oninput="renderOpportunities()"><button id="clearJobSearch" type="button" class="search-clear" aria-label="مسح البحث" title="مسح البحث" onclick="clearJobSearch()">مسح</button></div></div><div class="form-group" style="margin-bottom:0"><label>المدينة أو البلد</label><input id="jobLocation" placeholder="مثال: دمشق، قطر" oninput="renderOpportunities()"></div></div>
 <div id="categoryScroll" class="chips"></div><div id="opportunitiesList"></div>
 </section>
 
