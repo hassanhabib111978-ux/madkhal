@@ -302,29 +302,25 @@ async function calculateAutomaticAssessment(p){
   const summary=normalizeText(p.professional_summary||p.summary||"");
   const qualification=normalizeText(p.qualification||"");
   const exp=p.experience_years===""||p.experience_years==null?null:Number(p.experience_years);
+  const ratings={};
+  document.querySelectorAll("#skillAssessmentList input[type=radio]:checked").forEach(i=>{const uri=String(i.dataset.skillUri||"");if(uri)ratings[uri]=Number(i.value)||0});
   let required=[];
   if(p.occupation_uri){
     try{
-      const res=await Promise.race([supabaseClient.rpc("get_madkhal_occupation_skills",{occupation_uri_input:p.occupation_uri,result_limit:30}),new Promise(resolve=>setTimeout(()=>resolve({error:{message:"assessment skill lookup timeout"},data:[]}),2500))]);
+      const res=await Promise.race([
+        supabaseClient.rpc("get_madkhal_occupation_skills",{occupation_uri_input:p.occupation_uri,result_limit:30}),
+        new Promise(resolve=>setTimeout(()=>resolve({error:{message:"timeout"},data:[]}),2500))
+      ]);
       if(!res.error)required=(res.data||[]).map(s=>({uri:String(s.skill_uri||""),label:normalizeText(s.skill_label||"")})).filter(s=>s.label);
-    }catch(e){}
+    }catch(e){console.warn("assessment skill lookup",e)}
   }
-  const ratings={};
-  document.querySelectorAll("#skillAssessmentList input[type=radio]:checked").forEach(i=>{
-    const uri=String(i.dataset.skillUri||""); if(uri)ratings[uri]=Number(i.value)||0;
-  });
   const reqLabels=required.map(s=>s.label);
   const aliases=aliasTermsFor(p.occupation_label||"").map(normalizeText).filter(Boolean);
-  const evidenceHits=userSkills.filter(us=>{
-    return reqLabels.some(rs=>{
-      const a=tokens(us),b=tokens(rs);
-      return normalizeText(us)===rs || a.some(x=>x.length>=3&&b.includes(x)) || rs.includes(normalizeText(us)) || normalizeText(us).includes(rs);
-    }) || aliases.some(a=>a.includes(us)||us.includes(a));
-  }).length;
+  const evidenceHits=userSkills.filter(us=>reqLabels.some(rs=>{const a=tokens(us),b=tokens(rs);return normalizeText(us)===rs||a.some(x=>x.length>=3&&b.includes(x))||rs.includes(normalizeText(us))||normalizeText(us).includes(rs)})||aliases.some(a=>a.includes(us)||us.includes(a))).length;
   const evidenceScore=reqLabels.length?Math.min(100,Math.round(evidenceHits/Math.min(reqLabels.length,8)*100)):(userSkills.length?Math.min(100,40+Math.min(userSkills.length,4)*15):0);
   const ratedValues=required.filter(s=>ratings[s.uri]!=null).map(s=>ratings[s.uri]);
-  const ratingScore=ratedValues.length?Math.round(ratedValues.reduce((a,b)=>a+b,0)/ratedValues.length/5*100):null;
-  const skillScore=ratingScore===null?evidenceScore:Math.round(evidenceScore*0.6+ratingScore*0.4);
+  const ratingScore=ratedValues.length?Math.round(ratedValues.reduce((x,y)=>x+y,0)/ratedValues.length/5*100):null;
+  const skillScore=ratingScore===null?evidenceScore:Math.round(evidenceScore*.6+ratingScore*.4);
   const experienceScore=exp===null?0:Math.min(100,Math.round(35+Math.min(exp,7)*9.3));
   const qualificationScore=has(qualification)?75:0;
   const summaryScore=summary.length>=120?100:summary.length>=60?75:summary.length>=25?50:0;
@@ -337,7 +333,7 @@ async function calculateAutomaticAssessment(p){
     {name:"المؤهل",score:qualificationScore,weight:10},
     {name:"النبذة المهنية",score:summaryScore,weight:5}
   ];
-  const score=Math.round(factors.reduce((s,f)=>s+(f.score*f.weight/100),0));
+  const score=Math.round(factors.reduce((s,f)=>s+f.score*f.weight/100,0));
   const level=score>=85?"ملف قوي":score>=70?"ملف جيد":score>=50?"ملف قابل للتحسين":"يحتاج استكمال";
   return {score,level,skill:p.occupation_label||"الملف المهني",occupation_uri:p.occupation_uri||"",required_skills:required.slice(0,30),date:now(),factors,strengths:factors.filter(f=>f.score>=75).map(f=>f.name),improvements:factors.filter(f=>f.score<75).map(f=>f.name),method:"تقييم مهني مرتبط بالمهنة ومهاراتها"};
 }
