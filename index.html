@@ -368,7 +368,63 @@ function validSalaryNumber(v){const n=Number(v);return Number.isFinite(n)&&n>=0&
 function salaryText(j){let a=validSalaryNumber(j.salary_min),b=validSalaryNumber(j.salary_max),c=cleanSalaryCurrency(j.salary_currency);if(a!=null&&b!=null&&a>b){const x=a;a=b;b=x}if(a!=null&&b!=null)return a+" - "+b+(c?" "+c:"");if(a!=null)return "من "+a+(c?" "+c:"");if(b!=null)return "حتى "+b+(c?" "+c:"");return "حسب المصدر"}
 function workType(t){const x=cleanJobText(t);return ({full_time:"دوام كامل",part_time:"دوام جزئي",remote:"عن بُعد",freelance:"عمل حر",any:"أي نوع"})[x]||x||"غير محدد"}
 function categoryFor(j){const t=normalizeText([j.title,j.category,j.description].filter(Boolean).join(" "));if(t.includes("محاسب")||t.includes("محاسبة")||t.includes("account"))return "🧮 المحاسبة";if(t.includes("برمج")||t.includes("developer")||t.includes("engineer")||t.includes("software"))return "💻 التقنية";if(t.includes("تصميم")||t.includes("designer")||t.includes("graphic"))return "🎨 التصميم";if(t.includes("تسويق")||t.includes("marketing")||t.includes("مبيعات")||t.includes("sales"))return "📣 التسويق والمبيعات";if(t.includes("سكرت")||t.includes("secretary")||t.includes("admin"))return "🗂️ الإدارة";if(t.includes("خدمة العملاء")||t.includes("customer service"))return "🗣️ خدمة العملاء";if(t.includes("driver")||t.includes("سائق"))return "🚚 النقل";if(t.includes("تعليم")||t.includes("teacher")||t.includes("مدرس"))return "📚 التعليم";return "🔧 أخرى"}function visibleJob(j){return {id:j.id,title:cleanJobText(j.title)||"فرصة",company:cleanJobText(j.company)||"حسب المصدر",location:cleanJobText(j.location||j.country)||"غير محدد",country:cleanJobText(j.country),type:workType(j.job_type),category:categoryFor(j),description:cleanJobText(j.description)||"تفاصيل الوظيفة موجودة في المصدر الأصلي.",salary:salaryText(j),source:cleanJobText(j.source),source_name:cleanJobText(j.source_name),external_link:String(j.source_url||j.canonical_url||""),canonical_link:String(j.canonical_url||j.source_url||""),posted_at:j.posted_at||null,expires_at:j.expires_at||null}}
-function matchScore(job){const p=localProfile();if(!p.full_name&&!p.occupation_label&&!p.skills)return 35;const jt=normalizeText([job.title,job.description,job.category].join(" "));let s=30;const occ=normalizeText(p.occupation_label||"");if(occ){const ot=tokens(occ).filter(x=>x.length>=4&&!["مدير","مساعد","متخصص","عامل","عاملة"].includes(x));const hits=ot.filter(x=>jt.includes(x)).length;if(hits)s+=Math.min(30,10*hits);const aliases=aliasTermsFor(occ);if(aliases.some(a=>jt.includes(normalizeText(a))))s+=20}const skills=tokens(p.skills||"");const hits=skills.filter(x=>jt.includes(x)).length;s+=Math.min(20,5*hits);if(p.work_type&&p.work_type!=="any"){const wt=normalizeText(job.type);if((p.work_type==="remote"&&wt.includes("عن بعد"))||wt.includes(normalizeText(p.work_type)))s+=10}if(p.location){const loc=normalizeText(p.location);if(normalizeText(job.location).includes(loc)||normalizeText(job.country).includes(loc))s+=10}const a=getLS(LS.assessment,null);if(a&&Number(a.score)>0)s+=Math.min(5,Math.round(Number(a.score)/20));return Math.min(99,s)}
+function matchScore(job){
+  const p=localProfile();
+  if(!p.full_name&&!p.occupation_label&&!p.skills)return 0;
+  const titleCategory=normalizeText([job.title,job.category].join(" "));
+  const text=normalizeText([job.title,job.category,job.description].join(" "));
+  const occ=normalizeText(p.occupation_label||"");
+  let score=0;
+
+  // 40 نقطة: المهنة المطلوبة للفرصة
+  if(occ){
+    const occTokens=tokens(occ).filter(x=>x.length>=3&&!["مدير","مساعد","متخصص","عامل","عاملة"].includes(x));
+    const exactHits=occTokens.filter(x=>titleCategory.includes(x)).length;
+    const aliases=aliasTermsFor(occ).map(normalizeText).filter(Boolean);
+    const aliasHit=aliases.some(a=>titleCategory.includes(a));
+    if(exactHits>0)score+=Math.min(40,20+10*Math.min(exactHits,2));
+    else if(aliasHit)score+=30;
+  }
+
+  // 25 نقطة: المهارات
+  const skills=tokens(p.skills||"").filter(x=>x.length>=3);
+  if(skills.length){
+    const skillHits=skills.filter(x=>text.includes(x)).length;
+    score+=Math.min(25,Math.round(skillHits/Math.min(skills.length,5)*25));
+  }
+
+  // 10 نقاط: الموقع
+  if(p.location){
+    const loc=normalizeText(p.location);
+    const jobLoc=normalizeText(job.location||"");
+    const jobCountry=normalizeText(job.country||"");
+    if(jobLoc.includes(loc)||jobCountry.includes(loc))score+=10;
+  }
+
+  // 10 نقاط: نوع العمل
+  if(p.work_type&&p.work_type!=="any"){
+    const wt=normalizeText(job.type||"");
+    const wanted=normalizeText(p.work_type);
+    if((p.work_type==="remote"&&wt.includes("عن بعد"))||wt.includes(wanted))score+=10;
+  }
+
+  // 10 نقاط: الخبرة إذا ظهر شرط خبرة رقمي في الإعلان
+  const exp=Number(p.experience_years);
+  if(Number.isFinite(exp)&&exp>=0){
+    const yearsText=text.match(/[0-9٠-٩]+\\s*(?:سنوات|سنة|years?|yrs?)/g)||[];
+    if(!yearsText.length)score+=5;
+    else{
+      const requiredYears=yearsText.map(v=>Number(v.match(/[0-9٠-٩]+/)[0])).filter(Number.isFinite);
+      if(requiredYears.length&&exp>=Math.min(...requiredYears))score+=10;
+    }
+  }
+
+  // 5 نقاط: تقييم الملف العام، كعامل مساعد فقط
+  const a=getLS(LS.assessment,null);
+  if(a&&Number(a.score)>0)score+=Math.min(5,Math.round(Number(a.score)/20));
+
+  return Math.max(0,Math.min(100,Math.round(score)));
+}
 function renderCategories(){const c=document.getElementById("categoryScroll");if(!c)return;const cats=["الكل"];const counts={};allVisibleJobs.map(visibleJob).forEach(j=>{counts[j.category]=(counts[j.category]||0)+1});Object.keys(counts).sort().forEach(k=>cats.push(k));c.innerHTML="";cats.forEach(x=>{const b=document.createElement("button");b.className="chip"+(currentCategory===x?" active":"");b.textContent=x+(x!=="الكل"&&counts[x]?" · "+counts[x]:"");b.onclick=()=>{currentCategory=x;renderCategories();renderOpportunities()};c.appendChild(b)})}
 function renderOpportunities(){
   const box=document.getElementById("opportunitiesList");
