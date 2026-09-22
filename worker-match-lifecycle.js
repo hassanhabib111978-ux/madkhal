@@ -17,21 +17,20 @@ async function loadWorkerMatchCenter(){
  const clean=s=>String(s??'').toLowerCase().replace(/[ًٌٍَُِّْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[^\p{L}\p{N}]+/gu,' ').trim();
  const words=s=>clean(s).split(/\s+/).filter(x=>x.length>=3);
  const occupationScore=(occ,title)=>{
-   const o=clean(occ),t=clean(title);
-   if(!o||!t)return 0;
-   const direct=t.includes(o)||o.includes(t);
-   if(direct)return 45;
+   const o=clean(occ),t=clean(title); if(!o||!t)return 0;
    const groups=[
      {keys:['مدرس لغه عربيه','معلم لغه عربيه','معلم عربي','مدرس عربي','arabic teacher','arabic language teacher'],terms:['مدرس لغه عربيه','معلم لغه عربيه','معلم عربي','مدرس عربي','arabic teacher','arabic language teacher']},
-     {keys:['مدرس لغه انجليزيه','معلم لغه انجليزيه','english teacher','english language teacher'],terms:['مدرس لغه انجليزيه','معلم لغه انجليزيه','english teacher','english language teacher']},
+     {keys:['مدرس لغه انجليزيه','معلم لغه انجليزيه','مدرس انجليزي','معلم انجليزي','english teacher','english language teacher'],terms:['مدرس لغه انجليزيه','معلم لغه انجليزيه','مدرس انجليزي','معلم انجليزي','english teacher','english language teacher']},
      {keys:['مدرس رياضيات','معلم رياضيات','math teacher','mathematics teacher'],terms:['مدرس رياضيات','معلم رياضيات','math teacher','mathematics teacher']},
      {keys:['محاسب','accountant','accounting'],terms:['محاسب','accountant','accounting']}
    ];
-   for(const g of groups){
-     if(g.keys.some(k=>o.includes(clean(k)))) return g.terms.some(k=>t.includes(clean(k)))?45:0;
-   }
-   const ow=words(o), hits=ow.filter(w=>t.includes(w)).length;
-   return ow.length?Math.min(40,Math.round(hits/Math.min(ow.length,3)*40)):0;
+   for(const g of groups)if(g.keys.some(k=>o.includes(clean(k))))return g.terms.some(k=>t.includes(clean(k)))?45:0;
+   const teacherProfile=['مدرس','معلم','تدريس','تعليم','teacher','teaching'].some(k=>o.includes(clean(k)));
+   const teacherJob=['مدرس','معلم','تدريس','تعليم','teacher','teaching'].some(k=>t.includes(clean(k)));
+   if(teacherProfile&&teacherJob)return 20;
+   const direct=t.includes(o)||o.includes(t); if(direct)return 45;
+   const ow=words(o),hits=ow.filter(w=>t.includes(w)).length;
+   return ow.length?Math.min(35,Math.round(hits/Math.min(ow.length,3)*35)):0;
  };
  const scoreExternal=(j,p)=>{
    const title=[j.title,j.category].filter(Boolean).join(' ');
