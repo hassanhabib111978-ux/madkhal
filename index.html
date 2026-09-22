@@ -275,17 +275,30 @@ function showToast(message){const el=document.getElementById("toast");if(!el)ret
 function stickyOffset(){let x=10;const h=document.querySelector(".header");if(h)x+=h.getBoundingClientRect().height;const b=document.getElementById("installBar");if(b&&!b.classList.contains("hidden"))x+=b.getBoundingClientRect().height+8;return x}
 function updateNav(id){document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.screen===id))}
 function scrollToActive(id,focusId){const screen=document.getElementById(id);if(!screen)return;requestAnimationFrame(()=>{requestAnimationFrame(()=>{const target=focusId&&document.getElementById(focusId)?document.getElementById(focusId):screen;const y=Math.max(0,window.pageYOffset+target.getBoundingClientRect().top-stickyOffset());window.scrollTo(0,y);if(focusId){setTimeout(()=>{const f=document.getElementById(focusId);if(f)try{f.focus({preventScroll:true})}catch(e){f.focus()}},80)}})})}
-function showScreen(id,focusId){const target=document.getElementById(id);if(!target)return;currentScreen=id;document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id));updateNav(id);if(id==="accountScreen")loadAccount();if(id==="opportunitiesScreen"){renderCategories();renderOpportunities()}if(id==="subscriptionScreen")renderSubscription();if(id==="jibranScreen")renderJibranContext();scrollToActive(id,focusId)}
+function ensureAccountAssessment(){
+  const box=document.getElementById("savedAssessmentText");
+  if(!box)return;
+  const p=localProfile();
+  if(!p||!p.full_name)return;
+  try{
+    const a=calculateAutomaticAssessmentInstant(p);
+    if(a&&Number.isFinite(Number(a.score))){
+      setLS(LS.assessment,a);
+      renderAutomaticAssessment(a);
+    }
+  }catch(e){console.warn("account assessment fallback",e)}
+}
+function showScreen(id,focusId){const target=document.getElementById(id);if(!target)return;currentScreen=id;document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id));updateNav(id);if(id==="accountScreen"){ensureAccountAssessment();loadAccount();}if(id==="opportunitiesScreen"){renderCategories();renderOpportunities()}if(id==="subscriptionScreen")renderSubscription();if(id==="jibranScreen")renderJibranContext();scrollToActive(id,focusId)}
 function openSubscription(){showScreen("subscriptionScreen","subscriptionScreen")}
 function openWorker(){showScreen("workerScreen","workerScreen")}
 async function openProfile(){showScreen("profileScreen","workerFirstName");await loadProfile()}
 function openEmployer(){showScreen("employerScreen","employerName")}
 function openDiscoverSkills(){showScreen("discoverSkillsSection");renderSkills()}
 function startSkillAssessment(){openProfile()}
-function openAssessmentScreen(){showScreen("accountScreen");loadAccount()}
+function openAssessmentScreen(){showScreen("accountScreen");ensureAccountAssessment();loadAccount()}
 function openOpportunities(){showScreen("opportunitiesScreen","jobSearch");loadJobs().then(()=>{renderCategories();renderOpportunities()})}
 function clearJobSearch(){const e=document.getElementById("jobSearch");if(e){e.value="";renderOpportunities();e.focus({preventScroll:true})}}
-function openAccount(){showScreen("accountScreen");loadAccount()}
+function openAccount(){showScreen("accountScreen");ensureAccountAssessment();loadAccount()}
 
 async function sessionUser(){try{const g=await supabaseClient.auth.getSession();if(g.data&&g.data.session&&g.data.session.user)return g.data.session.user}catch(e){}try{const a=await supabaseClient.auth.signInAnonymously();return a.data&&a.data.user?a.data.user:null}catch(e){return null}}
 async function publicProfileId(user,fullName,role="user"){if(!user)return null;try{const q=await supabaseClient.from("profiles").select("id,full_name,role").eq("auth_user_id",user.id).maybeSingle();if(q.data){const patch={};if(fullName&&q.data.full_name!==fullName)patch.full_name=fullName;if(role&&q.data.role!==role)patch.role=role;if(Object.keys(patch).length)await supabaseClient.from("profiles").update(patch).eq("id",q.data.id);return q.data.id}const ins=await supabaseClient.from("profiles").insert({full_name:fullName||"مستخدم مَدخَل",role:role||"user",auth_user_id:user.id}).select("id").maybeSingle();if(ins.error)return null;return ins.data?ins.data.id:null}catch(e){return null}}
