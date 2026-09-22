@@ -278,8 +278,12 @@ function scrollToActive(id,focusId){const screen=document.getElementById(id);if(
 function ensureAccountAssessment(){
   const box=document.getElementById("savedAssessmentText");
   if(!box)return;
-  const p=localProfile();
-  if(!p||!p.full_name)return;
+  const p=localProfile()||{};
+  const hasProfile=Object.values(p).some(v=>String(v??"").trim().length>0);
+  if(!hasProfile)return;
+  if(!p.full_name){
+    p.full_name=[p.first_name,p.father_name,p.family_name].filter(Boolean).join(" ").trim();
+  }
   try{
     const a=calculateAutomaticAssessmentInstant(p);
     if(a&&Number.isFinite(Number(a.score))){
@@ -588,11 +592,13 @@ async function loadAccount(){
   const status=document.getElementById("accountStatus");
   const summary=document.getElementById("accountSummary");
   const box=document.getElementById("savedAssessmentText");
-  if(!p.full_name){
+  const hasProfile=Object.values(p||{}).some(v=>String(v??"").trim().length>0);
+  if(!hasProfile){
     status.textContent="لم يتم إنشاء الملف بعد.";
     summary.innerHTML='<button class="primary-btn" style="width:100%" onclick="openProfile()">👤 إنشاء الملف</button>';
     renderAutomaticAssessment(null);
   }else{
+    if(!p.full_name)p.full_name=[p.first_name,p.father_name,p.family_name].filter(Boolean).join(" ").trim();
     // نعرض تقييمًا فوريًا محليًا أولًا، ثم نحدّثه بالبيانات المتقدمة دون تعليق الواجهة.
     const quick=calculateAutomaticAssessmentInstant(p);
     if(box)renderAutomaticAssessment(quick);
