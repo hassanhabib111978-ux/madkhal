@@ -4,22 +4,47 @@ function byId(id){return document.getElementById(id)}
 function parseSalary(v){const s=String(v||'').trim();if(!s)return {min:null,max:null,currency:null};const nums=(s.match(/\d+(?:[.,]\d+)?/g)||[]).map(x=>Number(x.replace(',','.'))).filter(Number.isFinite);const cur=(s.match(/\b(USD|EUR|AED|SAR|QAR|KWD|BHD|OMR|SYP|TRY)\b/i)||[])[1]||null;return {min:nums[0]??null,max:nums.length>1?nums[1]:nums[0]??null,currency:cur?cur.toUpperCase():null}}
 async function initEmployerOccupationChoice(){
  const input=byId('employerOccupationSearch'),uri=byId('employerOccupationUri'),label=byId('employerOccupationLabel');
- if(!input||!uri||!label||byId('employerOccupationSelect'))return;
+ if(!input||!uri||!label)return;
+ if(byId('employerOccupationSelect'))return;
  input.readOnly=true;input.placeholder='اختر المهنة المطلوبة من القائمة';input.style.display='none';
  const box=input.closest('.occupation-box');if(!box)return;
  const wrap=document.createElement('div');wrap.className='employer-occupation-choice';
- wrap.innerHTML='<label style="display:block;font-size:13px;font-weight:900;margin-bottom:6px">المهنة المطلوبة — اختر من القائمة</label><select id="employerOccupationSelect"><option value="">⏳ جارٍ تحميل المهن المرتبطة بفرص فعلية...</option></select><div class="occupation-status">اختر مهنة من القائمة فقط. لا تكتب اسم المهنة يدويًا؛ الاختيار يحفظ المهنة المعتمدة.</div>';
- box.insertBefore(wrap,input);const select=wrap.querySelector('select');
+ wrap.innerHTML='<label style="display:block;font-size:13px;font-weight:900;margin-bottom:6px">المهنة المطلوبة — اختر من القائمة</label><select id="employerOccupationSelect"><option value="">⏳ جارٍ تحميل المهن...</option></select><div id="employerOccupationStatus" class="occupation-status">اختر مهنة من القائمة؛ سيتم حفظ المهنة المعتمدة مع الفرصة.</div>';
+ box.insertBefore(wrap,input);
+ const select=wrap.querySelector('select');
  try{
-  const q=await supabaseClient.from('jobs').select('title,category').eq('status','active').limit(250),raw=[];
-  (q.data||[]).forEach(j=>[j.category,j.title].forEach(v=>{const s=String(v||'').trim();if(s&&s.length>2&&!raw.includes(s))raw.push(s)}));
+  const terms=['محاسب','مدرس','معلم','مهندس','مبرمج','مصمم','مبيعات','سائق','ممرض','طبيب','مدير','سكرتير','فني','كهربائي','ميكانيكي','عامل'];
   const opts=[];
-  for(const name of raw.slice(0,35)){try{const r=await supabaseClient.rpc('search_madkhal_occupations',{search_text:name,result_limit:1});const o=(r.data||[])[0];if(o&&(o.conceptUri||o.concepturi||o.uri)){const lab=o.preferredLabel||o.preferredlabel||name,ur=o.conceptUri||o.concepturi||o.uri;if(!opts.some(x=>x.uri===ur))opts.push({label:lab,uri:ur})}}catch(e){}if(opts.length>=20)break}
+  const add=(o,fallback)=>{
+    const ur=o?.concept_uri||o?.conceptUri||o?.concepturi||o?.uri||'';
+    const lab=o?.preferred_label||o?.preferredLabel||o?.preferredlabel||fallback||'';
+    if(ur&&lab&&!opts.some(x=>x.uri===ur))opts.push({label:lab,uri:ur});
+  };
+  for(const term of terms){
+    try{
+      const r=await supabaseClient.rpc('search_madkhal_occupations',{search_text:term,result_limit:5});
+      (r.data||[]).forEach(o=>add(o,term));
+    }catch(e){}
+    if(opts.length>=35)break;
+  }
+  if(opts.length<20){
+    try{
+      const r=await supabaseClient.rpc('search_madkhal_occupations',{search_text:'',result_limit:30});
+      (r.data||[]).forEach(o=>add(o,''));
+    }catch(e){}
+  }
   select._occupationOptions=opts;
   select.innerHTML='<option value="">اختر المهنة المطلوبة</option>'+opts.map((o,i)=>'<option value="'+i+'">'+String(o.label).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+'</option>').join('');
-  if(!opts.length)select.innerHTML='<option value="">لم تُحمّل المهن الآن</option>';
+  if(!opts.length)select.innerHTML='<option value="">تعذر تحميل المهن الآن</option>';
  }catch(e){select.innerHTML='<option value="">تعذر تحميل قائمة المهن</option>'}
- select.onchange=()=>{const o=select._occupationOptions?.[Number(select.value)];if(!o){uri.value='';label.value='';input.value='';return}uri.value=o.uri;label.value=o.label;input.value=o.label;const st=byId('employerOccupationStatus');if(st){st.textContent='✓ تم اختيار مهنة مرتبطة بفرص فعلية.';st.className='occupation-status'}const title=byId('vacancyTitle');if(title&&!title.value.trim())title.value=o.label}
+ select.onchange=()=>{
+  const o=select._occupationOptions?.[Number(select.value)];
+  if(!o){uri.value='';label.value='';input.value='';return}
+  uri.value=o.uri;label.value=o.label;input.value=o.label;
+  const st=byId('employerOccupationStatus');
+  if(st){st.textContent='✓ تم اختيار المهنة المعتمدة: '+o.label;st.className='occupation-status'}
+  const title=byId('vacancyTitle');if(title&&!title.value.trim())title.value=o.label;
+ };
 }
 function injectEmployerFields(){const form=byId('submitVacancyButton')?.closest('.card');if(!form||byId('employerContactPhone'))return;const desc=byId('vacancyDescription');if(!desc)return;const g=document.createElement('div');g.className='form-group';g.innerHTML='<label>رقم التواصل</label><input id="employerContactPhone" type="tel" inputmode="tel" placeholder="رقم الهاتف للتواصل معك بشأن المرشحين"><div class="occupation-status">لن يظهر للباحثين في مرحلة المطابقة؛ يستخدمه مَدخَل لإدارة تواصل صاحب الفرصة.</div>';desc.parentElement.insertAdjacentElement('afterend',g);const note=byId('employerStatus');if(note)note.textContent='ستُحفظ الفرصة كفرصة خاصة، ثم يبدأ مَدخَل المطابقة مع الباحثين المؤهلين.';const b=byId('submitVacancyButton');if(b)b.textContent='📩 نشر الفرصة وبدء المطابقة'}
 async function fixedEmployerProfileId(user,fullName){if(!user)return null;try{const q=await supabaseClient.from('profiles').select('id,full_name,role').eq('auth_user_id',user.id).maybeSingle();if(q.error)throw q.error;if(q.data){const patch={};if(fullName&&q.data.full_name!==fullName)patch.full_name=fullName;if(q.data.role!=='employer')patch.role='employer';if(Object.keys(patch).length){const u=await supabaseClient.from('profiles').update(patch).eq('id',q.data.id).eq('auth_user_id',user.id);if(u.error)throw u.error}return q.data.id}const id=(typeof crypto!=='undefined'&&crypto.randomUUID)?crypto.randomUUID():('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0,v=c==='x'?r:(r&3|8);return v.toString(16)}));const ins=await supabaseClient.from('profiles').insert({id,full_name:fullName||'مستخدم مَدخَل',role:'employer',auth_user_id:user.id}).select('id').maybeSingle();if(ins.error)throw ins.error;return ins.data?.id||id}catch(e){console.error('Madkhal employer profile error',e);throw e}}
