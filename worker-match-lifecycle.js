@@ -13,9 +13,47 @@ async function loadWorkerMatchCenter(){
  const r=await supabaseClient.rpc('get_my_worker_matches');
  if(r.error){panel.innerHTML='<div class="notice">⚠️ تعذر تحميل مسار المطابقات.</div>';return}
  const rows=r.data||[];
- const publicMatches=(typeof allVisibleJobs!=='undefined'&&typeof matchScore==='function')
-   ? allVisibleJobs.map(visibleJob).map(j=>({j,s:Math.round(Number(matchScore(j))||0)})).filter(x=>x.s>=35).sort((x,y)=>y.s-x.s).slice(0,10)
-   : [];
+ // مطابقة مستقلة للفرص الخارجية: لا تعتمد على قائمة الفرص المعروضة في الصفحة ولا على درجة عامة مخزنة.
+ const clean=s=>String(s??'').toLowerCase().replace(/[ًٌٍَُِّْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[^\\p{L}\\p{N}]+/gu,' ').trim();
+ const words=s=>clean(s).split(/\\s+/).filter(x=>x.length>=3);
+ const occupationScore=(occ,title)=>{
+   const o=clean(occ),t=clean(title);
+   if(!o||!t)return 0;
+   const direct=t.includes(o)||o.includes(t);
+   if(direct)return 45;
+   const groups=[
+     {keys:['مدرس لغه عربيه','معلم لغه عربيه','معلم عربي','مدرس عربي','arabic teacher','arabic language teacher'],terms:['مدرس لغه عربيه','معلم لغه عربيه','معلم عربي','مدرس عربي','arabic teacher','arabic language teacher']},
+     {keys:['مدرس لغه انجليزيه','معلم لغه انجليزيه','english teacher','english language teacher'],terms:['مدرس لغه انجليزيه','معلم لغه انجليزيه','english teacher','english language teacher']},
+     {keys:['مدرس رياضيات','معلم رياضيات','math teacher','mathematics teacher'],terms:['مدرس رياضيات','معلم رياضيات','math teacher','mathematics teacher']},
+     {keys:['محاسب','accountant','accounting'],terms:['محاسب','accountant','accounting']}
+   ];
+   for(const g of groups){
+     if(g.keys.some(k=>o.includes(clean(k)))) return g.terms.some(k=>t.includes(clean(k)))?45:0;
+   }
+   const ow=words(o), hits=ow.filter(w=>t.includes(w)).length;
+   return ow.length?Math.min(40,Math.round(hits/Math.min(ow.length,3)*40)):0;
+ };
+ const scoreExternal=(j,p)=>{
+   const title=[j.title,j.category].filter(Boolean).join(' ');
+   const text=[j.title,j.category,j.description].filter(Boolean).join(' ');
+   let s=0;
+   s+=occupationScore(p.occupation_label||p.profession||'',title);
+   const sk=words(p.skills||'');
+   if(sk.length)s+=Math.min(25,Math.round(sk.filter(w=>clean(text).includes(w)).length/Math.min(sk.length,5)*25));
+   const loc=clean(p.location||'');
+   if(loc&&clean(j.location||'').includes(loc))s+=10;
+   const wt=clean(p.work_type||'');
+   const jt=clean(j.job_type||j.type||'');
+   if(wt&&wt!=='any'&&((wt==='remote'&&jt.includes('remote'))||jt.includes(wt)))s+=10;
+   return Math.max(0,Math.min(100,Math.round(s)));
+ };
+ let publicMatches=[];
+ try{
+   const q=await supabaseClient.from('jobs').select('id,title,company,location,country,job_type,category,description,source,source_name,source_url,status,geo_class,expires_at').eq('status','active').in('geo_class',['SYRIA','MENA']).order('created_at',{ascending:false}).limit(500);
+   if(!q.error){
+     publicMatches=(q.data||[]).map(j=>({j,s:scoreExternal(j,p)})).filter(x=>x.s>=35).sort((a,b)=>b.s-a.s).slice(0,10);
+   }else console.warn('external jobs lookup',q.error);
+ }catch(e){console.warn('external jobs lookup',e)}
  if(!rows.length&&!publicMatches.length){
    panel.innerHTML='<div class="notice">لا توجد مطابقة مهنية جديدة حاليًا. سيظهر المسار هنا عند العثور على فرصة مناسبة.</div>';return
  }
