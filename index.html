@@ -149,7 +149,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 <section id="opportunitiesScreen" class="screen">
 <button class="back" onclick="showScreen('homeScreen')">→ العودة</button>
 <div class="card"><h2>🔎 فرص العمل</h2><p>هذه القائمة تعرض الفرص الفعلية المتاحة في نطاق مَدخَل: سوريا والشرق الأوسط. الوظائف خارج النطاق أو التجريبية لا تظهر هنا.</p></div>
-<div class="search-box card"><div class="form-group"><label>المهنة أو المهارة</label><div class="opportunity-search-wrap"><input id="jobSearch" type="text" autocomplete="off" placeholder="اكتب المهنة أو المهارة، مثل: محاسب أو Excel" oninput="renderOpportunities()"><button id="clearJobSearch" type="button" class="search-clear" aria-label="مسح البحث" title="مسح البحث" onclick="clearJobSearch()">مسح</button></div></div><div class="form-group" style="margin-bottom:0"><label>المدينة أو البلد</label><input id="jobLocation" placeholder="مثال: دمشق، قطر" oninput="renderOpportunities()"></div></div>
+<div class="search-box card"><div class="form-group" style="margin-bottom:0"><label>🔎 ابحث عن المهنة</label><div class="opportunity-search-wrap"><input id="jobSearch" type="text" autocomplete="off" placeholder="اكتب أول حرفين أو ثلاثة، مثل: محاسب أو مهندس" oninput="renderOpportunities()"><button id="clearJobSearch" type="button" class="search-clear" aria-label="مسح البحث" title="مسح البحث" onclick="clearJobSearch()">مسح</button></div><div class="occupation-status">تتم الفلترة تلقائيًا أثناء الكتابة، وتُحتسب المهن القريبة والمتشابهة.</div></div></div>
 <div id="categoryScroll" class="chips"></div><div id="opportunitiesList"></div>
 </section>
 
@@ -356,19 +356,27 @@ function renderOpportunities(){
   const box=document.getElementById("opportunitiesList");
   if(!box)return;
   const q=normalizeText(document.getElementById("jobSearch")?.value||"");
-  const loc=normalizeText(document.getElementById("jobLocation")?.value||"");
   let list=allVisibleJobs.map(visibleJob);
   if(currentCategory!=="الكل")list=list.filter(j=>j.category===currentCategory);
-  if(q){
-    list=list.filter(j=>{
-      const text=normalizeText([j.title,j.company,j.description,j.category].join(" "));
-      return text.includes(q)||tokens(q).some(t=>text.includes(t));
+  if(q.length>=2){
+    const variants=new Set([q]);
+    Object.entries(OCC_ALIASES||{}).forEach(([base,alts])=>{
+      const all=[base,...(Array.isArray(alts)?alts:[])].map(normalizeText);
+      if(all.some(x=>x===q||x.includes(q)||q.includes(x))){
+        all.forEach(x=>{if(x)variants.add(x)});
+      }
     });
+    const qTokens=tokens(q).filter(t=>t.length>=2);
+    list=list.filter(j=>{
+      const text=normalizeText([j.title,j.category].join(" "));
+      return Array.from(variants).some(v=>text.includes(v))||qTokens.some(t=>text.includes(t));
+    });
+  }else if(q.length===1){
+    list=list.filter(j=>normalizeText([j.title,j.category].join(" ")).includes(q));
   }
-  if(loc)list=list.filter(j=>normalizeText(j.location+" "+j.country).includes(loc));
   list.sort((a,b)=>matchScore(b)-matchScore(a));
   if(!list.length){
-    box.innerHTML='<div class="card"><div class="empty">🔎 لا توجد فرص حاليًا ضمن نطاق مَدخَل بهذه المواصفات.<br>جرّب مهنة أو مكانًا آخر.</div></div>';
+    box.innerHTML='<div class="card"><div class="empty">🔎 لا توجد فرص حاليًا ضمن نطاق مَدخَل بهذه المواصفات.<br>جرّب كتابة حرفين أو ثلاثة من اسم المهنة.</div></div>';
     return;
   }
   box.innerHTML="";
