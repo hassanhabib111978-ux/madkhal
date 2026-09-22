@@ -283,7 +283,8 @@ function openEmployer(){showScreen("employerScreen","employerName")}
 function openDiscoverSkills(){showScreen("discoverSkillsSection");renderSkills()}
 function startSkillAssessment(){openProfile()}
 function openAssessmentScreen(){showScreen("accountScreen");loadAccount()}
-function openOpportunities(){showScreen("opportunitiesScreen","jobSearch");loadJobs().then(()=>{renderCategories();renderOpportunities()})}\nfunction clearJobSearch(){const e=document.getElementById("jobSearch");if(e){e.value="";renderOpportunities();e.focus({preventScroll:true})}}
+function openOpportunities(){showScreen("opportunitiesScreen","jobSearch");loadJobs().then(()=>{renderCategories();renderOpportunities()})}
+function clearJobSearch(){const e=document.getElementById("jobSearch");if(e){e.value="";renderOpportunities();e.focus({preventScroll:true})}}
 function openAccount(){showScreen("accountScreen");loadAccount()}
 
 async function sessionUser(){try{const g=await supabaseClient.auth.getSession();if(g.data&&g.data.session&&g.data.session.user)return g.data.session.user}catch(e){}try{const a=await supabaseClient.auth.signInAnonymously();return a.data&&a.data.user?a.data.user:null}catch(e){return null}}
