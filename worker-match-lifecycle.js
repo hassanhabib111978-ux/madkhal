@@ -14,8 +14,8 @@ async function loadWorkerMatchCenter(){
  if(r.error){panel.innerHTML='<div class="notice">⚠️ تعذر تحميل مسار المطابقات.</div>';return}
  const rows=r.data||[];
  // مطابقة مستقلة للفرص الخارجية: لا تعتمد على قائمة الفرص المعروضة في الصفحة ولا على درجة عامة مخزنة.
- const clean=s=>String(s??'').toLowerCase().replace(/[ًٌٍَُِّْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[^\\p{L}\\p{N}]+/gu,' ').trim();
- const words=s=>clean(s).split(/\\s+/).filter(x=>x.length>=3);
+ const clean=s=>String(s??'').toLowerCase().replace(/[ًٌٍَُِّْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[^\p{L}\p{N}]+/gu,' ').trim();
+ const words=s=>clean(s).split(/\s+/).filter(x=>x.length>=3);
  const occupationScore=(occ,title)=>{
    const o=clean(occ),t=clean(title);
    if(!o||!t)return 0;
