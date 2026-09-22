@@ -400,14 +400,28 @@ function matchScore(job){
   const occ=normalizeText(p.occupation_label||"");
   let score=0;
 
-  // 40 نقطة: المهنة المطلوبة للفرصة
+  // 40 نقطة: المهنة المطلوبة للفرصة — مع منع الخلط بين تخصصات التدريس.
   if(occ){
-    const occTokens=tokens(occ).filter(x=>x.length>=3&&!["مدير","مساعد","متخصص","عامل","عاملة"].includes(x));
-    const exactHits=occTokens.filter(x=>titleCategory.includes(x)).length;
-    const aliases=aliasTermsFor(occ).map(normalizeText).filter(Boolean);
-    const aliasHit=aliases.some(a=>titleCategory.includes(a));
-    if(exactHits>0)score+=Math.min(40,20+10*Math.min(exactHits,2));
-    else if(aliasHit)score+=30;
+    const teacherGroups=[
+      {keys:["مدرس لغه عربيه","معلم لغه عربيه","مدرس عربي","معلم عربي","arabic teacher","arabic language teacher"],terms:["مدرس لغه عربيه","معلم لغه عربيه","مدرس عربي","معلم عربي","arabic teacher","arabic language teacher"]},
+      {keys:["مدرس لغه انجليزيه","معلم لغه انجليزيه","مدرس انجليزي","معلم انجليزي","english teacher","english language teacher"],terms:["مدرس لغه انجليزيه","معلم لغه انجليزيه","مدرس انجليزي","معلم انجليزي","english teacher","english language teacher"]},
+      {keys:["مدرس رياضيات","معلم رياضيات","math teacher","mathematics teacher"],terms:["مدرس رياضيات","معلم رياضيات","math teacher","mathematics teacher"]}
+    ];
+    const groupFor=s=>teacherGroups.find(g=>g.keys.some(k=>normalizeText(s).includes(normalizeText(k))));
+    const og=groupFor(occ);
+    if(og){
+      const isMatch=og.terms.some(k=>titleCategory.includes(normalizeText(k)));
+      const hasOtherTeacher=teacherGroups.some(g=>g!==og&&g.terms.some(k=>titleCategory.includes(normalizeText(k))));
+      if(isMatch)score+=40;
+      else if(hasOtherTeacher)score+=0;
+    }else{
+      const occTokens=tokens(occ).filter(x=>x.length>=3&&!["مدير","مساعد","متخصص","عامل","عاملة"].includes(x));
+      const exactHits=occTokens.filter(x=>titleCategory.includes(x)).length;
+      const aliases=aliasTermsFor(occ).map(normalizeText).filter(Boolean);
+      const aliasHit=aliases.some(a=>titleCategory.includes(a));
+      if(exactHits>0)score+=Math.min(40,20+10*Math.min(exactHits,2));
+      else if(aliasHit)score+=30;
+    }
   }
 
   // 25 نقطة: المهارات
@@ -534,7 +548,7 @@ function openJobDetails(id){
 async function applyToCurrentJob(){if(!currentJob)return;const p=localProfile();if(!p.full_name||!p.occupation_uri){showToast("👤 أكمل ملفك المهني واختيار المهنة أولًا.");setTimeout(()=>openProfile(),500);return}const user=await sessionUser();if(!user){showToast("🔐 سجّل الدخول قبل التقديم.");return}const apps=getLS(LS.applications,[]);if(apps.some(a=>String(a.job_id)===String(currentJob.id))){showToast("ℹ️ سبق تسجيل هذا الطلب.");return}const wp=await supabaseClient.from("worker_profiles").select("id").eq("user_id",user.id).maybeSingle();if(wp.error||!wp.data){showToast("⚠️ احفظ ملفك المهني أولًا.");setTimeout(()=>openProfile(),300);return}const item={id:"app_"+Date.now(),job_id:currentJob.id,title:currentJob.title,company:currentJob.company,location:currentJob.location,source:currentJob.source,status:"applied",created_at:now(),source_url:currentJob.external_link};const row={user_id:user.id,worker_profile_id:wp.data.id,opportunity_type:"external",job_id:currentJob.id,vacancy_id:null,title:currentJob.title,company:currentJob.company||null,location:currentJob.location||null,match_score:matchScore(currentJob),status:"applied",source_url:currentJob.external_link||currentJob.canonical_link||null,applied_at:now(),created_at:now(),updated_at:now()};const ins=await supabaseClient.from("madkhal_applications").insert(row).select("id").single();if(ins.error){showToast("❌ تعذر تسجيل الطلب في المتابعة.");return}item.id=ins.data.id;apps.unshift(item);setLS(LS.applications,apps);addLocalNotification("📩 تم تسجيل طلب التقديم على "+currentJob.title,currentJob.id);showToast("✅ تم تسجيل طلبك وفتح المصدر الأصلي.");setTimeout(()=>{if(currentJob.external_link)window.open(currentJob.external_link,"_blank","noopener,noreferrer")},250);setTimeout(()=>showScreen("accountScreen"),650)}
 
 function addLocalNotification(message,jobId){const a=getLS(LS.notifications,[]);a.unshift({id:"n_"+Date.now()+Math.random(),message,job_id:jobId,created_at:now(),read:false});setLS(LS.notifications,a)}
-function generateLocalMatches(){const p=localProfile();if(!p.occupation_label)return;const matches=allVisibleJobs.map(visibleJob).map(j=>({j,s:matchScore(j)})).filter(x=>x.s>=70).sort((a,b)=>b.s-a.s).slice(0,5);const key="match_alerts_"+(p.occupation_uri||p.occupation_label);const old=getLS(key,[]);const seen=new Set(old.map(x=>String(x.job_id)));const fresh=matches.filter(x=>!seen.has(String(x.j.id)));if(fresh.length){const updated=fresh.map(x=>({job_id:x.j.id,score:x.s,created_at:now(),title:x.j.title})).concat(old).slice(0,20);setLS(key,updated);fresh.slice(0,3).forEach(x=>addLocalNotification("🎯 فرصة مناسبة لك: "+x.j.title+" — مطابقة "+x.s+"%",x.j.id))}}
+function generateLocalMatches(){const p=localProfile();if(!p.occupation_label)return;const key="match_alerts_v2_"+(p.occupation_uri||p.occupation_label);const matches=allVisibleJobs.map(visibleJob).map(j=>({j,s:matchScore(j)})).filter(x=>x.s>=70).sort((a,b)=>b.s-a.s).slice(0,5);const old=getLS(key,[]);const seen=new Set(old.map(x=>String(x.job_id)));const fresh=matches.filter(x=>!seen.has(String(x.j.id)));if(fresh.length){const updated=fresh.map(x=>({job_id:x.j.id,score:x.s,created_at:now(),title:x.j.title})).concat(old).slice(0,20);setLS(key,updated);const notes=getLS(LS.notifications,[]).filter(n=>!String(n.message||"").startsWith("🎯 فرصة مناسبة لك:"));setLS(LS.notifications,notes);fresh.slice(0,3).forEach(x=>addLocalNotification("🎯 فرصة مناسبة لك: "+x.j.title+" — مطابقة "+x.s+"%",x.j.id))}}
 async function saveSearch(){const status=getLS(LS.subscription,"inactive");if(status!=="requested"&&status!=="active"){showToast("🔔 حفظ البحث والمتابعة ضمن الاشتراك.");openSubscription();return}setLS("madkhal_saved_search_v1",{query:document.getElementById("jobSearch")?.value||"",location:document.getElementById("jobLocation")?.value||"",created_at:now()});showToast("💾 تم حفظ البحث على هذا الجهاز.")}
 
 async function renderSubscription(){const status=getLS(LS.subscription,"inactive");const box=document.getElementById("subscriptionStatus");const account=document.getElementById("accountSubscriptionStatus");const text=status==="active"?"✅ الاشتراك مفعل.":status==="requested"?"🔔 تم تسجيل رغبتك بالاشتراك. التفعيل الفعلي للدفع سيضاف عند ربط مزود الدفع.":"الاشتراك غير مفعل.";if(box)box.textContent=text;if(account)account.textContent=text}
