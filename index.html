@@ -9,7 +9,7 @@
 <meta name="description" content="مَدخَل — بوابتك إلى فرص العمل">
 <link rel="manifest" href="./manifest.json">
 <title>مَدخَل 🚪</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">document.addEventListener("DOMContentLoaded",()=>{const b=document.getElementById("clearJobSearch");if(b)b.addEventListener("click",clearJobSearch);});</script>
 <style>
 :root{--teal:#0f766e;--teal2:#e8f7f4;--ink:#182222;--muted:#657171;--line:#dfe8e7;--bg:#f5f8f7;--card:#fff;--gold:#e8ba55;--shadow:0 10px 28px rgba(20,40,40,.07)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -64,7 +64,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 #opportunitiesScreen .salary{flex:0 1 auto;max-width:130px;min-width:0;white-space:normal!important;overflow-wrap:anywhere;word-break:break-word;text-align:left}
 #opportunitiesScreen .source-note,#opportunitiesScreen .opportunity-meta{overflow-wrap:anywhere;word-break:break-word}
 </style>
-<style id="MADKHAL_PAYMENT_METHODS_2026_09_21">.payment-methods{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}.payment-method{width:100%;min-height:52px;font-weight:900;border-radius:14px}.payment-method:active{transform:scale(.98)}</style></head>
+<style id="MADKHAL_PAYMENT_METHODS_2026_09_21">.payment-methods{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}.payment-method{width:100%;min-height:52px;font-weight:900;border-radius:14px}.payment-method:active{transform:scale(.98)}</style><style id="MADKHAL_SEARCH_FIELDS_FIX_2026_09_22">.opportunity-search-wrap{position:relative;display:flex;gap:7px;align-items:center}.opportunity-search-wrap input{flex:1;min-width:0}.search-clear{flex:0 0 auto;border:1px solid #cde3df;background:#f7fbfa;color:#0f766e;border-radius:11px;padding:10px 11px;font-size:11px;font-weight:900}.search-clear:active{transform:scale(.97)}#employerOccupationSearch{cursor:default}input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-search-decoration{display:none;-webkit-appearance:none}</style></head>
 <body>
 <div class="app">
 <header class="header"><div class="header-row"><div class="logo">مَدخَل 🚪</div><div class="pilot">إطلاق تجريبي</div></div></header>
@@ -149,7 +149,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 <section id="opportunitiesScreen" class="screen">
 <button class="back" onclick="showScreen('homeScreen')">→ العودة</button>
 <div class="card"><h2>🔎 فرص العمل</h2><p>هذه القائمة تعرض الفرص الفعلية المتاحة في نطاق مَدخَل: سوريا والشرق الأوسط. الوظائف خارج النطاق أو التجريبية لا تظهر هنا.</p></div>
-<div class="search-box card"><div class="form-group"><label>المهنة أو المهارة</label><input id="jobSearch" type="search" placeholder="مثال: محاسب، Network Engineer" oninput="renderOpportunities()"></div><div class="form-group" style="margin-bottom:0"><label>المدينة أو البلد</label><input id="jobLocation" placeholder="مثال: دمشق، قطر" oninput="renderOpportunities()"></div></div>
+<div class="search-box card"><div class="form-group"><label>المهنة أو المهارة</label><div class="opportunity-search-wrap"><input id="jobSearch" type="text" autocomplete="off" placeholder="اكتب المهنة أو المهارة، مثل: محاسب أو Excel" oninput="renderOpportunities()"><button id="clearJobSearch" type="button" class="search-clear" aria-label="مسح البحث" title="مسح البحث">مسح</button></div></div><div class="form-group" style="margin-bottom:0"><label>المدينة أو البلد</label><input id="jobLocation" placeholder="مثال: دمشق، قطر" oninput="renderOpportunities()"></div></div>
 <div id="categoryScroll" class="chips"></div><div id="opportunitiesList"></div>
 </section>
 
@@ -177,7 +177,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 <div class="card"><h2>🏢 صاحب العمل</h2><p>أنشئ الفرصة، ثم يتولى مَدخَل المطابقة مع الباحثين المناسبين. الفرصة ليست قائمة عامة للتصفح.</p></div>
 <div class="card">
 <div class="form-group"><label>اسم الشركة أو صاحب العمل</label><input id="employerName" autocomplete="organization"></div>
-<div class="form-group occupation-box"><label>المهنة المطلوبة</label><input id="employerOccupationSearch" type="search" placeholder="مثال: محاسب / مهندس مدني"><input id="employerOccupationUri" type="hidden"><input id="employerOccupationLabel" type="hidden"><div id="employerOccupationResults" class="occupation-results"></div><div id="employerOccupationStatus" class="occupation-status">اختر مهنة مرتبطة بفرص العمل الفعلية.</div></div>
+<div class="form-group occupation-box"><label>المهنة المطلوبة</label><input id="employerOccupationSearch" type="text" autocomplete="off" placeholder="اختر المهنة من القائمة — لا تكتبها يدويًا"><input id="employerOccupationUri" type="hidden"><input id="employerOccupationLabel" type="hidden"><div id="employerOccupationResults" class="occupation-results"></div><div id="employerOccupationStatus" class="occupation-status">اختر مهنة مرتبطة بفرص العمل الفعلية.</div></div>
 <div class="form-group"><label>المسمى الذي سيظهر لصاحب الفرصة</label><input id="vacancyTitle" placeholder="مثال: محاسب"></div>
 <div class="grid-2"><div class="form-group"><label>البلد</label><input id="vacancyCountry" placeholder="سوريا، قطر..."></div><div class="form-group"><label>المدينة / المكان</label><input id="vacancyLocation" placeholder="دمشق"></div></div>
 <div class="form-group"><label>نوع العمل</label><select id="vacancyWorkType"><option value="">اختر</option><option value="full_time">دوام كامل</option><option value="part_time">دوام جزئي</option><option value="remote">عن بُعد</option><option value="freelance">عمل حر</option></select></div>
@@ -283,7 +283,7 @@ function openEmployer(){showScreen("employerScreen","employerName")}
 function openDiscoverSkills(){showScreen("discoverSkillsSection");renderSkills()}
 function startSkillAssessment(){openProfile()}
 function openAssessmentScreen(){showScreen("accountScreen");loadAccount()}
-function openOpportunities(){showScreen("opportunitiesScreen","jobSearch");loadJobs().then(()=>{renderCategories();renderOpportunities()})}
+function openOpportunities(){showScreen("opportunitiesScreen","jobSearch");loadJobs().then(()=>{renderCategories();renderOpportunities()})}\nfunction clearJobSearch(){const e=document.getElementById("jobSearch");if(e){e.value="";renderOpportunities();e.focus({preventScroll:true})}}
 function openAccount(){showScreen("accountScreen");loadAccount()}
 
 async function sessionUser(){try{const g=await supabaseClient.auth.getSession();if(g.data&&g.data.session&&g.data.session.user)return g.data.session.user}catch(e){}try{const a=await supabaseClient.auth.signInAnonymously();return a.data&&a.data.user?a.data.user:null}catch(e){return null}}
