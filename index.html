@@ -501,6 +501,14 @@ async function loadAccount(){
     status.textContent="👋 "+p.full_name+" · "+(p.occupation_label||"مهنة غير محددة")+" · 📍 "+(p.location||"غير محدد");
     summary.innerHTML='<div class="profile-summary"><div class="summary-box"><strong>المهنة</strong><br>'+escapeHtml(p.occupation_label||"—")+'</div><div class="summary-box"><strong>المؤهل</strong><br>'+escapeHtml(p.qualification||"—")+'</div><div class="summary-box"><strong>سنوات الخبرة</strong><br>'+escapeHtml(p.experience_years??"—")+'</div><div class="summary-box"><strong>نوع العمل</strong><br>'+escapeHtml(workType(p.work_type))+'</div></div><button class="secondary-btn" style="width:100%;margin-top:10px" onclick="openProfile()">✏️ تعديل الملف</button>';
     if(box)box.innerHTML='<div class="notice">⏳ جارٍ حساب تقييم مَدخَل حسب مهنتك ومهاراتك...</div>';
+    // نعرض تقييمًا فوريًا محليًا أولًا، ثم نحدّثه بالتقييم المهني الكامل إن توفرت مهارات المهنة من Supabase.
+    try{
+      const instant=calculateAutomaticAssessmentInstant(p);
+      if(instant&&Number.isFinite(Number(instant.score))){
+        setLS(LS.assessment,instant);
+        renderAutomaticAssessment(instant);
+      }
+    }catch(e){console.warn("instant assessment",e)}
     try{
       const a=await Promise.race([
         calculateAutomaticAssessment(p),
