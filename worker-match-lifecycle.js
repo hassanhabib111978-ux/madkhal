@@ -36,7 +36,19 @@ async function loadWorkerMatchCenter(){
    const title=[j.title,j.category].filter(Boolean).join(' ');
    const text=[j.title,j.category,j.description].filter(Boolean).join(' ');
    let s=0;
-   s+=occupationScore(p.occupation_label||p.profession||'',title);
+   const profileOcc=p.occupation_label||p.profession||'';
+   const profileSkills=clean(p.skills||'');
+   const specialtyTerms=['عربي','لغة عربية','arabic','انجليزي','لغة انجليزية','english','رياضيات','math','mathematics'];
+   const explicitSpecialty=specialtyTerms.some(k=>clean(title).includes(clean(k)));
+   const profileHasSpecialty=specialtyTerms.some(k=>profileOcc&&clean(profileOcc).includes(clean(k)))||
+     specialtyTerms.some(k=>profileSkills.includes(clean(k)));
+   const occ=occupationScore(profileOcc,title);
+   // التخصص الدقيق لا يُمنح نقاطًا لمجرد تشابه كلمة «معلم/تعليم».
+   if(explicitSpecialty&&!profileHasSpecialty){
+     s+=Math.min(20,occ);
+   }else{
+     s+=occ;
+   }
    const sk=words(p.skills||'');
    if(sk.length)s+=Math.min(25,Math.round(sk.filter(w=>clean(text).includes(w)).length/Math.min(sk.length,5)*25));
    const loc=clean(p.location||'');
