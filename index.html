@@ -257,7 +257,7 @@ const OCC_ALIASES={
   "فني شبكات":["network technician"],
   "أمين مستودع":["warehouse","storekeeper","inventory"],
   "طاه":["chef","cook"],
-  "حارس أمن":["security guard","security officer"],
+  "حارس أمن":["security guard","security officer","security agent","security personnel","security supervisor","doorman","watchman"],
   "مصور":["photographer"],
   "محرر فيديو":["video editor"],
   "مترجم":["translator"],
@@ -410,28 +410,25 @@ function salaryText(j){let a=validSalaryNumber(j.salary_min),b=validSalaryNumber
 function workType(t){const x=cleanJobText(t);return ({full_time:"دوام كامل",part_time:"دوام جزئي",remote:"عن بُعد",freelance:"عمل حر",any:"أي نوع"})[x]||x||"غير محدد"}
 function categoryFor(j){const t=normalizeText([j.title,j.category,j.description].filter(Boolean).join(" "));if(t.includes("محاسب")||t.includes("محاسبة")||t.includes("account"))return "🧮 المحاسبة";if(t.includes("برمج")||t.includes("developer")||t.includes("engineer")||t.includes("software"))return "💻 التقنية";if(t.includes("تصميم")||t.includes("designer")||t.includes("graphic"))return "🎨 التصميم";if(t.includes("تسويق")||t.includes("marketing")||t.includes("مبيعات")||t.includes("sales"))return "📣 التسويق والمبيعات";if(t.includes("سكرت")||t.includes("secretary")||t.includes("admin"))return "🗂️ الإدارة";if(t.includes("خدمة العملاء")||t.includes("customer service"))return "🗣️ خدمة العملاء";if(t.includes("driver")||t.includes("سائق"))return "🚚 النقل";if(t.includes("تعليم")||t.includes("teacher")||t.includes("مدرس"))return "📚 التعليم";return "🔧 أخرى"}function visibleJob(j){return {id:j.id,title:cleanJobText(j.title)||"فرصة",company:cleanJobText(j.company)||"حسب المصدر",location:cleanJobText(j.location||j.country)||"غير محدد",country:cleanJobText(j.country),type:workType(j.job_type),category:categoryFor(j),description:cleanJobText(j.description)||"تفاصيل الوظيفة موجودة في المصدر الأصلي.",salary:salaryText(j),source:cleanJobText(j.source),source_name:cleanJobText(j.source_name),external_link:String(j.source_url||j.canonical_url||""),canonical_link:String(j.canonical_url||j.source_url||""),posted_at:j.posted_at||null,expires_at:j.expires_at||null}}
 function matchScore(job){
-  const p=localProfile();
-  if(!p.full_name&&!p.occupation_label&&!p.skills)return 0;
+  const p=localProfile()||{};
+  if(!p.occupation_label)return 0;
+
   const titleCategory=normalizeText([job.title,job.category].join(" "));
   const text=normalizeText([job.title,job.category,job.description].join(" "));
-  const occ=normalizeText(p.occupation_label||"");
-  if(!occ)return 0;
+  const occ=normalizeText(p.occupation_label);
+  if(!occ||!titleCategory)return 0;
 
-  // المرحلة الأولى: لا نحسب الموقع/الدوام/الخبرة قبل إثبات صلة مهنية حقيقية.
-  const teacherWords=["مدرس","معلم","مدرسه","معلمه","تدريس","تعليم","teacher","teaching"];
+  // المرحلة الأولى: يجب إثبات صلة مهنية حقيقية قبل احتساب الموقع أو الدوام أو الخبرة.
+  const genericTokens=new Set(["مدير","مديره","مساعد","مساعدة","متخصص","متخصصة","عامل","عاملة","موظف","موظفة","مسؤول","مسؤولة","عام","عامه"]);
+  const occTokens=tokens(occ).filter(x=>x.length>=3&&!genericTokens.has(x));
+  const aliases=aliasTermsFor(p.occupation_label).map(normalizeText).filter(x=>x.length>=3);
+  const profileVariants=[occ,...aliases];
+
+  // التعليم: المهنة العامة لا تُساوي التخصص، لكن الإعلان الذي يذكر أكثر من مادة
+  // يمكن أن يطابق مدرس المادة المذكورة فيه.
+  const teacherWords=["مدرس","معلم","مدرسه","معلمه","تدريس","تعليم","teacher","teaching","instructor"];
   const teacherProfile=teacherWords.some(k=>occ.includes(normalizeText(k)));
   const teacherJob=teacherWords.some(k=>titleCategory.includes(normalizeText(k)));
-
-  const mismatchGroups=[
-    {profile:["حارس امن","حارس","security guard","security"],jobs:["محاسب","المحاسبة","accountant","accounting","تمويل","مسؤول التمويل","طبيب","general practitioner","doctor","موارد بشرية","hr","human resources"]},
-    {profile:["محاسب","المحاسبة","accountant","accounting"],jobs:["حارس امن","security guard","طبيب","general practitioner","doctor","موارد بشرية","hr","human resources"]},
-    {profile:["طبيب","طبيب عام","general practitioner","doctor"],jobs:["حارس امن","security guard","محاسب","المحاسبة","accountant","موارد بشرية","hr","human resources"]},
-    {profile:["موارد بشرية","hr","human resources"],jobs:["حارس امن","security guard","محاسب","المحاسبة","accountant","طبيب","general practitioner","doctor"]}
-  ];
-  if(mismatchGroups.some(g=>g.profile.some(k=>occ.includes(normalizeText(k)))&&g.jobs.some(k=>titleCategory.includes(normalizeText(k)))))return 0;
-
-  let professionalScore=0;
-  if(teacherProfile&&teacherJob)professionalScore=20;
 
   const teacherGroups=[
     {keys:["مدرس لغه عربيه","معلم لغه عربيه","مدرس عربي","معلم عربي","arabic teacher","arabic language teacher"],terms:["مدرس لغه عربيه","معلم لغه عربيه","مدرس عربي","معلم عربي","arabic teacher","arabic language teacher"]},
@@ -439,22 +436,27 @@ function matchScore(job){
     {keys:["مدرس رياضيات","معلم رياضيات","math teacher","mathematics teacher"],terms:["مدرس رياضيات","معلم رياضيات","math teacher","mathematics teacher"]}
   ];
   const groupFor=s=>teacherGroups.find(g=>g.keys.some(k=>normalizeText(s).includes(normalizeText(k))));
-  const og=groupFor(occ);
-  if(og&&og.terms.some(k=>titleCategory.includes(normalizeText(k))))professionalScore+=35;
-  else if(!og&&!teacherProfile){
-    const occTokens=tokens(occ).filter(x=>x.length>=3&&!["مدير","مساعد","متخصص","عامل","عاملة"].includes(x));
-    const exactHits=occTokens.filter(x=>titleCategory.includes(x)).length;
-    const aliases=aliasTermsFor(occ).map(normalizeText).filter(Boolean);
-    if(exactHits>0)professionalScore+=Math.min(35,18+8*Math.min(exactHits,2));
-    else if(aliases.some(a=>titleCategory.includes(a)))professionalScore+=25;
+  const teacherGroup=groupFor(occ);
+
+  let professionalScore=0;
+  if(teacherProfile&&teacherJob){
+    professionalScore=20;
+    if(teacherGroup&&teacherGroup.terms.some(k=>titleCategory.includes(normalizeText(k))))professionalScore+=35;
+  }else{
+    const exactLabel=titleCategory.includes(occ);
+    const aliasHit=aliases.some(a=>titleCategory.includes(a));
+    const tokenHits=occTokens.filter(t=>titleCategory.includes(t)).length;
+    if(exactLabel)professionalScore=40;
+    else if(aliasHit)professionalScore=35;
+    else if(tokenHits>0)professionalScore=Math.min(30,18+6*Math.min(tokenHits,2));
   }
 
-  // إذا لم توجد صلة مهنية واضحة، لا تظهر الفرصة كمطابقة.
+  // لا نرفع المطابقة بسبب الموقع/الدوام/الخبرة إذا لم توجد صلة مهنية.
   if(professionalScore<=0)return 0;
 
   let score=professionalScore;
 
-  const skills=tokens(p.skills||"").filter(x=>x.length>=3);
+  const skills=tokens(p.skills||"").filter(x=>x.length>=3&&!genericTokens.has(x));
   if(skills.length){
     const skillHits=skills.filter(x=>text.includes(x)).length;
     score+=Math.min(20,Math.round(skillHits/Math.min(skills.length,5)*20));
