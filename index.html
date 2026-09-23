@@ -478,6 +478,8 @@ function matchScore(job){
 
   return Math.max(0,Math.min(100,Math.round(score)));
 }
+function addLocalNotification(message,jobId){const a=getLS(LS.notifications,[]);a.unshift({id:"n_"+Date.now()+Math.random(),message,job_id:jobId||null,created_at:now(),read:false});setLS(LS.notifications,a)}
+function renderSubscription(){const status=getLS(LS.subscription,"inactive");const box=document.getElementById("subscriptionStatus");const account=document.getElementById("accountSubscriptionStatus");const text=status==="active"?"✅ الاشتراك مفعل.":status==="requested"?"🔔 تم تسجيل رغبتك بالاشتراك. التفعيل الفعلي للدفع يضاف بعد ربط مزود الدفع والتحقق من العملية.":"الاشتراك غير مفعل.";if(box)box.textContent=text;if(account)account.textContent=text}
 function generateLocalMatches(){
  const p=localProfile();
  if(!p.occupation_label)return;
