@@ -48,7 +48,7 @@ async function loadWorkerMatchCenter(){
  };
  let publicMatches=[];
  try{
-   const q=await supabaseClient.from('jobs').select('id,title,company,location,country,job_type,category,description,source,source_name,source_url,status,geo_class,expires_at').eq('status','active').in('geo_class',['SYRIA','MENA']).order('created_at',{ascending:false}).limit(500);
+   const q=await supabaseClient.from('jobs').select('id,title,company,location,country,job_type,category,description,source,source_url,status,geo_class,expires_at').eq('status','active').in('geo_class',['SYRIA','MENA']).order('created_at',{ascending:false}).limit(500);
    if(!q.error){
      publicMatches=(q.data||[]).map(j=>({j,s:scoreExternal(j,p)})).filter(x=>x.s>=35).sort((a,b)=>b.s-a.s).slice(0,10);
    }else console.warn('external jobs lookup',q.error);
