@@ -415,62 +415,61 @@ function matchScore(job){
   const titleCategory=normalizeText([job.title,job.category].join(" "));
   const text=normalizeText([job.title,job.category,job.description].join(" "));
   const occ=normalizeText(p.occupation_label||"");
-  let score=0;
+  if(!occ)return 0;
 
-  // 20 نقطة: المهنة العامة. كل تخصصات التدريس تشترك في أساس مهني واحد.
+  // المرحلة الأولى: لا نحسب الموقع/الدوام/الخبرة قبل إثبات صلة مهنية حقيقية.
   const teacherWords=["مدرس","معلم","مدرسه","معلمه","تدريس","تعليم","teacher","teaching"];
   const teacherProfile=teacherWords.some(k=>occ.includes(normalizeText(k)));
   const teacherJob=teacherWords.some(k=>titleCategory.includes(normalizeText(k)));
-  // لا نرسل فرصًا لمهن مختلفة بوضوح (مثل حارس أمن مقابل طبيب أو محاسب).
-  const mismatchGroups=[
-    {profile:["حارس امن","حارس","security guard","security"],jobs:["مسؤول تمويل","تمويل","امتثال","محاسب","accountant","طبيب","general practitioner","طبيبه","طبيب عام","موارد بشرية","hr","human resources"]},
-    {profile:["محاسب","accountant","accounting"],jobs:["حارس امن","security guard","طبيب","general practitioner","موارد بشرية","hr","human resources"]},
-    {profile:["طبيب","طبيب عام","general practitioner","doctor"],jobs:["حارس امن","security guard","محاسب","accountant","موارد بشرية","hr","human resources"]},
-    {profile:["موارد بشرية","hr","human resources"],jobs:["حارس امن","security guard","محاسب","accountant","طبيب","general practitioner"]}
-  ];
-  const hardMismatch=mismatchGroups.some(g=>g.profile.some(k=>occ.includes(normalizeText(k)))&&g.jobs.some(k=>titleCategory.includes(normalizeText(k))));
-  if(hardMismatch)return 0;
-  if(teacherProfile&&teacherJob)score+=20;
 
-  // 35 نقطة: التخصص الدقيق. لا تُمنح إلا إذا كان تخصص الباحث مذكورًا في الإعلان.
-  if(occ){
-    const teacherGroups=[
-      {keys:["مدرس لغه عربيه","معلم لغه عربيه","مدرس عربي","معلم عربي","arabic teacher","arabic language teacher"],terms:["مدرس لغه عربيه","معلم لغه عربيه","مدرس عربي","معلم عربي","arabic teacher","arabic language teacher"]},
-      {keys:["مدرس لغه انجليزيه","معلم لغه انجليزيه","مدرس انجليزي","معلم انجليزي","english teacher","english language teacher"],terms:["مدرس لغه انجليزيه","معلم لغه انجليزيه","مدرس انجليزي","معلم انجليزي","english teacher","english language teacher"]},
-      {keys:["مدرس رياضيات","معلم رياضيات","math teacher","mathematics teacher"],terms:["مدرس رياضيات","معلم رياضيات","math teacher","mathematics teacher"]}
-    ];
-    const groupFor=s=>teacherGroups.find(g=>g.keys.some(k=>normalizeText(s).includes(normalizeText(k))));
-    const og=groupFor(occ);
-    if(og&&og.terms.some(k=>titleCategory.includes(normalizeText(k))))score+=35;
-    else if(!og){
-      const occTokens=tokens(occ).filter(x=>x.length>=3&&!["مدير","مساعد","متخصص","عامل","عاملة"].includes(x));
-      const exactHits=occTokens.filter(x=>titleCategory.includes(x)).length;
-      const aliases=aliasTermsFor(occ).map(normalizeText).filter(Boolean);
-      if(exactHits>0)score+=Math.min(35,18+8*Math.min(exactHits,2));
-      else if(aliases.some(a=>titleCategory.includes(a)))score+=25;
-    }
+  const mismatchGroups=[
+    {profile:["حارس امن","حارس","security guard","security"],jobs:["محاسب","المحاسبة","accountant","accounting","تمويل","مسؤول التمويل","طبيب","general practitioner","doctor","موارد بشرية","hr","human resources"]},
+    {profile:["محاسب","المحاسبة","accountant","accounting"],jobs:["حارس امن","security guard","طبيب","general practitioner","doctor","موارد بشرية","hr","human resources"]},
+    {profile:["طبيب","طبيب عام","general practitioner","doctor"],jobs:["حارس امن","security guard","محاسب","المحاسبة","accountant","موارد بشرية","hr","human resources"]},
+    {profile:["موارد بشرية","hr","human resources"],jobs:["حارس امن","security guard","محاسب","المحاسبة","accountant","طبيب","general practitioner","doctor"]}
+  ];
+  if(mismatchGroups.some(g=>g.profile.some(k=>occ.includes(normalizeText(k)))&&g.jobs.some(k=>titleCategory.includes(normalizeText(k)))))return 0;
+
+  let professionalScore=0;
+  if(teacherProfile&&teacherJob)professionalScore=20;
+
+  const teacherGroups=[
+    {keys:["مدرس لغه عربيه","معلم لغه عربيه","مدرس عربي","معلم عربي","arabic teacher","arabic language teacher"],terms:["مدرس لغه عربيه","معلم لغه عربيه","مدرس عربي","معلم عربي","arabic teacher","arabic language teacher"]},
+    {keys:["مدرس لغه انجليزيه","معلم لغه انجليزيه","مدرس انجليزي","معلم انجليزي","english teacher","english language teacher"],terms:["مدرس لغه انجليزيه","معلم لغه انجليزيه","مدرس انجليزي","معلم انجليزي","english teacher","english language teacher"]},
+    {keys:["مدرس رياضيات","معلم رياضيات","math teacher","mathematics teacher"],terms:["مدرس رياضيات","معلم رياضيات","math teacher","mathematics teacher"]}
+  ];
+  const groupFor=s=>teacherGroups.find(g=>g.keys.some(k=>normalizeText(s).includes(normalizeText(k))));
+  const og=groupFor(occ);
+  if(og&&og.terms.some(k=>titleCategory.includes(normalizeText(k))))professionalScore+=35;
+  else if(!og&&!teacherProfile){
+    const occTokens=tokens(occ).filter(x=>x.length>=3&&!["مدير","مساعد","متخصص","عامل","عاملة"].includes(x));
+    const exactHits=occTokens.filter(x=>titleCategory.includes(x)).length;
+    const aliases=aliasTermsFor(occ).map(normalizeText).filter(Boolean);
+    if(exactHits>0)professionalScore+=Math.min(35,18+8*Math.min(exactHits,2));
+    else if(aliases.some(a=>titleCategory.includes(a)))professionalScore+=25;
   }
 
-  // 20 نقطة: مهارات مشتركة، لكنها لا تستطيع وحدها تعويض غياب التخصص.
+  // إذا لم توجد صلة مهنية واضحة، لا تظهر الفرصة كمطابقة.
+  if(professionalScore<=0)return 0;
+
+  let score=professionalScore;
+
   const skills=tokens(p.skills||"").filter(x=>x.length>=3);
   if(skills.length){
     const skillHits=skills.filter(x=>text.includes(x)).length;
     score+=Math.min(20,Math.round(skillHits/Math.min(skills.length,5)*20));
   }
 
-  // 10 نقاط: الموقع.
   if(p.location){
     const loc=normalizeText(p.location),jobLoc=normalizeText(job.location||""),jobCountry=normalizeText(job.country||"");
     if(jobLoc.includes(loc)||jobCountry.includes(loc))score+=10;
   }
 
-  // 5 نقاط: نوع العمل.
   if(p.work_type&&p.work_type!=="any"){
-    const wt=normalizeText(job.type||""),wanted=normalizeText(p.work_type);
+    const wt=normalizeText(job.type||job.job_type||""),wanted=normalizeText(p.work_type);
     if((p.work_type==="remote"&&wt.includes("عن بعد"))||wt.includes(wanted))score+=5;
   }
 
-  // 5 نقاط: الخبرة عند وجود شرط خبرة رقمي.
   const exp=Number(p.experience_years);
   if(Number.isFinite(exp)&&exp>=0){
     const yearsText=text.match(/[0-9٠-٩]+\s*(?:سنوات|سنة|years?|yrs?)/g)||[];
@@ -481,7 +480,6 @@ function matchScore(job){
     }
   }
 
-  // 5 نقاط: التقييم المهني العام عامل مساعد فقط.
   const a=getLS(LS.assessment,null);
   if(a&&Number(a.score)>0)score+=Math.min(5,Math.round(Number(a.score)/20));
 
