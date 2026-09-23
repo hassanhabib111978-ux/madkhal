@@ -590,6 +590,8 @@ async function startSubscriptionRequest(){const current=getLS(LS.subscription,"i
 
 function formatDate(v){if(!v)return"";try{return new Date(v).toLocaleDateString("ar-EG")}catch(e){return""}}
 async function loadAccount(){
+  // استعادة الملف من Supabase أولًا حتى لا تظهر «لم يُحسب التقييم» بعد إعادة فتح الصفحة.
+  try{ await loadProfileRemote(); }catch(e){ console.warn("account remote profile",e); }
   const p=localProfile();
   const status=document.getElementById("accountStatus");
   const summary=document.getElementById("accountSummary");
