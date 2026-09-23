@@ -421,6 +421,15 @@ function matchScore(job){
   const teacherWords=["مدرس","معلم","مدرسه","معلمه","تدريس","تعليم","teacher","teaching"];
   const teacherProfile=teacherWords.some(k=>occ.includes(normalizeText(k)));
   const teacherJob=teacherWords.some(k=>titleCategory.includes(normalizeText(k)));
+  // لا نرسل فرصًا لمهن مختلفة بوضوح (مثل حارس أمن مقابل طبيب أو محاسب).
+  const mismatchGroups=[
+    {profile:["حارس امن","حارس","security guard","security"],jobs:["مسؤول تمويل","تمويل","امتثال","محاسب","accountant","طبيب","general practitioner","طبيبه","طبيب عام","موارد بشرية","hr","human resources"]},
+    {profile:["محاسب","accountant","accounting"],jobs:["حارس امن","security guard","طبيب","general practitioner","موارد بشرية","hr","human resources"]},
+    {profile:["طبيب","طبيب عام","general practitioner","doctor"],jobs:["حارس امن","security guard","محاسب","accountant","موارد بشرية","hr","human resources"]},
+    {profile:["موارد بشرية","hr","human resources"],jobs:["حارس امن","security guard","محاسب","accountant","طبيب","general practitioner"]}
+  ];
+  const hardMismatch=mismatchGroups.some(g=>g.profile.some(k=>occ.includes(normalizeText(k)))&&g.jobs.some(k=>titleCategory.includes(normalizeText(k))));
+  if(hardMismatch)return 0;
   if(teacherProfile&&teacherJob)score+=20;
 
   // 35 نقطة: التخصص الدقيق. لا تُمنح إلا إذا كان تخصص الباحث مذكورًا في الإعلان.
@@ -670,6 +679,11 @@ async function loadAccount(){
       }
     }
   }
+  // ضمان بقاء التقييم ظاهرًا بعد اكتمال تحميل الحساب، حتى لو أعادت عملية أخرى رسم البطاقة.
+  try{
+    const finalAssessment=getLS(LS.assessment,null);
+    if(finalAssessment&&Number.isFinite(Number(finalAssessment.score))) renderAutomaticAssessment(finalAssessment);
+  }catch(e){ console.warn("final assessment render",e); }
   await renderApplications();
   renderNotifications();
   renderSubscription();
