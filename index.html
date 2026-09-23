@@ -604,7 +604,7 @@ function startLocalPayment(){const method=getLS("madkhal_payment_method","");if(
 async function startSubscriptionRequest(){const current=getLS(LS.subscription,"inactive");if(current==="requested"||current==="active"){showToast(current==="active"?"🔔 اشتراكك مفعل.":"🔔 سبق تسجيل رغبتك بالاشتراك.");renderSubscription();return}setLS(LS.subscription,"requested");try{const user=await sessionUser();if(user){const p=localProfile();const pid=await publicProfileId(user,p.full_name||"مستخدم مَدخَل","seeker");if(pid)await supabaseClient.from("subscriptions").upsert({user_id:pid,plan:"monthly",status:"requested",requested_at:now(),price_usd:1,currency:"USD",auto_renew:false,updated_at:now()},{onConflict:"user_id"});await supabaseClient.from("notifications").insert({user_id:user.id,channel:"in_app",title:"طلب اشتراك",body:"تم تسجيل رغبتك بالاشتراك مقابل دولار واحد شهريًا.",opportunity_type:"subscription",created_at:now(),delivery_status:"pending"})}}catch(e){}addLocalNotification("🔔 تم تسجيل رغبتك بالاشتراك — $1 شهريًا.");renderSubscription();showToast("✅ تم تسجيل رغبتك بالاشتراك.")}
 
 function formatDate(v){if(!v)return"";try{return new Date(v).toLocaleDateString("ar-EG")}catch(e){return""}}
-async function loadAccount(){
+async async function loadAccount(){
   // استعادة الملف من Supabase أولًا، ثم ضمان رسم التقييم المحلي فورًا قبل أي عمليات لاحقة.
   try{ await loadProfileRemote(); }catch(e){ console.warn("account remote profile",e); }
   const p=localProfile()||{};
