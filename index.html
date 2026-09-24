@@ -165,7 +165,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 
 <section id="accountScreen" class="screen">
 <div class="card"><h2>👤 حسابي</h2><p id="accountStatus">لم يتم إنشاء الملف بعد.</p><div id="accountSummary" style="margin-top:12px"></div></div>
-<div class="card"><h3>📊 تقييم مَدخَل</h3><div id="savedAssessmentText">لم يُحسب التقييم بعد.</div></div>
+<div class="card"><h3>📊 تقييم مَدخَل</h3><div id="savedAssessmentText">لم يُحسب التقييم بعد.</div><button class="secondary-btn" style="width:100%;margin-top:10px" onclick="recalculateAccountAssessment()">🔄 إعادة حساب التقييم</button></div>
 <div class="card"><h3>🔔 التنبيهات</h3><div id="notificationsList"></div></div>
 <div class="card"><h3>📩 طلباتي</h3><div id="applicationsList"></div></div>
 <div class="card"><h3>🔔 المتابعة الذكية</h3><p>البحث عن الفرص الموجودة مجاني ولا يتطلب اشتراكًا. الاشتراك اختياري لمن يريد من مَدخَل أن يبحث ويطابق ويرسل التنبيهات باستمرار.</p><div id="accountSubscriptionStatus" class="notice">الاشتراك غير مفعل.</div><button class="primary-btn" style="width:100%;margin-top:10px" onclick="openSubscription()">🔔 تفاصيل المتابعة — $1 شهريًا</button></div>
@@ -606,6 +606,27 @@ function startLocalPayment(){const method=getLS("madkhal_payment_method","");if(
 async function startSubscriptionRequest(){const current=getLS(LS.subscription,"inactive");if(current==="requested"||current==="active"){showToast(current==="active"?"🔔 اشتراكك مفعل.":"🔔 سبق تسجيل رغبتك بالاشتراك.");renderSubscription();return}setLS(LS.subscription,"requested");try{const user=await sessionUser();if(user){const p=localProfile();const pid=await publicProfileId(user,p.full_name||"مستخدم مَدخَل","seeker");if(pid)await supabaseClient.from("subscriptions").upsert({user_id:pid,plan:"monthly",status:"requested",requested_at:now(),price_usd:1,currency:"USD",auto_renew:false,updated_at:now()},{onConflict:"user_id"});await supabaseClient.from("notifications").insert({user_id:user.id,channel:"in_app",title:"طلب اشتراك",body:"تم تسجيل رغبتك بالاشتراك مقابل دولار واحد شهريًا.",opportunity_type:"subscription",created_at:now(),delivery_status:"pending"})}}catch(e){}addLocalNotification("🔔 تم تسجيل رغبتك بالاشتراك — $1 شهريًا.");renderSubscription();showToast("✅ تم تسجيل رغبتك بالاشتراك.")}
 
 function formatDate(v){if(!v)return"";try{return new Date(v).toLocaleDateString("ar-EG")}catch(e){return""}}
+async function recalculateAccountAssessment(){
+  const box=document.getElementById("savedAssessmentText");
+  const p=localProfile()||{};
+  if(!p.occupation_label){
+    if(box)box.innerHTML='<div class="notice">أكمل الملف المهني أولًا حتى نعيد حساب التقييم.</div>';
+    return;
+  }
+  try{
+    if(box)box.innerHTML='<div class="notice">⏳ جارٍ إعادة حساب تقييم مَدخَل...</div>';
+    const fresh=await calculateAutomaticAssessment(p);
+    if(!fresh||!Number.isFinite(Number(fresh.score)))throw new Error("invalid assessment");
+    setLS(LS.assessment,fresh);
+    renderAutomaticAssessment(fresh);
+    showToast("📊 تمت إعادة حساب تقييم مَدخَل.");
+  }catch(e){
+    const fallback=calculateAutomaticAssessmentInstant(p);
+    setLS(LS.assessment,fallback);
+    renderAutomaticAssessment(fallback);
+    showToast("📊 تمت إعادة الحساب بالبيانات المتاحة حاليًا.");
+  }
+}
 async function loadAccount(){
   // استعادة الملف من Supabase أولًا، ثم ضمان رسم التقييم المحلي فورًا قبل أي عمليات لاحقة.
   try{ await loadProfileRemote(); }catch(e){ console.warn("account remote profile",e); }
@@ -696,7 +717,17 @@ function renderNotifications(){
   const box=document.getElementById("notificationsList");
   if(!box)return;
   const raw=getLS(LS.notifications,[]);
-  const normal=raw.filter(x=>!String(x.message||"").startsWith("🎯 فرصة مناسبة لك:"));
+  const applications=getLS(LS.applications,[]);
+  const applicationTitles=new Set(applications.map(x=>normalizeText(x&&x.title||"")).filter(Boolean));
+  const normal=raw.filter(x=>{
+    const msg=String(x.message||"");
+    if(msg.startsWith("🎯 فرصة مناسبة لك:"))return false;
+    if(msg.startsWith("📩 تم تسجيل طلب التقديم على ")){
+      const title=normalizeText(msg.replace("📩 تم تسجيل طلب التقديم على ","").trim());
+      return applicationTitles.has(title);
+    }
+    return true;
+  });
   // لا نعتمد على إشعارات المطابقة القديمة؛ نعيد حسابها من الملف الحالي والفرص الحالية.
   const p=localProfile()||{};
   const matches=[];
