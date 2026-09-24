@@ -690,8 +690,42 @@ async function loadAccount(){
   renderJibranContext();
 }
 async function renderApplications(){const box=document.getElementById("applicationsList");if(!box)return;let a=getLS(LS.applications,[]).slice();try{const user=await sessionUser();if(user){const q=await supabaseClient.from("madkhal_applications").select("id,title,company,location,status,match_score,applied_at,created_at,job_id,source_url").eq("user_id",user.id).order("created_at",{ascending:false}).limit(40);if(!q.error&&Array.isArray(q.data)){const remote=q.data.map(x=>({id:x.id,job_id:x.job_id||null,title:x.title,company:x.company||"—",location:x.location||"غير محدد",status:x.status||"applied",created_at:x.applied_at||x.created_at,source_url:x.source_url||"",match_score:x.match_score}));const map=new Map(a.filter(x=>x&&x.job_id).map(x=>[String(x.job_id),x]));remote.forEach(x=>map.set(String(x.job_id||x.id),x));a=Array.from(map.values()).sort((x,y)=>new Date(y.created_at||0)-new Date(x.created_at||0));setLS(LS.applications,a)}}}catch(e){}if(!a.length){box.innerHTML='<div class="empty">لا توجد طلبات مسجلة بعد.</div>';return}box.innerHTML=a.slice(0,40).map(x=>'<div class="summary-box" style="margin-bottom:8px">📩 <strong>'+escapeHtml(x.title)+'</strong><br>🏢 '+escapeHtml(x.company)+'<br>📍 '+escapeHtml(x.location)+'<br>🟢 '+escapeHtml(x.status==="applied"?"تم التسجيل":x.status==="follow_up"?"قيد المتابعة":x.status==="interview"?"مقابلة":x.status==="offer"?"عرض عمل":x.status==="hired"?"تم التوظيف":"مغلق")+' · '+formatDate(x.created_at)+(x.match_score!=null?" · 🎯 "+Math.round(Number(x.match_score))+"%":"")+'</div>').join("")}
-function renderNotifications(){const box=document.getElementById("notificationsList");const raw=getLS(LS.notifications,[]);const seen=new Set();const a=raw.filter(x=>{const msg=String(x.message||"");if(!msg.startsWith("🎯 فرصة مناسبة لك:"))return true;const id=String(x.job_id||"");const title=normalizeText(msg.replace(/^🎯 فرصة مناسبة لك:\s*/,"").replace(/\s*—\s*مطابقة\s*\d+%.*$/,""));const key=id?"job|"+id:"title|"+title;if(seen.has(key))return false;seen.add(key);return true});if(a.length!==raw.length)setLS(LS.notifications,a);if(!a.length){box.innerHTML='<div class="empty">لا توجد تنبيهات جديدة.</div>';return}box.innerHTML=a.slice(0,12).map(x=>'<div class="summary-box" style="margin-bottom:8px">🔔 '+escapeHtml(x.message||"تنبيه")+'<br><small>'+formatDate(x.created_at)+'</small></div>').join("")}
+function renderNotifications(){
+  const box=document.getElementById("notificationsList");
+  if(!box)return;
+  const raw=getLS(LS.notifications,[]);
+  const p=localProfile()||{};
+  const validJobIds=new Set((allVisibleJobs||[]).map(j=>String(j.id)));
+  const seen=new Set();
+  const cleaned=raw.filter(x=>{
+    const msg=String(x.message||"");
+    if(!msg.startsWith("🎯 فرصة مناسبة لك:"))return true;
 
+    // إشعار المطابقة يُقبل فقط إذا كانت الوظيفة ما تزال موجودة
+    // ونسبة المطابقة الحالية تحقق الحد الأدنى. هذا يمنع بقاء
+    // نسب قديمة مثل 65% بعد تغيير منطق المطابقة أو الملف.
+    const id=String(x.job_id||"");
+    const job=(allVisibleJobs||[]).find(j=>String(j.id)===id);
+    if(!job||!p.occupation_label)return false;
+    const current=matchScore(visibleJob(job));
+    if(current<55)return false;
+
+    const key=id?"job|"+id:"title|"+normalizeText(msg.replace(/^🎯 فرصة مناسبة لك:\s*/,""));
+    if(seen.has(key))return false;
+    seen.add(key);
+
+    const expected="🎯 فرصة مناسبة لك: "+visibleJob(job).title+" — مطابقة "+current+"%";
+    x.message=expected;
+    x.created_at=x.created_at||now();
+    return true;
+  });
+  if(cleaned.length!==raw.length||cleaned.some((x,i)=>x.message!==raw[i]?.message))setLS(LS.notifications,cleaned);
+  if(!cleaned.length){
+    box.innerHTML='<div class="empty">لا توجد تنبيهات جديدة.</div>';
+    return;
+  }
+  box.innerHTML=cleaned.slice(0,12).map(x=>'<div class="summary-box" style="margin-bottom:8px">🔔 '+escapeHtml(x.message||"تنبيه")+'<br><small>'+formatDate(x.created_at)+'</small></div>').join("");
+}
 function selectExperience(button,level){document.querySelectorAll("#experienceOptions button").forEach(b=>{b.classList.remove("primary-btn");b.classList.add("secondary-btn")});button.classList.remove("secondary-btn");button.classList.add("primary-btn");experienceLevel=level;const s=getLS(LS.selectedSkills,[]);assessmentSkillContext=s;if(s.includes("الكتابة")||s.length===0){document.getElementById("writingTest").classList.remove("hidden");document.getElementById("generalAssessment").classList.add("hidden")}else{document.getElementById("writingTest").classList.add("hidden");document.getElementById("generalAssessment").classList.remove("hidden")}}
 function updateWordCount(){const t=document.getElementById("writingAnswer").value.trim();document.getElementById("wordCount").textContent="عدد الكلمات: "+(t?t.split(/\s+/).length:0)}
 function calculateWritingScore(text){const words=text.trim()?text.trim().split(/\s+/).length:0;if(!words)return 0;let score=35;if(words>=120&&words<=180)score+=20;else if(words>=90&&words<=220)score+=12;const lower=text.toLowerCase();["عملاء","العملاء","تواصل","تسويق","شركة","الشركات","منصات","مبيعات","جمهور","ثقة","محتوى","إعلان","اعلان"].forEach(w=>{if(lower.includes(w))score+=4});const sentences=text.split(/[.!؟\n]+/).filter(x=>x.trim()).length;if(sentences>=4)score+=10;return Math.min(100,Math.round(score))}
