@@ -694,32 +694,31 @@ function renderNotifications(){
   const box=document.getElementById("notificationsList");
   if(!box)return;
   const raw=getLS(LS.notifications,[]);
+  const normal=raw.filter(x=>!String(x.message||"").startsWith("🎯 فرصة مناسبة لك:"));
+  // لا نعتمد على إشعارات المطابقة القديمة؛ نعيد حسابها من الملف الحالي والفرص الحالية.
   const p=localProfile()||{};
-  const validJobIds=new Set((allVisibleJobs||[]).map(j=>String(j.id)));
-  const seen=new Set();
-  const cleaned=raw.filter(x=>{
-    const msg=String(x.message||"");
-    if(!msg.startsWith("🎯 فرصة مناسبة لك:"))return true;
-
-    // إشعار المطابقة يُقبل فقط إذا كانت الوظيفة ما تزال موجودة
-    // ونسبة المطابقة الحالية تحقق الحد الأدنى. هذا يمنع بقاء
-    // نسب قديمة مثل 65% بعد تغيير منطق المطابقة أو الملف.
-    const id=String(x.job_id||"");
-    const job=(allVisibleJobs||[]).find(j=>String(j.id)===id);
-    if(!job||!p.occupation_label)return false;
-    const current=matchScore(visibleJob(job));
-    if(current<55)return false;
-
-    const key=id?"job|"+id:"title|"+normalizeText(msg.replace(/^🎯 فرصة مناسبة لك:\s*/,""));
-    if(seen.has(key))return false;
-    seen.add(key);
-
-    const expected="🎯 فرصة مناسبة لك: "+visibleJob(job).title+" — مطابقة "+current+"%";
-    x.message=expected;
-    x.created_at=x.created_at||now();
-    return true;
-  });
-  if(cleaned.length!==raw.length||cleaned.some((x,i)=>x.message!==raw[i]?.message))setLS(LS.notifications,cleaned);
+  const matches=[];
+  if(p.occupation_label){
+    const seen=new Set();
+    (allVisibleJobs||[]).map(visibleJob).forEach(j=>{
+      const score=matchScore(j);
+      if(score<55)return;
+      const urlKey=normalizeText(j.canonical_url||j.source_url||"");
+      const titleKey=normalizeText(j.title||"");
+      const key=urlKey?"url|"+urlKey:"title|"+titleKey;
+      if(seen.has(key))return;
+      seen.add(key);
+      matches.push({job_id:j.id,title:j.title,score});
+    });
+    matches.sort((a,b)=>b.score-a.score);
+  }
+  const current=matches.slice(0,3).map(x=>({
+    job_id:x.job_id,
+    message:"🎯 فرصة مناسبة لك: "+x.title+" — مطابقة "+x.score+"%",
+    created_at:now()
+  }));
+  const cleaned=normal.concat(current);
+  setLS(LS.notifications,cleaned);
   if(!cleaned.length){
     box.innerHTML='<div class="empty">لا توجد تنبيهات جديدة.</div>';
     return;
@@ -748,7 +747,7 @@ window.addEventListener("beforeinstallprompt",event=>{event.preventDefault();ins
 window.addEventListener("appinstalled",()=>{installPromptEvent=null;document.getElementById("installBar").classList.add("hidden")});
 async function installMadkhal(){if(!installPromptEvent){showToast("📱 استخدم قائمة المتصفح ثم اختر إضافة إلى الشاشة الرئيسية.");return}installPromptEvent.prompt();try{await installPromptEvent.userChoice}catch(e){}installPromptEvent=null;document.getElementById("installBar").classList.add("hidden")}
 
-document.addEventListener("DOMContentLoaded",async()=>{selectedSkills=getLS(LS.selectedSkills,[]);await loadJobs();updateJobCounter();await loadProfileRemote();generateLocalMatches();renderCategories();renderOpportunities();renderSkills();await loadAccount();initOccupationPickers();if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js",{scope:"./"}).catch(()=>{});});
+document.addEventListener("DOMContentLoaded",async()=>{selectedSkills=getLS(LS.selectedSkills,[]);await loadJobs();updateJobCounter();await loadProfileRemote();generateLocalMatches();renderCategories();renderOpportunities();renderSkills();await loadAccount();ensureAccountAssessment();renderNotifications();initOccupationPickers();if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js",{scope:"./"}).catch(()=>{});});
 </script>
 <script src="./employer-flow-enhancement.js"></script>
 <script src="./worker-match-lifecycle.js"></script>
