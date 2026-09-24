@@ -366,7 +366,7 @@ async function calculateAutomaticAssessment(p){
   const aliases=aliasTermsFor(p.occupation_label||"").map(normalizeText).filter(Boolean);
   const evidenceHits=userSkills.filter(us=>reqLabels.some(rs=>{const a=tokens(us),b=tokens(rs);return normalizeText(us)===rs||a.some(x=>x.length>=3&&b.includes(x))||rs.includes(normalizeText(us))||normalizeText(us).includes(rs)})||aliases.some(a=>a.includes(us)||us.includes(a))).length;
   const evidenceScore=reqLabels.length?Math.min(100,Math.round(evidenceHits/Math.min(reqLabels.length,8)*100)):(userSkills.length?Math.min(100,40+Math.min(userSkills.length,4)*15):0);
-  const ratedValues=required.filter(s=>ratings[s.uri]!=null).map(s=>ratings[s.uri]);
+  const ratedValues=required.filter(s=>ratings[s.uri]!=null&&Number(ratings[s.uri])>0).map(s=>Number(ratings[s.uri]));
   const ratingScore=ratedValues.length?Math.round(ratedValues.reduce((x,y)=>x+y,0)/ratedValues.length/5*100):null;
   const skillScore=ratingScore===null?evidenceScore:Math.round(evidenceScore*.6+ratingScore*.4);
   const experienceScore=exp===null?0:Math.min(100,Math.round(35+Math.min(exp,7)*9.3));
