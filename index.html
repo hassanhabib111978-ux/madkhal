@@ -684,6 +684,8 @@ async function loadAccount(){
     const finalAssessment=getLS(LS.assessment,null);
     if(finalAssessment&&Number.isFinite(Number(finalAssessment.score))) renderAutomaticAssessment(finalAssessment);
   }catch(e){ console.warn("final assessment render",e); }
+  // تحميل الفرص الحالية قبل رسم الطلبات والتنبيهات حتى تُعاد المطابقة وفق الملف الحالي.
+  try{ await loadJobs(); }catch(e){ console.warn("account jobs load",e); }
   await renderApplications();
   renderNotifications();
   renderSubscription();
