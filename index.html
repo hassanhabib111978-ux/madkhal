@@ -613,19 +613,22 @@ async function recalculateAccountAssessment(){
     if(box)box.innerHTML='<div class="notice">أكمل الملف المهني أولًا حتى نعيد حساب التقييم.</div>';
     return;
   }
+  // نعرض النتيجة الفورية أولًا حتى لا تبقى البطاقة معلقة إذا تأخر مصدر المهارات.
+  const instant=calculateAutomaticAssessmentInstant(p);
+  setLS(LS.assessment,instant);
+  renderAutomaticAssessment(instant);
+  showToast("📊 تم تحديث تقييم مَدخَل.");
+  // نحاول الحساب المتقدم في الخلفية، لكن لا نجعل الواجهة تنتظر.
   try{
-    if(box)box.innerHTML='<div class="notice">⏳ جارٍ إعادة حساب تقييم مَدخَل...</div>';
-    const fresh=await calculateAutomaticAssessment(p);
-    if(!fresh||!Number.isFinite(Number(fresh.score)))throw new Error("invalid assessment");
-    setLS(LS.assessment,fresh);
-    renderAutomaticAssessment(fresh);
-    showToast("📊 تمت إعادة حساب تقييم مَدخَل.");
-  }catch(e){
-    const fallback=calculateAutomaticAssessmentInstant(p);
-    setLS(LS.assessment,fallback);
-    renderAutomaticAssessment(fallback);
-    showToast("📊 تمت إعادة الحساب بالبيانات المتاحة حاليًا.");
-  }
+    const fresh=await Promise.race([
+      calculateAutomaticAssessment(p),
+      new Promise(resolve=>setTimeout(()=>resolve(null),3000))
+    ]);
+    if(fresh&&Number.isFinite(Number(fresh.score))){
+      setLS(LS.assessment,fresh);
+      renderAutomaticAssessment(fresh);
+    }
+  }catch(e){ console.warn("background assessment",e); }
 }
 async function loadAccount(){
   // استعادة الملف من Supabase أولًا، ثم ضمان رسم التقييم المحلي فورًا قبل أي عمليات لاحقة.
@@ -722,6 +725,7 @@ function renderNotifications(){
   const normal=raw.filter(x=>{
     const msg=String(x.message||"");
     if(msg.startsWith("🎯 فرصة مناسبة لك:"))return false;
+    if(msg.includes("تم تسجيل رغبتك بالاشتراك")||msg.includes("طلب اشتراك"))return false;
     if(msg.startsWith("📩 تم تسجيل طلب التقديم على ")){
       const title=normalizeText(msg.replace("📩 تم تسجيل طلب التقديم على ","").trim());
       return applicationTitles.has(title);
