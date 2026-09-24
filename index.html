@@ -319,9 +319,17 @@ function calculateAutomaticAssessmentInstant(p){
   const qualification=normalizeText(p.qualification||"");
   const summary=normalizeText(p.professional_summary||p.summary||"");
   const exp=p.experience_years===""||p.experience_years==null?null:Number(p.experience_years);
+  const medical=/(طبيب|طبيبه|طبيبة|دكتور|doctor|physician|medicine|medical|طب شرعي|forensic)/.test(occ);
+  const teacher=/(مدرس|معلم|تدريس|تعليم|teacher|teaching)/.test(occ);
+  const engineering=/(مهندس|مهندسة|engineer|engineering)/.test(occ);
+  const accounting=/(محاسب|محاسبة|accountant|accounting)/.test(occ);
+  let qualificationScore=has(qualification)?75:0;
+  if(medical)qualificationScore=/(طب|طبيب|طبيبه|طبيبة|medicine|medical|doctor|physician|دكتور|بورد|اختصاص|دراسات عليا|ماجستير|دكتوراه|master|md|mbbs)/.test(qualification)?95:10;
+  else if(teacher)qualificationScore=/(تربية|تعليم|معلم|مدرس|آداب|لغة|education|teaching|teacher)/.test(qualification)?90:65;
+  else if(engineering)qualificationScore=/(هندسة|مهندس|engineering|engineer)/.test(qualification)?95:35;
+  else if(accounting)qualificationScore=/(محاسبة|اقتصاد|تجارة|accounting|finance|business)/.test(qualification)?95:40;
   const skillScore=skills.length?Math.min(100,40+Math.min(skills.length,4)*15):0;
   const experienceScore=exp===null?0:Math.min(100,Math.round(35+Math.min(exp,7)*9.3));
-  const qualificationScore=has(qualification)?75:0;
   const summaryScore=summary.length>=120?100:summary.length>=60?75:summary.length>=25?50:0;
   const completeness=[p.first_name,p.mother_name,p.birth_date,p.qualification,p.occupation_label,p.location,p.work_type,p.professional_summary].filter(has).length/8*100;
   const factors=[
@@ -329,13 +337,12 @@ function calculateAutomaticAssessmentInstant(p){
     {name:"ملاءمة المهنة المختارة",score:occ?100:0,weight:20},
     {name:"مهارات المهنة",score:skillScore,weight:35},
     {name:"الخبرة المهنية",score:experienceScore,weight:20},
-    {name:"المؤهل",score:qualificationScore,weight:10},
+    {name:"ملاءمة المؤهل للمهنة",score:qualificationScore,weight:10},
     {name:"النبذة المهنية",score:summaryScore,weight:5}
   ];
   const score=Math.round(factors.reduce((s,f)=>s+f.score*f.weight/100,0));
-  return {score,level:score>=85?"ملف قوي":score>=70?"ملف جيد":score>=50?"ملف قابل للتحسين":"يحتاج استكمال",skill:p.occupation_label||"الملف المهني",occupation_uri:p.occupation_uri||"",required_skills:[],date:now(),factors,strengths:factors.filter(f=>f.score>=75).map(f=>f.name),improvements:factors.filter(f=>f.score<75).map(f=>f.name),method:"تقييم فوري أولي مرتبط بالمهنة والمهارات"};
+  return {score,level:score>=85?"ملف قوي":score>=70?"ملف جيد":score>=50?"ملف قابل للتحسين":"يحتاج استكمال",skill:p.occupation_label||"الملف المهني",occupation_uri:p.occupation_uri||"",required_skills:[],date:now(),factors,strengths:factors.filter(f=>f.score>=75).map(f=>f.name),improvements:factors.filter(f=>f.score<75).map(f=>f.name),method:"تقييم فوري أولي مرتبط بالمهنة والمهارات وملاءمة المؤهل"};
 }
-
 async function calculateAutomaticAssessment(p){
   const has=v=>String(v??"").trim().length>0;
   const userSkills=String(p.skills||"").split(/[,،]+/).map(x=>normalizeText(x)).filter(Boolean);
@@ -363,7 +370,9 @@ async function calculateAutomaticAssessment(p){
   const ratingScore=ratedValues.length?Math.round(ratedValues.reduce((x,y)=>x+y,0)/ratedValues.length/5*100):null;
   const skillScore=ratingScore===null?evidenceScore:Math.round(evidenceScore*.6+ratingScore*.4);
   const experienceScore=exp===null?0:Math.min(100,Math.round(35+Math.min(exp,7)*9.3));
-  const qualificationScore=has(qualification)?75:0;
+  const qualificationScore=/(طبيب|طبيبه|طبيبة|دكتور|doctor|physician|medicine|medical|طب شرعي|forensic)/.test(occ)
+    ? (/(طب|طبيب|طبيبه|طبيبة|medicine|medical|doctor|physician|بورد|اختصاص|دراسات عليا|ماجستير|دكتوراه|master|md|mbbs)/.test(qualification)?95:10)
+    : (has(qualification)?75:0);
   const summaryScore=summary.length>=120?100:summary.length>=60?75:summary.length>=25?50:0;
   const profileCompleteness=[p.first_name,p.mother_name,p.birth_date,p.qualification,p.occupation_label,p.location,p.work_type,p.professional_summary].filter(has).length/8*100;
   const factors=[
@@ -412,24 +421,22 @@ function categoryFor(j){const t=normalizeText([j.title,j.category,j.description]
 function matchScore(job){
   const p=localProfile()||{};
   if(!p.occupation_label)return 0;
-
   const titleCategory=normalizeText([job.title,job.category].join(" "));
   const text=normalizeText([job.title,job.category,job.description].join(" "));
   const occ=normalizeText(p.occupation_label);
   if(!occ||!titleCategory)return 0;
-
-  // المرحلة الأولى: يجب إثبات صلة مهنية حقيقية قبل احتساب الموقع أو الدوام أو الخبرة.
   const genericTokens=new Set(["مدير","مديره","مساعد","مساعدة","متخصص","متخصصة","عامل","عاملة","موظف","موظفة","مسؤول","مسؤولة","عام","عامه"]);
   const occTokens=tokens(occ).filter(x=>x.length>=3&&!genericTokens.has(x));
   const aliases=aliasTermsFor(p.occupation_label).map(normalizeText).filter(x=>x.length>=3);
-  const profileVariants=[occ,...aliases];
-
-  // التعليم: المهنة العامة لا تُساوي التخصص، لكن الإعلان الذي يذكر أكثر من مادة
-  // يمكن أن يطابق مدرس المادة المذكورة فيه.
+  const hasAny=(s,list)=>list.some(k=>s.includes(normalizeText(k)));
+  const medicalWords=["طبيب","طبيبه","طبيبة","دكتور","doctor","physician","medical","medicine","طب","ممرض","ممرضة","nurse","pharmac","صيدلي","صيدلاني"];
+  const forensicWords=["طب شرعي","طبيب شرعي","طبيبة شرعية","forensic","forensic medicine","forensic doctor"];
+  const securityWords=["حارس أمن","حارسة أمن","security guard","security officer","security agent","security personnel","security supervisor","doorman","watchman"];
+  const accountantWords=["محاسب","محاسبة","accountant","accounting"];
+  const engineerWords=["مهندس","مهندسة","engineer","engineering"];
   const teacherWords=["مدرس","معلم","مدرسه","معلمه","تدريس","تعليم","teacher","teaching","instructor"];
-  const teacherProfile=teacherWords.some(k=>occ.includes(normalizeText(k)));
-  const teacherJob=teacherWords.some(k=>titleCategory.includes(normalizeText(k)));
-
+  const teacherProfile=hasAny(occ,teacherWords);
+  const teacherJob=hasAny(titleCategory,teacherWords);
   const teacherGroups=[
     {keys:["مدرس لغه عربيه","معلم لغه عربيه","مدرس عربي","معلم عربي","arabic teacher","arabic language teacher"],terms:["مدرس لغه عربيه","معلم لغه عربيه","مدرس عربي","معلم عربي","arabic teacher","arabic language teacher"]},
     {keys:["مدرس لغه انجليزيه","معلم لغه انجليزيه","مدرس انجليزي","معلم انجليزي","english teacher","english language teacher"],terms:["مدرس لغه انجليزيه","معلم لغه انجليزيه","مدرس انجليزي","معلم انجليزي","english teacher","english language teacher"]},
@@ -437,9 +444,28 @@ function matchScore(job){
   ];
   const groupFor=s=>teacherGroups.find(g=>g.keys.some(k=>normalizeText(s).includes(normalizeText(k))));
   const teacherGroup=groupFor(occ);
-
   let professionalScore=0;
-  if(teacherProfile&&teacherJob){
+  const profileMedical=hasAny(occ,medicalWords);
+  const jobMedical=hasAny(titleCategory,medicalWords);
+  const profileForensic=hasAny(occ,forensicWords);
+  const jobForensic=hasAny(titleCategory,forensicWords);
+  if(profileForensic){
+    if(!jobMedical)return 0;
+    professionalScore=25;
+    if(jobForensic)professionalScore=60;
+  }else if(profileMedical){
+    if(!jobMedical)return 0;
+    professionalScore=35;
+  }else if(hasAny(occ,securityWords)){
+    if(!hasAny(titleCategory,securityWords))return 0;
+    professionalScore=55;
+  }else if(hasAny(occ,accountantWords)){
+    if(!hasAny(titleCategory,accountantWords))return 0;
+    professionalScore=55;
+  }else if(hasAny(occ,engineerWords)){
+    if(!hasAny(titleCategory,engineerWords))return 0;
+    professionalScore=45;
+  }else if(teacherProfile&&teacherJob){
     professionalScore=20;
     if(teacherGroup&&teacherGroup.terms.some(k=>titleCategory.includes(normalizeText(k))))professionalScore+=35;
   }else{
@@ -450,41 +476,15 @@ function matchScore(job){
     else if(aliasHit)professionalScore=35;
     else if(tokenHits>0)professionalScore=Math.min(30,18+6*Math.min(tokenHits,2));
   }
-
-  // لا نرفع المطابقة بسبب الموقع/الدوام/الخبرة إذا لم توجد صلة مهنية.
   if(professionalScore<=0)return 0;
-
   let score=professionalScore;
-
   const skills=tokens(p.skills||"").filter(x=>x.length>=3&&!genericTokens.has(x));
-  if(skills.length){
-    const skillHits=skills.filter(x=>text.includes(x)).length;
-    score+=Math.min(20,Math.round(skillHits/Math.min(skills.length,5)*20));
-  }
-
-  if(p.location){
-    const loc=normalizeText(p.location),jobLoc=normalizeText(job.location||""),jobCountry=normalizeText(job.country||"");
-    if(jobLoc.includes(loc)||jobCountry.includes(loc))score+=10;
-  }
-
-  if(p.work_type&&p.work_type!=="any"){
-    const wt=normalizeText(job.type||job.job_type||""),wanted=normalizeText(p.work_type);
-    if((p.work_type==="remote"&&wt.includes("عن بعد"))||wt.includes(wanted))score+=5;
-  }
-
+  if(skills.length){const skillHits=skills.filter(x=>text.includes(x)).length;score+=Math.min(20,Math.round(skillHits/Math.min(skills.length,5)*20));}
+  if(p.location){const loc=normalizeText(p.location),jobLoc=normalizeText(job.location||""),jobCountry=normalizeText(job.country||"");if(jobLoc.includes(loc)||jobCountry.includes(loc))score+=10;}
+  if(p.work_type&&p.work_type!=="any"){const wt=normalizeText(job.type||job.job_type||""),wanted=normalizeText(p.work_type);if((p.work_type==="remote"&&wt.includes("عن بعد"))||wt.includes(wanted))score+=5;}
   const exp=Number(p.experience_years);
-  if(Number.isFinite(exp)&&exp>=0){
-    const yearsText=text.match(/[0-9٠-٩]+\s*(?:سنوات|سنة|years?|yrs?)/g)||[];
-    if(!yearsText.length)score+=2;
-    else{
-      const requiredYears=yearsText.map(v=>Number(v.match(/[0-9٠-٩]+/)[0])).filter(Number.isFinite);
-      if(requiredYears.length&&exp>=Math.min(...requiredYears))score+=5;
-    }
-  }
-
-  const a=getLS(LS.assessment,null);
-  if(a&&Number(a.score)>0)score+=Math.min(5,Math.round(Number(a.score)/20));
-
+  if(Number.isFinite(exp)&&exp>=0){const yearsText=text.match(/[0-9٠-٩]+\s*(?:سنوات|سنة|years?|yrs?)/g)||[];if(!yearsText.length)score+=2;else{const requiredYears=yearsText.map(v=>Number(v.match(/[0-9٠-٩]+/)[0])).filter(Number.isFinite);if(requiredYears.length&&exp>=Math.min(...requiredYears))score+=5;}}
+  const a=getLS(LS.assessment,null);if(a&&Number(a.score)>0)score+=Math.min(5,Math.round(Number(a.score)/20));
   return Math.max(0,Math.min(100,Math.round(score)));
 }
 function addLocalNotification(message,jobId){
