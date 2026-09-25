@@ -364,15 +364,21 @@ async function calculateAutomaticAssessment(p){
   }
   const reqLabels=required.map(s=>s.label);
   const aliases=aliasTermsFor(p.occupation_label||"").map(normalizeText).filter(Boolean);
-  const evidenceHits=userSkills.filter(us=>reqLabels.some(rs=>{const a=tokens(us),b=tokens(rs);return normalizeText(us)===rs||a.some(x=>x.length>=3&&b.includes(x))||rs.includes(normalizeText(us))||normalizeText(us).includes(rs)})||aliases.some(a=>a.includes(us)||us.includes(a))).length;
-  const evidenceScore=reqLabels.length?Math.min(100,Math.round(evidenceHits/Math.min(reqLabels.length,8)*100)):(userSkills.length?Math.min(100,40+Math.min(userSkills.length,4)*15):0);
+  const occupationSkillAliases=/مدرس|معلم|تدريس|تعليم|teacher|teaching|instructor/.test(occ)?["تدريس","التعليم","التعليم والشرح","teacher","teaching","instructor"]:[]; 
+  const evidenceTerms=aliases.concat(occupationSkillAliases).map(normalizeText).filter(Boolean);
+  const evidenceHits=userSkills.filter(us=>reqLabels.some(rs=>{const a=tokens(us),b=tokens(rs);return normalizeText(us)===rs||a.some(x=>x.length>=3&&b.includes(x))||rs.includes(normalizeText(us))||normalizeText(us).includes(rs)})||evidenceTerms.some(a=>a.includes(us)||us.includes(a))).length;
+  const manualSkillBaseline=userSkills.length?Math.min(100,40+Math.min(userSkills.length,4)*15):0;
+  const evidenceScore=reqLabels.length?Math.max(Math.min(100,Math.round(evidenceHits/Math.min(reqLabels.length,8)*100)),manualSkillBaseline):manualSkillBaseline;
   const ratedValues=required.filter(s=>ratings[s.uri]!=null).map(s=>ratings[s.uri]);
   const ratingScore=ratedValues.length?Math.round(ratedValues.reduce((x,y)=>x+y,0)/ratedValues.length/5*100):null;
   const skillScore=ratingScore===null?evidenceScore:Math.round(evidenceScore*.6+ratingScore*.4);
   const experienceScore=exp===null?0:Math.min(100,Math.round(35+Math.min(exp,7)*9.3));
+  const teacherQualification=/مدرس|معلم|تدريس|تعليم|teacher|teaching/.test(occ);
   const qualificationScore=/(طبيب|طبيبه|طبيبة|دكتور|doctor|physician|medicine|medical|طب شرعي|forensic)/.test(occ)
     ? (/(طب|طبيب|طبيبه|طبيبة|medicine|medical|doctor|physician|بورد|اختصاص|دراسات عليا|ماجستير|دكتوراه|master|md|mbbs)/.test(qualification)?95:10)
-    : (has(qualification)?75:0);
+    : teacherQualification
+      ? (/(تربية|تعليم|معلم|مدرس|آداب|لغة|education|teaching|teacher)/.test(qualification)?90:65)
+      : (has(qualification)?75:0);
   const summaryScore=summary.length>=120?100:summary.length>=60?75:summary.length>=25?50:0;
   const profileCompleteness=[p.first_name,p.mother_name,p.birth_date,p.qualification,p.occupation_label,p.location,p.work_type,p.professional_summary].filter(has).length/8*100;
   const factors=[
