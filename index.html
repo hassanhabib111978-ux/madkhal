@@ -490,6 +490,9 @@ function matchScore(job){
     if(!specialtyMatch)return 0;
     professionalScore=35;
     if(teacherGroup&&teacherGroup.terms.some(k=>titleCategory.includes(normalizeText(k))))professionalScore+=25;
+  }else if(teacherProfile){
+    // الوظيفة غير التعليمية لا تُعد مطابقة مهنية لمعلم حتى لو ظهرت كلمات مشتركة في الوصف.
+    return 0;
   }else{
     const exactLabel=titleCategory.includes(occ);
     const aliasHit=aliases.some(a=>titleCategory.includes(a));
