@@ -366,7 +366,7 @@ async function calculateAutomaticAssessment(p){
   const aliases=aliasTermsFor(p.occupation_label||"").map(normalizeText).filter(Boolean);
   const evidenceHits=userSkills.filter(us=>reqLabels.some(rs=>{const a=tokens(us),b=tokens(rs);return normalizeText(us)===rs||a.some(x=>x.length>=3&&b.includes(x))||rs.includes(normalizeText(us))||normalizeText(us).includes(rs)})||aliases.some(a=>a.includes(us)||us.includes(a))).length;
   const evidenceScore=reqLabels.length?Math.min(100,Math.round(evidenceHits/Math.min(reqLabels.length,8)*100)):(userSkills.length?Math.min(100,40+Math.min(userSkills.length,4)*15):0);
-  const ratedValues=required.filter(s=>ratings[s.uri]!=null&&Number(ratings[s.uri])>0).map(s=>Number(ratings[s.uri]));
+  const ratedValues=required.filter(s=>ratings[s.uri]!=null).map(s=>ratings[s.uri]);
   const ratingScore=ratedValues.length?Math.round(ratedValues.reduce((x,y)=>x+y,0)/ratedValues.length/5*100):null;
   const skillScore=ratingScore===null?evidenceScore:Math.round(evidenceScore*.6+ratingScore*.4);
   const experienceScore=exp===null?0:Math.min(100,Math.round(35+Math.min(exp,7)*9.3));
@@ -606,7 +606,7 @@ function startLocalPayment(){const method=getLS("madkhal_payment_method","");if(
 async function startSubscriptionRequest(){const current=getLS(LS.subscription,"inactive");if(current==="requested"||current==="active"){showToast(current==="active"?"🔔 اشتراكك مفعل.":"🔔 سبق تسجيل رغبتك بالاشتراك.");renderSubscription();return}setLS(LS.subscription,"requested");try{const user=await sessionUser();if(user){const p=localProfile();const pid=await publicProfileId(user,p.full_name||"مستخدم مَدخَل","seeker");if(pid)await supabaseClient.from("subscriptions").upsert({user_id:pid,plan:"monthly",status:"requested",requested_at:now(),price_usd:1,currency:"USD",auto_renew:false,updated_at:now()},{onConflict:"user_id"});await supabaseClient.from("notifications").insert({user_id:user.id,channel:"in_app",title:"طلب اشتراك",body:"تم تسجيل رغبتك بالاشتراك مقابل دولار واحد شهريًا.",opportunity_type:"subscription",created_at:now(),delivery_status:"pending"})}}catch(e){}addLocalNotification("🔔 تم تسجيل رغبتك بالاشتراك — $1 شهريًا.");renderSubscription();showToast("✅ تم تسجيل رغبتك بالاشتراك.")}
 
 function formatDate(v){if(!v)return"";try{return new Date(v).toLocaleDateString("ar-EG")}catch(e){return""}}
-async async function recalculateAccountAssessment(){
+async function recalculateAccountAssessment(){
   const box=document.getElementById("savedAssessmentText");
   const p=localProfile()||{};
   if(!p.occupation_label){
@@ -784,7 +784,7 @@ window.addEventListener("beforeinstallprompt",event=>{event.preventDefault();ins
 window.addEventListener("appinstalled",()=>{installPromptEvent=null;document.getElementById("installBar").classList.add("hidden")});
 async function installMadkhal(){if(!installPromptEvent){showToast("📱 استخدم قائمة المتصفح ثم اختر إضافة إلى الشاشة الرئيسية.");return}installPromptEvent.prompt();try{await installPromptEvent.userChoice}catch(e){}installPromptEvent=null;document.getElementById("installBar").classList.add("hidden")}
 
-document.addEventListener("DOMContentLoaded",()=>{selectedSkills=getLS(LS.selectedSkills,[]);renderSkills();initOccupationPickers();if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js",{scope:"./"}).catch(()=>{});Promise.resolve().then(async()=>{await loadJobs();updateJobCounter();await loadProfileRemote();generateLocalMatches();renderCategories();renderOpportunities();await loadAccount();ensureAccountAssessment();renderNotifications();}).catch(e=>console.warn("startup",e));});
+document.addEventListener("DOMContentLoaded",async()=>{selectedSkills=getLS(LS.selectedSkills,[]);await loadJobs();updateJobCounter();await loadProfileRemote();generateLocalMatches();renderCategories();renderOpportunities();renderSkills();await loadAccount();ensureAccountAssessment();renderNotifications();initOccupationPickers();if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js",{scope:"./"}).catch(()=>{});});
 </script>
 <script src="./employer-flow-enhancement.js"></script>
 <script src="./worker-match-lifecycle.js"></script>
