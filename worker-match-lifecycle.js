@@ -19,6 +19,7 @@ async function loadWorkerMatchCenter(){
  const occupationScore=(occ,title)=>{
    const o=clean(occ),t=clean(title); if(!o||!t)return 0;
    const groups=[
+     {keys:['مدرس أدب','مدرس الادب','معلم أدب','معلم الادب','literature teacher','arabic literature teacher'],terms:['مدرس أدب','مدرس الادب','معلم أدب','معلم الادب','literature teacher','arabic literature teacher']},
      {keys:['مدرس لغه عربيه','معلم لغه عربيه','معلم عربي','مدرس عربي','arabic teacher','arabic language teacher'],terms:['مدرس لغه عربيه','معلم لغه عربيه','معلم عربي','مدرس عربي','arabic teacher','arabic language teacher']},
      {keys:['مدرس لغه انجليزيه','معلم لغه انجليزيه','مدرس انجليزي','معلم انجليزي','english teacher','english language teacher'],terms:['مدرس لغه انجليزيه','معلم لغه انجليزيه','مدرس انجليزي','معلم انجليزي','english teacher','english language teacher']},
      {keys:['مدرس رياضيات','معلم رياضيات','math teacher','mathematics teacher'],terms:['مدرس رياضيات','معلم رياضيات','math teacher','mathematics teacher']},
@@ -38,7 +39,7 @@ async function loadWorkerMatchCenter(){
    let s=0;
    const profileOcc=p.occupation_label||p.profession||'';
    const profileSkills=clean(p.skills||'');
-   const specialtyTerms=['عربي','لغة عربية','arabic','انجليزي','لغة انجليزية','english','رياضيات','math','mathematics'];
+   const specialtyTerms=['أدب','ادب','literature','عربي','لغة عربية','arabic','انجليزي','لغة انجليزية','english','رياضيات','math','mathematics'];
    const explicitSpecialty=specialtyTerms.some(k=>clean(title).includes(clean(k)));
    const profileHasSpecialty=specialtyTerms.some(k=>profileOcc&&clean(profileOcc).includes(clean(k)))||
      specialtyTerms.some(k=>profileSkills.includes(clean(k)));
