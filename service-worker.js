@@ -1,4 +1,4 @@
-const CACHE_NAME = "madkhal-v24";
+const CACHE_NAME = "madkhal-v25";
 
 // Keep the latest page active immediately.
 self.addEventListener("install", event => {
