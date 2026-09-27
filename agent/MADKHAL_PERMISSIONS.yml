@@ -1,17 +1,17 @@
-version: 1
+version: 2
 agent: madkhal-agent
-mode: observe-only
+mode: branch-programmer-and-integration-supervisor
 
 permissions:
   github:
     read_repository: true
     read_branches: true
     read_commits: true
-    create_branch: false
-    create_file: false
-    update_file: false
+    create_branch: true
+    create_file: true
+    update_file: true
     delete_file: false
-    create_pull_request: false
+    create_pull_request: true
     merge_pull_request: false
 
   supabase:
@@ -27,6 +27,19 @@ permissions:
     deploy_edge_function: false
     modify_rls: false
     modify_auth: false
+
+operating_scope:
+  branch: agent/madkhal-foundation
+  role:
+    - programmer_when_code_change_is_required
+    - integration_supervisor_for_end_to_end_flow
+    - regression_guard
+  required_behavior:
+    - inspect_active_path_before_editing
+    - prefer_single_source_of_truth
+    - make_small_reversible_changes
+    - test_changed_path_before_proposing_merge
+    - stop_on_ambiguity
 
 protected:
   database:
@@ -47,4 +60,4 @@ approval_required:
   - any secret/key change
   - any merge to main
 
-principle: least-privilege
+principle: least-privilege-with-branch-autonomy
