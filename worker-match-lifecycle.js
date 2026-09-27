@@ -67,7 +67,9 @@ async function loadWorkerMatchCenter(){
    }else console.warn('external jobs lookup',q.error);
  }catch(e){console.warn('external jobs lookup',e)}
  if(!rows.length&&!publicMatches.length){
-   panel.innerHTML='<div class="notice">لا توجد مطابقة مهنية جديدة حاليًا. سيظهر المسار هنا عند العثور على فرصة مناسبة.</div>';return
+   panel.innerHTML='<div class="match-center-head"><div><h3>🎯 المطابقات ومسار التوظيف</h3><p>لا توجد حاليًا مطابقة مباشرة مع صاحب فرصة، ولا فرصة منشورة تجاوزت حد المطابقة المعتمد لعرضها هنا.</p></div><button class="secondary-btn" id="closeWorkerMatches">إغلاق</button></div><div class="notice">🔔 إذا ظهرت لك تنبيهات بفرص مناسبة في قسم التنبيهات، فهي فرص مرشحة من نظام المتابعة ويمكنك مراجعتها من هناك أو من قسم الفرص.</div>';
+   $('closeWorkerMatches').onclick=()=>panel.classList.add('hidden');
+   return
  }
  panel.innerHTML='<div class="match-center-head"><div><h3>🎯 المطابقات ومسار التوظيف</h3><p>يعرض مَدخَل هنا المطابقات المباشرة مع أصحاب الفرص، وأقرب الفرص المنشورة في مصادر مَدخَل.</p></div><button class="secondary-btn" id="closeWorkerMatches">إغلاق</button></div><div id="workerMatchList"></div>';
  $('closeWorkerMatches').onclick=()=>panel.classList.add('hidden');
