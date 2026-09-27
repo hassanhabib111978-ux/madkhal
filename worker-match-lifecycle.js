@@ -6,6 +6,8 @@ async function loadWorkerMatchCenter(){
  const u=await sessionUser(); if(!u){showToast('⚠️ سجّل الدخول أولًا.');return}
  const panel=$('workerMatchCenter'); if(!panel)return;
  const p=localProfile();
+ const publicMatches=await getCanonicalWorkerPublicMatches(p);
+
  panel.classList.remove('hidden');
  panel.innerHTML='<div class="notice">⏳ جارٍ تحديث المطابقة...</div>';
  try{await supabaseClient.rpc('process_my_worker_matches',{p_limit:200})}catch(e){console.warn('worker match processing',e)}
@@ -13,59 +15,7 @@ async function loadWorkerMatchCenter(){
  const r=await supabaseClient.rpc('get_my_worker_matches');
  if(r.error){panel.innerHTML='<div class="notice">⚠️ تعذر تحميل مسار المطابقات.</div>';return}
  const rows=r.data||[];
- // مطابقة مستقلة للفرص الخارجية: لا تعتمد على قائمة الفرص المعروضة في الصفحة ولا على درجة عامة مخزنة.
- const clean=s=>String(s??'').toLowerCase().replace(/[ًٌٍَُِّْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[^\p{L}\p{N}]+/gu,' ').trim();
- const words=s=>clean(s).split(/\s+/).filter(x=>x.length>=3);
- const occupationScore=(occ,title)=>{
-   const o=clean(occ),t=clean(title); if(!o||!t)return 0;
-   const groups=[
-     {keys:['مدرس أدب','مدرس الادب','معلم أدب','معلم الادب','literature teacher','arabic literature teacher'],terms:['مدرس أدب','مدرس الادب','معلم أدب','معلم الادب','literature teacher','arabic literature teacher']},
-     {keys:['مدرس لغه عربيه','معلم لغه عربيه','معلم عربي','مدرس عربي','arabic teacher','arabic language teacher'],terms:['مدرس لغه عربيه','معلم لغه عربيه','معلم عربي','مدرس عربي','arabic teacher','arabic language teacher']},
-     {keys:['مدرس لغه انجليزيه','معلم لغه انجليزيه','مدرس انجليزي','معلم انجليزي','english teacher','english language teacher'],terms:['مدرس لغه انجليزيه','معلم لغه انجليزيه','مدرس انجليزي','معلم انجليزي','english teacher','english language teacher']},
-     {keys:['مدرس رياضيات','معلم رياضيات','math teacher','mathematics teacher'],terms:['مدرس رياضيات','معلم رياضيات','math teacher','mathematics teacher']},
-     {keys:['محاسب','accountant','accounting'],terms:['محاسب','accountant','accounting']}
-   ];
-   for(const g of groups)if(g.keys.some(k=>o.includes(clean(k))))return g.terms.some(k=>t.includes(clean(k)))?45:0;
-   const teacherProfile=['مدرس','معلم','تدريس','تعليم','teacher','teaching'].some(k=>o.includes(clean(k)));
-   const teacherJob=['مدرس','معلم','تدريس','تعليم','teacher','teaching'].some(k=>t.includes(clean(k)));
-   if(teacherProfile&&teacherJob)return 20;
-   const direct=t.includes(o)||o.includes(t); if(direct)return 45;
-   const ow=words(o),hits=ow.filter(w=>t.includes(w)).length;
-   return ow.length?Math.min(35,Math.round(hits/Math.min(ow.length,3)*35)):0;
- };
- const scoreExternal=(j,p)=>{
-   const title=[j.title,j.category].filter(Boolean).join(' ');
-   const text=[j.title,j.category,j.description].filter(Boolean).join(' ');
-   let s=0;
-   const profileOcc=p.occupation_label||p.profession||'';
-   const profileSkills=clean(p.skills||'');
-   const specialtyTerms=['أدب','ادب','literature','عربي','لغة عربية','arabic','انجليزي','لغة انجليزية','english','رياضيات','math','mathematics'];
-   const explicitSpecialty=specialtyTerms.some(k=>clean(title).includes(clean(k)));
-   const profileHasSpecialty=specialtyTerms.some(k=>profileOcc&&clean(profileOcc).includes(clean(k)))||
-     specialtyTerms.some(k=>profileSkills.includes(clean(k)));
-   const occ=occupationScore(profileOcc,title);
-   // التخصص الدقيق لا يُمنح نقاطًا لمجرد تشابه كلمة «معلم/تعليم».
-   if(explicitSpecialty&&!profileHasSpecialty){
-     s+=Math.min(20,occ);
-   }else{
-     s+=occ;
-   }
-   const sk=words(p.skills||'');
-   if(sk.length)s+=Math.min(25,Math.round(sk.filter(w=>clean(text).includes(w)).length/Math.min(sk.length,5)*25));
-   const loc=clean(p.location||'');
-   if(loc&&clean(j.location||'').includes(loc))s+=10;
-   const wt=clean(p.work_type||'');
-   const jt=clean(j.job_type||j.type||'');
-   if(wt&&wt!=='any'&&((wt==='remote'&&jt.includes('remote'))||jt.includes(wt)))s+=10;
-   return Math.max(0,Math.min(100,Math.round(s)));
- };
- let publicMatches=[];
- try{
-   const q=await supabaseClient.from('jobs').select('id,title,company,location,country,job_type,category,description,source,source_url,status,geo_class,expires_at').eq('status','active').in('geo_class',['SYRIA','MENA']).order('created_at',{ascending:false}).limit(500);
-   if(!q.error){
-     publicMatches=(q.data||[]).map(j=>({j,s:scoreExternal(j,p)})).filter(x=>x.s>=35).sort((a,b)=>b.s-a.s).slice(0,10);
-   }else console.warn('external jobs lookup',q.error);
- }catch(e){console.warn('external jobs lookup',e)}
+ // الفرص المنشورة تمر عبر نفس دالة المطابقة المركزية التي تستخدمها التنبيهات.
  if(!rows.length&&!publicMatches.length){
    panel.innerHTML='<div class="match-center-head"><div><h3>🎯 المطابقات ومسار التوظيف</h3><p>لا توجد حاليًا مطابقة مباشرة مع صاحب فرصة، ولا فرصة منشورة تجاوزت حد المطابقة المعتمد لعرضها هنا.</p></div><button class="secondary-btn" id="closeWorkerMatches">إغلاق</button></div><div class="notice">🔔 إذا ظهرت لك تنبيهات بفرص مناسبة في قسم التنبيهات، فهي فرص مرشحة من نظام المتابعة ويمكنك مراجعتها من هناك أو من قسم الفرص.</div>';
    $('closeWorkerMatches').onclick=()=>panel.classList.add('hidden');
@@ -114,6 +64,54 @@ async function loadWorkerMatchCenter(){
    });
  }
 }
+async function getCanonicalWorkerPublicMatches(p){
+ const clean=s=>String(s??'').toLowerCase().replace(/[ًٌٍَُِّْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[^\p{L}\p{N}]+/gu,' ').trim();
+ const words=s=>clean(s).split(/\s+/).filter(x=>x.length>=3);
+ const occupationScore=(occ,title)=>{
+   const o=clean(occ),t=clean(title); if(!o||!t)return 0;
+   const groups=[
+     {keys:['مدرس أدب','مدرس الادب','معلم أدب','معلم الادب','literature teacher','arabic literature teacher'],terms:['مدرس أدب','مدرس الادب','معلم أدب','معلم الادب','literature teacher','arabic literature teacher']},
+     {keys:['مدرس لغه عربيه','معلم لغه عربيه','معلم عربي','مدرس عربي','arabic teacher','arabic language teacher'],terms:['مدرس لغه عربيه','معلم لغه عربيه','معلم عربي','مدرس عربي','arabic teacher','arabic language teacher']},
+     {keys:['مدرس لغه انجليزيه','معلم لغه انجليزيه','مدرس انجليزي','معلم انجليزي','english teacher','english language teacher'],terms:['مدرس لغه انجليزيه','معلم لغه انجليزيه','مدرس انجليزي','معلم انجليزي','english teacher','english language teacher']},
+     {keys:['مدرس رياضيات','معلم رياضيات','math teacher','mathematics teacher'],terms:['مدرس رياضيات','معلم رياضيات','math teacher','mathematics teacher']},
+     {keys:['محاسب','accountant','accounting'],terms:['محاسب','accountant','accounting']}
+   ];
+   for(const g of groups)if(g.keys.some(k=>o.includes(clean(k))))return g.terms.some(k=>t.includes(clean(k)))?45:0;
+   const teacherProfile=['مدرس','معلم','تدريس','تعليم','teacher','teaching'].some(k=>o.includes(clean(k)));
+   const teacherJob=['مدرس','معلم','تدريس','تعليم','teacher','teaching'].some(k=>t.includes(clean(k)));
+   if(teacherProfile&&teacherJob)return 20;
+   const direct=t.includes(o)||o.includes(t); if(direct)return 45;
+   const ow=words(o),hits=ow.filter(w=>t.includes(w)).length;
+   return ow.length?Math.min(35,Math.round(hits/Math.min(ow.length,3)*35)):0;
+ };
+ const scoreExternal=(j,p)=>{
+   const title=[j.title,j.category].filter(Boolean).join(' ');
+   const text=[j.title,j.category,j.description].filter(Boolean).join(' ');
+   let s=0;
+   const profileOcc=p?.occupation_label||p?.profession||'';
+   const profileSkills=clean(p?.skills||'');
+   const specialtyTerms=['أدب','ادب','literature','عربي','لغة عربية','arabic','انجليزي','لغة انجليزية','english','رياضيات','math','mathematics'];
+   const explicitSpecialty=specialtyTerms.some(k=>clean(title).includes(clean(k)));
+   const profileHasSpecialty=specialtyTerms.some(k=>profileOcc&&clean(profileOcc).includes(clean(k)))||specialtyTerms.some(k=>profileSkills.includes(clean(k)));
+   const occ=occupationScore(profileOcc,title);
+   s+=explicitSpecialty&&!profileHasSpecialty?Math.min(20,occ):occ;
+   const sk=words(p?.skills||'');
+   if(sk.length)s+=Math.min(25,Math.round(sk.filter(w=>clean(text).includes(w)).length/Math.min(sk.length,5)*25));
+   const loc=clean(p?.location||'');
+   if(loc&&clean(j.location||'').includes(loc))s+=10;
+   const wt=clean(p?.work_type||'');
+   const jt=clean(j.job_type||j.type||'');
+   if(wt&&wt!=='any'&&((wt==='remote'&&jt.includes('remote'))||jt.includes(wt)))s+=10;
+   return Math.max(0,Math.min(100,Math.round(s)));
+ };
+ try{
+   const q=await supabaseClient.from('jobs').select('id,title,company,location,country,job_type,category,description,source,source_url,canonical_url,status,geo_class,expires_at,created_at').eq('status','active').in('geo_class',['SYRIA','MENA']).order('created_at',{ascending:false}).limit(500);
+   if(q.error){console.warn('canonical public matches',q.error);return []}
+   const seen=new Set();
+   return (q.data||[]).map(j=>({j,s:scoreExternal(j,p)})).filter(x=>x.s>=35).sort((a,b)=>b.s-a.s).filter(x=>{const j=x.j;const k=String(j.canonical_url||j.source_url||j.id);if(seen.has(k))return false;seen.add(k);return true}).slice(0,10);
+ }catch(e){console.warn('canonical public matches',e);return []}
+}
+window.getCanonicalWorkerPublicMatches=getCanonicalWorkerPublicMatches;
 function injectWorkerMatchCenter(){
  const worker=$('workerScreen'); if(!worker||$('workerMatchCenter'))return;
  const panel=document.createElement('div');panel.id='workerMatchCenter';panel.className='card hidden';panel.style.marginTop='14px';worker.appendChild(panel);
