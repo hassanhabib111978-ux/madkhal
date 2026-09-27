@@ -812,21 +812,18 @@ async function renderNotifications(){
     }
     return true;
   });
-  const p=localProfile()||{};
-  const matches=[];
-  if(p.occupation_label){
-    const seen=new Set();
-    (allVisibleJobs||[]).map(visibleJob).forEach(j=>{
-      const score=matchScore(j);if(score<55)return;
-      const urlKey=normalizeText(j.canonical_url||j.source_url||"");
-      const titleKey=normalizeText(j.title||"");
-      const key=urlKey?"url|"+urlKey:"title|"+titleKey;
-      if(seen.has(key))return;seen.add(key);matches.push({job_id:j.id,title:j.title,score});
-    });
-    matches.sort((a,b)=>b.score-a.score);
-  }
-  const current=matches.slice(0,3).map(x=>({
-    job_id:x.job_id,message:"🎯 فرصة مناسبة لك: "+x.title+" — مطابقة "+x.score+"%",created_at:now()
+  // لا ينشئ قسم التنبيهات مسار مطابقة مستقلًا.
+  // المصدر الوحيد للفرص المرشحة هنا هو محرك المطابقة المركزي نفسه المستخدم في مركز المطابقات.
+  let canonicalPublicMatches=[];
+  try{
+    if(typeof window.getCanonicalWorkerPublicMatches==="function"){
+      canonicalPublicMatches=await window.getCanonicalWorkerPublicMatches(localProfile()||{});
+    }
+  }catch(e){console.warn("canonical notification matches",e)}
+  const current=(canonicalPublicMatches||[]).slice(0,3).map(x=>({
+    job_id:x.j?.id||null,
+    message:"🎯 فرصة مناسبة لك: "+(x.j?.title||"فرصة مناسبة")+" — مطابقة "+Math.round(Number(x.s)||0)+"%",
+    created_at:x.j?.created_at||now()
   }));
   const cleaned=normal.concat(current);
   setLS(LS.notifications,cleaned);
