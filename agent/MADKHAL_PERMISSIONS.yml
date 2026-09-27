@@ -1,0 +1,50 @@
+version: 1
+agent: madkhal-agent
+mode: observe-only
+
+permissions:
+  github:
+    read_repository: true
+    read_branches: true
+    read_commits: true
+    create_branch: false
+    create_file: false
+    update_file: false
+    delete_file: false
+    create_pull_request: false
+    merge_pull_request: false
+
+  supabase:
+    project_id: qbufsdpdobuicpljnssr
+    read_project_metadata: true
+    read_schema: true
+    read_migrations: true
+    read_logs: true
+    read_advisors: true
+    execute_read_only_sql: true
+    write_sql: false
+    apply_migration: false
+    deploy_edge_function: false
+    modify_rls: false
+    modify_auth: false
+
+protected:
+  database:
+    - public.jobs
+    - job source/import infrastructure
+    - production user/application/subscription data
+  external_systems:
+    - restaurant tables
+    - restaurant bot infrastructure
+
+approval_required:
+  - any production data mutation
+  - any DDL
+  - any RLS change
+  - any Auth change
+  - any job-source or cron change
+  - any deletion
+  - any secret/key change
+  - any merge to main
+
+principle: least-privilege
