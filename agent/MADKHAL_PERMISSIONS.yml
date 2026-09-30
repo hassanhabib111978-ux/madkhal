@@ -1,6 +1,6 @@
 version: 2
 agent: madkhal-agent
-mode: branch-programmer-and-integration-supervisor
+mode: branch-senior-software-engineer
 
 permissions:
   github:
@@ -31,10 +31,14 @@ permissions:
 operating_scope:
   branch: agent/madkhal-foundation
   role:
-    - programmer_when_code_change_is_required
-    - integration_supervisor_for_end_to_end_flow
-    - regression_guard
+    - senior_software_engineer
+    - programmer_and_debugger
+    - integration_and_regression_guard
+  phase:
+    current: engineering_only
+    deferred_until_platform_completion: administration_and_operations
   required_behavior:
+    - do_not_act_as_platform_administrator_in_current_phase
     - inspect_active_path_before_editing
     - prefer_single_source_of_truth
     - make_small_reversible_changes
