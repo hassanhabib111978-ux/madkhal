@@ -268,6 +268,9 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 #savedAssessmentText .auto-score-number{flex:0 0 86px;width:86px;height:86px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff7d6;border:5px solid #f4b52d;color:#173e59;font-size:25px;font-weight:900}
 #savedAssessmentText .score-bars{margin-top:8px}
 #savedAssessmentText .score-bar{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #e7eceb;line-height:1.5}
+</style><style id="MADKHAL_OPPORTUNITIES_CLEAN_MATCH_2026_09_30">
+#opportunitiesScreen .source-note{overflow-wrap:anywhere;word-break:break-word}
+#opportunitiesScreen .match{white-space:normal}
 </style></head>
 <body>
 <div class="app">
@@ -644,122 +647,20 @@ function selectedOccupation(){return {uri:document.getElementById("occupationUri
 
 async function loadJobs(force){if(jobsLoading&&!force)return jobsLoading;if(jobsLoaded&&!force)return allVisibleJobs;if(!supabaseClient)return[];jobsLoading=(async()=>{try{const rows=[];let from=0;const size=1000;while(true){const q=await supabaseClient.from("jobs").select("id,source,source_job_id,title,company,description,location,country,job_type,category,salary_min,salary_max,salary_currency,source_url,canonical_url,posted_at,updated_at,expires_at,status,geo_class,geo_region,created_at").eq("status","active").order("created_at",{ascending:false}).range(from,from+size-1);if(q.error)throw q.error;const page=q.data||[];rows.push(...page);if(page.length<size)break;from+=size}const menaCountries=new Set(["سوريا","syria","الأردن","الاردن","jordan","لبنان","lebanon","فلسطين","palestine","العراق","iraq","قطر","qatar","الإمارات العربية المتحدة","الامارات العربية المتحدة","united arab emirates","uae","السعودية","السعوديه","saudi arabia","الكويت","kuwait","البحرين","bahrain","عمان","oman","اليمن","yemen","مصر","egypt","السودان","sudan","ليبيا","libya","تونس","tunisia","الجزائر","algeria","المغرب","morocco","موريتانيا","mauritania"]);const nowMs=Date.now();const seen=new Set();allVisibleJobs=rows.filter(j=>!j.expires_at||Date.parse(j.expires_at)>=nowMs).filter(j=>{const cls=String(j.geo_class||"").toUpperCase();const reg=normalizeText(j.geo_region||"");const country=normalizeText(j.country||"");const location=normalizeText(j.location||"");return cls==="SYRIA"||cls==="MENA"||["middle east","middle east & north africa","syria","mena"].includes(reg)||menaCountries.has(country)||/\\b(syria|levant|middle east|mena)\\b/.test(location)||location.includes("سوريا")||location.includes("الشرق الاوسط")||location.includes("الشرق الأوسط");}).filter(j=>{const key=String(j.canonical_url||j.source_url||j.id);if(seen.has(key))return false;seen.add(key);return true}).map(j=>({...j,source_name:sourceName(j.source)}));jobsLoaded=true;return allVisibleJobs}catch(e){console.warn("loadJobs",e);jobsLoaded=false;allVisibleJobs=[];return[]}finally{jobsLoading=null}})();return jobsLoading}
 function sourceName(s){const m={"himalayas":"Himalayas","gulfjobs":"GulfJobs","myself.ae":"myself.ae","worklink":"WorkLink","jobicy":"Jobicy","fao":"FAO","UN Careers":"UN Careers","1QatarJobs":"1QatarJobs","akhtaboot":"Akhtaboot","Jobs of Oman":"Jobs of Oman","jobsofoman":"Jobs of Oman"};return m[String(s||"").trim()]||String(s||"المصدر الأصلي")}
-function cleanJobText(v){return String(v??"").replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi,"$1").replace(/<[^>]*>/g," ").replace(/&nbsp;/gi," ").replace(/&amp;/gi,"&").replace(/&quot;/gi,'"').replace(/&#39;/gi,"'").replace(/\s+/g," ").trim()}
+function cleanJobText(v){let s=String(v??"").replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi,"$1").replace(/<[^>]*>/g," ");for(let i=0;i<3;i++){s=s.replace(/&amp;/gi,"&").replace(/&nbsp;|&#160;|&ensp;|&emsp;/gi," ").replace(/&quot;|&#34;/gi,'"').replace(/&#39;|&#x27;/gi,"'").replace(/&lt;/gi,"<").replace(/&gt;/gi,">")}return s.replace(/\s+/g," ").trim()}
 function cleanSalaryCurrency(v){return cleanJobText(v)}
 function validSalaryNumber(v){const n=Number(v);return Number.isFinite(n)&&n>=0&&n<=10000000?n:null}
-function salaryText(j){let a=validSalaryNumber(j.salary_min),b=validSalaryNumber(j.salary_max),c=cleanSalaryCurrency(j.salary_currency);if(a!=null&&b!=null&&a>b){const x=a;a=b;b=x}if(a!=null&&b!=null)return a+" - "+b+(c?" "+c:"");if(a!=null)return "من "+a+(c?" "+c:"");if(b!=null)return "حتى "+b+(c?" "+c:"");return "حسب المصدر"}
+function salaryText(j){let a=validSalaryNumber(j.salary_min),b=validSalaryNumber(j.salary_max),c=cleanSalaryCurrency(j.salary_currency);if(a===0&&b===0){a=null;b=null}if(a===0)a=null;if(b===0)b=null;if(a!=null&&b!=null&&a>b){const x=a;a=b;b=x}if(a!=null&&b!=null)return a+" - "+b+(c?" "+c:"");if(a!=null)return "من "+a+(c?" "+c:"");if(b!=null)return "حتى "+b+(c?" "+c:"");return "حسب المصدر"}
 function workType(t){const x=cleanJobText(t);return ({full_time:"دوام كامل",part_time:"دوام جزئي",remote:"عن بُعد",freelance:"عمل حر",any:"أي نوع"})[x]||x||"غير محدد"}
 function categoryFor(j){const t=normalizeText([j.title,j.category,j.description].filter(Boolean).join(" "));if(t.includes("محاسب")||t.includes("محاسبة")||t.includes("account"))return "🧮 المحاسبة";if(t.includes("برمج")||t.includes("developer")||t.includes("engineer")||t.includes("software"))return "💻 التقنية";if(t.includes("تصميم")||t.includes("designer")||t.includes("graphic"))return "🎨 التصميم";if(t.includes("تسويق")||t.includes("marketing")||t.includes("مبيعات")||t.includes("sales"))return "📣 التسويق والمبيعات";if(t.includes("سكرت")||t.includes("secretary")||t.includes("admin"))return "🗂️ الإدارة";if(t.includes("خدمة العملاء")||t.includes("customer service"))return "🗣️ خدمة العملاء";if(t.includes("driver")||t.includes("سائق"))return "🚚 النقل";if(t.includes("تعليم")||t.includes("teacher")||t.includes("مدرس"))return "📚 التعليم";return "🔧 أخرى"}function visibleJob(j){return {id:j.id,title:cleanJobText(j.title)||"فرصة",company:cleanJobText(j.company)||"حسب المصدر",location:cleanJobText(j.location||j.country)||"غير محدد",country:cleanJobText(j.country),type:workType(j.job_type),category:categoryFor(j),description:cleanJobText(j.description)||"تفاصيل الوظيفة موجودة في المصدر الأصلي.",salary:salaryText(j),source:cleanJobText(j.source),source_name:cleanJobText(j.source_name),external_link:String(j.source_url||j.canonical_url||""),canonical_link:String(j.canonical_url||j.source_url||""),posted_at:j.posted_at||null,expires_at:j.expires_at||null}}
 function matchScore(job){
-  const p=localProfile()||{};
-  if(!p.occupation_label)return 0;
-  const titleCategory=normalizeText([job.title,job.category].join(" "));
-  const text=normalizeText([job.title,job.category,job.description].join(" "));
-  const occ=normalizeText(p.occupation_label);
-  if(!occ||!titleCategory)return 0;
-  const genericTokens=new Set(["مدير","مديره","مساعد","مساعدة","متخصص","متخصصة","عامل","عاملة","موظف","موظفة","مسؤول","مسؤولة","عام","عامه"]);
-  const occTokens=tokens(occ).filter(x=>x.length>=3&&!genericTokens.has(x));
-  const aliases=aliasTermsFor(p.occupation_label).map(normalizeText).filter(x=>x.length>=3);
-  const hasAny=(s,list)=>list.some(k=>s.includes(normalizeText(k)));
-  const medicalWords=["طبيب","طبيبه","طبيبة","دكتور","doctor","physician","medical","medicine","طب","ممرض","ممرضة","nurse","pharmac","صيدلي","صيدلاني"];
-  const forensicWords=["طب شرعي","طبيب شرعي","طبيبة شرعية","forensic","forensic medicine","forensic doctor"];
-  const securityWords=["حارس أمن","حارسة أمن","security guard","security officer","security agent","security personnel","security supervisor","doorman","watchman"];
-  const accountantWords=["محاسب","محاسبة","accountant","accounting"];
-  const engineerWords=["مهندس","مهندسة","engineer","engineering"];
-  const teacherWords=["مدرس","معلم","مدرسه","معلمه","تدريس","تعليم","teacher","teaching","instructor"];
-  const teacherProfile=hasAny(occ,teacherWords);
-  const teacherJob=hasAny(titleCategory,teacherWords);
-  const teacherGroups=[
-    {keys:["مدرس لغه عربيه","معلم لغه عربيه","مدرس عربي","معلم عربي","arabic teacher","arabic language teacher"],terms:["مدرس لغه عربيه","معلم لغه عربيه","مدرس عربي","معلم عربي","arabic teacher","arabic language teacher"]},
-    {keys:["مدرس لغه انجليزيه","معلم لغه انجليزيه","مدرس انجليزي","معلم انجليزي","english teacher","english language teacher"],terms:["مدرس لغه انجليزيه","معلم لغه انجليزيه","مدرس انجليزي","معلم انجليزي","english teacher","english language teacher"]},
-    {keys:["مدرس رياضيات","معلم رياضيات","math teacher","mathematics teacher"],terms:["مدرس رياضيات","معلم رياضيات","math teacher","mathematics teacher"]}
-  ];
-  const groupFor=s=>teacherGroups.find(g=>g.keys.some(k=>normalizeText(s).includes(normalizeText(k))));
-  const teacherGroup=groupFor(occ);
-  let professionalScore=0;
-  const profileMedical=hasAny(occ,medicalWords);
-  const jobMedical=hasAny(titleCategory,medicalWords);
-  const profileForensic=hasAny(occ,forensicWords);
-  const jobForensic=hasAny(titleCategory,forensicWords);
-  if(profileForensic){
-    if(!jobMedical)return 0;
-    professionalScore=25;
-    if(jobForensic)professionalScore=60;
-  }else if(profileMedical){
-    if(!jobMedical)return 0;
-    professionalScore=35;
-  }else if(hasAny(occ,securityWords)){
-    if(!hasAny(titleCategory,securityWords))return 0;
-    professionalScore=55;
-  }else if(hasAny(occ,accountantWords)){
-    if(!hasAny(titleCategory,accountantWords))return 0;
-    professionalScore=55;
-  }else if(hasAny(occ,engineerWords)){
-    if(!hasAny(titleCategory,engineerWords))return 0;
-    professionalScore=45;
-  }else if(teacherProfile&&teacherJob){
-    // التدريس مجال عام، لكن التخصص يبقى بوابة أساسية: لا نرفع مدرس الأدب
-    // إلى إعلان إداري أو تسويقي، ولا نساوي مدرس الأدب بمدرس الإنجليزية لمجرد أنهما معلمان.
-    const occHasLiterature=/(أدب|ادب|literature)/.test(occ);
-    const occHasArabic=/(عربي|العربية|لغة عربية|arabic)/.test(occ);
-    const occHasEnglish=/(انجليزي|إنجليزي|اللغة الانجليزية|اللغة الإنجليزية|english)/.test(occ);
-    const occHasMath=/(رياضيات|math|mathematics)/.test(occ);
-    const jobHasLiterature=/(أدب|ادب|literature)/.test(titleCategory);
-    const jobHasArabic=/(عربي|العربية|لغة عربية|arabic)/.test(titleCategory);
-    const jobHasEnglish=/(انجليزي|إنجليزي|اللغة الانجليزية|اللغة الإنجليزية|english)/.test(titleCategory);
-    const jobHasMath=/(رياضيات|math|mathematics)/.test(titleCategory);
-    let specialtyMatch=true;
-    if(occHasLiterature) specialtyMatch=jobHasLiterature||jobHasArabic;
-    else if(occHasArabic) specialtyMatch=jobHasArabic;
-    else if(occHasEnglish) specialtyMatch=jobHasEnglish;
-    else if(occHasMath) specialtyMatch=jobHasMath;
-    if(!specialtyMatch)return 0;
-    professionalScore=35;
-    if(teacherGroup&&teacherGroup.terms.some(k=>titleCategory.includes(normalizeText(k))))professionalScore+=25;
-  }else if(teacherProfile){
-    // الوظيفة غير التعليمية لا تُعد مطابقة مهنية لمعلم حتى لو ظهرت كلمات مشتركة في الوصف.
-    return 0;
-  }else{
-    const exactLabel=titleCategory.includes(occ);
-    const aliasHit=aliases.some(a=>titleCategory.includes(a));
-    const tokenHits=occTokens.filter(t=>titleCategory.includes(t)).length;
-    if(exactLabel)professionalScore=40;
-    else if(aliasHit)professionalScore=35;
-    else if(tokenHits>0)professionalScore=Math.min(30,18+6*Math.min(tokenHits,2));
-  }
-  if(professionalScore<=0)return 0;
-  let score=professionalScore;
-  const skills=tokens(p.skills||"").filter(x=>x.length>=3&&!genericTokens.has(x));
-  if(skills.length){const skillHits=skills.filter(x=>text.includes(x)).length;score+=Math.min(20,Math.round(skillHits/Math.min(skills.length,5)*20));}
-  if(p.location){const loc=normalizeText(p.location),jobLoc=normalizeText(job.location||""),jobCountry=normalizeText(job.country||"");if(jobLoc.includes(loc)||jobCountry.includes(loc))score+=10;}
-  if(p.work_type&&p.work_type!=="any"){const wt=normalizeText(job.type||job.job_type||""),wanted=normalizeText(p.work_type);if((p.work_type==="remote"&&wt.includes("عن بعد"))||wt.includes(wanted))score+=5;}
-  const exp=Number(p.experience_years);
-  if(Number.isFinite(exp)&&exp>=0){const yearsText=text.match(/[0-9٠-٩]+\s*(?:سنوات|سنة|years?|yrs?)/g)||[];if(!yearsText.length)score+=2;else{const requiredYears=yearsText.map(v=>Number(v.match(/[0-9٠-٩]+/)[0])).filter(Number.isFinite);if(requiredYears.length&&exp>=Math.min(...requiredYears))score+=5;}}
-  const a=getLS(LS.assessment,null);if(a&&Number(a.score)>0)score+=Math.min(5,Math.round(Number(a.score)/20));
-  return Math.max(0,Math.min(100,Math.round(score)));
-}
-function addLocalNotification(message,jobId){
- const a=getLS(LS.notifications,[]);
- const jid=jobId?String(jobId):"";
- if(jid&&a.some(n=>String(n.job_id||"")===jid&&String(n.message||"").startsWith("🎯 فرصة مناسبة لك:")))return;
- a.unshift({id:"n_"+Date.now()+Math.random(),message,job_id:jobId||null,created_at:now(),read:false});
- setLS(LS.notifications,a);
-}
-async function syncSubscriptionStatus(){
   try{
-    const user=await sessionUser();if(!user){renderSubscription();return}
-    const pr=await supabaseClient.from("profiles").select("id").eq("auth_user_id",user.id).maybeSingle();
-    if(pr.error||!pr.data){renderSubscription();return}
-    const q=await supabaseClient.from("subscriptions").select("status,ends_at,provider,price_usd").eq("user_id",pr.data.id).eq("audience","worker").order("updated_at",{ascending:false}).limit(1).maybeSingle();
-    if(q.error||!q.data){setLS(LS.subscription,"inactive");renderSubscription();return}
-    const active=q.data.status==="active"&&(!q.data.ends_at||Date.parse(q.data.ends_at)>=Date.now());
-    setLS(LS.subscription,active?"active":q.data.status==="requested"?"requested":"inactive");
-    if(q.data.provider)setLS("madkhal_payment_method",q.data.provider);
-    renderSubscription();
-  }catch(e){console.warn("subscription sync",e);renderSubscription()}
+    if(typeof window.calculateCanonicalPublicJobMatchScore==="function"){
+      return window.calculateCanonicalPublicJobMatchScore(job,localProfile()||{});
+    }
+  }catch(e){console.warn("canonical match score",e)}
+  return 0;
 }
-async function syncSubscriptionRemote(){try{const user=await sessionUser();if(!user)return;const p=localProfile()||{};const pid=await publicProfileId(user,p.full_name||"مستخدم مَدخَل","seeker");if(!pid)return;const q=await supabaseClient.from("subscriptions").select("status,ends_at,updated_at").eq("user_id",pid).eq("audience","worker").order("updated_at",{ascending:false}).limit(1).maybeSingle();if(q.error||!q.data)return;const active=q.data.status==="active"&&(!q.data.ends_at||Date.parse(q.data.ends_at)>=Date.now());setLS(LS.subscription,active?"active":(q.data.status||"inactive"));renderSubscription();}catch(e){console.warn("subscription sync",e)}}
-function renderSubscription(){const status=getLS(LS.subscription,"inactive");const payment=getLS("madkhal_payment_status","");const box=document.getElementById("subscriptionStatus");const account=document.getElementById("accountSubscriptionStatus");const text=status==="active"?"✅ الاشتراك مفعل.":payment==="pending"?"💳 بانتظار تسجيل/التحقق من عملية الدفع.":status==="requested"?"🔔 تم تسجيل طلب التفعيل. لا يصبح الاشتراك فعالًا إلا بعد التحقق من الدفع.":"الاشتراك غير مفعل.";if(box)box.textContent=text;if(account)account.textContent=text}
 function generateLocalMatches(){
  const p=localProfile();
  if(!p.occupation_label)return;
@@ -781,7 +682,7 @@ function generateLocalMatches(){
  matches.slice(0,3).forEach(x=>addLocalNotification("🎯 فرصة مناسبة لك: "+x.j.title+" — مطابقة "+x.s+"%",x.j.id))
 }
 function renderCategories(){const c=document.getElementById("categoryScroll");if(!c)return;const cats=["الكل"];const counts={};allVisibleJobs.map(visibleJob).forEach(j=>{counts[j.category]=(counts[j.category]||0)+1});Object.keys(counts).sort().forEach(k=>cats.push(k));c.innerHTML="";cats.forEach(x=>{const b=document.createElement("button");b.className="chip"+(currentCategory===x?" active":"");b.textContent=x+(x!=="الكل"&&counts[x]?" · "+counts[x]:"");b.onclick=()=>{currentCategory=x;renderCategories();renderOpportunities()};c.appendChild(b)})}
-function renderOpportunities(){
+async function renderOpportunities(){
   const box=document.getElementById("opportunitiesList");
   if(!box)return;
   const q=normalizeText(document.getElementById("jobSearch")?.value||"");
@@ -791,9 +692,7 @@ function renderOpportunities(){
     const variants=new Set([q]);
     Object.entries(OCC_ALIASES||{}).forEach(([base,alts])=>{
       const all=[base,...(Array.isArray(alts)?alts:[])].map(normalizeText);
-      if(all.some(x=>x===q||x.includes(q)||q.includes(x))){
-        all.forEach(x=>{if(x)variants.add(x)});
-      }
+      if(all.some(x=>x===q||x.includes(q)||q.includes(x)))all.forEach(x=>{if(x)variants.add(x)});
     });
     const qTokens=tokens(q).filter(t=>t.length>=2);
     list=list.filter(j=>{
@@ -803,7 +702,14 @@ function renderOpportunities(){
   }else if(q.length===1){
     list=list.filter(j=>normalizeText([j.title,j.category].join(" ")).includes(q));
   }
-  list.sort((a,b)=>matchScore(b)-matchScore(a));
+  const profile=localProfile()||{};
+  list=list.map(j=>({j,s:matchScore(j)})).sort((a,b)=>b.s-a.s).map(x=>x.j);
+  const seen=new Set();
+  list=list.filter(j=>{
+    const url=normalizeText(j.canonical_url||j.source_url||j.canonical_link||j.external_link||"");
+    const key=url?"url|"+url:"meta|"+normalizeText([j.source,j.title,j.company,j.location,j.country].join("|"));
+    if(seen.has(key))return false; seen.add(key); return true;
+  });
   if(!list.length){
     box.innerHTML='<div class="card"><div class="empty">🔎 لا توجد فرص حاليًا ضمن نطاق مَدخَل بهذه المواصفات.<br>جرّب كتابة حرفين أو ثلاثة من اسم المهنة.</div></div>';
     return;
@@ -812,6 +718,8 @@ function renderOpportunities(){
   list.slice(0,80).forEach(j=>{
     const d=document.createElement("div");
     d.className="opportunity";
+    const score=matchScore(j);
+    const cleanDescription=String(j.description||"").replace(/https?:\/\/\S+/gi," ").replace(/\s+/g," ").trim();
     d.innerHTML=`<div class="opportunity-top">
       <div>
         <h3>💼 ${escapeHtml(j.title)}</h3>
@@ -819,11 +727,11 @@ function renderOpportunities(){
         <div class="opportunity-meta">📍 ${escapeHtml(j.location)} · 💼 ${escapeHtml(j.type)}</div>
         <span class="tag">${escapeHtml(j.category)}</span>
         <span class="tag">🌐 ${escapeHtml(j.source_name)}</span>
-        <div class="match">🎯 ملاءمة هذه الفرصة لملفك: ${matchScore(j)}%</div>
+        <div class="match">🎯 ملاءمة هذه الفرصة لملفك: ${score}%</div>
       </div>
       <div class="salary">${escapeHtml(j.salary)}</div>
     </div>
-    <div class="source-note">${escapeHtml(j.description.slice(0,260))}${j.description.length>260?"…":""}</div>`;
+    <div class="source-note">${escapeHtml(cleanDescription.slice(0,260))}${cleanDescription.length>260?"…":""}</div>`;
     const btn=document.createElement("button");
     btn.className="primary-btn";
     btn.style.cssText="width:100%;margin-top:12px";
@@ -834,7 +742,6 @@ function renderOpportunities(){
     box.appendChild(d);
   });
 }
-
 function openJobDetails(id){
   const j=allVisibleJobs.find(x=>String(x.id)===String(id));
   if(!j)return;
