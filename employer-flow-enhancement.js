@@ -52,3 +52,58 @@ async function submitEmployerVacancyEnhanced(){const company=byId('employerName'
 window.submitEmployerVacancy=submitEmployerVacancyEnhanced;
 document.addEventListener('DOMContentLoaded',()=>{injectEmployerFields();initEmployerOccupationChoice();});
 })();
+(function(){'use strict';
+const byId2=id=>document.getElementById(id);
+const esc2=v=>String(v??'').replace(/[&<>\"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[ch]));
+async function loadEmployerMatchCenter(){
+ const box=byId2('employerMatchCenter'); if(!box)return;
+ const user=await sessionUser(); if(!user){box.innerHTML='<div class="notice">🔐 سجّل الدخول لمراجعة المطابقات.</div>';return}
+ box.innerHTML='<div class="notice">⏳ جارٍ تحميل المطابقات...</div>';
+ try{
+  const v=await supabaseClient.from('employer_vacancies').select('id,title,company_name,status,created_at').in('status',['open','matching']).order('created_at',{ascending:false}).limit(20);
+  if(v.error)throw v.error;
+  const vacancies=v.data||[];
+  if(!vacancies.length){box.innerHTML='<div class="notice">لا توجد فرص منشورة للمطابقة حاليًا.</div>';return}
+  const ids=vacancies.map(x=>x.id);
+  const m=await supabaseClient.from('match_requests').select('id,vacancy_id,match_score,status,employer_note,created_at,updated_at').in('vacancy_id',ids).order('updated_at',{ascending:false}).limit(100);
+  if(m.error)throw m.error;
+  const rows=m.data||[];
+  const byVac=new Map(vacancies.map(x=>[x.id,x]));
+  box.innerHTML='<div class="match-center-head"><div><h3>🎯 المطابقات ومسار التوظيف</h3><p>هذه النتائج تخص فرصك فقط. لا تظهر بيانات الباحث الشخصية قبل اكتمال الموافقة وفتح التواصل.</p></div></div><div id="employerMatchList"></div>';
+  const list=byId2('employerMatchList');
+  if(!rows.length){list.innerHTML='<div class="notice">لم تُسجّل مطابقات مؤهلة بعد. سيستمر مَدخَل في فحص الباحثين المؤكدين.</div>';return}
+  rows.forEach((r,i)=>{
+   const v=byVac.get(r.vacancy_id)||{};
+   const card=document.createElement('div');card.className='worker-match-card';
+   card.innerHTML='<div class="candidate-top"><strong>'+esc2(v.title||'فرصة')+'</strong><span class="match-score">'+Math.round(Number(r.match_score)||0)+'% مطابقة</span></div>'+
+    '<div class="candidate-meta">👤 مرشح مؤهل · حالة المسار: <strong>'+esc2(r.status)+'</strong></div>'+
+    '<div class="candidate-meta">آخر تحديث: '+new Date(r.updated_at||r.created_at||Date.now()).toLocaleString('ar')+'</div><div class="worker-match-actions"></div>';
+   const actions=card.querySelector('.worker-match-actions');
+   const advance=async(next,label)=>{
+    const b=document.createElement('button');b.className='primary-btn';b.textContent=label;
+    b.onclick=async()=>{b.disabled=true;const x=await supabaseClient.rpc('advance_match_request',{p_request_id:r.id,p_next_status:next,p_note:null});if(x.error){b.disabled=false;showToast('⚠️ تعذر تحديث مسار المطابقة.');return}showToast('✅ تم تحديث مسار المطابقة.');loadEmployerMatchCenter()};
+    actions.appendChild(b);
+   };
+   if(r.status==='matched')advance('employer_interested','📩 إبداء الاهتمام بالمرشح');
+   else if(r.status==='accepted')advance('contact_opened','📞 فتح مرحلة التواصل');
+   else if(r.status==='employer_interested'){const n=document.createElement('div');n.className='notice';n.textContent='⏳ تم إرسال الاهتمام. بانتظار رد الباحث.';actions.appendChild(n)}
+   else if(r.status==='declined'){const n=document.createElement('div');n.className='notice';n.textContent='↩️ الباحث رفض المتابعة.';actions.appendChild(n)}
+   else if(r.status==='contact_opened'){const n=document.createElement('div');n.className='notice success';n.textContent='📞 تم فتح مرحلة التواصل. تفاصيل الاتصال المباشر ستُربط في المرحلة التالية دون كشفها قبل هذه الحالة.';actions.appendChild(n)}
+   else if(['interview','offer','hired','closed'].includes(r.status)){
+    const labels={interview:'🗣️ مقابلة',offer:'📄 عرض',hired:'🎉 تم التوظيف',closed:'🔒 مغلقة'};
+    const n=document.createElement('div');n.className='notice';n.textContent='الحالة الحالية: '+labels[r.status];actions.appendChild(n);
+   }
+   list.appendChild(card);
+  });
+ }catch(e){console.error('Madkhal employer match center',e);box.innerHTML='<div class="notice">⚠️ تعذر تحميل المطابقات الآن.</div>'}
+}
+function injectEmployerMatchCenter(){
+ const screen=byId2('employerScreen'); if(!screen||byId2('employerMatchCenter'))return;
+ const panel=document.createElement('div');panel.id='employerMatchPanel';panel.className='card';panel.style.marginTop='14px';
+ panel.innerHTML='<h3>🎯 مركز المطابقات</h3><p>بعد نشر الفرصة، ستظهر هنا المطابقات المسجلة ومسار التفاعل مع الباحث.</p><button id="openEmployerMatches" class="secondary-btn" style="width:100%">عرض المطابقات</button><div id="employerMatchCenterBody" style="margin-top:10px"></div>';
+ screen.appendChild(panel);
+ const body=panel.querySelector('#employerMatchCenterBody'); body.id='employerMatchCenter';
+ panel.querySelector('#openEmployerMatches').onclick=loadEmployerMatchCenter;
+}
+document.addEventListener('DOMContentLoaded',injectEmployerMatchCenter);
+})();

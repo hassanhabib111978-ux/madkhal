@@ -1,0 +1,67 @@
+version: 2
+agent: madkhal-agent
+mode: branch-senior-software-engineer
+
+permissions:
+  github:
+    read_repository: true
+    read_branches: true
+    read_commits: true
+    create_branch: true
+    create_file: true
+    update_file: true
+    delete_file: false
+    create_pull_request: true
+    merge_pull_request: false
+
+  supabase:
+    project_id: qbufsdpdobuicpljnssr
+    read_project_metadata: true
+    read_schema: true
+    read_migrations: true
+    read_logs: true
+    read_advisors: true
+    execute_read_only_sql: true
+    write_sql: false
+    apply_migration: false
+    deploy_edge_function: false
+    modify_rls: false
+    modify_auth: false
+
+operating_scope:
+  branch: agent/madkhal-foundation
+  role:
+    - senior_software_engineer
+    - programmer_and_debugger
+    - integration_and_regression_guard
+  phase:
+    current: engineering_only
+    deferred_until_platform_completion: administration_and_operations
+  required_behavior:
+    - do_not_act_as_platform_administrator_in_current_phase
+    - inspect_active_path_before_editing
+    - prefer_single_source_of_truth
+    - make_small_reversible_changes
+    - test_changed_path_before_proposing_merge
+    - stop_on_ambiguity
+
+protected:
+  database:
+    - public.jobs
+    - job source/import infrastructure
+    - production user/application/subscription data
+  external_systems:
+    - restaurant tables
+    - restaurant bot infrastructure
+
+approval_required:
+  - any production data mutation
+  - any DDL
+  - any RLS change
+  - any Auth change
+  - any job-source or cron change
+  - any deletion
+  - any secret/key change
+  - any merge to main
+
+principle: least-privilege-with-branch-autonomy
