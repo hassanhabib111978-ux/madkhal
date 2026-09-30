@@ -78,7 +78,64 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 .door-ref{width:38%;height:525px;overflow:visible}.door-ref .door-frame{width:158px;height:425px;margin-right:-5px}.door-ref .real-door{width:140px;height:405px}.door-ref .door-gap{height:390px;width:76px}.door-ref .door-handle{top:220px}.door-light{position:absolute;right:15px;top:60px;width:170px;height:410px;background:linear-gradient(90deg,rgba(255,226,146,.72),rgba(255,255,255,.08),transparent);filter:blur(12px);transform:skewY(-8deg);z-index:0}.door-ref .door-floor{height:38px;opacity:.7}
 .hero-ref-actions{position:relative;z-index:10;gap:14px}.hero-ref-actions .primary-btn,.hero-ref-actions .secondary-btn{min-height:60px;border-radius:30px;font-size:19px;box-shadow:0 8px 20px rgba(0,0,0,.25);border:2px solid rgba(255,255,255,.18)}.hero-ref-actions .primary-btn{background:linear-gradient(135deg,#ffd24f,#f0ad22);color:#18242b}.hero-ref-actions .secondary-btn{background:linear-gradient(135deg,#173b58,#10283b);color:#fff}.hero-ref-actions .secondary-btn{order:1}.hero-ref-actions .primary-btn{order:2}
 @media(max-width:560px){.hero-ref{min-height:650px;padding:25px 10px 15px}.hero-ref-copy{padding-left:8%;padding-right:8%}.hero-ref-copy h1{font-size:44px}.hero-ref-copy p{font-size:18px}.hero-ref-stage{min-height:485px}.hero-network{height:455px;width:65%}.door-ref{height:455px;width:35%}.door-ref .door-frame{width:116px;height:365px}.door-ref .real-door{width:102px;height:345px}.door-ref .door-gap{height:330px;width:57px}.network-node{width:70px;height:70px;font-size:26px}.network-node small{top:73px;font-size:9px}.node-laptop{left:28%}.node-phone{right:28%}.node-tools{left:24%}.node-compass{right:24%}.job-counter-ref{width:122px;height:122px}.job-counter-ref .job-counter-word{font-size:31px}.job-counter-ref .job-counter-number{font-size:16px}.job-counter-ref .job-counter-label{font-size:8px}.nl1,.nl2,.nl3,.nl4,.nl5,.nl6{width:110px}.hero-ref-actions .primary-btn,.hero-ref-actions .secondary-btn{font-size:15px;min-height:55px;padding:10px 8px}}
-</style></style></head>
+</style></style><style id="MADKHAL_HOME_VIEWPORT_READABILITY_FIX_2026_09_30">
+/* ضبط بصري فقط: الواجهة الرئيسية تظهر ضمن الشاشة الأولى، وتحسين تباين العناوين. */
+#homeScreen{margin-top:-14px}
+#homeScreen .hero-ref{
+  min-height:calc(100svh - 54px);
+  height:calc(100svh - 54px);
+  padding-top:22px;
+}
+#homeScreen .hero-ref-stage{
+  min-height:0;
+  flex:1 1 auto;
+}
+#homeScreen .hero-network,
+#homeScreen .door-ref{height:100%;max-height:500px}
+#homeScreen .hero-ref-actions{flex:0 0 auto}
+.screen:not(#homeScreen) .card h1,
+.screen:not(#homeScreen) .card h2,
+.screen:not(#homeScreen) .card h3,
+.screen:not(#homeScreen) .details-box h1,
+.screen:not(#homeScreen) .details-box h2,
+.screen:not(#homeScreen) .details-box h3,
+.screen:not(#homeScreen) .section-title,
+.screen:not(#homeScreen) .result .level,
+.screen:not(#homeScreen) .premium h3,
+.screen:not(#homeScreen) .jibran h3{
+  color:#173e59!important;
+}
+#homeScreen>.card h3,
+#homeScreen>.premium h3,
+#homeScreen>.section-title{color:#173e59!important}
+@media(max-width:560px){
+  #homeScreen .hero-ref{
+    padding-top:18px;
+    padding-bottom:12px;
+  }
+  #homeScreen .hero-ref-copy h1{font-size:40px}
+  #homeScreen .hero-ref-copy p{font-size:17px}
+  #homeScreen .hero-network,
+  #homeScreen .door-ref{height:100%;max-height:445px}
+  #homeScreen .hero-ref-actions .primary-btn,
+  #homeScreen .hero-ref-actions .secondary-btn{min-height:50px}
+}
+@media(max-width:560px) and (max-height:740px){
+  #homeScreen .hero-ref-copy{margin-bottom:2px}
+  #homeScreen .hero-ref-copy h1{font-size:36px;margin-bottom:4px}
+  #homeScreen .hero-ref-copy p{font-size:15px}
+  #homeScreen .hero-ref-stage{min-height:0}
+  #homeScreen .hero-network,
+  #homeScreen .door-ref{max-height:390px}
+  #homeScreen .network-node{width:62px;height:62px;font-size:23px}
+  #homeScreen .network-node small{top:64px;font-size:8px}
+  #homeScreen .job-counter-ref{width:108px;height:108px}
+  #homeScreen .job-counter-ref .job-counter-word{font-size:28px}
+  #homeScreen .hero-ref-actions{gap:9px}
+  #homeScreen .hero-ref-actions .primary-btn,
+  #homeScreen .hero-ref-actions .secondary-btn{min-height:46px;font-size:14px}
+}
+</style></head>
 <body>
 <div class="app">
 <header class="header"><div class="header-row"><div class="logo">مَدخَل 🚪</div><div class="pilot">إطلاق تجريبي</div></div></header>
