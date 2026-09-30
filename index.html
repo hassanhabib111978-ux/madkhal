@@ -258,6 +258,11 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 #madkhalPaymentMethods .payment-later-note{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;padding:10px 12px;border:1px solid #e1e8e7;border-radius:12px;background:#f8faf9;color:#4d5b5b;font-size:12px;font-weight:800}
 #madkhalPaymentMethods .payment-later-note span{color:#7a8585;font-weight:700}
 #madkhalPaymentMethods p,#madkhalPaymentMethods .notice{line-height:2}
+</style><style id="MADKHAL_ACCOUNT_ASSESSMENT_VISIBLE_FIX_2026_09_30">
+#savedAssessmentText .auto-score{display:flex;gap:14px;align-items:flex-start}
+#savedAssessmentText .auto-score-number{flex:0 0 86px;width:86px;height:86px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff7d6;border:5px solid #f4b52d;color:#173e59;font-size:25px;font-weight:900}
+#savedAssessmentText .score-bars{margin-top:8px}
+#savedAssessmentText .score-bar{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #e7eceb;line-height:1.5}
 </style></head>
 <body>
 <div class="app">
@@ -488,7 +493,7 @@ function ensureAccountAssessment(){
     }
   }catch(e){console.warn("account assessment fallback",e)}
 }
-function showScreen(id,focusId){const target=document.getElementById(id);if(!target)return;currentScreen=id;document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id));updateNav(id);if(id==="accountScreen"){ensureAccountAssessment();loadAccount();}if(id==="opportunitiesScreen"){renderCategories();renderOpportunities()}if(id==="subscriptionScreen"){renderSubscription();syncSubscriptionStatus();}if(id==="jibranScreen")renderJibranContext();scrollToActive(id,focusId)}
+function showScreen(id,focusId){const target=document.getElementById(id);if(!target)return;currentScreen=id;document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id));updateNav(id);if(id==="accountScreen"){ensureAccountAssessment();loadAccount();setTimeout(()=>{try{ensureAccountAssessment();const p=localProfile()||{};if(Object.values(p).some(v=>String(v??"").trim().length>0)){const a=calculateAutomaticAssessmentInstant(p);if(a&&Number.isFinite(Number(a.score)))renderAutomaticAssessment(a)}}catch(e){console.warn("account assessment visible fallback",e)}},250);}if(id==="opportunitiesScreen"){renderCategories();renderOpportunities()}if(id==="subscriptionScreen"){renderSubscription();syncSubscriptionStatus();}if(id==="jibranScreen")renderJibranContext();scrollToActive(id,focusId)}
 function openSubscription(){showScreen("subscriptionScreen","subscriptionScreen")}
 function openWorker(){showScreen("workerScreen","workerScreen")}
 async function openProfile(){showScreen("profileScreen","workerFirstName");await loadProfile()}
