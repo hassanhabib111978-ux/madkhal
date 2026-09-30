@@ -263,6 +263,11 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 #savedAssessmentText .auto-score-number{flex:0 0 86px;width:86px;height:86px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff7d6;border:5px solid #f4b52d;color:#173e59;font-size:25px;font-weight:900}
 #savedAssessmentText .score-bars{margin-top:8px}
 #savedAssessmentText .score-bar{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #e7eceb;line-height:1.5}
+</style><style id="MADKHAL_ASSESSMENT_GUARANTEED_RENDER_2026_09_30">
+#savedAssessmentText .auto-score{display:flex;gap:14px;align-items:flex-start}
+#savedAssessmentText .auto-score-number{flex:0 0 86px;width:86px;height:86px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff7d6;border:5px solid #f4b52d;color:#173e59;font-size:25px;font-weight:900}
+#savedAssessmentText .score-bars{margin-top:8px}
+#savedAssessmentText .score-bar{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #e7eceb;line-height:1.5}
 </style></head>
 <body>
 <div class="app">
@@ -366,7 +371,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 
 <section id="accountScreen" class="screen">
 <div class="card"><h2>👤 حسابي</h2><p id="accountStatus">لم يتم إنشاء الملف بعد.</p><div id="accountSummary" style="margin-top:12px"></div></div>
-<div class="card"><h3>📊 تقييم مَدخَل</h3><div id="savedAssessmentText">لم يُحسب التقييم بعد.</div><button class="secondary-btn" style="width:100%;margin-top:10px" onclick="recalculateAccountAssessment()">🔄 إعادة حساب التقييم</button></div>
+<div class="card"><h3>📊 تقييم مَدخَل</h3><div id="savedAssessmentText">⏳ جارٍ حساب تقييم مَدخَل...</div><button class="secondary-btn" style="width:100%;margin-top:10px" onclick="recalculateAccountAssessment()">🔄 إعادة حساب التقييم</button></div>
 <div class="card"><h3>🔔 التنبيهات</h3><div id="notificationsList"></div></div>
 <div class="card"><h3>📩 طلباتي</h3><div id="applicationsList"></div></div>
 <div class="card"><h3>🔔 المتابعة الذكية</h3><p>البحث عن الفرص الموجودة مجاني ولا يتطلب اشتراكًا. الاشتراك اختياري لمن يريد من مَدخَل أن يبحث ويطابق ويرسل التنبيهات باستمرار.</p><div id="accountSubscriptionStatus" class="notice">الاشتراك غير مفعل.</div><button class="primary-btn" style="width:100%;margin-top:10px" onclick="openSubscription()">🔔 تفاصيل المتابعة — $1 شهريًا</button></div>
@@ -479,19 +484,10 @@ function scrollToActive(id,focusId){const screen=document.getElementById(id);if(
 function ensureAccountAssessment(){
   const box=document.getElementById("savedAssessmentText");
   if(!box)return;
+  try{ if(forceAccountAssessmentDisplay()) return; }catch(e){console.warn("guaranteed assessment",e)}
   const p=localProfile()||{};
   const hasProfile=Object.values(p).some(v=>String(v??"").trim().length>0);
   if(!hasProfile)return;
-  if(!p.full_name){
-    p.full_name=[p.first_name,p.father_name,p.family_name].filter(Boolean).join(" ").trim();
-  }
-  try{
-    const a=calculateAutomaticAssessmentInstant(p);
-    if(a&&Number.isFinite(Number(a.score))){
-      setLS(LS.assessment,a);
-      renderAutomaticAssessment(a);
-    }
-  }catch(e){console.warn("account assessment fallback",e)}
 }
 function showScreen(id,focusId){const target=document.getElementById(id);if(!target)return;currentScreen=id;document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id));updateNav(id);if(id==="accountScreen"){ensureAccountAssessment();loadAccount();setTimeout(()=>{try{ensureAccountAssessment();const p=localProfile()||{};if(Object.values(p).some(v=>String(v??"").trim().length>0)){const a=calculateAutomaticAssessmentInstant(p);if(a&&Number.isFinite(Number(a.score)))renderAutomaticAssessment(a)}}catch(e){console.warn("account assessment visible fallback",e)}},250);}if(id==="opportunitiesScreen"){renderCategories();renderOpportunities()}if(id==="subscriptionScreen"){renderSubscription();syncSubscriptionStatus();}if(id==="jibranScreen")renderJibranContext();scrollToActive(id,focusId)}
 function openSubscription(){showScreen("subscriptionScreen","subscriptionScreen")}
@@ -593,6 +589,35 @@ async function calculateAutomaticAssessment(p){
   const score=Math.round(factors.reduce((s,f)=>s+f.score*f.weight/100,0));
   const level=score>=85?"ملف قوي":score>=70?"ملف جيد":score>=50?"ملف قابل للتحسين":"يحتاج استكمال";
   return {score,level,skill:p.occupation_label||"الملف المهني",occupation_uri:p.occupation_uri||"",required_skills:required.slice(0,30),date:now(),factors,strengths:factors.filter(f=>f.score>=75).map(f=>f.name),improvements:factors.filter(f=>f.score<75).map(f=>f.name),method:"تقييم مهني مرتبط بالمهنة ومهاراتها"};
+}
+function forceAccountAssessmentDisplay(){
+  const box=document.getElementById("savedAssessmentText");
+  if(!box)return false;
+  const p=localProfile()||{};
+  const hasProfile=Object.values(p).some(v=>String(v??"").trim().length>0);
+  if(!hasProfile)return false;
+  let result=null;
+  try{result=calculateAutomaticAssessmentInstant(p)}catch(e){console.warn("assessment instant render",e)}
+  if(!result||!Number.isFinite(Number(result.score))){
+    const has=v=>String(v??"").trim().length>0;
+    const occ=has(p.occupation_label)?100:0;
+    const qual=has(p.qualification)?75:0;
+    const exp=p.experience_years===""||p.experience_years==null?0:Math.min(100,Math.round(35+Math.min(Number(p.experience_years)||0,7)*9.3));
+    const skills=String(p.skills||"").split(/[,،]+/).map(x=>x.trim()).filter(Boolean).length;
+    const skill=Math.min(100,skills?40+Math.min(skills,4)*15:0);
+    const complete=[p.first_name,p.mother_name,p.birth_date,p.qualification,p.occupation_label,p.location,p.work_type,p.professional_summary].filter(has).length/8*100;
+    const score=Math.round(complete*.10+occ*.20+skill*.35+exp*.20+qual*.10);
+    result={score,level:score>=85?"ملف قوي":score>=70?"ملف جيد":score>=50?"ملف قابل للتحسين":"يحتاج استكمال",skill:p.occupation_label||"الملف المهني",occupation_uri:p.occupation_uri||"",required_skills:[],date:now(),factors:[
+      {name:"اكتمال الملف",score:Math.round(complete),weight:10},
+      {name:"ملاءمة المهنة المختارة",score:occ,weight:20},
+      {name:"مهارات المهنة",score:skill,weight:35},
+      {name:"الخبرة المهنية",score:exp,weight:20},
+      {name:"المؤهل",score:qual,weight:10}
+    ],strengths:[],improvements:[],method:"تقييم مَدخَل الأساسي"};
+  }
+  setLS(LS.assessment,result);
+  renderAutomaticAssessment(result);
+  return true;
 }
 function renderAutomaticAssessment(result){
   const box=document.getElementById("savedAssessmentText");
