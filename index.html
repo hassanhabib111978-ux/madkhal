@@ -562,7 +562,7 @@ function renderOpportunities(){
   }else if(q.length===1){
     list=list.filter(j=>normalizeText([j.title,j.category].join(" ")).includes(q));
   }
-  list.sort((a,b)=>matchScore(b)-matchScore(a));
+  list.sort((a,b)=>Date.parse(b.created_at||0)-Date.parse(a.created_at||0));
   if(!list.length){
     box.innerHTML='<div class="card"><div class="empty">🔎 لا توجد فرص حاليًا ضمن نطاق مَدخَل بهذه المواصفات.<br>جرّب كتابة حرفين أو ثلاثة من اسم المهنة.</div></div>';
     return;
