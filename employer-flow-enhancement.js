@@ -96,7 +96,7 @@ async function loadEmployerMatchCenter(){
 }
 function injectEmployerMatchCenter(){
  const screen=byId('employerScreen'); if(!screen||byId('employerMatchCenter'))return;
- const panel=document.createElement('div');panel.id='employerMatchCenter';panel.className='card';panel.style.marginTop='14px';
+ const panel=document.createElement('div');panel.id='employerMatchPanel';panel.className='card';panel.style.marginTop='14px';
  panel.innerHTML='<h3>🎯 مركز المطابقات</h3><p>بعد نشر الفرصة، ستظهر هنا المطابقات المسجلة ومسار التفاعل مع الباحث.</p><button id="openEmployerMatches" class="secondary-btn" style="width:100%">عرض المطابقات</button><div id="employerMatchCenterBody" style="margin-top:10px"></div>';
  screen.appendChild(panel);
  const body=panel.querySelector('#employerMatchCenterBody'); body.id='employerMatchCenter';
