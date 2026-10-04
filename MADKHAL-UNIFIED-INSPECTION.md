@@ -46,3 +46,9 @@
 
 ## حماية
 مصادر الوظائف وبياناتها العاملة خارج نطاق الإصلاح الحالي. لا حذف لطلبات التقديم التاريخية. لا تغيير للاشتراك/المحفظة إلا إذا أثبت الفحص أن هناك اعتمادًا مباشرًا يمنع الرحلة الموحدة.
+
+## 2026-10-04 — internal score canonicalization
+- Active internal `match_requests.match_score` generation now uses the same `professional_match_scores.scoring_version='v3'` score.
+- The previous legacy 75% + professional 25% composite is no longer used for newly generated active matches.
+- Legacy scoring functions and historical rows remain intact for audit/backward compatibility; no destructive data rewrite was performed.
+- Worker skill ratings are persisted before the unified match refresh in the front-end, so the professional v3 matcher can consume the current assessment state.
