@@ -679,7 +679,7 @@ function generateLocalMatches(){
  setLS(key,updated);
  const notes=getLS(LS.notifications,[]).filter(n=>!String(n.message||"").startsWith("🎯 فرصة مناسبة لك:"));
  setLS(LS.notifications,notes);
- matches.slice(0,3).forEach(x=>addLocalNotification("🎯 فرصة مناسبة لك: "+x.j.title+" — مطابقة "+x.s+"%",x.j.id))
+ // لا تُنشئ هذه الدالة تنبيهات مطابقة محلية؛ التنبيهات المهنية مصدرها مسار المطابقة الرسمي في Supabase.
 }
 function renderCategories(){const c=document.getElementById("categoryScroll");if(!c)return;const cats=["الكل"];const counts={};allVisibleJobs.map(visibleJob).forEach(j=>{counts[j.category]=(counts[j.category]||0)+1});Object.keys(counts).sort().forEach(k=>cats.push(k));c.innerHTML="";cats.forEach(x=>{const b=document.createElement("button");b.className="chip"+(currentCategory===x?" active":"");b.textContent=x+(x!=="الكل"&&counts[x]?" · "+counts[x]:"");b.onclick=()=>{currentCategory=x;renderCategories();renderOpportunities()};c.appendChild(b)})}
 async function renderOpportunities(){
@@ -958,10 +958,10 @@ async function renderNotifications(){
     });
     matches.sort((a,b)=>b.score-a.score);
   }
-  const current=matches.slice(0,3).map(x=>({
-    job_id:x.job_id,message:"🎯 فرصة مناسبة لك: "+x.title+" — مطابقة "+x.score+"%",created_at:now()
-  }));
-  const cleaned=normal.concat(current);
+  // لا تُعاد صناعة تنبيهات المطابقة محليًا هنا.
+  // المصدر الرسمي لتنبيه المطابقة هو مسار Supabase الموحد؛
+  // هذا يمنع اختلاف درجة الواجهة عن الدرجة الرسمية.
+  const cleaned=normal;
   setLS(LS.notifications,cleaned);
   if(!cleaned.length){box.innerHTML='<div class="empty">لا توجد تنبيهات جديدة.</div>';return}
   box.innerHTML=cleaned.slice(0,12).map(x=>'<div class="summary-box" style="margin-bottom:8px">🔔 '+escapeHtml(x.message||"تنبيه")+'<br><small>'+formatDate(x.created_at)+'</small></div>').join("");
