@@ -67,3 +67,8 @@
 - The worker match processor now recalculates existing non-terminal match requests against the current professional `v3` score instead of skipping them.
 - New matches still require a v3 score of at least 35; declined, closed, and hired requests are preserved.
 - This closes the stale-score path after a worker edits profile, skills, or assessment data.
+
+## 2026-10-04 — live data audit
+- `worker_opportunity_recommendations`: 3 stale `external-v2` rows remain for audit, while the active path uses 3 `external-v3` rows; current `external-v3` positive recommendations checked: 0.
+- `notifications`: 0 current match/job-match notifications and 1 subscription notification.
+- Active `match_requests`: 2/2 have current v3 records and their active score fields match v3 (0 mismatches).
