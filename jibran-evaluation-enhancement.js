@@ -117,7 +117,34 @@
   function jobText(j){
     return norm([j.title,j.company,j.description,j.location,j.country,j.category,j.job_type,j.required_skills].filter(Boolean).join(" "));
   }
-  // المطابقة المهنية ليست وظيفة محلية في جبران. المصدر الرسمي هو مسار مَدخَل الموحد في Supabase.\n  // نحافظ هنا فقط على عرض سياق التقييم، ولا نعيد تعريف matchScore أو askJibranUser.\n  window.renderJibranContext=async function(){\n    const p=profile(), el=document.getElementById("jibranContext");\n    if(!el)return;\n    if(!p.full_name){\n      el.innerHTML="<h3>السياق الحالي</h3><p>لا يوجد ملف محفوظ بعد. أكمل الملف أولًا حتى يستطيع جبران ربط تقييمك بالمسار الرسمي.</p>";\n      return;\n    }\n    const a=calculateAutomaticAssessment(p);\n    let official=null;\n    try{\n      if(typeof window.loadCanonicalWorkerMatchData==="function") official=await window.loadCanonicalWorkerMatchData(p);\n    }catch(e){console.warn("jibran official match context",e)}\n    const direct=official?.directMatches||[];\n    const publicMatches=official?.publicMatches||[];\n    let matchHtml="لا توجد مطابقة مهنية جديدة حاليًا.";\n    if(direct.length){\n      matchHtml="أقرب مطابقة مباشرة: <strong>"+escapeHtml(direct[0].title||"فرصة مباشرة")+"</strong> — "+Math.round(Number(direct[0].match_score)||0)+"%";\n    }else if(publicMatches.length){\n      matchHtml="أقرب فرصة منشورة: <strong>"+escapeHtml(publicMatches[0].j?.title||"فرصة منشورة")+"</strong> — "+Math.round(Number(publicMatches[0].s)||0)+"%";\n    }\n    el.innerHTML="<h3>السياق الحالي</h3><p><strong>"+escapeHtml(p.full_name)+"</strong> · "+escapeHtml(p.occupation_label||p.profession||"مهنة غير محددة")+" · 📍 "+escapeHtml(p.location||"غير محدد")+"</p>"+\n      "<div class='notice'>📊 التقييم المهني الحالي: <strong>"+escapeHtml(a.score)+" / 100</strong> — "+escapeHtml(a.level)+"</div>"+\n      "<div class='notice'>🎯 "+matchHtml+"</div>";\n  };\n\n  window.renderAutomaticAssessment=function(result){
+  // المطابقة المهنية ليست وظيفة محلية في جبران. المصدر الرسمي هو مسار مَدخَل الموحد في Supabase.
+  // نحافظ هنا فقط على عرض سياق التقييم، ولا نعيد تعريف matchScore أو askJibranUser.
+  window.renderJibranContext=async function(){
+    const p=profile(), el=document.getElementById("jibranContext");
+    if(!el)return;
+    if(!p.full_name){
+      el.innerHTML="<h3>السياق الحالي</h3><p>لا يوجد ملف محفوظ بعد. أكمل الملف أولًا حتى يستطيع جبران ربط تقييمك بالمسار الرسمي.</p>";
+      return;
+    }
+    const a=calculateAutomaticAssessment(p);
+    let official=null;
+    try{
+      if(typeof window.loadCanonicalWorkerMatchData==="function") official=await window.loadCanonicalWorkerMatchData(p);
+    }catch(e){console.warn("jibran official match context",e)}
+    const direct=official?.directMatches||[];
+    const publicMatches=official?.publicMatches||[];
+    let matchHtml="لا توجد مطابقة مهنية جديدة حاليًا.";
+    if(direct.length){
+      matchHtml="أقرب مطابقة مباشرة: <strong>"+escapeHtml(direct[0].title||"فرصة مباشرة")+"</strong> — "+Math.round(Number(direct[0].match_score)||0)+"%";
+    }else if(publicMatches.length){
+      matchHtml="أقرب فرصة منشورة: <strong>"+escapeHtml(publicMatches[0].j?.title||"فرصة منشورة")+"</strong> — "+Math.round(Number(publicMatches[0].s)||0)+"%";
+    }
+    el.innerHTML="<h3>السياق الحالي</h3><p><strong>"+escapeHtml(p.full_name)+"</strong> · "+escapeHtml(p.occupation_label||p.profession||"مهنة غير محددة")+" · 📍 "+escapeHtml(p.location||"غير محدد")+"</p>"+
+      "<div class='notice'>📊 التقييم المهني الحالي: <strong>"+escapeHtml(a.score)+" / 100</strong> — "+escapeHtml(a.level)+"</div>"+
+      "<div class='notice'>🎯 "+matchHtml+"</div>";
+  };
+
+  window.renderAutomaticAssessment=function(result){
     const box=document.getElementById("automaticAssessment");
     if(!box||!result)return;
     box.innerHTML="<div class='auto-score'><div class='auto-score-number'>"+escapeHtml(result.score)+"</div><div><h3>"+escapeHtml(result.level)+"</h3><p>التقييم لا يعتمد على اكتمال الحقول وحده؛ بل يوازن بين المهنة والمهارات والخبرة والمؤهل والنبذة ونوع العمل.</p></div></div>"+
