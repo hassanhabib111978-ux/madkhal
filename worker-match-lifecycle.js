@@ -75,7 +75,9 @@ async function loadWorkerMatchCenter(){
  const r=await supabaseClient.rpc('get_my_worker_matches');
  if(r.error){panel.innerHTML='<div class="notice">⚠️ تعذر تحميل مسار المطابقات.</div>';return}
  const rows=r.data||[];
- const publicMatches=window.getCanonicalWorkerPublicMatches?window.getCanonicalWorkerPublicMatches((q.data||[]),p,10):[];
+ let publicJobs=[];
+ try{publicJobs=typeof loadJobs==='function'?await loadJobs(false):[];}catch(e){console.warn('worker public jobs',e);publicJobs=[];}
+ const publicMatches=window.getCanonicalWorkerPublicMatches?window.getCanonicalWorkerPublicMatches(publicJobs,p,10):[];
  if(!rows.length&&!publicMatches.length){
    panel.innerHTML='<div class="notice">لا توجد مطابقة مهنية جديدة حاليًا. سيظهر المسار هنا عند العثور على فرصة مناسبة.</div>';return
  }
