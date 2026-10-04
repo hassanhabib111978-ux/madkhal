@@ -995,8 +995,10 @@ async function renderNotifications(){
     if(msg.startsWith("🎯 فرصة مناسبة لك:"))return false;
     if(msg.includes("تم تسجيل رغبتك بالاشتراك")||msg.includes("طلب اشتراك"))return false;
     if(msg.startsWith("📩 تم تسجيل طلب التقديم على ")){
-      const title=normalizeText(msg.replace("📩 تم تسجيل طلب التقديم على ","").trim());
-      return applicationTitles.has(title);
+      // Application confirmations belong to «طلباتي», not current alerts.
+      // Keeping them out of notifications prevents historical applications
+      // from looking like current recommendations after a profile change.
+      return false;
     }
     return true;
   });
