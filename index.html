@@ -654,14 +654,6 @@ function validSalaryNumber(v){const n=Number(v);return Number.isFinite(n)&&n>=0&
 function salaryText(j){let a=validSalaryNumber(j.salary_min),b=validSalaryNumber(j.salary_max),c=cleanSalaryCurrency(j.salary_currency);if(a===0&&b===0){a=null;b=null}if(a===0)a=null;if(b===0)b=null;if(a!=null&&b!=null&&a>b){const x=a;a=b;b=x}if(a!=null&&b!=null)return a+" - "+b+(c?" "+c:"");if(a!=null)return "من "+a+(c?" "+c:"");if(b!=null)return "حتى "+b+(c?" "+c:"");return "حسب المصدر"}
 function workType(t){const x=cleanJobText(t);return ({full_time:"دوام كامل",part_time:"دوام جزئي",remote:"عن بُعد",freelance:"عمل حر",any:"أي نوع"})[x]||x||"غير محدد"}
 function categoryFor(j){const t=normalizeText([j.title,j.category,j.description].filter(Boolean).join(" "));if(t.includes("محاسب")||t.includes("محاسبة")||t.includes("account"))return "🧮 المحاسبة";if(t.includes("برمج")||t.includes("developer")||t.includes("engineer")||t.includes("software"))return "💻 التقنية";if(t.includes("تصميم")||t.includes("designer")||t.includes("graphic"))return "🎨 التصميم";if(t.includes("تسويق")||t.includes("marketing")||t.includes("مبيعات")||t.includes("sales"))return "📣 التسويق والمبيعات";if(t.includes("سكرت")||t.includes("secretary")||t.includes("admin"))return "🗂️ الإدارة";if(t.includes("خدمة العملاء")||t.includes("customer service"))return "🗣️ خدمة العملاء";if(t.includes("driver")||t.includes("سائق"))return "🚚 النقل";if(t.includes("تعليم")||t.includes("teacher")||t.includes("مدرس"))return "📚 التعليم";return "🔧 أخرى"}function visibleJob(j){return {id:j.id,title:cleanJobText(j.title)||"فرصة",company:cleanJobText(j.company)||"حسب المصدر",location:cleanJobText(j.location||j.country)||"غير محدد",country:cleanJobText(j.country),type:workType(j.job_type),category:categoryFor(j),description:cleanJobText(j.description)||"تفاصيل الوظيفة موجودة في المصدر الأصلي.",salary:salaryText(j),source:cleanJobText(j.source),source_name:cleanJobText(j.source_name),external_link:String(j.source_url||j.canonical_url||""),canonical_link:String(j.canonical_url||j.source_url||""),posted_at:j.posted_at||null,expires_at:j.expires_at||null}}
-function matchScore(job){
-  try{
-    if(typeof window.calculateCanonicalPublicJobMatchScore==="function"){
-      return window.calculateCanonicalPublicJobMatchScore(job,localProfile()||{});
-    }
-  }catch(e){console.warn("canonical match score",e)}
-  return 0;
-}
 function generateLocalMatches(){
  // المطابقة المهنية ليست وظيفة محلية في الواجهة.
  // المصدر الرسمي هو مسار Supabase الموحد؛ الفرص العامة تبقى للبحث والعرض فقط.
@@ -933,19 +925,6 @@ async function renderNotifications(){
     }
     return true;
   });
-  const p=localProfile()||{};
-  const matches=[];
-  if(p.occupation_label){
-    const seen=new Set();
-    (allVisibleJobs||[]).map(visibleJob).forEach(j=>{
-      const score=matchScore(j);if(score<55)return;
-      const urlKey=normalizeText(j.canonical_url||j.source_url||"");
-      const titleKey=normalizeText(j.title||"");
-      const key=urlKey?"url|"+urlKey:"title|"+titleKey;
-      if(seen.has(key))return;seen.add(key);matches.push({job_id:j.id,title:j.title,score});
-    });
-    matches.sort((a,b)=>b.score-a.score);
-  }
   // لا تُعاد صناعة تنبيهات المطابقة محليًا هنا.
   // المصدر الرسمي لتنبيه المطابقة هو مسار Supabase الموحد؛
   // هذا يمنع اختلاف درجة الواجهة عن الدرجة الرسمية.
