@@ -634,8 +634,88 @@ function normalizeText(v){return String(v||"").toLowerCase().normalize("NFKC").r
 function tokens(v){return normalizeText(v).split(" ").filter(x=>x.length>=3)}
 function aliasTermsFor(label){const out=[];const key=normalizeText(label);Object.keys(OCC_ALIASES).forEach(ar=>{if(key.includes(normalizeText(ar)))out.push(...OCC_ALIASES[ar])});return out}
 function jobCorpus(){return normalizeText(allVisibleJobs.map(j=>[j.title,j.description,j.category,j.company,j.location,j.country].filter(Boolean).join(" ")).join(" "))}
-function occupationRelevant(item,typed){const label=String(item.preferred_label||"");const alt=String(item.alt_labels||"");const corpus=jobCorpus();const labelVariants=[label].concat(alt.split(/\n+/)).concat(aliasTermsFor(label));for(const v of labelVariants){const nv=normalizeText(v);if(nv.length>=4&&corpus.includes(nv))return true;const tt=tokens(nv).filter(x=>x.length>=4&&!["مدير","اداري","ادارية","مساعد","مساعدة","متخصص","متخصصة","عامل","عاملة"].includes(x));if(tt.some(t=>corpus.includes(t)))return true}const typedTerms=tokens(typed);if(typedTerms.length){const mapped=[];typedTerms.forEach(t=>{Object.keys(OCC_ALIASES).forEach(ar=>{const al=OCC_ALIASES[ar].map(normalizeText);if(al.some(x=>x.includes(t)))mapped.push(normalizeText(ar))})});if(mapped.some(m=>labelVariants.map(normalizeText).some(v=>v.includes(m))))return true}return false}
-async function searchOccupations(inputId,resultId,statusId,uriId,labelId,timerType){const input=document.getElementById(inputId);const results=document.getElementById(resultId);const status=document.getElementById(statusId);if(!input||!results||!status)return;const term=input.value.trim();if(term.length<2){results.style.display="none";results.innerHTML="";status.textContent="اكتب حرفين على الأقل. لا نعرض كتالوج ESCO كاملًا.";return}status.textContent="جاري البحث في المهن المرتبطة بالفرص الحالية...";let rpcTerm=term;const low=normalizeText(term);Object.keys(OCC_ALIASES).forEach(ar=>{if(normalizeText(ar).includes(low)||OCC_ALIASES[ar].some(x=>normalizeText(x).includes(low)))rpcTerm=ar});try{const res=await supabaseClient.rpc("search_madkhal_occupations",{search_text:rpcTerm,result_limit:30});if(res.error)throw res.error;let rows=(res.data||[]).filter(x=>occupationRelevant(x,term));results.innerHTML="";rows.slice(0,12).forEach(item=>{const b=document.createElement("button");b.type="button";b.className="occupation-option";b.innerHTML="<strong>"+escapeHtml(item.preferred_label)+"</strong><small>المعيار الأوروبي ESCO · ISCO: "+escapeHtml(item.isco_group||"")+"</small>";b.onclick=()=>{input.value=item.preferred_label||"";document.getElementById(uriId).value=item.concept_uri||"";document.getElementById(labelId).value=item.preferred_label||"";results.style.display="none";status.textContent="✓ تم اختيار مهنة مرتبطة بفرص فعلية.";if(timerType==="worker")loadOccupationSkills(item.concept_uri||"")};results.appendChild(b)});results.style.display=results.children.length?"block":"none";status.textContent=results.children.length?"اختر المهنة المناسبة.":"لم نجد مهنة معيارية مرتبطة بفرصة حالية بهذه الكلمة. جرّب مصطلحًا قريبًا."}catch(e){results.style.display="none";status.textContent="تعذر تحميل المهن حاليًا."}}
+function occupationRelevant(item,typed){
+  const label=String(item.preferred_label||"");
+  const alt=String(item.alt_labels||"");
+  const labelVariants=[label].concat(alt.split(/\n+/)).concat(aliasTermsFor(label));
+  const typedTerms=tokens(typed).filter(x=>x.length>=2);
+  const typedNorm=normalizeText(typed);
+  const mapped=[];
+  typedTerms.forEach(t=>Object.keys(OCC_ALIASES).forEach(ar=>{
+    const arNorm=normalizeText(ar);
+    const aliases=(OCC_ALIASES[ar]||[]).map(normalizeText);
+    if(arNorm.includes(t)||aliases.some(x=>x.includes(t)||t.includes(x)))mapped.push(arNorm,...aliases);
+  }));
+  const candidateTerms=[typedNorm,...typedTerms,...mapped].filter(x=>x&&x.length>=2);
+  const jobTexts=allVisibleJobs.map(j=>normalizeText([j.title,j.category,j.description].filter(Boolean).join(" ")));
+  if(!jobTexts.length)return false;
+  for(const v of labelVariants){
+    const nv=normalizeText(v);
+    if(!nv)continue;
+    if(jobTexts.some(job=>{
+      if(job.includes(nv))return true;
+      const vt=tokens(nv).filter(t=>t.length>=3&&!["مدير","مديرة","اداري","ادارية","مساعد","مساعدة","متخصص","متخصصة","عامل","عاملة"].includes(t));
+      return vt.length>0&&vt.some(t=>job.includes(t));
+    }))return true;
+  }
+  return candidateTerms.some(term=>jobTexts.some(job=>job.includes(term)));
+}
+async function searchOccupations(inputId,resultId,statusId,uriId,labelId,timerType){
+  const input=document.getElementById(inputId),results=document.getElementById(resultId),status=document.getElementById(statusId);
+  if(!input||!results||!status)return;
+  const term=input.value.trim();
+  if(term.length<2){results.style.display="none";results.innerHTML="";status.textContent="اكتب حرفين على الأقل. لا نعرض كتالوج ESCO كاملًا.";return}
+  status.textContent="جاري البحث عن مهن مرتبطة بالفرص الحالية...";
+  const low=normalizeText(term);
+  const queryTerms=[term,...tokens(term).filter(t=>t.length>=2)];
+  Object.keys(OCC_ALIASES).forEach(ar=>{
+    const arNorm=normalizeText(ar),aliases=(OCC_ALIASES[ar]||[]).map(normalizeText);
+    if(arNorm.includes(low)||low.includes(arNorm)||aliases.some(x=>x.includes(low)||low.includes(x)))queryTerms.push(ar);
+  });
+  const uniqueTerms=[...new Set(queryTerms.filter(Boolean))].slice(0,6);
+  try{
+    if(!allVisibleJobs.length)await loadJobs();
+    const responses=await Promise.all(uniqueTerms.map(q=>supabaseClient.rpc("search_madkhal_occupations",{search_text:q,result_limit:30})));
+    const rows=[];
+    const seen=new Set();
+    responses.forEach(res=>{
+      if(res.error)throw res.error;
+      (res.data||[]).forEach(item=>{
+        const key=item.concept_uri||item.preferred_label;
+        if(key&&!seen.has(key)){seen.add(key);rows.push(item)}
+      });
+    });
+    let filtered=rows.filter(x=>occupationRelevant(x,term));
+    // إذا كان البحث جزءًا واضحًا من اسم المهنة، لا نستبعده بسبب اختلاف صياغة الفرصة.
+    if(!filtered.length){
+      filtered=rows.filter(x=>{
+        const text=normalizeText([x.preferred_label,x.alt_labels].join(" "));
+        return text.includes(low)||tokens(term).some(t=>t.length>=2&&text.includes(t));
+      });
+    }
+    results.innerHTML="";
+    filtered.slice(0,12).forEach(item=>{
+      const b=document.createElement("button");
+      b.type="button";b.className="occupation-option";
+      b.innerHTML="<strong>"+escapeHtml(item.preferred_label)+"</strong><small>مرتبطة بفرص مَدخَل الحالية · ESCO / ISCO: "+escapeHtml(item.isco_group||"")+"</small>";
+      b.onclick=()=>{
+        input.value=item.preferred_label||"";
+        document.getElementById(uriId).value=item.concept_uri||"";
+        document.getElementById(labelId).value=item.preferred_label||"";
+        results.style.display="none";
+        status.textContent="✓ تم اختيار مهنة مرتبطة بفرص فعلية.";
+        if(timerType==="worker")loadOccupationSkills(item.concept_uri||"");
+      };
+      results.appendChild(b);
+    });
+    results.style.display=results.children.length?"block":"none";
+    status.textContent=results.children.length?"اختر المهنة المناسبة من الفرص الحالية.":"لم نجد مهنة مرتبطة بفرصة حالية بهذه الكلمة. جرّب جزءًا آخر من المهنة.";
+  }catch(e){
+    console.warn("occupation search",e);
+    results.style.display="none";
+    status.textContent="تعذر تحميل المهن المرتبطة بالفرص حاليًا.";
+  }
+}
 function loadOccupationSkills(uri){const box=document.getElementById("skillAssessmentBox");const list=document.getElementById("skillAssessmentList");const status=document.getElementById("skillAssessmentStatus");if(!uri||!box||!list)return;box.classList.remove("hidden");status.textContent="جاري تحميل المهارات...";supabaseClient.rpc("get_madkhal_occupation_skills",{occupation_uri_input:uri,result_limit:12}).then(res=>{if(res.error)throw res.error;list.innerHTML="";(res.data||[]).forEach((s,idx)=>{const card=document.createElement("div");card.className="skill-card";let radios="";for(let n=0;n<=5;n++)radios+='<label><input type="radio" name="occ_skill_'+idx+'" value="'+n+'" data-skill-uri="'+escapeHtml(s.skill_uri)+'" data-skill-label="'+escapeHtml(s.skill_label)+'">'+n+"</label>";card.innerHTML='<div class="skill-name">'+escapeHtml(s.skill_label)+'</div><div class="skill-scale">'+radios+'</div>';list.appendChild(card)});status.textContent=(res.data||[]).length?"لم تُقيّم المهارات بعد. يمكنك تقييم أي مهارة من 0 إلى 5 ثم حفظ الملف.":"لا توجد مهارات مرتبطة بهذه المهنة حاليًا."}).catch(e=>{status.textContent="تعذر تحميل المهارات حاليًا."})}
 function selectedOccupation(){return {uri:document.getElementById("occupationUri")?.value.trim()||"",label:document.getElementById("occupationLabel")?.value.trim()||""}}
 
