@@ -64,22 +64,47 @@ function getCanonicalWorkerPublicMatches(jobs,p,limit=10){
 }
 window.calculateCanonicalPublicJobMatchScore=calculateCanonicalPublicJobMatchScore;
 window.getCanonicalWorkerPublicMatches=getCanonicalWorkerPublicMatches;
+async function loadCanonicalWorkerMatchData(profile){
+ const p=profile||localProfile();
+ let directMatches=[],directError=null;
+ try{
+  const process=await supabaseClient.rpc('process_my_worker_matches',{p_limit:200});
+  if(process?.error)console.warn('worker match processing',process.error);
+ }catch(e){console.warn('worker match processing',e)}
+ try{
+  const notify=await supabaseClient.rpc('create_worker_match_notifications',{p_limit:50});
+  if(notify?.error)console.warn('worker notifications',notify.error);
+ }catch(e){console.warn('worker notifications',e)}
+ try{
+  const r=await supabaseClient.rpc('get_my_worker_matches');
+  if(r?.error)directError=r.error;
+  else directMatches=r.data||[];
+ }catch(e){directError=e}
+ let publicJobs=[];
+ try{
+  if(typeof loadJobs==='function')publicJobs=await loadJobs(false);
+ }catch(e){console.warn('worker public jobs',e)}
+ const publicMatches=window.getCanonicalWorkerPublicMatches?
+  window.getCanonicalWorkerPublicMatches(publicJobs,p,10):[];
+ return {directMatches,publicMatches,directError};
+}
+window.loadCanonicalWorkerMatchData=loadCanonicalWorkerMatchData;
 async function loadWorkerMatchCenter(){
  const u=await sessionUser(); if(!u){showToast('⚠️ سجّل الدخول أولًا.');return}
  const panel=$('workerMatchCenter'); if(!panel)return;
  const p=localProfile();
  panel.classList.remove('hidden');
- panel.innerHTML='<div class="notice">⏳ جارٍ تحديث المطابقة...</div>';
- try{await supabaseClient.rpc('process_my_worker_matches',{p_limit:200})}catch(e){console.warn('worker match processing',e)}
- try{await supabaseClient.rpc('create_worker_match_notifications',{p_limit:50})}catch(e){console.warn('worker notifications',e)}
- const r=await supabaseClient.rpc('get_my_worker_matches');
- if(r.error){panel.innerHTML='<div class="notice">⚠️ تعذر تحميل مسار المطابقات.</div>';return}
- const rows=r.data||[];
- const publicMatches=window.getCanonicalWorkerPublicMatches?window.getCanonicalWorkerPublicMatches((q.data||[]),p,10):[];
+ panel.innerHTML='<div class="notice">⏳ جارٍ تحديث مسار مَدخَل الموحد...</div>';
+ const data=await loadCanonicalWorkerMatchData(p);
+ const rows=data.directMatches||[];
+ const publicMatches=data.publicMatches||[];
+ if(data.directError&&!publicMatches.length){
+  panel.innerHTML='<div class="notice">⚠️ تعذر تحميل مسار المطابقات.</div>';return
+ }
  if(!rows.length&&!publicMatches.length){
    panel.innerHTML='<div class="notice">لا توجد مطابقة مهنية جديدة حاليًا. سيظهر المسار هنا عند العثور على فرصة مناسبة.</div>';return
  }
- panel.innerHTML='<div class="match-center-head"><div><h3>🎯 المطابقات ومسار التوظيف</h3><p>يعرض مَدخَل هنا المطابقات المباشرة مع أصحاب الفرص، وأقرب الفرص المنشورة في مصادر مَدخَل.</p></div><button class="secondary-btn" id="closeWorkerMatches">إغلاق</button></div><div id="workerMatchList"></div>';
+ panel.innerHTML='<div class="match-center-head"><div><h3>🎯 المطابقات ومسار التوظيف</h3><p>يعرض مَدخَل مسارًا موحدًا لنتائج المطابقة، مع الحفاظ على الفرق بين الفرص المباشرة والفرص المنشورة.</p></div><button class="secondary-btn" id="closeWorkerMatches">إغلاق</button></div><div id="workerMatchList"></div>';
  $('closeWorkerMatches').onclick=()=>panel.classList.add('hidden');
  const list=$('workerMatchList');
  if(rows.length){
