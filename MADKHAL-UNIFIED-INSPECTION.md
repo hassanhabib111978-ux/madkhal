@@ -62,3 +62,8 @@
 - Evaluation/request refresh triggers now synchronize both `match_score` and `explainable_match_score` from the current professional `v3` score.
 - Existing active match requests with a current `v3` record were corrected to that derived score; historical application scores were not changed.
 - Final live check: 2/2 match requests have a current v3 score and 0 score mismatches.
+
+## 2026-10-04 — worker re-match v5
+- The worker match processor now recalculates existing non-terminal match requests against the current professional `v3` score instead of skipping them.
+- New matches still require a v3 score of at least 35; declined, closed, and hired requests are preserved.
+- This closes the stale-score path after a worker edits profile, skills, or assessment data.
