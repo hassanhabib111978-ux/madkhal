@@ -351,11 +351,6 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 <div id="selectedSkillsBox" class="info-strip">لم تختر أي مهارة بعد.</div>
 <button class="primary-btn action-btn" style="margin-top:10px" onclick="openProfile()">حفظ المهارات</button>
 </section>
-<section id="assessmentSection" class="screen">
-<button class="back" onclick="showScreen('workerScreen')">→ العودة</button>
-<div id="assessmentResult"></div>
-</section>
-
 <section id="opportunitiesScreen" class="screen">
 <button class="back" onclick="showScreen('homeScreen')">→ العودة</button>
 <div class="card"><h2>🔎 فرص العمل</h2><p>هذه القائمة تعرض الفرص الفعلية المتاحة في نطاق مَدخَل: سوريا والشرق الأوسط. الوظائف خارج النطاق أو التجريبية لا تظهر هنا.</p></div>
@@ -424,8 +419,6 @@ let jobsLoaded=false;
 let jobsLoading=null;
 let currentJob=null;let installPromptEvent=null;
 let toastTimer=null;
-let experienceLevel=null;
-let assessmentSkillContext=[];
 let selectedSkills=[];
 let occupationTimer=null;
 let employerOccupationTimer=null;
@@ -935,16 +928,7 @@ async function renderNotifications(){
   if(!cleaned.length){box.innerHTML='<div class="empty">لا توجد تنبيهات جديدة.</div>';return}
   box.innerHTML=cleaned.slice(0,12).map(x=>'<div class="summary-box" style="margin-bottom:8px">🔔 '+escapeHtml(x.message||"تنبيه")+'<br><small>'+formatDate(x.created_at)+'</small></div>').join("");
 }
-function selectExperience(button,level){document.querySelectorAll("#experienceOptions button").forEach(b=>{b.classList.remove("primary-btn");b.classList.add("secondary-btn")});button.classList.remove("secondary-btn");button.classList.add("primary-btn");experienceLevel=level;const s=getLS(LS.selectedSkills,[]);assessmentSkillContext=s;if(s.includes("الكتابة")||s.length===0){document.getElementById("writingTest").classList.remove("hidden");document.getElementById("generalAssessment").classList.add("hidden")}else{document.getElementById("writingTest").classList.add("hidden");document.getElementById("generalAssessment").classList.remove("hidden")}}
-function updateWordCount(){const t=document.getElementById("writingAnswer").value.trim();document.getElementById("wordCount").textContent="عدد الكلمات: "+(t?t.split(/\s+/).length:0)}
-function calculateWritingScore(text){const words=text.trim()?text.trim().split(/\s+/).length:0;if(!words)return 0;let score=35;if(words>=120&&words<=180)score+=20;else if(words>=90&&words<=220)score+=12;const lower=text.toLowerCase();["عملاء","العملاء","تواصل","تسويق","شركة","الشركات","منصات","مبيعات","جمهور","ثقة","محتوى","إعلان","اعلان"].forEach(w=>{if(lower.includes(w))score+=4});const sentences=text.split(/[.!؟\n]+/).filter(x=>x.trim()).length;if(sentences>=4)score+=10;return Math.min(100,Math.round(score))}
-function getWritingLevel(score){if(score>=85)return"🏆 محترف";if(score>=70)return"⭐ جيد جدًا";if(score>=55)return"👍 جيد";return"🌱 مبتدئ"}
-function calculateGeneralAssessment(){const base={expert:90,learning:70,little:50,none:30};let score=base[experienceLevel]||30;const s=assessmentSkillContext.filter(x=>x!=="لا أعرف بعد");if(s.length>=3)score+=5;if(s.length>=5)score+=5;return Math.min(100,score)}
-function getGeneralLevel(score){if(score>=85)return"🏆 متقدم";if(score>=70)return"⭐ جيد";if(score>=50)return"👍 في طور التطور";return"🌱 بداية جيدة"}
-function renderAssessmentResult(result){const box=document.getElementById("assessmentResult");box.classList.remove("hidden");box.innerHTML='<div class="result"><div style="font-size:12px;color:#718080">نتيجتك في التقييم</div><div class="score">'+escapeHtml(result.score)+'</div><div class="level">'+escapeHtml(result.level)+'</div><div style="font-size:12px;color:#718080">المجال: '+escapeHtml(result.skill)+'</div><div class="result-row">📊 المؤشر: <strong>'+escapeHtml(result.score)+'/100</strong></div><div class="result-row">💪 <strong>نقاط القوة</strong><br>'+result.strengths.map(escapeHtml).join("<br>")+'</div><div class="result-row">📚 <strong>ما يحتاج تطويرًا</strong><br>'+result.improvements.map(escapeHtml).join("<br>")+'</div><button class="primary-btn" style="width:100%;margin-top:13px" onclick="openOpportunities()">🔎 ابحث عن الفرص</button></div>'}
-function submitWritingTest(){const answer=document.getElementById("writingAnswer").value.trim();const words=answer?answer.split(/\s+/).length:0;if(words<50){showToast("⚠️ اكتب إجابة أطول قليلًا.");return}const score=calculateWritingScore(answer);const result={score,level:getWritingLevel(score),words,skill:"الكتابة",experience:experienceLevel,date:now(),strengths:[words>=120?"طول الإجابة مناسب للمطلوب":"لديك بداية جيدة في بناء الإجابة","قدرتك على شرح الفكرة الأساسية واضحة"],improvements:[words<120?"تحتاج إلى تطوير الإجابة وتوسيع الأفكار":"حاول زيادة الأمثلة العملية","حسّن ترابط الفقرات وتسلسل الأفكار"]};setLS(LS.assessment,result);renderAssessmentResult(result);document.getElementById("writingTest").classList.add("hidden");document.getElementById("assessmentIntro").classList.add("hidden");showToast("📊 تم حفظ نتيجة التقييم.")}
-function submitGeneralAssessment(){if(!experienceLevel){showToast("⚠️ اختر مستوى خبرتك أولًا.");return}const score=calculateGeneralAssessment();const result={score,level:getGeneralLevel(score),skill:assessmentSkillContext.join("، ")||"مجال عام",experience:experienceLevel,date:now(),strengths:["لديك نقطة بداية واضحة",assessmentSkillContext.length?"حددت المهارات التي تريد تطويرها":"بدأت باستكشاف المجال"],improvements:[experienceLevel==="none"?"ابدأ بتطبيقات عملية بسيطة":"استمر في بناء الخبرة العملية","أضف أمثلة ومشاريع عملية إلى ملفك"]};setLS(LS.assessment,result);renderAssessmentResult(result);document.getElementById("generalAssessment").classList.add("hidden");document.getElementById("assessmentIntro").classList.add("hidden");showToast("📊 تم حفظ نتيجة التقييم.")}
-async function askJibran(kind){
+nction askJibran(kind){
  const p=localProfile();let msg="";
  if(kind==="profile")msg=p.full_name?"ملفك موجود. راجع المهنة المعتمدة واسم الأم والمكان ونوع العمل ثم احفظ التعديلات.":"ابدأ بالملف المهني: الاسم، اسم الأم، المهنة المعتمدة، المكان ونوع العمل. بعد ذلك تصبح المطابقة أدق.";
  else if(kind==="jobs")msg=allVisibleJobs.length?"لدي مَدخَل "+allVisibleJobs.length+" فرصة فعلية ضمن نطاق سوريا والشرق الأوسط في هذه الجلسة. ابدأ بالبحث ثم افتح التفاصيل قبل التقديم.":"افتح قسم الفرص لتحميل الفرص الفعلية من قاعدة البيانات، ثم استخدم المهنة والمكان لتضييق النتائج.";
