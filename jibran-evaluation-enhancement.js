@@ -117,83 +117,31 @@
   function jobText(j){
     return norm([j.title,j.company,j.description,j.location,j.country,j.category,j.job_type,j.required_skills].filter(Boolean).join(" "));
   }
-  function matchScoreEnhanced(job){
-    const p=profile();
-    if(!has(p.occupation_label)&&!has(p.profession))return 20;
-    const text=jobText(job);
-    const occTerms=aliases(p.occupation_label||p.profession||"");
-    let occ=0;
-    occTerms.forEach(o=>{
-      const words=toks(o).filter(w=>w.length>2);
-      if(!words.length)return;
-      if(words.some(w=>text.includes(w)))occ=Math.max(occ,100);
-    });
-    const skills=txt(p.skills).split(/[,،\n]+/).map(norm).filter(Boolean);
-    let skillHits=0;
-    skills.forEach(s=>{if(s&&text.includes(s))skillHits++});
-    const skill=skills.length?Math.min(100,Math.round(skillHits/Math.min(6,skills.length)*100)):0;
-    const loc=has(p.location)&&text.includes(norm(p.location))?100:(has(p.location)?35:0);
-    const wt=has(p.work_type)&&text.includes(norm(p.work_type))?100:(has(p.work_type)?45:0);
-    const exp=experienceScore(p.experience_years);
-    const a=assessment();
-    const as= a&&Number(a.score)>0?Math.min(100,Number(a.score)):calculateAutomaticAssessment(p).score;
-    let score=occ*.40+skill*.25+loc*.10+wt*.10+exp*.10+as*.05;
-    if(occ===0)score-=15;
-    return Math.max(0,Math.min(99,Math.round(score)));
-  }
-  window.matchScore=matchScoreEnhanced;
-
-  function topJobs(){
-    try{
-      const arr=Array.isArray(allVisibleJobs)?allVisibleJobs:[];
-      return arr.map(x=>typeof visibleJob==="function"?visibleJob(x):x)
-        .map(j=>({j,s:matchScoreEnhanced(j)}))
-        .sort((a,b)=>b.s-a.s).slice(0,3);
-    }catch(e){return []}
-  }
-
-  window.renderJibranContext=function(){
+  // المطابقة المهنية ليست وظيفة محلية في جبران. المصدر الرسمي هو مسار مَدخَل الموحد في Supabase.
+  // نحافظ هنا فقط على عرض سياق التقييم، ولا نعيد تعريف matchScore أو askJibranUser.
+  window.renderJibranContext=async function(){
     const p=profile(), el=document.getElementById("jibranContext");
     if(!el)return;
     if(!p.full_name){
-      el.innerHTML="<h3>السياق الحالي</h3><p>لا يوجد ملف محفوظ بعد. أكمل الملف أولًا حتى يستطيع جبران ربط تقييمك بالفرص.</p>";
+      el.innerHTML="<h3>السياق الحالي</h3><p>لا يوجد ملف محفوظ بعد. أكمل الملف أولًا حتى يستطيع جبران ربط تقييمك بالمسار الرسمي.</p>";
       return;
     }
     const a=calculateAutomaticAssessment(p);
-    const top=topJobs();
+    let official=null;
+    try{
+      if(typeof window.loadCanonicalWorkerMatchData==="function") official=await window.loadCanonicalWorkerMatchData(p);
+    }catch(e){console.warn("jibran official match context",e)}
+    const direct=official?.directMatches||[];
+    const publicMatches=official?.publicMatches||[];
+    let matchHtml="لا توجد مطابقة مهنية جديدة حاليًا.";
+    if(direct.length){
+      matchHtml="أقرب مطابقة مباشرة: <strong>"+escapeHtml(direct[0].title||"فرصة مباشرة")+"</strong> — "+Math.round(Number(direct[0].match_score)||0)+"%";
+    }else if(publicMatches.length){
+      matchHtml="أقرب فرصة منشورة: <strong>"+escapeHtml(publicMatches[0].j?.title||"فرصة منشورة")+"</strong> — "+Math.round(Number(publicMatches[0].s)||0)+"%";
+    }
     el.innerHTML="<h3>السياق الحالي</h3><p><strong>"+escapeHtml(p.full_name)+"</strong> · "+escapeHtml(p.occupation_label||p.profession||"مهنة غير محددة")+" · 📍 "+escapeHtml(p.location||"غير محدد")+"</p>"+
-      "<div class='notice'>📊 التقييم المهني الحالي: <strong>"+a.score+"/100</strong> — "+escapeHtml(a.level)+"</div>"+
-      (top.length?"<div class='notice'>🎯 أقرب فرصة حاليًا: <strong>"+escapeHtml(top[0].j.title||"—")+"</strong> — مطابقة أولية "+top[0].s+"%</div>":"");
-  };
-
-  window.askJibranUser=function(){
-    const input=document.getElementById("jibranInput");
-    const q=norm(input&&input.value);
-    if(!q){showToast("✍️ اكتب سؤالك.");return}
-    const p=profile(), a=calculateAutomaticAssessment(p);
-    let ans="";
-    const asksBest=["مناسبة","مناسب","الفرصة المناسبة","حسب ملفي","حسب تقييمي","تقييمي","ملفي"].some(x=>q.includes(norm(x)));
-    if(q.includes("اشتراك")||q.includes("دولار")){
-      ans="الاشتراك دولار واحد شهريًا للمتابعة المستمرة والمطابقة والتنبيهات. البحث الأساسي والتقديم على الفرص المتاحة مجانيان.";
-    }else if(asksBest){
-      if(!p.full_name||!p.occupation_label){
-        ans="أكمل ملفك المهني واختر المهنة أولًا، وبعدها أربط تقييمك بالفرص المناسبة.";
-      }else{
-        const top=topJobs();
-        if(!top.length)ans="لا توجد فرص متاحة حاليًا أستطيع مطابقتها مع ملفك.";
-        else{
-          ans="بحسب ملفك وتقييمك المهني الحالي "+a.score+"/100، أقرب فرصة حاليًا هي: "+top[0].j.title+" لدى "+(top[0].j.company||"—")+" — مطابقة أولية "+top[0].s+"%.";
-          if(top.length>1)ans+=" وهناك أيضًا: "+top.slice(1).map(x=>x.j.title+" ("+x.s+"%)").join("، ")+"。";
-          ans+=" هذه المطابقة أولية وتعتمد على بيانات الفرصة وبيانات ملفك المتاحة حاليًا.";
-        }
-      }
-    }else if(q.includes("وظيفة")||q.includes("فرصة"))askJibran("jobs");
-    else if(q.includes("مطابق"))askJibran("match");
-    else if(q.includes("خطوة"))askJibran("next");
-    else if(q.includes("ملف"))askJibran("profile");
-    else ans=p.full_name?"أستطيع مساعدتك في تقييم ملفك، مطابقة الفرص، التقديم، والمتابعة.":"ابدأ بملفك المهني، ثم أساعدك في فهم تقييمك والفرص الأقرب.";
-    if(ans)document.getElementById("jibranMainText").textContent=ans;
-    if(input)input.value="";
+      "<div class='notice'>📊 التقييم المهني الحالي: <strong>"+escapeHtml(a.score)+" / 100</strong> — "+escapeHtml(a.level)+"</div>"+
+      "<div class='notice'>🎯 "+matchHtml+"</div>";
   };
 
   window.renderAutomaticAssessment=function(result){
