@@ -981,7 +981,31 @@ async function askJibran(kind){
  }else if(kind==="next")msg=p.occupation_label?"الخطوة التالية: راجع المطابقات الرسمية، افتح تفاصيل الفرصة، ثم قدّم وسجل طلبك. وللمتابعة المستمرة والتنبيهات فعّل اشتراك $1 شهريًا.":"الخطوة التالية: أكمل ملفك واختر مهنة مرتبطة بفرصة فعلية.";
  document.getElementById("jibranHomeText").textContent=msg;document.getElementById("jibranAccountText").textContent=msg
 }
-function askJibranUser(){const input=document.getElementById("jibranInput");const q=normalizeText(input.value);if(!q){showToast("✍️ اكتب سؤالك.");return}let ans="";const p=localProfile();const a=getLS(LS.assessment,null);const asksBest=q.includes("مناسبة")||q.includes("مناسب")||q.includes("الفرصة المناسبة")||q.includes("حسب ملفي")||q.includes("حسب تقييمي")||q.includes("تقييمي")||q.includes("ملفي");if(q.includes("اشتراك")||q.includes("دولار"))ans="الاشتراك دولار واحد شهريًا للمتابعة المستمرة والمطابقة والتنبيهات.";else if(asksBest){const top=allVisibleJobs.map(visibleJob).map(j=>({j,s:matchScore(j)})).sort((x,y)=>y.s-x.s).slice(0,3);if(!p.full_name||!p.occupation_label)ans="أكمل ملفك المهني واختر المهنة أولًا، وبعدها أستطيع تحديد الفرصة الأقرب لك.";else if(!top.length)ans="لا توجد فرص متاحة حاليًا أستطيع مطابقتها مع ملفك.";else{const assessment=a&&Number(a.score)>0?" وتقييمك الحالي "+Math.round(Number(a.score))+"/100":"، لكن لم يُحفظ تقييم بعد";ans="بحسب ملفك"+assessment+"، الفرصة الأقرب لك حاليًا هي: "+top[0].j.title+" لدى "+top[0].j.company+" — مطابقة أولية "+top[0].s+"%. "+(top.length>1?"وهناك أيضًا: "+top.slice(1).map(x=>x.j.title+" ("+x.s+"%)").join("، ")+"。":"")}}else if(q.includes("وظيفة")||q.includes("فرصة"))askJibran("jobs");else if(q.includes("مطابق"))askJibran("match");else if(q.includes("خطوة"))askJibran("next");else if(q.includes("ملف"))askJibran("profile");else ans=p.full_name?"أستطيع مساعدتك في الملف والمطابقة والفرص والتقديم والاشتراك.":"ابدأ بملفك المهني، ثم أختار معك المهن المرتبطة بالفرص الحالية.";if(ans)document.getElementById("jibranMainText").textContent=ans;document.getElementById("jibranInput").value=""}
+async function askJibranUser(){
+ const input=document.getElementById("jibranInput");const q=normalizeText(input.value);
+ if(!q){showToast("✍️ اكتب سؤالك.");return}
+ let ans="";const p=localProfile();const a=getLS(LS.assessment,null);
+ const asksBest=q.includes("مناسبة")||q.includes("مناسب")||q.includes("الفرصة المناسبة")||q.includes("حسب ملفي")||q.includes("حسب تقييمي")||q.includes("تقييمي")||q.includes("ملفي");
+ if(q.includes("اشتراك")||q.includes("دولار"))ans="الاشتراك دولار واحد شهريًا للمتابعة المستمرة والمطابقة والتنبيهات.";
+ else if(asksBest){
+   if(!p.full_name||!p.occupation_label)ans="أكمل ملفك المهني واختر المهنة أولًا، وبعدها تبدأ المطابقة الرسمية.";
+   else if(typeof window.loadCanonicalWorkerMatchData!=="function")ans="افتح حسابك ثم أعد المحاولة حتى أستدعي المطابقة الرسمية.";
+   else{
+     try{
+       const data=await window.loadCanonicalWorkerMatchData(p);
+       const top=(data?.directMatches||[]).slice(0,3);
+       const assessment=a&&Number(a.score)>0?" وتقييم ملفك الحالي "+Math.round(Number(a.score))+"/100":"، ولم يُحفظ تقييم محلي بعد";
+       ans=top.length?"بحسب مسار المطابقة الرسمي"+assessment+"، أقرب الفرص المباشرة لك: "+top.map(x=>x.title||"فرصة").join("، ")+"." :"لا توجد مطابقة مهنية رسمية جديدة حاليًا"+assessment+"؛ ستظهر هنا عند العثور على فرصة مناسبة.";
+     }catch(e){ans="تعذر تحديث المطابقة الرسمية الآن. حاول مرة أخرى بعد قليل."}
+   }
+ }else if(q.includes("وظيفة")||q.includes("فرصة"))ans="لدي مَدخَل فرص فعلية في سوريا والشرق الأوسط. افتح قسم الفرص وابحث ثم افتح التفاصيل قبل التقديم.";
+ else if(q.includes("مطابق"))ans="يمكنني عرض المطابقة الرسمية بعد حفظ ملفك المهني.";
+ else if(q.includes("خطوة"))ans=p.occupation_label?"الخطوة التالية: راجع المطابقات الرسمية، افتح تفاصيل الفرصة، ثم قدّم وسجل طلبك. وللمتابعة المستمرة والتنبيهات فعّل اشتراك $1 شهريًا.":"الخطوة التالية: أكمل ملفك المهني أولًا.";
+ else if(q.includes("ملف"))ans=p.full_name?"راجع المهنة المعتمدة واسم الأم والمكان ونوع العمل ثم احفظ التعديلات.":"ابدأ بالملف المهني: الاسم، اسم الأم، المهنة المعتمدة، المكان ونوع العمل.";
+ else ans=p.full_name?"أستطيع مساعدتك في الملف والمطابقة والفرص والتقديم والاشتراك.":"ابدأ بملفك المهني، ثم ننتقل إلى المطابقة الرسمية.";
+ if(ans)document.getElementById("jibranMainText").textContent=ans;
+ input.value="";
+}
 function renderJibranContext(){const p=localProfile();const el=document.getElementById("jibranContext");if(el)el.innerHTML="<h3>السياق الحالي</h3><p>"+escapeHtml(p.full_name?("ملف محفوظ باسم "+p.full_name+". المهنة: "+(p.occupation_label||"غير محددة")+"، المكان: "+(p.location||"غير محدد")+"."):"لا يوجد ملف محفوظ بعد.")+"</p>"}
 
 function initOccupationPickers(){const w=document.getElementById("occupationSearch");const e=document.getElementById("employerOccupationSearch");if(w)w.addEventListener("input",()=>{document.getElementById("occupationUri").value="";document.getElementById("occupationLabel").value="";clearTimeout(occupationTimer);occupationTimer=setTimeout(()=>searchOccupations("occupationSearch","occupationResults","occupationStatus","occupationUri","occupationLabel","worker"),220)});if(w)w.addEventListener("focus",()=>{if(w.value.trim().length>=2)searchOccupations("occupationSearch","occupationResults","occupationStatus","occupationUri","occupationLabel","worker")});if(e)e.addEventListener("input",()=>{document.getElementById("employerOccupationUri").value="";document.getElementById("employerOccupationLabel").value="";clearTimeout(employerOccupationTimer);employerOccupationTimer=setTimeout(()=>searchOccupations("employerOccupationSearch","employerOccupationResults","employerOccupationStatus","employerOccupationUri","employerOccupationLabel","employer"),220)});if(e)e.addEventListener("focus",()=>{if(e.value.trim().length>=2)searchOccupations("employerOccupationSearch","employerOccupationResults","employerOccupationStatus","employerOccupationUri","employerOccupationLabel","employer")});document.addEventListener("click",event=>{if(w&&!w.closest(".occupation-box").contains(event.target))document.getElementById("occupationResults").style.display="none";if(e&&!e.closest(".occupation-box").contains(event.target))document.getElementById("employerOccupationResults").style.display="none"})}
