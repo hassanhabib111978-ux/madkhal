@@ -57,3 +57,8 @@
 - `apply_to_employer_vacancy` now calculates the same `professional_match_scores` `v3` score used by the active internal matching path.
 - The application request stores that score in both `match_score` and `explainable_match_score`.
 - No historical application or match rows were rewritten or deleted.
+
+## 2026-10-04 — score refresh trigger consistency
+- Evaluation/request refresh triggers now synchronize both `match_score` and `explainable_match_score` from the current professional `v3` score.
+- Existing active match requests with a current `v3` record were corrected to that derived score; historical application scores were not changed.
+- Final live check: 2/2 match requests have a current v3 score and 0 score mismatches.
