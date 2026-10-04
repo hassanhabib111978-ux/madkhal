@@ -88,6 +88,7 @@ async function loadCanonicalWorkerMatchData(profile){
   window.getCanonicalWorkerPublicMatches(publicJobs,p,10):[];
  return {directMatches,publicMatches,directError};
 }
+window.loadCanonicalWorkerMatchData=loadCanonicalWorkerMatchData;
 async function loadWorkerMatchCenter(){
  const u=await sessionUser(); if(!u){showToast('⚠️ سجّل الدخول أولًا.');return}
  const panel=$('workerMatchCenter'); if(!panel)return;
