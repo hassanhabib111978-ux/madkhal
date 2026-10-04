@@ -52,3 +52,8 @@
 - The previous legacy 75% + professional 25% composite is no longer used for newly generated active matches.
 - Legacy scoring functions and historical rows remain intact for audit/backward compatibility; no destructive data rewrite was performed.
 - Worker skill ratings are persisted before the unified match refresh in the front-end, so the professional v3 matcher can consume the current assessment state.
+
+## 2026-10-04 — internal application canonicalization
+- `apply_to_employer_vacancy` now calculates the same `professional_match_scores` `v3` score used by the active internal matching path.
+- The application request stores that score in both `match_score` and `explainable_match_score`.
+- No historical application or match rows were rewritten or deleted.
