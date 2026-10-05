@@ -719,17 +719,24 @@ async function searchOccupations(inputId,resultId,statusId,uriId,labelId,timerTy
 
     let filtered=rows.filter(x=>occupationRelevant(x,term));
 
-    // fallback آمن: إذا وجدنا فرصًا فعلية مرتبطة بكلمة الباحث/مرادفها،
-    // نسمح بالمهنة التي يطابق اسمها كلمة البحث، بدل إسقاطها بسبب اختلاف
-    // صياغة عنوان الفرصة.
-    if(!filtered.length&&matchingJobs.length){
+    // إذا لم يظهر ارتباط مباشر لأن صياغة الفرصة مختلفة عن كلمة الباحث،
+    // نطابق أولًا اسم المهنة/مرادفاتها مع النص الذي كتبه الباحث، ثم نتحقق
+    // من أن المهنة يمكن إثباتها داخل سوق مَدخَل الحالي عبر عنوان/تصنيف/وصف
+    // الفرص أو عبر كلمات ESCO المرتبطة بها.
+    if(!filtered.length){
       filtered=rows.filter(x=>{
         const occupationText=normalizeText([x.preferred_label,x.alt_labels].join(" "));
-        const aliases=aliasTermsFor(x.preferred_label).map(normalizeText);
-        return [low,...typedTokens,...aliasQueries.map(normalizeText),...aliases]
-          .some(t=>t.length>=2&&occupationText.includes(t))
-          || [low,...typedTokens,...aliasQueries.map(normalizeText),...aliases]
-          .some(t=>t.length>=2&&matchingJobs.some(j=>j.text.includes(t)));
+        const occupationAliases=aliasTermsFor(x.preferred_label).map(normalizeText);
+        const queryTerms=[low,...typedTokens,...aliasQueries.map(normalizeText)].filter(t=>t.length>=2);
+        const nameHit=queryTerms.some(t=>occupationText.includes(t)) ||
+          occupationAliases.some(a=>queryTerms.some(t=>a.includes(t)||t.includes(a)));
+        if(!nameHit)return false;
+        const evidenceText=[x.preferred_label,x.alt_labels,...occupationAliases].join(" ");
+        return matchingJobs.length>0 ||
+          allVisibleJobs.some(j=>{
+            const jobText=normalizeText([j.title,j.category,j.description].filter(Boolean).join(" "));
+            return tokens(normalizeText(evidenceText)).some(t=>t.length>=4&&jobText.includes(t));
+          });
       });
     }
 
@@ -1120,7 +1127,45 @@ async function askJibranUser(){
 }
 function renderJibranContext(){const p=localProfile();const el=document.getElementById("jibranContext");if(el)el.innerHTML="<h3>السياق الحالي</h3><p>"+escapeHtml(p.full_name?("ملف محفوظ باسم "+p.full_name+". المهنة: "+(p.occupation_label||"غير محددة")+"، المكان: "+(p.location||"غير محدد")+"."):"لا يوجد ملف محفوظ بعد.")+"</p>"}
 
-function initOccupationPickers(){const w=document.getElementById("occupationSearch");const e=document.getElementById("employerOccupationSearch");if(w)w.addEventListener("input",()=>{document.getElementById("occupationUri").value="";document.getElementById("occupationLabel").value="";clearTimeout(occupationTimer);occupationTimer=setTimeout(()=>searchOccupations("occupationSearch","occupationResults","occupationStatus","occupationUri","occupationLabel","worker"),220)});if(w)w.addEventListener("focus",()=>{if(w.value.trim().length>=2)searchOccupations("occupationSearch","occupationResults","occupationStatus","occupationUri","occupationLabel","worker")});if(e)e.addEventListener("input",()=>{document.getElementById("employerOccupationUri").value="";document.getElementById("employerOccupationLabel").value="";clearTimeout(employerOccupationTimer);employerOccupationTimer=setTimeout(()=>searchOccupations("employerOccupationSearch","employerOccupationResults","employerOccupationStatus","employerOccupationUri","employerOccupationLabel","employer"),220)});if(e)e.addEventListener("focus",()=>{if(e.value.trim().length>=2)searchOccupations("employerOccupationSearch","employerOccupationResults","employerOccupationStatus","employerOccupationUri","employerOccupationLabel","employer")});document.addEventListener("click",event=>{if(w&&!w.closest(".occupation-box").contains(event.target))document.getElementById("occupationResults").style.display="none";if(e&&!e.closest(".occupation-box").contains(event.target))document.getElementById("employerOccupationResults").style.display="none"})}
+function initOccupationPickers(){
+  const w=document.getElementById("occupationSearch");
+  const e=document.getElementById("employerOccupationSearch");
+  const prepareEditableOccupation=input=>{
+    if(!input)return;
+    const remembered=input.value.trim();
+    if(remembered){
+      input.addEventListener("focus",()=>{
+        if(input.value.trim()===remembered){
+          setTimeout(()=>{try{input.select()}catch(e){}},0);
+        }
+      });
+    }
+  };
+  prepareEditableOccupation(w);
+  prepareEditableOccupation(e);
+  if(w)w.addEventListener("input",()=>{
+    document.getElementById("occupationUri").value="";
+    document.getElementById("occupationLabel").value="";
+    clearTimeout(occupationTimer);
+    occupationTimer=setTimeout(()=>searchOccupations("occupationSearch","occupationResults","occupationStatus","occupationUri","occupationLabel","worker"),220)
+  });
+  if(w)w.addEventListener("focus",()=>{
+    if(w.value.trim().length>=2)searchOccupations("occupationSearch","occupationResults","occupationStatus","occupationUri","occupationLabel","worker")
+  });
+  if(e)e.addEventListener("input",()=>{
+    document.getElementById("employerOccupationUri").value="";
+    document.getElementById("employerOccupationLabel").value="";
+    clearTimeout(employerOccupationTimer);
+    employerOccupationTimer=setTimeout(()=>searchOccupations("employerOccupationSearch","employerOccupationResults","employerOccupationStatus","employerOccupationUri","employerOccupationLabel","employer"),220)
+  });
+  if(e)e.addEventListener("focus",()=>{
+    if(e.value.trim().length>=2)searchOccupations("employerOccupationSearch","employerOccupationResults","employerOccupationStatus","employerOccupationUri","employerOccupationLabel","employer")
+  });
+  document.addEventListener("click",event=>{
+    if(w&&!w.closest(".occupation-box").contains(event.target))document.getElementById("occupationResults").style.display="none";
+    if(e&&!e.closest(".occupation-box").contains(event.target))document.getElementById("employerOccupationResults").style.display="none"
+  });
+}
 
 async function updateJobCounter(){try{const jobs=await loadJobs();const total=Array.isArray(jobs)?jobs.length:0;const el=document.getElementById("jobCounterNumber");if(el)el.textContent=total.toLocaleString("ar-EG");const label=document.getElementById("jobCounterLabel");if(label)label.textContent="فرصة متاحة الآن"}catch(e){console.warn("job counter",e)}}
 window.addEventListener("beforeinstallprompt",event=>{event.preventDefault();installPromptEvent=event;document.getElementById("installBar").classList.remove("hidden")});
