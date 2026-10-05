@@ -571,7 +571,9 @@ async function calculateAutomaticAssessment(p){
   const evidenceScore=reqLabels.length?Math.max(Math.min(100,Math.round(evidenceHits/Math.min(reqLabels.length,8)*100)),manualSkillBaseline):manualSkillBaseline;
   const ratedValues=required.filter(s=>ratings[s.uri]!=null).map(s=>ratings[s.uri]);
   const ratingScore=ratedValues.length?Math.round(ratedValues.reduce((x,y)=>x+y,0)/ratedValues.length/5*100):null;
-  const skillScore=ratingScore===null?evidenceScore:Math.round(evidenceScore*.6+ratingScore*.4);
+  // Explicit skill ratings are authoritative: a deliberate 0 must remain 0.
+  // Evidence/baseline is used only when no skill rating has been provided.
+  const skillScore=ratingScore===null?evidenceScore:ratingScore;
   const experienceScore=exp===null?0:Math.min(100,Math.round(35+Math.min(exp,7)*9.3));
   const teacherQualification=/مدرس|معلم|تدريس|تعليم|teacher|teaching/.test(occ);
   const qualificationScore=/(طبيب|طبيبه|طبيبة|دكتور|doctor|physician|medicine|medical|طب شرعي|forensic)/.test(occ)
