@@ -664,20 +664,45 @@ async function searchOccupations(inputId,resultId,statusId,uriId,labelId,timerTy
   const input=document.getElementById(inputId),results=document.getElementById(resultId),status=document.getElementById(statusId);
   if(!input||!results||!status)return;
   const term=input.value.trim();
-  if(term.length<2){results.style.display="none";results.innerHTML="";status.textContent="اكتب حرفين على الأقل. لا نعرض كتالوج ESCO كاملًا.";return}
-  status.textContent="جاري البحث عن مهن مرتبطة بالفرص الحالية...";
+  if(term.length<2){
+    results.style.display="none";results.innerHTML="";
+    status.textContent="اكتب حرفين على الأقل. سيقترح مَدخَل مهنًا مرتبطة بفرص فعلية.";
+    return;
+  }
+  status.textContent="جاري البحث عن مهنة مرتبطة بالفرص الحالية...";
   const low=normalizeText(term);
-  const queryTerms=[term,...tokens(term).filter(t=>t.length>=2)];
+  const typedTokens=tokens(term).filter(t=>t.length>=2);
+  const aliasQueries=[];
   Object.keys(OCC_ALIASES).forEach(ar=>{
     const arNorm=normalizeText(ar),aliases=(OCC_ALIASES[ar]||[]).map(normalizeText);
-    if(arNorm.includes(low)||low.includes(arNorm)||aliases.some(x=>x.includes(low)||low.includes(x)))queryTerms.push(ar);
+    if(arNorm.includes(low)||low.includes(arNorm)||aliases.some(x=>x.includes(low)||low.includes(x))){
+      aliasQueries.push(ar,...(OCC_ALIASES[ar]||[]));
+    }
   });
-  const uniqueTerms=[...new Set(queryTerms.filter(Boolean))].slice(0,6);
+
   try{
     if(!allVisibleJobs.length)await loadJobs();
-    const responses=await Promise.all(uniqueTerms.map(q=>supabaseClient.rpc("search_madkhal_occupations",{search_text:q,result_limit:30})));
-    const rows=[];
-    const seen=new Set();
+
+    // ابحث أولًا داخل الفرص المنشورة نفسها. هذا يمنع بقاء المهنة القديمة
+    // ويجعل الاقتراحات ناتجة عن سوق مَدخَل الحالي، لا عن كتالوج ESCO فقط.
+    const jobRows=allVisibleJobs.map(j=>({
+      raw:j,
+      text:normalizeText([j.title,j.category,j.description,j.company].filter(Boolean).join(" "))
+    }));
+    const evidenceTerms=[low,...typedTokens,...aliasQueries.map(normalizeText)].filter(Boolean);
+    const matchingJobs=jobRows.filter(row=>evidenceTerms.some(t=>t.length>=2&&row.text.includes(t)));
+
+    const queryTerms=[term,...typedTokens,...aliasQueries];
+    // إذا كان اسم الفرصة الفعلي مختلفًا قليلًا عن كلمة الباحث، استخدم كلمات
+    // العنوان/التصنيف الفعلية كدلائل إضافية للعثور على المهنة المعتمدة.
+    matchingJobs.slice(0,6).forEach(row=>{
+      const parts=[row.raw.title,row.raw.category].filter(Boolean).join(" ");
+      tokens(parts).filter(t=>t.length>=4).slice(0,4).forEach(t=>queryTerms.push(t));
+    });
+
+    const uniqueTerms=[...new Set(queryTerms.map(String).map(x=>x.trim()).filter(x=>x.length>=2))].slice(0,12);
+    const responses=await Promise.all(uniqueTerms.map(q=>supabaseClient.rpc("search_madkhal_occupations",{search_text:q,result_limit:40})));
+    const rows=[];const seen=new Set();
     responses.forEach(res=>{
       if(res.error)throw res.error;
       (res.data||[]).forEach(item=>{
@@ -685,14 +710,47 @@ async function searchOccupations(inputId,resultId,statusId,uriId,labelId,timerTy
         if(key&&!seen.has(key)){seen.add(key);rows.push(item)}
       });
     });
+
     let filtered=rows.filter(x=>occupationRelevant(x,term));
-    // إذا كان البحث جزءًا واضحًا من اسم المهنة، لا نستبعده بسبب اختلاف صياغة الفرصة.
-    if(!filtered.length){
+
+    // fallback آمن: إذا وجدنا فرصًا فعلية مرتبطة بكلمة الباحث/مرادفها،
+    // نسمح بالمهنة التي يطابق اسمها كلمة البحث، بدل إسقاطها بسبب اختلاف
+    // صياغة عنوان الفرصة.
+    if(!filtered.length&&matchingJobs.length){
       filtered=rows.filter(x=>{
-        const text=normalizeText([x.preferred_label,x.alt_labels].join(" "));
-        return text.includes(low)||tokens(term).some(t=>t.length>=2&&text.includes(t));
+        const occupationText=normalizeText([x.preferred_label,x.alt_labels].join(" "));
+        const aliases=aliasTermsFor(x.preferred_label).map(normalizeText);
+        return [low,...typedTokens,...aliasQueries.map(normalizeText),...aliases]
+          .some(t=>t.length>=2&&occupationText.includes(t))
+          || [low,...typedTokens,...aliasQueries.map(normalizeText),...aliases]
+          .some(t=>t.length>=2&&matchingJobs.some(j=>j.text.includes(t)));
       });
     }
+
+    // لا نعرض أي نتيجة إذا لم نستطع إثبات ارتباطها بفرصة حالية.
+    // لكن نعيد البحث مرة ثانية على عناوين الفرص عندما يكون RPC الأول ضيقًا.
+    if(!filtered.length&&matchingJobs.length){
+      const evidenceQueries=[];
+      matchingJobs.slice(0,8).forEach(row=>{
+        [row.raw.title,row.raw.category].filter(Boolean).forEach(v=>evidenceQueries.push(v));
+      });
+      const retryTerms=[...new Set(evidenceQueries.map(v=>String(v).trim()).filter(v=>v.length>=2))].slice(0,8);
+      if(retryTerms.length){
+        const retry=await Promise.all(retryTerms.map(q=>supabaseClient.rpc("search_madkhal_occupations",{search_text:q,result_limit:20})));
+        retry.forEach(res=>{
+          if(res.error)throw res.error;
+          (res.data||[]).forEach(item=>{
+            const key=item.concept_uri||item.preferred_label;
+            if(key&&!seen.has(key)){seen.add(key);rows.push(item)}
+          });
+        });
+        filtered=rows.filter(x=>occupationRelevant(x,term)||matchingJobs.some(j=>{
+          const ot=normalizeText([x.preferred_label,x.alt_labels].join(" "));
+          return tokens(ot).some(t=>t.length>=3&&j.text.includes(t));
+        }));
+      }
+    }
+
     results.innerHTML="";
     filtered.slice(0,12).forEach(item=>{
       const b=document.createElement("button");
@@ -709,7 +767,9 @@ async function searchOccupations(inputId,resultId,statusId,uriId,labelId,timerTy
       results.appendChild(b);
     });
     results.style.display=results.children.length?"block":"none";
-    status.textContent=results.children.length?"اختر المهنة المناسبة من الفرص الحالية.":"لم نجد مهنة مرتبطة بفرصة حالية بهذه الكلمة. جرّب جزءًا آخر من المهنة.";
+    status.textContent=results.children.length
+      ?"اختر المهنة المناسبة من الفرص الحالية."
+      :"لم نجد مهنة مرتبطة بفرصة حالية بهذه الكلمة. جرّب كلمة أخرى من اسم المهنة أو مجالها.";
   }catch(e){
     console.warn("occupation search",e);
     results.style.display="none";
