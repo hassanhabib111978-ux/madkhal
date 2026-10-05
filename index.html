@@ -419,6 +419,7 @@ let jobsLoaded=false;
 let jobsLoading=null;
 let currentJob=null;let installPromptEvent=null;
 let toastTimer=null;
+let accountLoading=null;
 let selectedSkills=[];
 let occupationTimer=null;
 let employerOccupationTimer=null;
@@ -499,10 +500,10 @@ async function openProfile(){showScreen("profileScreen","workerFirstName");await
 function openEmployer(){showScreen("employerScreen","employerName")}
 function openDiscoverSkills(){showScreen("discoverSkillsSection");renderSkills()}
 function startSkillAssessment(){openProfile()}
-function openAssessmentScreen(){showScreen("accountScreen");ensureAccountAssessment();loadAccount()}
+function openAssessmentScreen(){showScreen("accountScreen")}
 function openOpportunities(){showScreen("opportunitiesScreen","jobSearch");loadJobs().then(()=>{renderCategories();renderOpportunities()})}
 function clearJobSearch(){const e=document.getElementById("jobSearch");if(e){e.value="";renderOpportunities();e.focus({preventScroll:true})}}
-function openAccount(){showScreen("accountScreen");ensureAccountAssessment();loadAccount()}
+function openAccount(){showScreen("accountScreen")}
 
 async function sessionUser(){try{const g=await supabaseClient.auth.getSession();if(g.data&&g.data.session&&g.data.session.user)return g.data.session.user}catch(e){}try{const a=await supabaseClient.auth.signInAnonymously();return a.data&&a.data.user?a.data.user:null}catch(e){return null}}
 async function publicProfileId(user,fullName,role="user"){if(!user)return null;try{const q=await supabaseClient.from("profiles").select("id,full_name,role").eq("auth_user_id",user.id).maybeSingle();if(q.data){const patch={};if(fullName&&q.data.full_name!==fullName)patch.full_name=fullName;if(role&&q.data.role!==role)patch.role=role;if(Object.keys(patch).length)await supabaseClient.from("profiles").update(patch).eq("id",q.data.id);return q.data.id}const ins=await supabaseClient.from("profiles").insert({full_name:fullName||"مستخدم مَدخَل",role:role||"user",auth_user_id:user.id}).select("id").maybeSingle();if(ins.error)return null;return ins.data?ins.data.id:null}catch(e){return null}}
@@ -941,6 +942,8 @@ async function recalculateAccountAssessment(){
   }catch(e){ console.warn("background assessment",e); }
 }
 async function loadAccount(){
+  if(accountLoading)return accountLoading;
+  accountLoading=(async()=>{
   // استعادة الملف وحالة الاشتراك من Supabase أولًا، ثم ضمان رسم التقييم المحلي فورًا قبل أي عمليات لاحقة.
   try{ await loadProfileRemote(); }catch(e){ console.warn("account remote profile",e); }
   const p=localProfile()||{};
@@ -1027,6 +1030,8 @@ async function loadAccount(){
   await renderNotifications();
   await syncSubscriptionStatus();
   renderJibranContext();
+  })().finally(()=>{accountLoading=null});
+  return accountLoading;
 }
 async function renderApplications(){const box=document.getElementById("applicationsList");if(!box)return;let a=getLS(LS.applications,[]).slice();try{const user=await sessionUser();if(user){const q=await supabaseClient.from("madkhal_applications").select("id,title,company,location,status,match_score,applied_at,created_at,job_id,source_url").eq("user_id",user.id).order("created_at",{ascending:false}).limit(40);if(!q.error&&Array.isArray(q.data)){a=q.data.map(x=>({id:x.id,job_id:x.job_id||null,title:x.title,company:x.company||"—",location:x.location||"غير محدد",status:x.status||"applied",created_at:x.applied_at||x.created_at,source_url:x.source_url||"",match_score:x.match_score}));setLS(LS.applications,a)}}}catch(e){}if(!a.length){box.innerHTML='<div class="empty">لا توجد طلبات مسجلة بعد.</div>';return}box.innerHTML=a.slice(0,40).map(x=>'<div class="summary-box" style="margin-bottom:8px">📩 <strong>'+escapeHtml(x.title)+'</strong><br>🏢 '+escapeHtml(x.company)+'<br>📍 '+escapeHtml(x.location)+'<br>🟢 '+escapeHtml(x.status==="applied"?"تم التسجيل":x.status==="follow_up"?"قيد المتابعة":x.status==="interview"?"مقابلة":x.status==="offer"?"عرض عمل":x.status==="hired"?"تم التوظيف":"مغلق")+' · '+formatDate(x.created_at)+(x.match_score!=null?" · 🎯 "+Math.round(Number(x.match_score))+"%":"")+'</div>').join("")}
 async function renderNotifications(){
@@ -1166,7 +1171,7 @@ window.addEventListener("beforeinstallprompt",event=>{event.preventDefault();ins
 window.addEventListener("appinstalled",()=>{installPromptEvent=null;document.getElementById("installBar").classList.add("hidden")});
 async function installMadkhal(){if(!installPromptEvent){showToast("📱 استخدم قائمة المتصفح ثم اختر إضافة إلى الشاشة الرئيسية.");return}installPromptEvent.prompt();try{await installPromptEvent.userChoice}catch(e){}installPromptEvent=null;document.getElementById("installBar").classList.add("hidden")}
 
-document.addEventListener("DOMContentLoaded",async()=>{selectedSkills=getLS(LS.selectedSkills,[]);await loadJobs();updateJobCounter();await loadProfileRemote();generateLocalMatches();renderCategories();renderOpportunities();renderSkills();await loadAccount();ensureAccountAssessment();await renderNotifications();initOccupationPickers();if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js",{scope:"./"}).catch(()=>{});});
+document.addEventListener("DOMContentLoaded",async()=>{selectedSkills=getLS(LS.selectedSkills,[]);await loadJobs();await updateJobCounter();await loadProfileRemote();generateLocalMatches();renderCategories();renderOpportunities();renderSkills();await loadAccount();ensureAccountAssessment();await renderNotifications();initOccupationPickers();if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js",{scope:"./"}).catch(()=>{});});
 </script>
 <script src="./employer-flow-enhancement.js"></script>
 <script src="./worker-match-lifecycle.js"></script>
