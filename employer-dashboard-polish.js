@@ -56,7 +56,7 @@ async function loadCandidatesPolished(vacancyId,container){
       '<div class="candidate-skills">'+(c.skills?'🛠️ '+esc2(c.skills):'')+'</div>'+
       '<div class="candidate-status">الحالة: <strong>'+esc2(c.match_status)+'</strong></div><div class="candidate-actions"></div>';
     const actions=card.querySelector('.candidate-actions');
-    const next={matched:['employer_interested','إبداء الاهتمام'],employer_interested:['accepted','طلب القبول'],accepted:['contact_opened','فتح التواصل'],contact_opened:['interview','تحديد مقابلة'],interview:['offer','تقديم عرض'],offer:['hired','تسجيل التوظيف']}[c.match_status];
+    const next={matched:['employer_interested','إبداء الاهتمام'],accepted:['contact_opened','فتح التواصل'],contact_opened:['interview','تحديد مقابلة'],interview:['offer','تقديم عرض'],offer:['hired','تسجيل التوظيف']}[c.match_status];
     if(next){
       const b=document.createElement('button');b.className='secondary-btn';b.textContent='➡️ '+next[1];
       b.onclick=async()=>{b.disabled=true;const r=await supabaseClient.rpc('advance_match_request',{p_request_id:c.request_id,p_next_status:next[0],p_note:null});if(r.error){b.disabled=false;showToast('⚠️ تعذر تحديث الحالة.');return}showToast('✅ تم تحديث حالة المطابقة إلى '+next[1]+'。');loadCandidatesPolished(vacancyId,container)};
