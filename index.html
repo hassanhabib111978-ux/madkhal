@@ -685,28 +685,24 @@ async function searchOccupations(inputId,resultId,statusId,uriId,labelId,timerTy
       aliasQueries.push(ar,...(OCC_ALIASES[ar]||[]));
     }
   });
-
   try{
     if(!allVisibleJobs.length)await loadJobs();
 
-    // ابحث أولًا داخل الفرص المنشورة نفسها. هذا يمنع بقاء المهنة القديمة
-    // ويجعل الاقتراحات ناتجة عن سوق مَدخَل الحالي، لا عن كتالوج ESCO فقط.
+    // مصدر الاقتراح هو كتالوج المهن، لكن لا نعرض منه شيئًا إلا بعد
+    // إثبات وجود صلة بفرصة منشورة حاليًا في مَدخَل.
     const jobRows=allVisibleJobs.map(j=>({
       raw:j,
-      text:normalizeText([j.title,j.category,j.description,j.company].filter(Boolean).join(" "))
+      text:normalizeText([j.title,j.category,j.description,j.company,j.location,j.country].filter(Boolean).join(" "))
     }));
     const evidenceTerms=[low,...typedTokens,...aliasQueries.map(normalizeText)].filter(Boolean);
-    const matchingJobs=jobRows.filter(row=>evidenceTerms.some(t=>t.length>=2&&row.text.includes(t)));
+    const directlyMatchingJobs=jobRows.filter(row=>evidenceTerms.some(t=>t.length>=2&&row.text.includes(t)));
 
     const queryTerms=[term,...typedTokens,...aliasQueries];
-    // إذا كان اسم الفرصة الفعلي مختلفًا قليلًا عن كلمة الباحث، استخدم كلمات
-    // العنوان/التصنيف الفعلية كدلائل إضافية للعثور على المهنة المعتمدة.
-    matchingJobs.slice(0,6).forEach(row=>{
-      const parts=[row.raw.title,row.raw.category].filter(Boolean).join(" ");
-      tokens(parts).filter(t=>t.length>=4).slice(0,4).forEach(t=>queryTerms.push(t));
+    directlyMatchingJobs.slice(0,8).forEach(row=>{
+      tokens([row.raw.title,row.raw.category].filter(Boolean).join(" "))
+        .filter(t=>t.length>=3).slice(0,5).forEach(t=>queryTerms.push(t));
     });
-
-    const uniqueTerms=[...new Set(queryTerms.map(String).map(x=>x.trim()).filter(x=>x.length>=2))].slice(0,12);
+    const uniqueTerms=[...new Set(queryTerms.map(String).map(x=>x.trim()).filter(x=>x.length>=2))].slice(0,16);
     const responses=await Promise.all(uniqueTerms.map(q=>supabaseClient.rpc("search_madkhal_occupations",{search_text:q,result_limit:40})));
     const rows=[];const seen=new Set();
     responses.forEach(res=>{
@@ -717,50 +713,46 @@ async function searchOccupations(inputId,resultId,statusId,uriId,labelId,timerTy
       });
     });
 
-    let filtered=rows.filter(x=>occupationRelevant(x,term));
-
-    // إذا لم يظهر ارتباط مباشر لأن صياغة الفرصة مختلفة عن كلمة الباحث،
-    // نطابق أولًا اسم المهنة/مرادفاتها مع النص الذي كتبه الباحث، ثم نتحقق
-    // من أن المهنة يمكن إثباتها داخل سوق مَدخَل الحالي عبر عنوان/تصنيف/وصف
-    // الفرص أو عبر كلمات ESCO المرتبطة بها.
-    if(!filtered.length){
-      filtered=rows.filter(x=>{
-        const occupationText=normalizeText([x.preferred_label,x.alt_labels].join(" "));
-        const occupationAliases=aliasTermsFor(x.preferred_label).map(normalizeText);
-        const queryTerms=[low,...typedTokens,...aliasQueries.map(normalizeText)].filter(t=>t.length>=2);
-        const nameHit=queryTerms.some(t=>occupationText.includes(t)) ||
-          occupationAliases.some(a=>queryTerms.some(t=>a.includes(t)||t.includes(a)));
-        if(!nameHit)return false;
-        const evidenceText=[x.preferred_label,x.alt_labels,...occupationAliases].join(" ");
-        return matchingJobs.length>0 ||
-          allVisibleJobs.some(j=>{
-            const jobText=normalizeText([j.title,j.category,j.description].filter(Boolean).join(" "));
-            return tokens(normalizeText(evidenceText)).some(t=>t.length>=4&&jobText.includes(t));
-          });
+    const occupationMatchesTyped=item=>{
+      const occupationText=normalizeText([item.preferred_label,item.alt_labels].join(" "));
+      const aliases=aliasTermsFor(item.preferred_label).map(normalizeText);
+      const terms=[low,...typedTokens,...aliasQueries.map(normalizeText),...aliases].filter(t=>t&&t.length>=2);
+      return terms.some(t=>occupationText.includes(t)||t.includes(occupationText));
+    };
+    const occupationMatchesJobs=item=>{
+      const variants=[item.preferred_label,...String(item.alt_labels||"").split(/\n+/),...aliasTermsFor(item.preferred_label)]
+        .map(normalizeText).filter(Boolean);
+      const occupationTokens=tokens(variants.join(" ")).filter(t=>t.length>=3);
+      return jobRows.some(row=>{
+        if(variants.some(v=>v.length>=3&&row.text.includes(v)))return true;
+        return occupationTokens.some(t=>row.text.includes(t));
       });
-    }
+    };
 
-    // لا نعرض أي نتيجة إذا لم نستطع إثبات ارتباطها بفرصة حالية.
-    // لكن نعيد البحث مرة ثانية على عناوين الفرص عندما يكون RPC الأول ضيقًا.
-    if(!filtered.length&&matchingJobs.length){
-      const evidenceQueries=[];
-      matchingJobs.slice(0,8).forEach(row=>{
-        [row.raw.title,row.raw.category].filter(Boolean).forEach(v=>evidenceQueries.push(v));
+    // مهم: لا نشترط أن تحتوي الوظيفة على نفس كلمة الباحث.
+    // يكفي أن نجد مهنة تنتمي إلى الفرص الحالية؛ وهذا يحل حالات مثل
+    // "هندسة" ← "مهندس برمجيات / Network Engineer".
+    let filtered=rows.filter(item=>occupationMatchesTyped(item)&&occupationMatchesJobs(item));
+
+    // إذا كانت نتائج البحث المباشر ضيقة، استخدم كلمات عناوين الفرص الحالية
+    // لاستخراج المهن المرتبطة بها، ثم أعد التصفية.
+    if(!filtered.length&&jobRows.length){
+      const retryTerms=[];
+      jobRows.slice(0,20).forEach(row=>{
+        tokens([row.raw.title,row.raw.category].filter(Boolean).join(" "))
+          .filter(t=>t.length>=3).slice(0,6).forEach(t=>retryTerms.push(t));
       });
-      const retryTerms=[...new Set(evidenceQueries.map(v=>String(v).trim()).filter(v=>v.length>=2))].slice(0,8);
-      if(retryTerms.length){
-        const retry=await Promise.all(retryTerms.map(q=>supabaseClient.rpc("search_madkhal_occupations",{search_text:q,result_limit:20})));
-        retry.forEach(res=>{
+      const retry=[...new Set(retryTerms)].slice(0,20);
+      if(retry.length){
+        const retryResponses=await Promise.all(retry.map(q=>supabaseClient.rpc("search_madkhal_occupations",{search_text:q,result_limit:25})));
+        retryResponses.forEach(res=>{
           if(res.error)throw res.error;
           (res.data||[]).forEach(item=>{
             const key=item.concept_uri||item.preferred_label;
             if(key&&!seen.has(key)){seen.add(key);rows.push(item)}
           });
         });
-        filtered=rows.filter(x=>occupationRelevant(x,term)||matchingJobs.some(j=>{
-          const ot=normalizeText([x.preferred_label,x.alt_labels].join(" "));
-          return tokens(ot).some(t=>t.length>=3&&j.text.includes(t));
-        }));
+        filtered=rows.filter(item=>occupationMatchesTyped(item)&&occupationMatchesJobs(item));
       }
     }
 
