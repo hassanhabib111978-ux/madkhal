@@ -84,8 +84,11 @@ async function loadCanonicalWorkerMatchData(profile){
  try{
   if(typeof loadJobs==='function')publicJobs=await loadJobs(false);
  }catch(e){console.warn('worker public jobs',e)}
+ const applied=getLS('madkhal_applications_v1',[]);
+ const appliedIds=new Set((Array.isArray(applied)?applied:[]).map(a=>String(a?.job_id||'')).filter(Boolean));
+ const filteredPublicJobs=publicJobs.filter(j=>!appliedIds.has(String(j?.id||'')));
  const publicMatches=window.getCanonicalWorkerPublicMatches?
-  window.getCanonicalWorkerPublicMatches(publicJobs,p,10):[];
+  window.getCanonicalWorkerPublicMatches(filteredPublicJobs,p,10):[];
  return {directMatches,publicMatches,directError};
 }
 window.loadCanonicalWorkerMatchData=loadCanonicalWorkerMatchData;
