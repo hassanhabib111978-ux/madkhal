@@ -17,6 +17,9 @@ checks = [
     ("occupation picker clears hidden canonical values on input", 'document.getElementById("occupationUri").value=""' in index),
     ("occupation picker uses live opportunities", "allVisibleJobs" in index and "search_madkhal_occupations" in index),
     ("constitution is present", "Codex is the engineering agent for مَدخَل" in agents),
+    ("account loading is guarded", "let accountLoading=null;" in index and "if(accountLoading)return accountLoading;" in index),
+    ("deployed enhancements are explicit", './subscription-install-link.js' in index and './payment-flexible-layer.js' in index and './employer-dashboard-polish.js' in index),
+
 ]
 
 failed = [name for name, ok in checks if not ok]
