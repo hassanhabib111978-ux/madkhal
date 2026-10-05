@@ -1,4 +1,4 @@
-const CACHE_NAME = "madkhal-v25";
+const CACHE_NAME = "madkhal-v26";
 
 // Keep the latest page active immediately.
 self.addEventListener("install", event => {
@@ -24,7 +24,6 @@ self.addEventListener("fetch", event => {
       const freshRequest = new Request(event.request, { cache: "no-store" });
       return await fetch(freshRequest);
     } catch (error) {
-      // Network failure: fall back to the current browser response when possible.
       const cached = await caches.match(event.request);
       if (cached) return cached;
       throw error;
