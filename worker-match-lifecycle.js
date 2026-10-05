@@ -132,7 +132,7 @@ async function loadWorkerMatchCenter(){
    const h=document.createElement('div');h.className='notice success';h.style.marginTop='14px';h.textContent='🔎 أقرب الفرص المنشورة حاليًا';list.appendChild(h);
    publicMatches.forEach(x=>{
     const j=x.j;const card=document.createElement('div');card.className='worker-match-card';
-    card.innerHTML='<div class="candidate-top"><strong>'+esc(j.title)+'</strong><span class="match-score">فرصة قريبة</span></div>'+
+    card.innerHTML='<div class="candidate-top"><strong>'+esc(j.title)+'</strong><span class="match-score">'+Math.round(Number(x.s)||0)+'% مطابقة</span></div>'+
       '<div class="candidate-meta">🏢 '+esc(j.company||'—')+(j.location?' · 📍 '+esc(j.location):'')+(j.country?' · '+esc(j.country):'')+'</div>'+
       '<div class="candidate-meta">المصدر: '+esc(j.source_name||j.source||'مَدخَل')+'</div>'+
       '<div class="worker-match-actions"></div>';
