@@ -1061,8 +1061,12 @@ async function renderNotifications(){
     }
   }catch(e){console.warn("remote notifications",e)}
   const applications=getLS(LS.applications,[]);
+  const appliedJobIds=new Set(applications.map(x=>String(x&&x.job_id||"")).filter(Boolean));
   const applicationTitles=new Set(applications.map(x=>normalizeText(x&&x.title||"")).filter(Boolean));
   const normal=raw.filter(x=>{
+    // لا نعرض تنبيه مطابقة لفرصة سبق للباحث تسجيل التقديم عليها.
+    // يبقى سجل الطلب نفسه في «طلباتي».
+    if(x.job_id!=null&&appliedJobIds.has(String(x.job_id)))return false;
     const msg=String(x.message||"");
     if(msg.startsWith("🎯 فرصة مناسبة لك:"))return false;
     if(msg.includes("تم تسجيل رغبتك بالاشتراك")||msg.includes("طلب اشتراك"))return false;
