@@ -710,7 +710,7 @@ async function searchOccupations(inputId,resultId,statusId,uriId,labelId,timerTy
     ));
     const pool=[];const seen=new Set();
     responses.forEach(res=>{
-      if(res.error)throw res.error;
+      if(res.error){console.warn("occupation query skipped",res.error.message||res.error);return}
       (res.data||[]).forEach(item=>{
         const key=item.concept_uri||item.preferred_label;
         if(key&&!seen.has(key)){seen.add(key);pool.push(item)}
