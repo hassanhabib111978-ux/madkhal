@@ -324,7 +324,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     <div class="form-group"><label>المؤهل</label><input id="workerQualification" placeholder="مثال: بكالوريوس"></div>
   </div>
   <div class="form-group occupation-box">
-    <label>المهنة المعتمدة</label>    <input id="occupationSearch" type="search" autocomplete="off" placeholder="اكتب المهنة بالعربية أو الإنجليزية (مثال: محاسب / Network Engineer)">
+    <label>المهنة المرتبطة بالفرص</label>    <input id="occupationSearch" type="search" autocomplete="off" placeholder="اكتب المهنة بالعربية أو الإنجليزية (مثال: محاسب / Network Engineer)">
     <input id="occupationUri" type="hidden"><input id="occupationLabel" type="hidden">
     <div id="occupationResults" class="occupation-results"></div>
     <div id="occupationStatus" class="occupation-status">تظهر هنا فقط المهن التي يمكن ربطها بفرص عمل فعلية ضمن نطاق مَدخَل.</div>
@@ -677,106 +677,112 @@ async function searchOccupations(inputId,resultId,statusId,uriId,labelId,timerTy
     status.textContent="اكتب حرفين على الأقل. سيقترح مَدخَل مهنًا مرتبطة بفرص فعلية.";
     return;
   }
-  status.textContent="جاري البحث عن مهنة مرتبطة بالفرص الحالية...";
-  const low=normalizeText(term);
-  const typedTokens=tokens(term).filter(t=>t.length>=2);
-  const aliasQueries=[];
-  Object.keys(OCC_ALIASES).forEach(ar=>{
-    const arNorm=normalizeText(ar),aliases=(OCC_ALIASES[ar]||[]).map(normalizeText);
-    if(arNorm.includes(low)||low.includes(arNorm)||aliases.some(x=>x.includes(low)||low.includes(x))){
-      aliasQueries.push(ar,...(OCC_ALIASES[ar]||[]));
-    }
-  });
+  status.textContent="جاري البحث في المهن المرتبطة بالفرص الحالية...";
   try{
     if(!allVisibleJobs.length)await loadJobs();
-
-    // مصدر الاقتراح هو كتالوج المهن، لكن لا نعرض منه شيئًا إلا بعد
-    // إثبات وجود صلة بفرصة منشورة حاليًا في مَدخَل.
     const jobRows=allVisibleJobs.map(j=>({
       raw:j,
-      text:normalizeText([j.title,j.category,j.description,j.company,j.location,j.country].filter(Boolean).join(" "))
+      text:normalizeText([j.title,j.category,j.description].filter(Boolean).join(" "))
     }));
-    const evidenceTerms=[low,...typedTokens,...aliasQueries.map(normalizeText)].filter(Boolean);
-    const directlyMatchingJobs=jobRows.filter(row=>evidenceTerms.some(t=>t.length>=2&&row.text.includes(t)));
+    let employerRows=[];
+    try{
+      const ev=await supabaseClient.from("employer_vacancies")
+        .select("id,title,occupation_uri,occupation_label,status")
+        .in("status",["open","matching","screening"])
+        .limit(200);
+      if(!ev.error)employerRows=ev.data||[];
+    }catch(e){}
 
-    const queryTerms=[term,...typedTokens,...aliasQueries];
-    directlyMatchingJobs.slice(0,8).forEach(row=>{
-      tokens([row.raw.title,row.raw.category].filter(Boolean).join(" "))
-        .filter(t=>t.length>=3).slice(0,5).forEach(t=>queryTerms.push(t));
+    const low=normalizeText(term);
+    const typed=tokens(term).filter(t=>t.length>=2);
+    const aliases=[];
+    Object.keys(OCC_ALIASES||{}).forEach(ar=>{
+      const a=normalizeText(ar), al=(OCC_ALIASES[ar]||[]).map(normalizeText);
+      if(a.includes(low)||low.includes(a)||al.some(x=>x.includes(low)||low.includes(x)))
+        aliases.push(ar,...(OCC_ALIASES[ar]||[]));
     });
-    const uniqueTerms=[...new Set(queryTerms.map(String).map(x=>x.trim()).filter(x=>x.length>=2))].slice(0,16);
-    const responses=await Promise.all(uniqueTerms.map(q=>supabaseClient.rpc("search_madkhal_occupations",{search_text:q,result_limit:40})));
-    const rows=[];const seen=new Set();
+
+    const queries=[term,...typed,...aliases].map(String).map(x=>x.trim()).filter(x=>x.length>=2);
+    const uniqueQueries=[...new Set(queries)].slice(0,12);
+    const responses=await Promise.all(uniqueQueries.map(q=>
+      supabaseClient.rpc("search_madkhal_occupations",{search_text:q,result_limit:50})
+    ));
+    const pool=[];const seen=new Set();
     responses.forEach(res=>{
       if(res.error)throw res.error;
       (res.data||[]).forEach(item=>{
         const key=item.concept_uri||item.preferred_label;
-        if(key&&!seen.has(key)){seen.add(key);rows.push(item)}
+        if(key&&!seen.has(key)){seen.add(key);pool.push(item)}
       });
     });
 
-    const occupationMatchesTyped=item=>{
-      const occupationText=normalizeText([item.preferred_label,item.alt_labels].join(" "));
-      const aliases=aliasTermsFor(item.preferred_label).map(normalizeText);
-      const terms=[low,...typedTokens,...aliasQueries.map(normalizeText),...aliases].filter(t=>t&&t.length>=2);
-      return terms.some(t=>occupationText.includes(t)||t.includes(occupationText));
-    };
-    const occupationMatchesJobs=item=>{
-      const variants=[item.preferred_label,...String(item.alt_labels||"").split(/\n+/),...aliasTermsFor(item.preferred_label)]
-        .map(normalizeText).filter(Boolean);
-      const occupationTokens=tokens(variants.join(" ")).filter(t=>t.length>=3);
-      return jobRows.some(row=>{
-        if(variants.some(v=>v.length>=3&&row.text.includes(v)))return true;
-        return occupationTokens.some(t=>row.text.includes(t));
-      });
-    };
+    const generic=new Set(["مدير","مديرة","المدير","المديرة","مسؤول","مسؤولة","متخصص","متخصصة","أخصائي","أخصائية","فني","فنية","عامل","عاملة","مساعد","مساعدة","موظف","موظفة","خبير","خبيرة","مستشار","مستشارة","ال","من","في","و"]);
+    const usefulTokens=v=>tokens(v).filter(t=>t.length>=3&&!generic.has(t));
+    const normVariants=item=>[
+      item.preferred_label,
+      ...String(item.alt_labels||"").split(/\\n+/),
+      ...aliasTermsFor(item.preferred_label)
+    ].map(normalizeText).filter(Boolean);
 
-    // مهم: لا نشترط أن تحتوي الوظيفة على نفس كلمة الباحث.
-    // يكفي أن نجد مهنة تنتمي إلى الفرص الحالية؛ وهذا يحل حالات مثل
-    // "هندسة" ← "مهندس برمجيات / Network Engineer".
-    let filtered=rows.filter(item=>occupationMatchesTyped(item)&&occupationMatchesJobs(item));
-
-    // إذا كانت نتائج البحث المباشر ضيقة، استخدم كلمات عناوين الفرص الحالية
-    // لاستخراج المهن المرتبطة بها، ثم أعد التصفية.
-    if(!filtered.length&&jobRows.length){
-      const retryTerms=[];
-      jobRows.slice(0,20).forEach(row=>{
-        tokens([row.raw.title,row.raw.category].filter(Boolean).join(" "))
-          .filter(t=>t.length>=3).slice(0,6).forEach(t=>retryTerms.push(t));
-      });
-      const retry=[...new Set(retryTerms)].slice(0,20);
-      if(retry.length){
-        const retryResponses=await Promise.all(retry.map(q=>supabaseClient.rpc("search_madkhal_occupations",{search_text:q,result_limit:25})));
-        retryResponses.forEach(res=>{
-          if(res.error)throw res.error;
-          (res.data||[]).forEach(item=>{
-            const key=item.concept_uri||item.preferred_label;
-            if(key&&!seen.has(key)){seen.add(key);rows.push(item)}
-          });
-        });
-        filtered=rows.filter(item=>occupationMatchesTyped(item)&&occupationMatchesJobs(item));
+    const evidence=(item)=>{
+      const variants=normVariants(item);
+      const useful=[...new Set(usefulTokens(variants.join(" ")))];
+      const uri=String(item.concept_uri||"");
+      let employer=0;
+      for(const v of employerRows){
+        if(uri&&String(v.occupation_uri||"")===uri) employer++;
+        else if(normalizeText(v.occupation_label||"")===normalizeText(item.preferred_label||"")) employer++;
       }
-    }
+      let exact=0, tokenHits=0;
+      for(const row of jobRows){
+        if(variants.some(v=>v.length>=4&&row.text.includes(v))) exact++;
+        if(useful.length){
+          const hits=useful.filter(t=>row.text.includes(t)).length;
+          if(hits>=Math.min(2,useful.length))tokenHits++;
+        }
+      }
+      // لا نعتبر كلمة عامة مثل "مدير" دليلًا كافيًا وحدها.
+      const score=employer*100+exact*20+tokenHits*8;
+      return {score,employer,exact,tokenHits,useful};
+    };
+
+    let ranked=pool.map(item=>({...item,_e:evidence(item)}))
+      .filter(x=>x._e.score>0);
+
+    // تضييق إضافي حسب الكلمة المكتوبة، مع إبقاء المهن التي لها دليل فعلي في الفرص.
+    ranked=ranked.filter(x=>{
+      const text=normalizeText([x.preferred_label,x.alt_labels].join(" "));
+      return [low,...typed,...aliases.map(normalizeText)].some(t=>t&&text.includes(t));
+    });
+
+    ranked.sort((a,b)=>{
+      if(b._e.score!==a._e.score)return b._e.score-a._e.score;
+      if(b._e.employer!==a._e.employer)return b._e.employer-a._e.employer;
+      return String(a.preferred_label).localeCompare(String(b.preferred_label),"ar");
+    });
 
     results.innerHTML="";
-    filtered.slice(0,12).forEach(item=>{
+    ranked.slice(0,12).forEach(item=>{
       const b=document.createElement("button");
       b.type="button";b.className="occupation-option";
-      b.innerHTML="<strong>"+escapeHtml(item.preferred_label)+"</strong><small>مرتبطة بفرص مَدخَل الحالية · ESCO / ISCO: "+escapeHtml(item.isco_group||"")+"</small>";
+      const evidenceText=item._e.employer
+        ? "مستخدمة في فرص أصحاب العمل الحالية"
+        : "مرتبطة بعناوين فرص منشورة حاليًا";
+      b.innerHTML="<strong>"+escapeHtml(item.preferred_label)+"</strong><small>✓ "+evidenceText+" · ESCO / ISCO: "+escapeHtml(item.isco_group||"")+"</small>";
       b.onclick=()=>{
         input.value=item.preferred_label||"";
         document.getElementById(uriId).value=item.concept_uri||"";
         document.getElementById(labelId).value=item.preferred_label||"";
         results.style.display="none";
-        status.textContent="✓ تم اختيار مهنة مرتبطة بفرص فعلية.";
+        status.textContent="✓ تم اختيار مهنة مثبتة بفرص مَدخَل الحالية.";
         if(timerType==="worker")loadOccupationSkills(item.concept_uri||"");
       };
       results.appendChild(b);
     });
     results.style.display=results.children.length?"block":"none";
     status.textContent=results.children.length
-      ?"اختر المهنة المناسبة من الفرص الحالية."
-      :"لم نجد مهنة مرتبطة بفرصة حالية بهذه الكلمة. جرّب كلمة أخرى من اسم المهنة أو مجالها.";
+      ?"اختر المهنة المناسبة — الاقتراحات مبنية على فرص مَدخَل الحالية، وليست قائمة مهن عامة."
+      :"لم نجد مهنة مثبتة بفرصة حالية بهذه الكلمة. جرّب كلمة أقصر أو مجالًا قريبًا من المهنة.";
   }catch(e){
     console.warn("occupation search",e);
     results.style.display="none";
@@ -982,7 +988,7 @@ async function loadAccount(){
     // نعرض تقييمًا فوريًا محليًا أولًا، ثم نحدّثه بالبيانات المتقدمة دون تعليق الواجهة.
     const quick=calculateAutomaticAssessmentInstant(p);
     if(box)renderAutomaticAssessment(quick);
-    status.textContent="👋 "+p.full_name+" · "+(p.occupation_label||"مهنة غير محددة")+" · 📍 "+(p.location||"غير محدد");
+    status.textContent="👋 "+p.full_name+" · "+(p.occupation_label||"مهنة مرتبطة بالفرص غير محددة")+" · 📍 "+(p.location||"غير محدد");
     summary.innerHTML='<div class="profile-summary"><div class="summary-box"><strong>المهنة</strong><br>'+escapeHtml(p.occupation_label||"—")+'</div><div class="summary-box"><strong>المؤهل</strong><br>'+escapeHtml(p.qualification||"—")+'</div><div class="summary-box"><strong>سنوات الخبرة</strong><br>'+escapeHtml(p.experience_years??"—")+'</div><div class="summary-box"><strong>نوع العمل</strong><br>'+escapeHtml(workType(p.work_type))+'</div></div><button class="secondary-btn" style="width:100%;margin-top:10px" onclick="openProfile()">✏️ تعديل الملف</button>';
     // لا نترك شاشة الحساب معلقة: التقييم المحلي الفوري هو النتيجة الاحتياطية دائمًا.
     let instant=null;
