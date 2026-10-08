@@ -72,3 +72,13 @@
 - `worker_opportunity_recommendations`: 3 stale `external-v2` rows remain for audit, while the active path uses 3 `external-v3` rows; current `external-v3` positive recommendations checked: 0.
 - `notifications`: 0 current match/job-match notifications and 1 subscription notification.
 - Active `match_requests`: 2/2 have current v3 records and their active score fields match v3 (0 mismatches).
+
+## 2026-10-08 — investable product hardening
+- Fixed the paid-product boundary: continuous worker matching and match notifications now require an active monthly worker subscription at the database layer.
+- Preserved free search/browsing/application behavior.
+- Hardened subscription RLS so a client cannot create or update an active subscription; client-side requests are limited to `requested` state.
+- Added a unified subscription runtime to provide the missing `renderSubscription`, `syncSubscriptionStatus`, and `syncSubscriptionRemote` paths and to keep payment requests explicitly pending verification.
+- Added indexes for active subscriptions, worker match status, and notification deduplication.
+- Preserved existing Middle East source ingestion and historical applications.
+- Verification: modified JavaScript files parse successfully; database functions are SECURITY DEFINER and remain ownership-scoped; no production job data was rewritten.
+- Remaining before sale/investment readiness: real payment-provider verification/activation, full end-to-end seeker/employer journey test, cleanup/consolidation of legacy fix layers, formal RLS tests, and production release review.
