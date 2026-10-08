@@ -72,7 +72,8 @@ async function subscriptionIsActive(){
      return !!(s&&s.status==='active'&&(!s.ends_at||new Date(s.ends_at)>new Date()));
    }
  }catch(e){console.warn('subscription sync',e)}
- return localStorage.getItem('madkhal_subscription_status')==='active';
+ // Server-side subscription state is authoritative. A local flag can never activate paid matching.
+ return false;
 }
 
 async function loadCanonicalWorkerMatchData(profile){
