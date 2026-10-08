@@ -61,24 +61,24 @@ async function renderEmployerCandidates(vacancyId){
     rows.forEach(c=>{
       const card=document.createElement('div');card.className='candidate-card';
       const score=Math.round(Number(c.match_score??c.explainable_match_score)||0);
-      card.innerHTML='<div><strong>'+String(c.full_name||c.worker_name||'باحث عن عمل').replace(/[&<>"]/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[x]))+'</strong> <span class="match-score">'+score+'%</span></div>'+
-      '<div class="candidate-meta">المهنة: '+String(c.occupation_label||c.occupation||'—')+'</div>'+
-      '<div class="candidate-meta">حالة المطابقة: '+String(c.status||'—')+'</div>'+
+      card.innerHTML='<div><strong>'+String(c.first_name||'باحث عن عمل').replace(/[&<>"]/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[x]))+'</strong> <span class="match-score">'+score+'%</span></div>'+
+      '<div class="candidate-meta">المهنة: '+String(c.profession||'—')+'</div>'+
+      '<div class="candidate-meta">حالة المطابقة: '+String(c.match_status||'—')+'</div>'+
       '<div class="candidate-actions"></div>';
       const a=card.querySelector('.candidate-actions');
-      if(c.status==='matched'||c.status==='worker_pending'){
+      if((c.match_status==='matched'||c.match_status==='worker_pending')){
         const b=document.createElement('button');b.className='primary-btn';b.textContent='⭐ اهتمام بالمرشح';
         b.onclick=async()=>{b.disabled=true;const x=await supabaseClient.rpc('advance_match_request',{p_request_id:c.request_id||c.id,p_next_status:'employer_interested',p_note:null});if(x.error){b.disabled=false;showToast('⚠️ تعذر تسجيل الاهتمام.');return}showToast('✅ تم تسجيل الاهتمام وإرسال المسار للباحث.');renderEmployerCandidates(vacancyId)};
         a.appendChild(b);
-      } else if(c.status==='worker_accepted'){
+      } else if(c.match_status==='worker_accepted'){
         const b=document.createElement('button');b.className='primary-btn';b.textContent='📞 فتح التواصل';
         b.onclick=async()=>{b.disabled=true;const x=await supabaseClient.rpc('advance_match_request',{p_request_id:c.request_id||c.id,p_next_status:'contact_opened',p_note:null});if(x.error){b.disabled=false;showToast('⚠️ تعذر فتح التواصل.');return}showToast('📞 تم فتح مرحلة التواصل.');renderEmployerCandidates(vacancyId)};
         a.appendChild(b);
-      } else if(c.status==='contact_opened'){
+      } else if(c.match_status==='contact_opened'){
         const i=document.createElement('button');i.className='secondary-btn';i.textContent='🗣️ تسجيل مقابلة';i.onclick=async()=>{i.disabled=true;const x=await supabaseClient.rpc('advance_match_request',{p_request_id:c.request_id||c.id,p_next_status:'interview',p_note:null});if(x.error){i.disabled=false;showToast('⚠️ تعذر تحديث الحالة.');return}renderEmployerCandidates(vacancyId)};a.appendChild(i);
-      } else if(c.status==='interview'){
+      } else if(c.match_status==='interview'){
         const i=document.createElement('button');i.className='secondary-btn';i.textContent='📄 تقديم عرض';i.onclick=async()=>{i.disabled=true;const x=await supabaseClient.rpc('advance_match_request',{p_request_id:c.request_id||c.id,p_next_status:'offer',p_note:null});if(x.error){i.disabled=false;showToast('⚠️ تعذر تحديث الحالة.');return}renderEmployerCandidates(vacancyId)};a.appendChild(i);
-      } else if(c.status==='offer'){
+      } else if(c.match_status==='offer'){
         const i=document.createElement('button');i.className='primary-btn';i.textContent='🎉 تسجيل التوظيف';i.onclick=async()=>{i.disabled=true;const x=await supabaseClient.rpc('advance_match_request',{p_request_id:c.request_id||c.id,p_next_status:'hired',p_note:null});if(x.error){i.disabled=false;showToast('⚠️ تعذر تحديث الحالة.');return}renderEmployerCandidates(vacancyId)};a.appendChild(i);
       }
       box.appendChild(card);
