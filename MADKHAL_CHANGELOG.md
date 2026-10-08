@@ -21,3 +21,4 @@ No source ingestion was rebuilt or deleted in this batch. Payment activation rem
 ## 2026-10-08 — Accepted match state
 - Corrected employer candidate review to recognize the authoritative `accepted` state returned after worker approval.
 - Restored the next employer action: opening contact after worker acceptance.
+- 2026-10-08: employer flow now refreshes the authoritative candidate panel immediately after a vacancy is published and matching starts, keeping employer review connected to the created vacancy.
