@@ -67,19 +67,22 @@ window.getCanonicalWorkerPublicMatches=getCanonicalWorkerPublicMatches;
 async function loadCanonicalWorkerMatchData(profile){
  const p=profile||localProfile();
  let directMatches=[],directError=null;
- try{
-  const process=await supabaseClient.rpc('process_my_worker_matches',{p_limit:200});
-  if(process?.error)console.warn('worker match processing',process.error);
- }catch(e){console.warn('worker match processing',e)}
- try{
-  const notify=await supabaseClient.rpc('create_worker_match_notifications',{p_limit:50});
-  if(notify?.error)console.warn('worker notifications',notify.error);
- }catch(e){console.warn('worker notifications',e)}
- try{
-  const r=await supabaseClient.rpc('get_my_worker_matches');
-  if(r?.error)directError=r.error;
-  else directMatches=r.data||[];
- }catch(e){directError=e}
+ const paid=localStorage.getItem('madkhal_subscription_status')==='active';
+ if(paid){
+  try{
+   const process=await supabaseClient.rpc('process_my_worker_matches',{p_limit:200});
+   if(process?.error)console.warn('worker match processing',process.error);
+  }catch(e){console.warn('worker match processing',e)}
+  try{
+   const notify=await supabaseClient.rpc('create_worker_match_notifications',{p_limit:50});
+   if(notify?.error)console.warn('worker notifications',notify.error);
+  }catch(e){console.warn('worker notifications',e)}
+  try{
+   const r=await supabaseClient.rpc('get_my_worker_matches');
+   if(r?.error)directError=r.error;
+   else directMatches=r.data||[];
+  }catch(e){directError=e}
+ }
  let publicJobs=[];
  try{
   if(typeof loadJobs==='function')publicJobs=await loadJobs(false);
