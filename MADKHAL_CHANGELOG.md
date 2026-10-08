@@ -32,3 +32,4 @@ No source ingestion was rebuilt or deleted in this batch. Payment activation rem
 
 - 2026-10-08: fixed `loadProfileRemote()` field precedence so persisted Supabase values, including intentional empty/null values, are not masked by stale local profile values; job-source data and matching algorithms were not changed.
 - 2026-10-08: tightened remote profile authority further by removing local-value fallback for ordinary profile fields when the authenticated `worker_profiles` row exists; matching now receives the persisted profile state as the canonical baseline.
+- 2026-10-08: hardened external application duplicate protection by checking authoritative `madkhal_applications` history before recording a new application; localStorage is no longer the sole duplicate guard. No job-source data changed.
