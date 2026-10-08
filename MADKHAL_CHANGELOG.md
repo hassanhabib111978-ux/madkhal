@@ -17,3 +17,7 @@ No source ingestion was rebuilt or deleted in this batch. Payment activation rem
 - Added candidate lifecycle actions through the existing `advance_match_request`: employer interest, contact, interview, offer, hired.
 - Added an explicit candidate panel after opportunity publishing.
 - Preserved private-match-only employer vacancies and job-source ingestion.
+
+## 2026-10-08 — Accepted match state
+- Corrected employer candidate review to recognize the authoritative `accepted` state returned after worker approval.
+- Restored the next employer action: opening contact after worker acceptance.
