@@ -25,3 +25,4 @@ No source ingestion was rebuilt or deleted in this batch. Payment activation rem
 - 2026-10-08: added the Madkhal automated-engineer operating charter, permissions policy, and inspection/repair protocol; these define inspect-first, least-change, source-preserving, auditable repair rules.
 - 2026-10-08: hardened paid matching so a localStorage `active` flag can never activate paid matching when the authoritative Supabase subscription check is unavailable; failure now falls back to free behavior.
 - 2026-10-08: Jibran matching requests now verify the authoritative Supabase subscription before loading direct matches, closing the client-side timing gap before the subscription runtime guard initializes.
+- 2026-10-08: corrected the Jibran async function declaration introduced during the subscription-boundary hardening; verified the declaration is syntactically singular (`async function`).
