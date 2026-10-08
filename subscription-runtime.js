@@ -175,6 +175,42 @@
   window.startLocalPayment=startLocalPayment;
 
   document.addEventListener("DOMContentLoaded",function(){
-    setTimeout(function(){syncSubscriptionRemote();},150);
+    setTimeout(function(){
+      syncSubscriptionRemote();
+      // Jibran must respect the same paid/free boundary as the matching engine.
+      if(typeof window.askJibran==="function" && !window.askJibran.__subscriptionGuarded){
+        const original=window.askJibran;
+        const guarded=function(kind){
+          if(kind==="match" && lsGet(LS_KEY,"inactive")!=="active"){
+            const el=document.getElementById("jibranHomeText");
+            const account=document.getElementById("jibranAccountText");
+            const msg="المطابقة المستمرة والتنبيهات من مزايا اشتراك مَدخَل بقيمة 1 دولار شهريًا. يمكنك البحث عن الفرص مجانًا.";
+            if(el)el.textContent=msg;
+            if(account)account.textContent=msg;
+            return;
+          }
+          return original.apply(this,arguments);
+        };
+        guarded.__subscriptionGuarded=true;
+        window.askJibran=guarded;
+      }
+      if(typeof window.askJibranUser==="function" && !window.askJibranUser.__subscriptionGuarded){
+        const originalUser=window.askJibranUser;
+        const guardedUser=function(){
+          const q=(document.getElementById("jibranInput")?.value||"").trim();
+          const normalized=typeof normalizeText==="function"?normalizeText(q):q.toLowerCase();
+          const asksMatch=/مناسبة|مناسب|حسب ملفي|حسب تقييمي|ملفي|تقييمي|مطابق/.test(normalized);
+          if(asksMatch && lsGet(LS_KEY,"inactive")!=="active"){
+            const el=document.getElementById("jibranMainText");
+            if(el)el.textContent="المطابقة المستمرة والتنبيهات من مزايا اشتراك مَدخَل بقيمة 1 دولار شهريًا. البحث عن الفرص والتصفح والتقديم الأساسي متاح مجانًا.";
+            const input=document.getElementById("jibranInput"); if(input)input.value="";
+            return;
+          }
+          return originalUser.apply(this,arguments);
+        };
+        guardedUser.__subscriptionGuarded=true;
+        window.askJibranUser=guardedUser;
+      }
+    },150);
   });
 })();
