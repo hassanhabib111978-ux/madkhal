@@ -1090,7 +1090,7 @@ async function renderNotifications(){
   if(!cleaned.length){box.innerHTML='<div class="empty">لا توجد تنبيهات جديدة.</div>';return}
   box.innerHTML=cleaned.slice(0,12).map(x=>'<div class="summary-box" style="margin-bottom:8px">🔔 '+escapeHtml(x.message||"تنبيه")+'<br><small>'+formatDate(x.created_at)+'</small></div>').join("");
 }
-async async function askJibran(kind){
+async function askJibran(kind){
  const p=localProfile();let msg="";
  if(kind==="match" && typeof window.syncSubscriptionRemote==="function"){
    const s=await window.syncSubscriptionRemote();
