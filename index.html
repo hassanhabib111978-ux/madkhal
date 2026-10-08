@@ -298,18 +298,19 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <div class="jibran"><div class="jibran-title">🤖 جبران — مساعد مَدخَل</div><div id="jibranHomeText" class="jibran-bubble">اسألني عن ملفك أو عن كيفية الوصول إلى فرصة مناسبة.</div><div class="jibran-actions"><button class="secondary-btn" onclick="askJibran('profile')">كيف أبني ملفي؟</button><button class="secondary-btn" onclick="askJibran('jobs')">كيف أجد فرصة؟</button></div></div>
   <h2 class="section-title">رحلتك</h2>
   <div class="journey"><div class="journey-item"><span>👤</span>بياناتك</div><div class="journey-item"><span>🧠</span>مهاراتك</div><div class="journey-item"><span>🎯</span>المطابقة</div><div class="journey-item"><span>🔎</span>الفرص</div><div class="journey-item"><span>📩</span>التقديم</div><div class="journey-item"><span>🔔</span>المتابعة</div></div>
-  <div class="premium"><span class="premium-badge">🔔 المتابعة الذكية</span><h3 style="margin-top:10px">البحث مجاني والاشتراك اختياري</h3><p><strong>يمكنك البحث عن فرص العمل واستعراضها والتقديم عليها مجانًا</strong>، والعودة للبحث بشكل دوري كلما رغبت. وإذا أردت أن يبحث مَدخَل عنك باستمرار، ويطابق ملفك مع الفرص الجديدة، ويرسل لك تنبيهات عند ظهور فرص مناسبة، يمكنك تفعيل الاشتراك.</p><div class="price">$1 شهريًا</div><button class="primary-btn" style="width:100%" onclick="openSubscription()">🔔 تفعيل المتابعة</button></div>
+  <div class="premium"><span class="premium-badge">🎉 الإطلاق المجاني</span><h3 style="margin-top:10px">مَدخَل متاح مجانًا في المرحلة الأولى</h3><p><strong>يمكنك الآن إنشاء ملفك، استكشاف الفرص، التقييم، المطابقة والتقديم مجانًا.</strong> نركز في هذه المرحلة على بناء مجتمع حقيقي من الباحثين عن العمل وصانعي الفرص وزيادة الثقة والاستخدام.</p><div class="notice success">ستبقى المتابعة المدفوعة محفوظة في النظام، لكنها غير مفعلة حاليًا. سيُعلن مَدخَل عن تفعيلها لاحقًا.</div></div>
 </section>
 
 <section id="workerScreen" class="screen">
 <button class="back" onclick="showScreen('homeScreen')">→ العودة</button>
-<div class="card"><h2>💼 الباحث عن عمل</h2><p>أكمل ملفك مرة واحدة. بعد الحفظ يحلل مَدخَل بياناتك تلقائيًا ويعرض تقييمك ثم يقترح الفرص الأقرب.</p></div>
+<div class="card"><h2>💼 الباحث عن عمل</h2><p>أكمل ملفك مرة واحدة. بعد الحفظ يحلل مَدخَل بياناتك تلقائيًا ويعرض تقييمك، ثم يعرض لك الفرص العامة والمطابقات المهنية كلٌّ في مساره الصحيح.</p></div>
 <div class="card action-stack">
 <button class="primary-btn action-btn" onclick="openProfile()">👤 ابدأ ملفك</button>
-<button class="secondary-btn action-btn" onclick="openOpportunities()">🔎 الفرص</button>
+<button class="secondary-btn action-btn" onclick="openOpportunities()">🔎 الفرص العامة</button>
 <button class="secondary-btn action-btn" onclick="openAccount()">📊 تقييمي</button>
-<button class="primary-btn action-btn" onclick="openSubscription()">🔔 المتابعة</button>
+<button class="primary-btn action-btn" onclick="openAccount()">🎯 المطابقات ومسار التوظيف</button>
 </div>
+<div class="notice">ℹ️ <strong>الفرص العامة</strong> هي فرص متاحة للاستكشاف، أما <strong>المطابقات</strong> فلا تظهر هنا إلا عندما تتوافق الفرصة مع ملفك وفق مسار المطابقة المهني.</div>
 </section>
 
 <section id="profileScreen" class="screen">
@@ -374,7 +375,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 <div class="card"><h3>📊 تقييم مَدخَل</h3><div id="savedAssessmentText">⏳ جارٍ حساب تقييم مَدخَل...</div><button class="secondary-btn" style="width:100%;margin-top:10px" onclick="recalculateAccountAssessment()">🔄 إعادة حساب التقييم</button></div>
 <div class="card"><h3>🔔 التنبيهات</h3><div id="notificationsList"></div></div>
 <div class="card"><h3>📩 طلباتي</h3><div id="applicationsList"></div></div>
-<div class="card"><h3>🔔 المتابعة الذكية</h3><p>البحث عن الفرص الموجودة مجاني ولا يتطلب اشتراكًا. الاشتراك اختياري لمن يريد من مَدخَل أن يبحث ويطابق ويرسل التنبيهات باستمرار.</p><div id="accountSubscriptionStatus" class="notice">الاشتراك غير مفعل.</div><button class="primary-btn" style="width:100%;margin-top:10px" onclick="openSubscription()">🔔 تفاصيل المتابعة — $1 شهريًا</button></div>
+<div class="card"><h3>🎉 المرحلة الأولى: مَدخَل مجاني</h3><p>جميع وظائف الباحث الأساسية متاحة مجانًا حاليًا: الملف، التقييم، الفرص العامة، المطابقات المهنية والتقديم.</p><div id="accountSubscriptionStatus" class="notice success">الاشتراك المدفوع محفوظ في النظام لكنه غير مفعّل خلال مرحلة الإطلاق المجاني.</div></div>
 <div class="jibran"><div class="jibran-title">🤖 جبران</div><div id="jibranAccountText" class="jibran-bubble">أخبرني بما تريد معرفته عن ملفك أو فرصك.</div><div class="jibran-actions"><button class="secondary-btn" onclick="askJibran('match')">ما فرصي الأقرب؟</button><button class="secondary-btn" onclick="askJibran('next')">ما الخطوة التالية؟</button></div></div>
 </section>
 
@@ -1109,7 +1110,7 @@ async function askJibran(kind){
        msg=top.length?"أقرب الفرص الرسمية الآن: "+top.map(x=>x.title||"فرصة").join("، "):"لا توجد مطابقة مهنية رسمية جديدة حاليًا. ستظهر هنا عند العثور على فرصة مناسبة.";
      }catch(e){msg="تعذر تحديث المطابقة الرسمية الآن. حاول مرة أخرى بعد قليل."}
    }
- }else if(kind==="next")msg=p.occupation_label?"الخطوة التالية: راجع المطابقات الرسمية، افتح تفاصيل الفرصة، ثم قدّم وسجل طلبك. وللمتابعة المستمرة والتنبيهات فعّل اشتراك $1 شهريًا.":"الخطوة التالية: أكمل ملفك واختر مهنة مرتبطة بفرصة فعلية.";
+ }else if(kind==="next")msg=p.occupation_label?"الخطوة التالية: راجع المطابقات الرسمية، افتح تفاصيل الفرصة، ثم قدّم وسجل طلبك. جميع هذه الخطوات متاحة مجانًا حاليًا.":"الخطوة التالية: أكمل ملفك واختر مهنة مرتبطة بفرصة فعلية.";
  document.getElementById("jibranHomeText").textContent=msg;document.getElementById("jibranAccountText").textContent=msg
 }
 async function askJibranUser(){
@@ -1136,7 +1137,7 @@ async function askJibranUser(){
    }
  }else if(q.includes("وظيفة")||q.includes("فرصة"))ans="لدي مَدخَل فرص فعلية في سوريا والشرق الأوسط. افتح قسم الفرص وابحث ثم افتح التفاصيل قبل التقديم.";
  else if(q.includes("مطابق"))ans="يمكنني عرض المطابقة الرسمية بعد حفظ ملفك المهني.";
- else if(q.includes("خطوة"))ans=p.occupation_label?"الخطوة التالية: راجع المطابقات الرسمية، افتح تفاصيل الفرصة، ثم قدّم وسجل طلبك. وللمتابعة المستمرة والتنبيهات فعّل اشتراك $1 شهريًا.":"الخطوة التالية: أكمل ملفك المهني أولًا.";
+ else if(q.includes("خطوة"))ans=p.occupation_label?"الخطوة التالية: راجع المطابقات الرسمية، افتح تفاصيل الفرصة، ثم قدّم وسجل طلبك. جميع هذه الخطوات متاحة مجانًا حاليًا.":"الخطوة التالية: أكمل ملفك المهني أولًا.";
  else if(q.includes("ملف"))ans=p.full_name?"راجع المهنة المعتمدة واسم الأم والمكان ونوع العمل ثم احفظ التعديلات.":"ابدأ بالملف المهني: الاسم، اسم الأم، المهنة المعتمدة، المكان ونوع العمل.";
  else ans=p.full_name?"أستطيع مساعدتك في الملف والمطابقة والفرص والتقديم والاشتراك.":"ابدأ بملفك المهني، ثم ننتقل إلى المطابقة الرسمية.";
  if(ans)document.getElementById("jibranMainText").textContent=ans;
