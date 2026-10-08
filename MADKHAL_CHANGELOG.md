@@ -55,3 +55,10 @@ No source ingestion was rebuilt or deleted in this batch. Payment activation rem
 - Hid the subscription/payment presentation during the launch phase and replaced subscription prompts in the active UI/Jibran responses with the free-launch message.
 - Kept the subscription/payment implementation dormant rather than deleting it, so it can be reactivated later after real usage and trust are established.
 - Preserved employer matching, application tracking, job-source ingestion, and existing source data.
+
+## 2026-10-08 — Clarify free launch and worker journey
+- Updated the worker entry screen to distinguish public opportunities from professional matches.
+- Removed the active subscription CTA from the worker journey during the free-launch phase.
+- Clarified that professional matches appear only when the official matching path finds a suitable opportunity.
+- Updated the account view and Jibran's next-step wording to reflect the current free-launch phase.
+- Preserved the dormant subscription implementation and existing job-source/matching backend.
