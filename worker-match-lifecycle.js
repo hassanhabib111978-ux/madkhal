@@ -77,7 +77,14 @@ async function subscriptionIsActive(){
 }
 
 async function loadCanonicalWorkerMatchData(profile){
- const p=profile||localProfile();
+ // Canonical matching always refreshes the persisted worker profile first, so callers such as Jibran or the account screen cannot calculate from stale local data.
+ let p=profile||localProfile();
+ try{
+  if(typeof window.loadProfileRemote==='function'){
+   await window.loadProfileRemote();
+   p=localProfile()||p;
+  }
+ }catch(e){console.warn('canonical profile refresh',e)}
  let directMatches=[],directError=null;
  const paid=await subscriptionIsActive();
  if(paid){
