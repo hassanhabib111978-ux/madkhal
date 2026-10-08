@@ -29,3 +29,6 @@ No source ingestion was rebuilt or deleted in this batch. Payment activation rem
 - 2026-10-08: unified employer match lifecycle with existing application history via safe Supabase triggers. Match transitions now update an existing vacancy application (`follow_up/interview/offer/hired/withdrawn/closed`) without creating applications from matches; application insertion also respects an already-existing match state. Job-source tables were untouched.
 - 2026-10-08: aligned the worker match center with the saved worker profile by refreshing the remote profile before calculating public opportunities; no job-source data or source integrations were changed.
 - 2026-10-08: made the canonical worker matching entry point refresh the persisted worker profile before calculating matches, covering account, match-center, and Jibran callers without touching job-source data.
+
+- 2026-10-08: fixed `loadProfileRemote()` field precedence so persisted Supabase values, including intentional empty/null values, are not masked by stale local profile values; job-source data and matching algorithms were not changed.
+- 2026-10-08: tightened remote profile authority further by removing local-value fallback for ordinary profile fields when the authenticated `worker_profiles` row exists; matching now receives the persisted profile state as the canonical baseline.
