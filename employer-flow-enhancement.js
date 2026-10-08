@@ -87,6 +87,49 @@ async function renderEmployerCandidates(vacancyId){
 }
 window.renderEmployerCandidates=renderEmployerCandidates;
 window.submitEmployerVacancy=submitEmployerVacancyEnhanced;
+
+// مَدخَل — وضع الإطلاق المجاني المؤقت
+function installFreeLaunchMode(){
+  window.__MADKHAL_FREE_LAUNCH__=true;
+  try{
+    const sub=document.getElementById('subscriptionScreen');
+    if(sub) sub.style.display='none';
+    document.querySelectorAll('#accountScreen .card').forEach(function(card){
+      const h=card.querySelector('h3');
+      if(h && /المتابعة الذكية|الاشتراك/.test(h.textContent||'')) card.style.display='none';
+    });
+    window.openSubscription=function(){ if(typeof showToast==='function')showToast('🎉 مَدخَل مجاني حاليًا خلال مرحلة الإطلاق؛ الاشتراك مؤجل.'); };
+    window.startSubscriptionRequest=async function(){ if(typeof showToast==='function')showToast('🎉 مَدخَل مجاني حاليًا؛ الدفع مؤجل.'); return false; };
+    window.startLocalPayment=async function(){ if(typeof showToast==='function')showToast('🎉 مَدخَل مجاني حاليًا؛ الدفع مؤجل.'); };
+    setTimeout(function(){
+      window.askJibran=async function(kind){
+        const p=typeof localProfile==='function'?localProfile():{};
+        let msg='';
+        if(kind==='profile') msg=p.full_name?'ملفك موجود. راجع المهنة والمكان ونوع العمل ثم احفظ التعديلات.':'ابدأ بالملف المهني واختر المهنة المعتمدة أولًا.';
+        else if(kind==='jobs') msg='البحث عن الفرص والتصفح والتقديم الأساسي متاح مجانًا خلال مرحلة الإطلاق.';
+        else if(kind==='match'){
+          if(!p.occupation_label) msg='احفظ ملفك المهني واختر المهنة أولًا حتى أبدأ المطابقة.';
+          else if(typeof window.loadCanonicalWorkerMatchData==='function'){
+            try{const d=await window.loadCanonicalWorkerMatchData(p);const top=(d?.directMatches||[]).slice(0,3);msg=top.length?'أقرب المطابقات الرسمية الآن: '+top.map(x=>x.title||'فرصة').join('، '):'لا توجد مطابقة مهنية رسمية جديدة حاليًا. المطابقة متاحة مجانًا في مرحلة الإطلاق.';}catch(x){msg='تعذر تحديث المطابقة الآن. حاول مرة أخرى.'}
+          }else msg='افتح حسابك ثم أعد المحاولة.';
+        }else msg=p.occupation_label?'راجع المطابقات الرسمية ثم افتح تفاصيل الفرصة وقدّم طلبك.':'أكمل ملفك المهني أولًا.';
+        const a=document.getElementById('jibranHomeText'),b=document.getElementById('jibranAccountText');if(a)a.textContent=msg;if(b)b.textContent=msg;
+      };
+      window.askJibranUser=async function(){
+        const input=document.getElementById('jibranInput');const q=typeof normalizeText==='function'?normalizeText(input?.value||''):(input?.value||'').toLowerCase().trim();
+        if(!q){if(typeof showToast==='function')showToast('✍️ اكتب سؤالك.');return}
+        const p=typeof localProfile==='function'?localProfile():{};let ans='';
+        if(/مطابق|مناسبة|مناسب|ملفي|تقييمي/.test(q)&&typeof window.loadCanonicalWorkerMatchData==='function'){
+          try{const d=await window.loadCanonicalWorkerMatchData(p);const top=(d?.directMatches||[]).slice(0,3);ans=top.length?'أقرب المطابقات الرسمية الآن: '+top.map(x=>x.title||'فرصة').join('، '):'لا توجد مطابقة مهنية رسمية جديدة حاليًا؛ المطابقة مجانية خلال مرحلة الإطلاق.';}catch(x){ans='تعذر تحديث المطابقة الآن. حاول مرة أخرى.'}
+        }else if(/وظيفة|فرصة/.test(q)) ans='البحث عن الفرص والتصفح والتقديم الأساسي متاح مجانًا خلال مرحلة الإطلاق.';
+        else if(/اشتراك|دولار|دفع/.test(q)) ans='الاشتراك والمدفوعات مؤجلان حاليًا. مَدخَل مجاني خلال مرحلة الإطلاق.';
+        else ans=p.occupation_label?'أكمل ملفك وراجع المطابقات الرسمية ثم قدّم للفرصة المناسبة.':'ابدأ بإكمال ملفك المهني واختيار المهنة.';
+        const out=document.getElementById('jibranMainText');if(out)out.textContent=ans;if(input)input.value='';
+      };
+    },500);
+  }catch(x){console.warn('free launch mode',x)}
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   if(!window.syncSubscriptionRemote){
     const s=document.createElement('script');
@@ -96,5 +139,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
   injectEmployerFields();
   initEmployerOccupationChoice();
+  installFreeLaunchMode();
 });
 })();
