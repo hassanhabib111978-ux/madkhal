@@ -1090,8 +1090,13 @@ async function renderNotifications(){
   if(!cleaned.length){box.innerHTML='<div class="empty">لا توجد تنبيهات جديدة.</div>';return}
   box.innerHTML=cleaned.slice(0,12).map(x=>'<div class="summary-box" style="margin-bottom:8px">🔔 '+escapeHtml(x.message||"تنبيه")+'<br><small>'+formatDate(x.created_at)+'</small></div>').join("");
 }
-async function askJibran(kind){
+async async function askJibran(kind){
  const p=localProfile();let msg="";
+ if(kind==="match" && typeof window.syncSubscriptionRemote==="function"){
+   const s=await window.syncSubscriptionRemote();
+   const active=!!(s&&s.status==="active"&&(!s.ends_at||new Date(s.ends_at)>new Date()));
+   if(!active){msg="المطابقة المستمرة والتنبيهات من مزايا اشتراك مَدخَل بقيمة 1 دولار شهريًا. يمكنك البحث عن الفرص والتقديم الأساسي مجانًا.";document.getElementById("jibranHomeText").textContent=msg;document.getElementById("jibranAccountText").textContent=msg;return;}
+ }
  if(kind==="profile")msg=p.full_name?"ملفك موجود. راجع المهنة المعتمدة واسم الأم والمكان ونوع العمل ثم احفظ التعديلات.":"ابدأ بالملف المهني: الاسم، اسم الأم، المهنة المعتمدة، المكان ونوع العمل. بعد ذلك تصبح المطابقة أدق.";
  else if(kind==="jobs")msg=allVisibleJobs.length?"لدي مَدخَل "+allVisibleJobs.length+" فرصة فعلية ضمن نطاق سوريا والشرق الأوسط في هذه الجلسة. ابدأ بالبحث ثم افتح التفاصيل قبل التقديم.":"افتح قسم الفرص لتحميل الفرص الفعلية من قاعدة البيانات، ثم استخدم المهنة والمكان لتضييق النتائج.";
  else if(kind==="match"){
@@ -1112,6 +1117,11 @@ async function askJibranUser(){
  if(!q){showToast("✍️ اكتب سؤالك.");return}
  let ans="";const p=localProfile();const a=getLS(LS.assessment,null);
  const asksBest=q.includes("مناسبة")||q.includes("مناسب")||q.includes("الفرصة المناسبة")||q.includes("حسب ملفي")||q.includes("حسب تقييمي")||q.includes("تقييمي")||q.includes("ملفي");
+ if(asksBest && typeof window.syncSubscriptionRemote==="function"){
+   const s=await window.syncSubscriptionRemote();
+   const active=!!(s&&s.status==="active"&&(!s.ends_at||new Date(s.ends_at)>new Date()));
+   if(!active){document.getElementById("jibranMainText").textContent="المطابقة المستمرة والتنبيهات من مزايا اشتراك مَدخَل بقيمة 1 دولار شهريًا. البحث عن الفرص والتصفح والتقديم الأساسي متاح مجانًا.";input.value="";return;}
+ }
  if(q.includes("اشتراك")||q.includes("دولار"))ans="الاشتراك دولار واحد شهريًا للمتابعة المستمرة والمطابقة والتنبيهات.";
  else if(asksBest){
    if(!p.full_name||!p.occupation_label)ans="أكمل ملفك المهني واختر المهنة أولًا، وبعدها تبدأ المطابقة الرسمية.";
