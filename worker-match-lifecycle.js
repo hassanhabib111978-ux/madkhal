@@ -55,7 +55,7 @@ function getCanonicalWorkerPublicMatches(jobs,p,limit=10){
  const profile=p||localProfile();
  const seen=new Set(),arr=[];
  (Array.isArray(jobs)?jobs:[]).forEach(job=>{
-   const key=publicOpportunityKey(job); if(seen.has(key))return; seen.add(key);
+   const key=publicOpportunityKey(job);if(seen.has(key))return;seen.add(key);
    const score=calculateCanonicalPublicJobMatchScore(job,profile);
    if(score>=35)arr.push({j:job,s:score});
  });
@@ -64,10 +64,21 @@ function getCanonicalWorkerPublicMatches(jobs,p,limit=10){
 }
 window.calculateCanonicalPublicJobMatchScore=calculateCanonicalPublicJobMatchScore;
 window.getCanonicalWorkerPublicMatches=getCanonicalWorkerPublicMatches;
+
+async function subscriptionIsActive(){
+ try{
+   if(typeof window.syncSubscriptionRemote==='function'){
+     const s=await window.syncSubscriptionRemote();
+     return !!(s&&s.status==='active'&&(!s.ends_at||new Date(s.ends_at)>new Date()));
+   }
+ }catch(e){console.warn('subscription sync',e)}
+ return localStorage.getItem('madkhal_subscription_status')==='active';
+}
+
 async function loadCanonicalWorkerMatchData(profile){
  const p=profile||localProfile();
  let directMatches=[],directError=null;
- const paid=localStorage.getItem('madkhal_subscription_status')==='active';
+ const paid=await subscriptionIsActive();
  if(paid){
   try{
    const process=await supabaseClient.rpc('process_my_worker_matches',{p_limit:200});
@@ -79,79 +90,72 @@ async function loadCanonicalWorkerMatchData(profile){
   }catch(e){console.warn('worker notifications',e)}
   try{
    const r=await supabaseClient.rpc('get_my_worker_matches');
-   if(r?.error)directError=r.error;
-   else directMatches=r.data||[];
+   if(r?.error)directError=r.error;else directMatches=r.data||[];
   }catch(e){directError=e}
  }
  let publicJobs=[];
- try{
-  if(typeof loadJobs==='function')publicJobs=await loadJobs(false);
- }catch(e){console.warn('worker public jobs',e)}
- const publicMatches=window.getCanonicalWorkerPublicMatches?
-  window.getCanonicalWorkerPublicMatches(publicJobs,p,10):[];
- return {directMatches,publicMatches,directError};
+ try{if(typeof loadJobs==='function')publicJobs=await loadJobs(false)}catch(e){console.warn('worker public jobs',e)}
+ const publicMatches=window.getCanonicalWorkerPublicMatches?window.getCanonicalWorkerPublicMatches(publicJobs,p,10):[];
+ return {directMatches,publicMatches,directError,paid};
 }
 window.loadCanonicalWorkerMatchData=loadCanonicalWorkerMatchData;
+
 async function loadWorkerMatchCenter(){
- const u=await sessionUser(); if(!u){showToast('⚠️ سجّل الدخول أولًا.');return}
- const panel=$('workerMatchCenter'); if(!panel)return;
+ const u=await sessionUser();if(!u){showToast('⚠️ سجّل الدخول أولًا.');return}
+ const panel=$('workerMatchCenter');if(!panel)return;
  const p=localProfile();
  panel.classList.remove('hidden');
  panel.innerHTML='<div class="notice">⏳ جارٍ تحديث مسار مَدخَل الموحد...</div>';
  const data=await loadCanonicalWorkerMatchData(p);
- const rows=data.directMatches||[];
- const publicMatches=data.publicMatches||[];
+ const rows=data.directMatches||[],publicMatches=data.publicMatches||[];
  if(data.directError&&!publicMatches.length){
   panel.innerHTML='<div class="notice">⚠️ تعذر تحميل مسار المطابقات.</div>';return
  }
  if(!rows.length&&!publicMatches.length){
-   panel.innerHTML='<div class="notice">لا توجد مطابقة مهنية جديدة حاليًا. سيظهر المسار هنا عند العثور على فرصة مناسبة.</div>';return
+  panel.innerHTML='<div class="notice">لا توجد مطابقة مهنية جديدة حاليًا. سيظهر المسار هنا عند العثور على فرصة مناسبة.</div>';return
  }
- panel.innerHTML='<div class="match-center-head"><div><h3>🎯 المطابقات ومسار التوظيف</h3><p>يعرض مَدخَل مسارًا موحدًا لنتائج المطابقة، مع الحفاظ على الفرق بين الفرص المباشرة والفرص المنشورة.</p></div><button class="secondary-btn" id="closeWorkerMatches">إغلاق</button></div><div id="workerMatchList"></div>';
+ panel.innerHTML='<div class="match-center-head"><div><h3>🎯 المطابقات ومسار التوظيف</h3><p>المطابقة المباشرة والتنبيهات المستمرة ضمن الاشتراك، بينما البحث عن أقرب الفرص المنشورة متاح مجانًا.</p></div><button class="secondary-btn" id="closeWorkerMatches">إغلاق</button></div><div id="workerMatchList"></div>';
  $('closeWorkerMatches').onclick=()=>panel.classList.add('hidden');
  const list=$('workerMatchList');
  if(rows.length){
-   const h=document.createElement('div');h.className='notice success';h.textContent='📩 مطابقات مباشرة مع أصحاب الفرص';list.appendChild(h);
-   rows.forEach(c=>{
-    const card=document.createElement('div');card.className='worker-match-card';
-    card.innerHTML='<div class="candidate-top"><strong>'+esc(c.title)+'</strong><span class="match-score">'+Math.round(Number(c.match_score)||0)+'% مطابقة</span></div>'+
-     '<div class="candidate-meta">🏢 '+esc(c.company_name||'جهة عمل')+(c.location?' · 📍 '+esc(c.location):'')+(c.job_type?' · ⏱️ '+esc(c.job_type):'')+'</div>'+
-     '<div class="candidate-status">الحالة: <strong>'+esc(c.status)+'</strong></div>'+
-     (c.employer_note?'<div class="candidate-meta">📝 '+esc(c.employer_note)+'</div>':'')+
-     '<div class="worker-match-actions"></div>';
-    const actBox=card.querySelector('.worker-match-actions');
-    if(c.status==='employer_interested'){
-     const accept=document.createElement('button');accept.className='primary-btn';accept.textContent='✅ أوافق على المتابعة';
-     const decline=document.createElement('button');decline.className='secondary-btn';decline.textContent='↩️ لا أرغب';
-     const act=async(next,btn)=>{btn.disabled=true;const x=await supabaseClient.rpc('advance_match_request',{p_request_id:c.request_id,p_next_status:next,p_note:null});if(x.error){btn.disabled=false;showToast('⚠️ تعذر تحديث الرد.');return}showToast(next==='accepted'?'✅ تم قبول المتابعة.':'تم رفض المطابقة.');loadWorkerMatchCenter()};
-     accept.onclick=()=>act('accepted',accept);decline.onclick=()=>act('declined',decline);actBox.append(accept,decline);
-    }else if(c.status==='accepted'){const n=document.createElement('div');n.className='notice';n.textContent='✅ تم قبولك للمطابقة. بانتظار صاحب الفرصة لفتح التواصل.';actBox.appendChild(n)}
-    else if(c.status==='contact_opened'){const n=document.createElement('div');n.className='notice';n.textContent='📞 تم فتح مرحلة التواصل. تابع تعليمات جهة العمل للتنسيق.';actBox.appendChild(n)}
-    else if(['interview','offer','hired'].includes(c.status)){const labels={interview:'🗣️ تم الانتقال إلى المقابلة',offer:'📄 تم تقديم عرض',hired:'🎉 تم تسجيل التوظيف'};const n=document.createElement('div');n.className='notice';n.textContent=labels[c.status];actBox.appendChild(n)}
-    list.appendChild(card);
-   });
+  const h=document.createElement('div');h.className='notice success';h.textContent='📩 مطابقات مباشرة مع أصحاب الفرص';list.appendChild(h);
+  rows.forEach(c=>{
+   const card=document.createElement('div');card.className='worker-match-card';
+   card.innerHTML='<div class="candidate-top"><strong>'+esc(c.title)+'</strong><span class="match-score">'+Math.round(Number(c.match_score)||0)+'% مطابقة</span></div>'+
+    '<div class="candidate-meta">🏢 '+esc(c.company_name||'جهة عمل')+(c.location?' · 📍 '+esc(c.location):'')+(c.job_type?' · ⏱️ '+esc(c.job_type):'')+'</div>'+
+    '<div class="candidate-status">الحالة: <strong>'+esc(c.status)+'</strong></div>'+
+    (c.employer_note?'<div class="candidate-meta">📝 '+esc(c.employer_note)+'</div>':'')+
+    '<div class="worker-match-actions"></div>';
+   const actBox=card.querySelector('.worker-match-actions');
+   if(c.status==='employer_interested'){
+    const accept=document.createElement('button');accept.className='primary-btn';accept.textContent='✅ أوافق على المتابعة';
+    const decline=document.createElement('button');decline.className='secondary-btn';decline.textContent='↩️ لا أرغب';
+    const act=async(next,btn)=>{btn.disabled=true;const x=await supabaseClient.rpc('advance_match_request',{p_request_id:c.request_id,p_next_status:next,p_note:null});if(x.error){btn.disabled=false;showToast('⚠️ تعذر تحديث الرد.');return}showToast(next==='accepted'?'✅ تم قبول المتابعة.':'تم رفض المطابقة.');loadWorkerMatchCenter()};
+    accept.onclick=()=>act('accepted',accept);decline.onclick=()=>act('declined',decline);actBox.append(accept,decline);
+   }else if(c.status==='accepted'){const n=document.createElement('div');n.className='notice';n.textContent='✅ تم قبولك للمطابقة. بانتظار صاحب الفرصة لفتح التواصل.';actBox.appendChild(n)}
+   else if(c.status==='contact_opened'){const n=document.createElement('div');n.className='notice';n.textContent='📞 تم فتح مرحلة التواصل. تابع تعليمات جهة العمل للتنسيق.';actBox.appendChild(n)}
+   else if(['interview','offer','hired'].includes(c.status)){const labels={interview:'🗣️ تم الانتقال إلى المقابلة',offer:'📄 تم تقديم عرض',hired:'🎉 تم تسجيل التوظيف'};const n=document.createElement('div');n.className='notice';n.textContent=labels[c.status];actBox.appendChild(n)}
+   list.appendChild(card);
+  });
  }
  if(publicMatches.length){
-   const h=document.createElement('div');h.className='notice success';h.style.marginTop='14px';h.textContent='🔎 أقرب الفرص المنشورة حاليًا';list.appendChild(h);
-   publicMatches.forEach(x=>{
-    const j=x.j;const card=document.createElement('div');card.className='worker-match-card';
-    card.innerHTML='<div class="candidate-top"><strong>'+esc(j.title)+'</strong><span class="match-score">فرصة قريبة</span></div>'+
-      '<div class="candidate-meta">🏢 '+esc(j.company||'—')+(j.location?' · 📍 '+esc(j.location):'')+(j.country?' · '+esc(j.country):'')+'</div>'+
-      '<div class="candidate-meta">المصدر: '+esc(j.source_name||j.source||'مَدخَل')+'</div>'+
-      '<div class="worker-match-actions"></div>';
-    const ab=card.querySelector('.worker-match-actions');
-    if(j.source_url){
-      const link=document.createElement('a');link.href=j.source_url;link.target='_blank';link.rel='noopener noreferrer';link.className='primary-btn';link.style.textAlign='center';link.style.textDecoration='none';link.textContent='🔗 فتح الإعلان';
-      ab.appendChild(link);
-    }else{
-      const btn=document.createElement('button');btn.className='secondary-btn';btn.textContent='🔎 عرض الفرص';btn.onclick=()=>openOpportunities();ab.appendChild(btn);
-    }
-    list.appendChild(card);
-   });
+  const h=document.createElement('div');h.className='notice success';h.style.marginTop='14px';h.textContent='🔎 أقرب الفرص المنشورة حاليًا — متاحة مجانًا';list.appendChild(h);
+  publicMatches.forEach(x=>{
+   const j=x.j,score=x.s;const card=document.createElement('div');card.className='worker-match-card';
+   card.innerHTML='<div class="candidate-top"><strong>'+esc(j.title)+'</strong><span class="match-score">'+score+'% ملاءمة</span></div>'+
+    '<div class="candidate-meta">🏢 '+esc(j.company||'—')+(j.location?' · 📍 '+esc(j.location):'')+(j.country?' · '+esc(j.country):'')+'</div>'+
+    '<div class="candidate-meta">المصدر: '+esc(j.source_name||j.source||'مَدخَل')+'</div>'+
+    '<div class="notice">درجة الملاءمة تقديرية من بيانات الملف والفرصة، وليست وعدًا بالتوظيف.</div>'+
+    '<div class="worker-match-actions"></div>';
+   const ab=card.querySelector('.worker-match-actions');
+   if(j.source_url){const link=document.createElement('a');link.href=j.source_url;link.target='_blank';link.rel='noopener noreferrer';link.className='primary-btn';link.style.textAlign='center';link.style.textDecoration='none';link.textContent='🔗 فتح الإعلان';ab.appendChild(link)}
+   else{const btn=document.createElement('button');btn.className='secondary-btn';btn.textContent='🔎 عرض الفرص';btn.onclick=()=>openOpportunities();ab.appendChild(btn)}
+   list.appendChild(card);
+  });
  }
 }
 function injectWorkerMatchCenter(){
- const worker=$('workerScreen'); if(!worker||$('workerMatchCenter'))return;
+ const worker=$('workerScreen');if(!worker||$('workerMatchCenter'))return;
  const panel=document.createElement('div');panel.id='workerMatchCenter';panel.className='card hidden';panel.style.marginTop='14px';worker.appendChild(panel);
  const action=worker.querySelector('[onclick*="openAccount"]');
  if(action){const b=document.createElement('button');b.className='secondary-btn action-btn';b.textContent='🎯 المطابقات ومسار التوظيف';b.onclick=loadWorkerMatchCenter;action.parentElement.insertBefore(b,action.nextSibling)}
