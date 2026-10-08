@@ -70,7 +70,7 @@ async function renderEmployerCandidates(vacancyId){
         const b=document.createElement('button');b.className='primary-btn';b.textContent='⭐ اهتمام بالمرشح';
         b.onclick=async()=>{b.disabled=true;const x=await supabaseClient.rpc('advance_match_request',{p_request_id:c.request_id||c.id,p_next_status:'employer_interested',p_note:null});if(x.error){b.disabled=false;showToast('⚠️ تعذر تسجيل الاهتمام.');return}showToast('✅ تم تسجيل الاهتمام وإرسال المسار للباحث.');renderEmployerCandidates(vacancyId)};
         a.appendChild(b);
-      } else if(c.match_status==='worker_accepted'){
+      } else if(c.match_status==='accepted'){
         const b=document.createElement('button');b.className='primary-btn';b.textContent='📞 فتح التواصل';
         b.onclick=async()=>{b.disabled=true;const x=await supabaseClient.rpc('advance_match_request',{p_request_id:c.request_id||c.id,p_next_status:'contact_opened',p_note:null});if(x.error){b.disabled=false;showToast('⚠️ تعذر فتح التواصل.');return}showToast('📞 تم فتح مرحلة التواصل.');renderEmployerCandidates(vacancyId)};
         a.appendChild(b);
