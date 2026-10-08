@@ -104,6 +104,9 @@ window.loadCanonicalWorkerMatchData=loadCanonicalWorkerMatchData;
 async function loadWorkerMatchCenter(){
  const u=await sessionUser();if(!u){showToast('⚠️ سجّل الدخول أولًا.');return}
  const panel=$('workerMatchCenter');if(!panel)return;
+ // Keep the match center aligned with the saved worker profile before calculating public matches.
+ // loadProfileRemote preserves local fallback only when the remote profile cannot provide a value.
+ try{if(typeof window.loadProfileRemote==='function')await window.loadProfileRemote()}catch(e){console.warn('canonical worker profile refresh',e)}
  const p=localProfile();
  panel.classList.remove('hidden');
  panel.innerHTML='<div class="notice">⏳ جارٍ تحديث مسار مَدخَل الموحد...</div>';
