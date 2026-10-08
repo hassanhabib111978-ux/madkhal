@@ -104,7 +104,11 @@ async function loadWorkerMatchCenter(){
  panel.classList.remove('hidden');
  panel.innerHTML='<div class="notice">⏳ جارٍ تحديث مسار مَدخَل الموحد...</div>';
  const data=await loadCanonicalWorkerMatchData(p);
- const rows=data.directMatches||[],publicMatches=data.publicMatches||[];
+ const allDirectMatches=data.directMatches||[];
+ // لا نعرض الحالات النهائية القديمة داخل مركز المطابقات الحالي؛ تبقى محفوظة في السجل.
+ const activeStatuses=new Set(['matched','employer_interested','accepted','contact_opened','interview','offer']);
+ const rows=allDirectMatches.filter(x=>activeStatuses.has(String(x.status||'')));
+ const publicMatches=data.publicMatches||[];
  if(data.directError&&!publicMatches.length){
   panel.innerHTML='<div class="notice">⚠️ تعذر تحميل مسار المطابقات.</div>';return
  }
