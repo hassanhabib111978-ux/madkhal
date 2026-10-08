@@ -66,14 +66,8 @@ window.calculateCanonicalPublicJobMatchScore=calculateCanonicalPublicJobMatchSco
 window.getCanonicalWorkerPublicMatches=getCanonicalWorkerPublicMatches;
 
 async function subscriptionIsActive(){
- try{
-   if(typeof window.syncSubscriptionRemote==='function'){
-     const s=await window.syncSubscriptionRemote();
-     return !!(s&&s.status==='active'&&(!s.ends_at||new Date(s.ends_at)>new Date()));
-   }
- }catch(e){console.warn('subscription sync',e)}
- // Server-side subscription state is authoritative. A local flag can never activate paid matching.
- return false;
+ // مَدخَل في مرحلة الإطلاق المجاني: المطابقة الأساسية متاحة للجميع.
+ return true;
 }
 
 async function loadCanonicalWorkerMatchData(profile){
@@ -125,7 +119,7 @@ async function loadWorkerMatchCenter(){
  if(!rows.length&&!publicMatches.length){
   panel.innerHTML='<div class="notice">لا توجد مطابقة مهنية جديدة حاليًا. سيظهر المسار هنا عند العثور على فرصة مناسبة.</div>';return
  }
- panel.innerHTML='<div class="match-center-head"><div><h3>🎯 المطابقات ومسار التوظيف</h3><p>المطابقة المباشرة والتنبيهات المستمرة ضمن الاشتراك، بينما البحث عن أقرب الفرص المنشورة متاح مجانًا.</p></div><button class="secondary-btn" id="closeWorkerMatches">إغلاق</button></div><div id="workerMatchList"></div>';
+ panel.innerHTML='<div class="match-center-head"><div><h3>🎯 المطابقات ومسار التوظيف</h3><p>المطابقة المباشرة والبحث عن الفرص متاحان مجانًا خلال مرحلة الإطلاق. الاشتراك مؤجل حاليًا.</p></div><button class="secondary-btn" id="closeWorkerMatches">إغلاق</button></div><div id="workerMatchList"></div>';
  $('closeWorkerMatches').onclick=()=>panel.classList.add('hidden');
  const list=$('workerMatchList');
  if(rows.length){
