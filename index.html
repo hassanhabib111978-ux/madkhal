@@ -411,7 +411,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 
 const SUPABASE_URL="https://qbufsdpdobuicpljnssr.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mcPmNU2CGJkiSbfgOD6gOg_9RNMNlEY";
-const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+let supabaseClient=null; try{ if(window.supabase&&typeof window.supabase.createClient==="function"){supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY)} }catch(e){console.warn("Supabase client unavailable; local UI remains active.",e)}
 
 let currentScreen="homeScreen";
 let currentCategory="الكل";
