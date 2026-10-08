@@ -47,3 +47,11 @@ No source ingestion was rebuilt or deleted in this batch. Payment activation rem
 - تم اكتشاف سبب توقف جميع الأزرار: خطأ JavaScript نحوي داخل `loadProfileRemote()` كان يمنع تفسير الملف الرئيسي `index.html` بالكامل.
 - تم إصلاح إغلاق تعريف كائن الملف قبل استدعاء `setLS()`.
 - تم فحص الملف الرئيسي والملفات المساعدة الخمسة نحويًا بعد الإصلاح؛ جميعها تمر دون أخطاء تركيبية.
+
+
+## 2026-10-08 — Free launch phase
+- Temporarily moved the product experience to a free-launch model so seekers and opportunity creators can use Madkhal without a paid subscription during the initial adoption and trust-building period.
+- Removed the subscription requirement from the worker-facing match center UI path: existing authoritative employer-created match requests can be viewed without a paid plan, while the public opportunity search remains free.
+- Hid the subscription/payment presentation during the launch phase and replaced subscription prompts in the active UI/Jibran responses with the free-launch message.
+- Kept the subscription/payment implementation dormant rather than deleting it, so it can be reactivated later after real usage and trust are established.
+- Preserved employer matching, application tracking, job-source ingestion, and existing source data.
