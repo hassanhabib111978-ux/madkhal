@@ -23,3 +23,4 @@ No source ingestion was rebuilt or deleted in this batch. Payment activation rem
 - Restored the next employer action: opening contact after worker acceptance.
 - 2026-10-08: employer flow now refreshes the authoritative candidate panel immediately after a vacancy is published and matching starts, keeping employer review connected to the created vacancy.
 - 2026-10-08: added the Madkhal automated-engineer operating charter, permissions policy, and inspection/repair protocol; these define inspect-first, least-change, source-preserving, auditable repair rules.
+- 2026-10-08: hardened paid matching so a localStorage `active` flag can never activate paid matching when the authoritative Supabase subscription check is unavailable; failure now falls back to free behavior.
