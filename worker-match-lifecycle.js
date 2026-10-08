@@ -81,20 +81,12 @@ async function loadCanonicalWorkerMatchData(profile){
  }catch(e){console.warn('canonical profile refresh',e)}
  let directMatches=[],directError=null;
  const paid=await subscriptionIsActive();
- if(paid){
-  try{
-   const process=await supabaseClient.rpc('process_my_worker_matches',{p_limit:200});
-   if(process?.error)console.warn('worker match processing',process.error);
-  }catch(e){console.warn('worker match processing',e)}
-  try{
-   const notify=await supabaseClient.rpc('create_worker_match_notifications',{p_limit:50});
-   if(notify?.error)console.warn('worker notifications',notify.error);
-  }catch(e){console.warn('worker notifications',e)}
-  try{
-   const r=await supabaseClient.rpc('get_my_worker_matches');
-   if(r?.error)directError=r.error;else directMatches=r.data||[];
-  }catch(e){directError=e}
- }
+ // الإطلاق المجاني: لا نستدعي دوال المعالجة/التنبيهات المقيدة بالاشتراك.
+ // نقرأ فقط المطابقات المهنية الموثقة التي أنشأها مسار صاحب الفرصة، ثم نعرض الفرص العامة مجانًا.
+ try{
+  const r=await supabaseClient.rpc('get_my_worker_matches');
+  if(r?.error)directError=r.error;else directMatches=r.data||[];
+ }catch(e){directError=e}
  let publicJobs=[];
  try{if(typeof loadJobs==='function')publicJobs=await loadJobs(false)}catch(e){console.warn('worker public jobs',e)}
  const publicMatches=window.getCanonicalWorkerPublicMatches?window.getCanonicalWorkerPublicMatches(publicJobs,p,10):[];
