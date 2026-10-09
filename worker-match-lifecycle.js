@@ -110,10 +110,10 @@ async function loadWorkerMatchCenter(){
  const rows=allDirectMatches.filter(x=>activeStatuses.has(String(x.status||'')));
  const publicMatches=data.publicMatches||[];
  if(data.directError&&!publicMatches.length){
-  panel.innerHTML='<div class="notice">⚠️ تعذر تحميل مسار المطابقات.</div>';return
+  panel.innerHTML='<div class="notice">⚠️ تعذر تحميل مسار المطابقات.</div>';scrollMatchPanelIntoView(panel);return
  }
  if(!rows.length&&!publicMatches.length){
-  panel.innerHTML='<div class="notice">لا توجد مطابقة مهنية جديدة حاليًا. سيظهر المسار هنا عند العثور على فرصة مناسبة.</div>';return
+  panel.innerHTML='<div class="notice">لا توجد مطابقة مهنية جديدة حاليًا. سيظهر المسار هنا عند العثور على فرصة مناسبة.</div>';scrollMatchPanelIntoView(panel);return
  }
  panel.innerHTML='<div class="match-center-head"><div><h3>🎯 المطابقات ومسار التوظيف</h3><p>المطابقة المباشرة والبحث عن الفرص متاحان مجانًا خلال مرحلة الإطلاق. الاشتراك مؤجل حاليًا.</p></div><button class="secondary-btn" id="closeWorkerMatches">إغلاق</button></div><div id="workerMatchList"></div>';
  $('closeWorkerMatches').onclick=()=>panel.classList.add('hidden');
@@ -154,6 +154,12 @@ async function loadWorkerMatchCenter(){
    list.appendChild(card);
   });
  }
+ scrollMatchPanelIntoView(panel);
+}
+function scrollMatchPanelIntoView(panel){
+ if(!panel) return;
+ panel.style.scrollMarginTop='104px';
+ window.setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'start',inline:'nearest'}),80);
 }
 function injectWorkerMatchCenter(){
  const worker=$('workerScreen');if(!worker||$('workerMatchCenter'))return;
