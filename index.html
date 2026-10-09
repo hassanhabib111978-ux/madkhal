@@ -1191,6 +1191,34 @@ window.addEventListener("appinstalled",()=>{installPromptEvent=null;document.get
 async function installMadkhal(){if(!installPromptEvent){showToast("📱 استخدم قائمة المتصفح ثم اختر إضافة إلى الشاشة الرئيسية.");return}installPromptEvent.prompt();try{await installPromptEvent.userChoice}catch(e){}installPromptEvent=null;document.getElementById("installBar").classList.add("hidden")}
 
 document.addEventListener("DOMContentLoaded",async()=>{selectedSkills=getLS(LS.selectedSkills,[]);await loadJobs();updateJobCounter();await loadProfileRemote();generateLocalMatches();renderCategories();renderOpportunities();renderSkills();await loadAccount();ensureAccountAssessment();await renderNotifications();initOccupationPickers();if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js",{scope:"./"}).catch(()=>{});});
+
+/* MADKHAL_ACCESSIBILITY_SCROLL_2026_10_09: progressive evaluation and result focus; no scoring or navigation changes. */
+(function(){
+  if(window.__MADKHAL_PROGRESSIVE_EVAL_SCROLL__) return;
+  window.__MADKHAL_PROGRESSIVE_EVAL_SCROLL__=true;
+  function scrollToStep(el){
+    if(!el) return;
+    el.style.scrollMarginTop="104px";
+    el.scrollIntoView({behavior:"smooth",block:"start",inline:"nearest"});
+  }
+  document.addEventListener("change",function(event){
+    const input=event.target;
+    if(!input || input.type!=="radio" || !input.checked) return;
+    const list=input.closest("#skillAssessmentList, #madkhalSkillList");
+    if(!list) return;
+    const card=input.closest(".skill-card, .madkhal-skill-card");
+    if(!card) return;
+    const cards=Array.from(list.querySelectorAll(".skill-card, .madkhal-skill-card"));
+    const index=cards.indexOf(card);
+    if(index<0) return;
+    if(index+1<cards.length){
+      window.setTimeout(()=>scrollToStep(cards[index+1]),100);
+    } else {
+      const save=document.getElementById("saveWorkerButton");
+      if(save) window.setTimeout(()=>scrollToStep(save),100);
+    }
+  },true);
+})();
 </script>
 <script src="./subscription-runtime.js"></script>
 <script src="./jibran.js"></script>
