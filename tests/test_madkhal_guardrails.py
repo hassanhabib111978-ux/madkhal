@@ -28,7 +28,7 @@ checks = [
     ("paid mode requires a currently active monthly worker plan", "s.audience = 'worker'" in migration and "s.plan = 'monthly'" in migration and "s.status = 'active'" in migration),
     ("external notification eligibility checks active unexpired jobs", "j.status='active'" in migration and "j.expires_at IS NULL OR j.expires_at>=now()" in migration),
     ("current employer vacancies only are returned as active matches", "ev.status in ('open','matching')" in migration and "ev.confirmation_at is not null" in migration),
-    ("migration preserves imported jobs and application history", "DELETE FROM public.jobs" not in migration.upper() and "DELETE FROM public.MADKHAL_APPLICATIONS" not in migration.upper()),
+    ("migration preserves imported jobs and application history", "DELETE FROM public.jobs" not in migration.upper() and "DELETE FROM PUBLIC.MADKHAL_APPLICATIONS" not in migration.upper()),
     ("engineering constitution is present", "Codex is the engineering agent for مَدخَل" in agents),
 ]
 
