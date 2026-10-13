@@ -82,3 +82,13 @@
 - Preserved existing Middle East source ingestion and historical applications.
 - Verification: modified JavaScript files parse successfully; database functions are SECURITY DEFINER and remain ownership-scoped; no production job data was rewritten.
 - Remaining before sale/investment readiness: real payment-provider verification/activation, full end-to-end seeker/employer journey test, cleanup/consolidation of legacy fix layers, formal RLS tests, and production release review.
+
+
+## 2026-10-14 — connected seeker flow review branch
+- Root cause found: the legacy `jibran.js` save/occupation overlay referenced input IDs no longer present in `index.html` and intercepted the save button, creating a second conflicting path. Its script reference was removed from the review-branch HTML; the file itself was retained for safe rollback until all references and workflows are audited.
+- Confirmed free-launch mismatch: the UI hid subscription prompts, while the database matching, recommendations, and job-alert functions still required active subscriptions. Added a reversible migration that uses the existing `madkhal_launch_config.free_launch` flag as the single access rule. No production database function has been changed yet.
+- Unifed the worker match loader around saved direct matches plus database-scored external recommendations. Zero-score rows are not shown as professional recommendations; heuristic public-job estimates are clearly labelled as estimates rather than official scores.
+- Current alert/match views now filter out expired external jobs and closed/unconfirmed/expired employer vacancies. The notification UI no longer blanket-hides valid remote matching alerts.
+- Added regression checks and extended the existing app-validation workflow to run on pull requests and the review branch, including JavaScript syntax checks and static architecture checks.
+- Database evidence at inspection time: 2,106 active in-scope Middle East jobs; 2 confirmed worker profiles; 3 external-v3 recommendation rows, all with scores below 35. No scoring thresholds were loosened to manufacture matches. This explains why a correct live result may currently be “no professional match”.
+- Migration was dry-run inside a transaction and rolled back successfully to validate SQL syntax. The migration remains a reviewed artifact on this branch; it has not been applied to production. Browser-based end-to-end verification is still pending.
