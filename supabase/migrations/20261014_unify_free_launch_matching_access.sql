@@ -1,7 +1,8 @@
--- Unify free-launch/paid matching gates and current-opportunity alerts.
--- This migration does not rewrite or delete jobs, applications, match history, or existing alerts.
--- Turning madkhal_launch_config.free_launch off restores the monthly-subscription gate.
--- Read the explicit platform setting without exposing the config table to public clients.
+-- Reconcile matching and alert gates with the platform's explicit launch flag.
+-- Prioritize unscored active jobs for confirmed workers, then rotate by oldest scoring time.
+-- No job records, applications, requests, or notification history are deleted or rewritten.
+-- Setting madkhal_launch_config.free_launch=false restores monthly plan requirements.
+-- Centralize the existing free-launch policy without exposing the config to public clients.
 CREATE OR REPLACE FUNCTION public.madkhal_free_launch_enabled()
  RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO ''
 AS $function$
@@ -9,8 +10,6 @@ AS $function$
 $function$;
 REVOKE ALL ON FUNCTION public.madkhal_free_launch_enabled() FROM PUBLIC, anon, authenticated;
 
--- Central access rule: only an authenticated user may invoke worker matching;
--- free launch permits matching without a paid subscription, otherwise a current monthly plan is required.
 CREATE OR REPLACE FUNCTION public.madkhal_worker_matching_access()
  RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO ''
 AS $function$
@@ -203,7 +202,27 @@ begin
           'الكويت','البحرين','اليمن','مصر','السودان','ليبيا','تونس','الجزائر','المغرب','موريتانيا'
         )
       )
-    order by coalesce(j.updated_at,j.created_at) desc nulls last
+    ORDER BY
+      EXISTS (
+        SELECT 1
+          FROM public.worker_profiles AS pending_wp
+         WHERE pending_wp.confirmation_at IS NOT NULL
+           AND NOT EXISTS (
+             SELECT 1 FROM public.opportunity_match_scores AS oms
+              WHERE oms.opportunity_type='external'
+                AND oms.opportunity_id=j.id
+                AND oms.worker_profile_id=pending_wp.id
+                AND oms.scoring_version='external-v3'
+           )
+      ) DESC,
+      (
+        SELECT min(oms.updated_at)
+          FROM public.opportunity_match_scores AS oms
+         WHERE oms.opportunity_type='external'
+           AND oms.opportunity_id=j.id
+           AND oms.scoring_version='external-v3'
+      ) ASC NULLS FIRST,
+      coalesce(j.updated_at,j.created_at) DESC NULLS LAST
     limit greatest(1,p_limit)
   loop
     for w in
