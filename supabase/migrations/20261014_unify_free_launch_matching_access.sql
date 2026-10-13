@@ -1,45 +1,30 @@
--- Align the matching engine with the existing free-launch feature flag.
--- Free launch gives logged-in worker accounts matching/recommendation/alerts access.
--- Setting free_launch=false restores the monthly-subscription gate; no job, application,
--- match, or notification history is deleted by this migration.
+-- Unify free-launch/paid matching gates and current-opportunity alerts.
+-- This migration does not rewrite or delete jobs, applications, match history, or existing alerts.
+-- Turning madkhal_launch_config.free_launch off restores the monthly-subscription gate.
+-- Read the explicit platform setting without exposing the config table to public clients.
 CREATE OR REPLACE FUNCTION public.madkhal_free_launch_enabled()
- RETURNS boolean
- LANGUAGE sql
- STABLE
- SECURITY DEFINER
- SET search_path TO ''
+ RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO ''
 AS $function$
-  SELECT COALESCE(
-    (SELECT c.free_launch
-       FROM public.madkhal_launch_config AS c
-      WHERE c.id IS TRUE
-      LIMIT 1),
-    FALSE
-  );
+ SELECT COALESCE((SELECT c.free_launch FROM public.madkhal_launch_config AS c WHERE c.id IS TRUE LIMIT 1), FALSE);
 $function$;
 REVOKE ALL ON FUNCTION public.madkhal_free_launch_enabled() FROM PUBLIC, anon, authenticated;
 
+-- Central access rule: only an authenticated user may invoke worker matching;
+-- free launch permits matching without a paid subscription, otherwise a current monthly plan is required.
 CREATE OR REPLACE FUNCTION public.madkhal_worker_matching_access()
- RETURNS boolean
- LANGUAGE sql
- STABLE
- SECURITY DEFINER
- SET search_path TO ''
+ RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO ''
 AS $function$
-  SELECT (SELECT auth.uid()) IS NOT NULL
-     AND (
-       public.madkhal_free_launch_enabled()
-       OR EXISTS (
-         SELECT 1
-           FROM public.subscriptions AS s
-           JOIN public.profiles AS p ON p.id = s.user_id
-          WHERE p.auth_user_id = (SELECT auth.uid())
-            AND s.audience = 'worker'
-            AND s.plan = 'monthly'
-            AND s.status = 'active'
-            AND (s.ends_at IS NULL OR s.ends_at > now())
-       )
-     );
+ SELECT (SELECT auth.uid()) IS NOT NULL
+    AND (
+      public.madkhal_free_launch_enabled()
+      OR EXISTS (
+        SELECT 1 FROM public.subscriptions AS s
+        JOIN public.profiles AS p ON p.id=s.user_id
+        WHERE p.auth_user_id=(SELECT auth.uid())
+          AND s.audience='worker' AND s.plan='monthly' AND s.status='active'
+          AND (s.ends_at IS NULL OR s.ends_at>now())
+      )
+    );
 $function$;
 REVOKE ALL ON FUNCTION public.madkhal_worker_matching_access() FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.madkhal_worker_matching_access() TO authenticated;
@@ -169,6 +154,25 @@ AS $function$
   order by r.overall_score desc,r.posted_at desc nulls last,r.opportunity_id
   limit greatest(1,least(coalesce(p_limit,20),100));
 $function$
+;
+
+CREATE OR REPLACE FUNCTION public.get_my_worker_matches()
+ RETURNS TABLE(request_id uuid, vacancy_id uuid, title text, company_name text, location text, country text, job_type text, match_score numeric, status text, employer_note text, created_at timestamp with time zone, updated_at timestamp with time zone)
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+begin
+ if auth.uid() is null then raise exception 'auth_required'; end if;
+ return query
+ select mr.id,mr.vacancy_id,ev.title,ev.company_name,ev.location,ev.country,ev.job_type,mr.match_score,mr.status,mr.employer_note,mr.created_at,mr.updated_at
+ from public.match_requests mr join public.employer_vacancies ev on ev.id=mr.vacancy_id join public.worker_profiles wp on wp.id=mr.worker_profile_id
+ where wp.user_id=auth.uid()
+   and ev.status in ('open','matching')
+   and ev.confirmation_at is not null
+   and (ev.expires_at is null or ev.expires_at>now())
+ order by mr.updated_at desc nulls last,mr.created_at desc;
+end $function$
 ;
 
 CREATE OR REPLACE FUNCTION public.process_external_opportunity_matches(p_limit integer DEFAULT 500)
