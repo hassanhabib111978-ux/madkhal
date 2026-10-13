@@ -101,6 +101,16 @@ function installFreeLaunchMode(){
     window.openSubscription=function(){ if(typeof showToast==='function')showToast('🎉 مَدخَل مجاني حاليًا خلال مرحلة الإطلاق؛ الاشتراك مؤجل.'); };
     window.startSubscriptionRequest=async function(){ if(typeof showToast==='function')showToast('🎉 مَدخَل مجاني حاليًا؛ الدفع مؤجل.'); return false; };
     window.startLocalPayment=async function(){ if(typeof showToast==='function')showToast('🎉 مَدخَل مجاني حاليًا؛ الدفع مؤجل.'); };
+    const summarizeMatches=function(d){
+      const direct=(d?.directMatches||[]).filter(x=>['matched','employer_interested','accepted','contact_opened','interview','offer'].includes(String(x.status||'')));
+      const official=d?.recommendations||[];
+      const estimates=d?.publicMatches||[];
+      if(direct.length)return 'لديك '+direct.length+' مطابقة مباشرة موثقة مع أصحاب فرص؛ أبرزها: '+direct.slice(0,3).map(x=>x.title||'فرصة عمل').join('، ')+'. افتح مركز المطابقات لمراجعة حالتها.';
+      if(official.length)return 'وجدت '+official.length+' توصية منشورة بدرجة مطابقة محسوبة في قاعدة بيانات مَدخَل؛ أبرزها: '+official.slice(0,3).map(x=>(x.title||'فرصة')+' ('+Math.round(Number(x.overall_score)||0)+'%)').join('، ')+'.';
+      if(estimates.length)return 'لم أجد توصية رسمية محفوظة بعد، لكن توجد فرص قريبة بتقدير أولي: '+estimates.slice(0,3).map(x=>(x.j?.title||'فرصة')+' ('+(Number(x.s)||0)+'% تقديري)').join('، ')+'. هذه النسب استدلالية وليست درجات رسمية.';
+      if(d?.directError||d?.recommendationsError)return 'تعذّر تأكيد جميع نتائج المطابقة من قاعدة البيانات الآن. أعد المحاولة لاحقًا؛ لن أعرض نتيجة قديمة على أنها جديدة.';
+      return 'لا توجد مطابقة مهنية جديدة حاليًا. يستمر محرك مَدخَل في تحديث النتائج، ويمكنك تصفح الفرص المنشورة.';
+    };
     setTimeout(function(){
       window.askJibran=async function(kind){
         const p=typeof localProfile==='function'?localProfile():{};
@@ -108,22 +118,23 @@ function installFreeLaunchMode(){
         if(kind==='profile') msg=p.full_name?'ملفك موجود. راجع المهنة والمكان ونوع العمل ثم احفظ التعديلات.':'ابدأ بالملف المهني واختر المهنة المعتمدة أولًا.';
         else if(kind==='jobs') msg='البحث عن الفرص والتصفح والتقديم الأساسي متاح مجانًا خلال مرحلة الإطلاق.';
         else if(kind==='match'){
-          if(!p.occupation_label) msg='احفظ ملفك المهني واختر المهنة أولًا حتى أبدأ المطابقة.';
+          if(!p.occupation_label||!p.occupation_uri) msg='احفظ ملفك المهني واختر المهنة المعتمدة أولًا حتى ترتبط المطابقة بالمهنة الصحيحة.';
           else if(typeof window.loadCanonicalWorkerMatchData==='function'){
-            try{const d=await window.loadCanonicalWorkerMatchData(p);const top=(d?.directMatches||[]).slice(0,3);msg=top.length?'أقرب المطابقات الرسمية الآن: '+top.map(x=>x.title||'فرصة').join('، '):'لا توجد مطابقة مهنية رسمية جديدة حاليًا. المطابقة متاحة مجانًا في مرحلة الإطلاق.';}catch(x){msg='تعذر تحديث المطابقة الآن. حاول مرة أخرى.'}
+            try{const d=await window.loadCanonicalWorkerMatchData(p);msg=summarizeMatches(d);}catch(x){msg='تعذّر تحديث المطابقة الآن. حاول مرة أخرى.'}
           }else msg='افتح حسابك ثم أعد المحاولة.';
-        }else msg=p.occupation_label?'راجع المطابقات الرسمية ثم افتح تفاصيل الفرصة وقدّم طلبك.':'أكمل ملفك المهني أولًا.';
+        }else msg=p.occupation_label?'راجع المطابقات الحالية، ثم افتح تفاصيل الفرصة المناسبة وقدّم طلبك.':'أكمل ملفك المهني أولًا.';
         const a=document.getElementById('jibranHomeText'),b=document.getElementById('jibranAccountText');if(a)a.textContent=msg;if(b)b.textContent=msg;
       };
       window.askJibranUser=async function(){
         const input=document.getElementById('jibranInput');const q=typeof normalizeText==='function'?normalizeText(input?.value||''):(input?.value||'').toLowerCase().trim();
         if(!q){if(typeof showToast==='function')showToast('✍️ اكتب سؤالك.');return}
         const p=typeof localProfile==='function'?localProfile():{};let ans='';
-        if(/مطابق|مناسبة|مناسب|ملفي|تقييمي/.test(q)&&typeof window.loadCanonicalWorkerMatchData==='function'){
-          try{const d=await window.loadCanonicalWorkerMatchData(p);const top=(d?.directMatches||[]).slice(0,3);ans=top.length?'أقرب المطابقات الرسمية الآن: '+top.map(x=>x.title||'فرصة').join('، '):'لا توجد مطابقة مهنية رسمية جديدة حاليًا؛ المطابقة مجانية خلال مرحلة الإطلاق.';}catch(x){ans='تعذر تحديث المطابقة الآن. حاول مرة أخرى.'}
+        if(/مطابق|فرصه مناسبه|فرص مناسبة|مناسبه|مناسبة/.test(q)&&typeof window.loadCanonicalWorkerMatchData==='function'){
+          try{const d=await window.loadCanonicalWorkerMatchData(p);ans=summarizeMatches(d);}catch(x){ans='تعذّر تحديث المطابقة الآن. حاول مرة أخرى.'}
         }else if(/وظيفة|فرصة/.test(q)) ans='البحث عن الفرص والتصفح والتقديم الأساسي متاح مجانًا خلال مرحلة الإطلاق.';
         else if(/اشتراك|دولار|دفع/.test(q)) ans='الاشتراك والمدفوعات مؤجلان حاليًا. مَدخَل مجاني خلال مرحلة الإطلاق.';
-        else ans=p.occupation_label?'أكمل ملفك وراجع المطابقات الرسمية ثم قدّم للفرصة المناسبة.':'ابدأ بإكمال ملفك المهني واختيار المهنة.';
+        else if(/تقييمي|تقييم/.test(q)) ans='التقييم المهني يُعرض في صفحة الحساب من بيانات الملف والمهارات. افتح الحساب للتأكد من آخر نتيجة محفوظة.';
+        else ans=p.occupation_label?'أكمل ملفك وراجع المطابقات الحالية ثم قدّم للفرصة المناسبة.':'ابدأ بإكمال ملفك المهني واختيار المهنة المعتمدة.';
         const out=document.getElementById('jibranMainText');if(out)out.textContent=ans;if(input)input.value='';
       };
     },500);
