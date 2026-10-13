@@ -126,7 +126,7 @@ async function loadCanonicalWorkerMatchData(profile,options={}){
  try{
   const r=await supabaseClient.rpc('get_my_opportunity_recommendations',{p_limit:20});
   if(r?.error)recommendationsError=r.error;
-  else recommendations=(r.data||[]).filter(x=>!x.expires_at||new Date(x.expires_at).getTime()>=Date.now());
+  else recommendations=(r.data||[]).filter(x=>Number(x.overall_score)>=35&&(!x.expires_at||new Date(x.expires_at).getTime()>=Date.now()));
  }catch(e){recommendationsError=e}
  let publicJobs=[];
  try{if(typeof loadJobs==='function')publicJobs=await loadJobs(false)}catch(e){console.warn('worker public jobs',e)}
