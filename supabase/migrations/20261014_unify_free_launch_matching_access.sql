@@ -185,6 +185,22 @@ declare
   w record;
   n integer := 0;
 begin
+  -- Avoid scanning job batches when no worker currently has matching access.
+  IF NOT public.madkhal_free_launch_enabled()
+     AND NOT EXISTS (
+       SELECT 1
+         FROM public.worker_profiles AS wp
+         JOIN public.profiles AS p ON p.auth_user_id=wp.user_id
+        WHERE wp.confirmation_at IS NOT NULL
+          AND EXISTS (
+            SELECT 1 FROM public.subscriptions AS sub
+             WHERE (sub.user_id=p.id OR sub.user_id=wp.user_id)
+               AND sub.audience='worker' AND sub.plan='monthly' AND sub.status='active'
+               AND (sub.ends_at IS NULL OR sub.ends_at>=now())
+          )
+     ) THEN
+    RETURN 0;
+  END IF;
   for r in
     select j.id
     from public.jobs j
@@ -206,7 +222,17 @@ begin
       EXISTS (
         SELECT 1
           FROM public.worker_profiles AS pending_wp
+          JOIN public.profiles AS pending_p ON pending_p.auth_user_id=pending_wp.user_id
          WHERE pending_wp.confirmation_at IS NOT NULL
+           AND (
+             public.madkhal_free_launch_enabled()
+             OR EXISTS (
+               SELECT 1 FROM public.subscriptions AS pending_sub
+                WHERE (pending_sub.user_id=pending_p.id OR pending_sub.user_id=pending_wp.user_id)
+                  AND pending_sub.audience='worker' AND pending_sub.plan='monthly' AND pending_sub.status='active'
+                  AND (pending_sub.ends_at IS NULL OR pending_sub.ends_at>=now())
+             )
+           )
            AND NOT EXISTS (
              SELECT 1 FROM public.opportunity_match_scores AS oms
               WHERE oms.opportunity_type='external'
@@ -218,9 +244,21 @@ begin
       (
         SELECT min(oms.updated_at)
           FROM public.opportunity_match_scores AS oms
+          JOIN public.worker_profiles AS scored_wp ON scored_wp.id=oms.worker_profile_id
+          JOIN public.profiles AS scored_p ON scored_p.auth_user_id=scored_wp.user_id
          WHERE oms.opportunity_type='external'
            AND oms.opportunity_id=j.id
            AND oms.scoring_version='external-v3'
+           AND scored_wp.confirmation_at IS NOT NULL
+           AND (
+             public.madkhal_free_launch_enabled()
+             OR EXISTS (
+               SELECT 1 FROM public.subscriptions AS scored_sub
+                WHERE (scored_sub.user_id=scored_p.id OR scored_sub.user_id=scored_wp.user_id)
+                  AND scored_sub.audience='worker' AND scored_sub.plan='monthly' AND scored_sub.status='active'
+                  AND (scored_sub.ends_at IS NULL OR scored_sub.ends_at>=now())
+             )
+           )
       ) ASC NULLS FIRST,
       coalesce(j.updated_at,j.created_at) DESC NULLS LAST
     limit greatest(1,p_limit)
