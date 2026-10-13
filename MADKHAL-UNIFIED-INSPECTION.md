@@ -94,3 +94,5 @@
 - Migration was dry-run inside a transaction and rolled back successfully to validate SQL syntax. The migration remains a reviewed artifact on this branch; it has not been applied to production. Browser-based end-to-end verification is still pending.
 
 - Additional batch audit: the external cron selected jobs by last source update only, so repeated executions could keep recalculating the same newest batch. The migration now prioritizes in-scope jobs missing an `external-v3` score for any confirmed worker, then rotates toward the oldest-scored jobs. This is a code-path correction; production cron/function behavior is unchanged until the migration is approved and applied.
+
+- Batch rotation also respects the active-worker set: in paid mode, un-subscribed profiles are not treated as permanently “unscored” and cannot starve subscribed workers' batches. When there is no eligible worker and free launch is off, the external cron returns without scanning jobs.
