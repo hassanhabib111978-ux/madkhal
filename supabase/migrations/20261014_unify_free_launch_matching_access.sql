@@ -1,6 +1,6 @@
 -- Reconcile matching and alert gates with the platform's explicit launch flag.
 -- Prioritize unscored active jobs for confirmed workers, then rotate by oldest scoring time.
--- No job records, applications, requests, or notification history are deleted or rewritten.
+-- Historical jobs, applications, and match requests are preserved; obsolete current-alert rows may be pruned.
 -- Setting madkhal_launch_config.free_launch=false restores monthly plan requirements.
 -- Centralize the existing free-launch policy without exposing the config to public clients.
 CREATE OR REPLACE FUNCTION public.madkhal_free_launch_enabled()
@@ -167,6 +167,8 @@ begin
  select mr.id,mr.vacancy_id,ev.title,ev.company_name,ev.location,ev.country,ev.job_type,mr.match_score,mr.status,mr.employer_note,mr.created_at,mr.updated_at
  from public.match_requests mr join public.employer_vacancies ev on ev.id=mr.vacancy_id join public.worker_profiles wp on wp.id=mr.worker_profile_id
  where wp.user_id=auth.uid()
+   and auth.uid() is not null
+   and public.madkhal_worker_matching_access()
    and ev.status in ('open','matching')
    and ev.confirmation_at is not null
    and (ev.expires_at is null or ev.expires_at>now())
@@ -367,7 +369,7 @@ declare
 begin
   if v_auth is null then raise exception 'authentication_required'; end if;
   if not public.madkhal_worker_matching_access() then
-    delete from public.notifications n where n.user_id=v_auth and n.opportunity_type='match_request';
+    -- Keep prior alerts as history; current matches stay hidden by the read RPC gate.
     return 0;
   end if;
   select wp.id into v_worker from public.worker_profiles wp
