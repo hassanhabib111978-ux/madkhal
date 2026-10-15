@@ -33,6 +33,7 @@ checks = [
     ("external matcher skips cron work when no worker currently has access", "Avoid scanning job batches" in migration and "RETURN 0;" in migration),
     ("current employer vacancies only are returned as active matches", "ev.status in ('open','matching')" in migration and "ev.confirmation_at is not null" in migration),
     ("migration preserves imported jobs and application history", "DELETE FROM public.jobs" not in migration.upper() and "DELETE FROM PUBLIC.MADKHAL_APPLICATIONS" not in migration.upper()),
+    ("match refresh preserves historical notification rows", "DELETE FROM PUBLIC.NOTIFICATIONS" not in migration.upper() and "delete from public.notifications" not in migration.lower()),
     ("engineering constitution is present", "Codex is the engineering agent for مَدخَل" in agents),
 ]
 
