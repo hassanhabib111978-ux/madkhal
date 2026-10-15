@@ -1,6 +1,6 @@
 -- Reconcile matching and alert gates with the platform's explicit launch flag.
 -- Prioritize unscored active jobs for confirmed workers, then rotate by oldest scoring time.
--- Historical jobs, applications, and match requests are preserved; obsolete current-alert rows may be pruned.
+-- Historical jobs, applications, match requests, and notification rows are preserved.
 -- Setting madkhal_launch_config.free_launch=false restores monthly plan requirements.
 -- Centralize the existing free-launch policy without exposing the config to public clients.
 CREATE OR REPLACE FUNCTION public.madkhal_free_launch_enabled()
@@ -410,7 +410,6 @@ begin
       else
         update public.match_requests set status='closed',match_score=coalesce(professional_score,0),explainable_match_score=coalesce(professional_score,0),updated_at=now()
         where id=existing_match.id;
-        delete from public.notifications n where n.user_id=v_auth and n.opportunity_type='match_request' and n.opportunity_id=existing_match.id;
         processed_count:=processed_count+1;
       end if;
     elsif existing_match.status not in ('declined','closed','hired') then
@@ -419,8 +418,6 @@ begin
       processed_count:=processed_count+1;
     end if;
   end loop;
-  delete from public.notifications n where n.user_id=v_auth and n.opportunity_type='match_request'
-    and not exists(select 1 from public.match_requests mr where mr.id=n.opportunity_id and mr.worker_profile_id=v_worker and mr.status='matched');
   return processed_count;
 end;
 $function$
