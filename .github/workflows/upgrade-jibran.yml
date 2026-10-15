@@ -1,6 +1,8 @@
 name: app-validation
 on:
   push:
+    branches: [main, "codex/**"]
+  pull_request:
     branches: [main]
   workflow_dispatch:
 
@@ -19,3 +21,51 @@ jobs:
           node --check subscription-runtime.js
           node --check worker-match-lifecycle.js
           node --check employer-flow-enhancement.js
+
+      - name: Parse the main inline UI script
+        run: |
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+
+          class InlineScriptParser(HTMLParser):
+              def __init__(self):
+                  super().__init__(convert_charrefs=False)
+                  self.scripts = []
+                  self.current = None
+
+              def handle_starttag(self, tag, attrs):
+                  if tag.lower() != "script":
+                      return
+                  attrs = dict(attrs)
+                  if attrs.get("src"):
+                      self.current = None
+                      return
+                  kind = (attrs.get("type") or "text/javascript").lower()
+                  if kind in ("text/javascript", "application/javascript", "module", ""):
+                      self.current = []
+                      self.scripts.append(self.current)
+                  else:
+                      self.current = None
+
+              def handle_data(self, data):
+                  if self.current is not None:
+                      self.current.append(data)
+
+              def handle_endtag(self, tag):
+                  if tag.lower() == "script":
+                      self.current = None
+
+          parser = InlineScriptParser()
+          parser.feed(Path("index.html").read_text(encoding="utf-8"))
+          inline = ["".join(parts) for parts in parser.scripts]
+          if not inline:
+              raise SystemExit("No inline JavaScript found in index.html")
+          for number, code in enumerate(inline, 1):
+              Path(f"/tmp/madkhal-inline-{number}.js").write_text(code, encoding="utf-8")
+          print(f"Extracted {len(inline)} inline JavaScript block(s)")
+          PY
+          for file in /tmp/madkhal-inline-*.js; do node --check "$file"; done
+
+      - name: Run Madkhal regression guardrails
+        run: python3 tests/test_madkhal_guardrails.py
