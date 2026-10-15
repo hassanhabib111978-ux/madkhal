@@ -25,6 +25,8 @@ checks = [
     ("Jibran reports official and estimated results separately", "summarizeMatches" in jibran and "d?.recommendations" in jibran and "تقديري" in jibran),
     ("migration centralizes free-launch access in a DB flag", "madkhal_free_launch_enabled" in migration and "madkhal_launch_config" in migration),
     ("free-launch access still requires an authenticated user", "(SELECT auth.uid()) IS NOT NULL" in migration),
+    ("current internal matches use the same launch/subscription access gate", "and public.madkhal_worker_matching_access()" in migration.split("CREATE OR REPLACE FUNCTION public.get_my_worker_matches()", 1)[1].split("$function$", 1)[0]),
+    ("denied refresh does not erase prior match alerts", "if not public.madkhal_worker_matching_access() then\n    -- Keep prior alerts as history; current matches stay hidden by the read RPC gate.\n    return 0;\n  end if;" in migration),
     ("paid mode requires a currently active monthly worker plan", "s.audience='worker'" in migration and "s.plan='monthly'" in migration and "s.status='active'" in migration),
     ("external notification eligibility checks active unexpired jobs", "j.status='active'" in migration and "j.expires_at IS NULL OR j.expires_at>=now()" in migration),
     ("external matching prioritizes jobs not yet scored for eligible seekers", "pending_wp" in migration and "pending_sub.audience='worker'" in migration and "oms.scoring_version='external-v3'" in migration),
