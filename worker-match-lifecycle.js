@@ -69,14 +69,19 @@ function publicOpportunityKey(job){
 }
 function getCanonicalWorkerPublicMatches(jobs,p,limit=10){
  const profile=p||localProfile();
- const seen=new Set(),arr=[];
+ const seen=new Set(),ranked=[];
  (Array.isArray(jobs)?jobs:[]).forEach(job=>{
+   if(!job||!String(job.title||'').trim())return;
    const key=publicOpportunityKey(job);if(seen.has(key))return;seen.add(key);
    const score=calculateCanonicalPublicJobMatchScore(job,profile);
-   if(score>=35)arr.push({j:job,s:score});
+   ranked.push({j:job,s:score});
  });
- arr.sort((a,b)=>b.s-a.s);
- return arr.slice(0,Math.max(1,Number(limit)||10));
+ ranked.sort((a,b)=>b.s-a.s);
+ const matched=ranked.filter(x=>x.s>=35);
+ // Never hide all published opportunities solely because the stricter score falls below the professional-match threshold.
+ // If there are no qualified matches, show a separate general-opportunities fallback without presenting it as a confirmed match.
+ const result=matched.length?matched:ranked.map(x=>({...x,general:true}));
+ return result.slice(0,Math.max(1,Number(limit)||10));
 }
 window.calculateCanonicalPublicJobMatchScore=calculateCanonicalPublicJobMatchScore;
 window.getCanonicalWorkerPublicMatches=getCanonicalWorkerPublicMatches;
