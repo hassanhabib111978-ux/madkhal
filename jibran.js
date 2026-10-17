@@ -1,9 +1,7 @@
 (function () {
   'use strict';
 
-    installArabicOccupationPicker();
-
-  if ('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
       navigator.serviceWorker.register('./service-worker.js', { scope:'./' })
         .then(function (registration) { console.log('مَدخَل PWA: Service Worker registered', registration.scope); })
