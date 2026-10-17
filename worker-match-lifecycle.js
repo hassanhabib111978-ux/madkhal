@@ -9,12 +9,20 @@ function canonicalOccupationScore(occ,title){
  const groups=[
   ['مدرس أدب','مدرس الادب','معلم أدب','معلم الادب','literature teacher','arabic literature teacher'],
   ['مدرس لغه عربيه','معلم لغه عربيه','معلم عربي','مدرس عربي','arabic teacher','arabic language teacher'],
-  ['مدرس لغه انجليزيه','معلم لغه انجليزيه','مدرس انجليزي','معلم انجليزي','english teacher','english language teacher'],
+  ['مدرس لغه انجليزيه','معلم لغه انجليزيه','مدرس انجليزي','معلم انجليزي','english teacher','english language teacher','english instructor','language instructor','english tutor'],
   ['مدرس رياضيات','معلم رياضيات','math teacher','mathematics teacher'],
   ['محاسب','accountant','accounting']
  ];
  for(const g of groups){
-   if(g.some(k=>o.includes(canonicalClean(k))))return g.some(k=>t.includes(canonicalClean(k)))?45:0;
+   if(g.some(k=>o.includes(canonicalClean(k)))){
+     if(g.some(k=>t.includes(canonicalClean(k))))return 45;
+     // Allow equivalent job titles (e.g. English Language Instructor) instead of
+     // returning zero merely because the wording differs from the profile label.
+     if(g.includes('english teacher')&&/(english|language).*(teacher|instructor|tutor)|(teacher|instructor|tutor).*(english|language)/.test(t))return 42;
+     if(g.includes('arabic teacher')&&/(arabic|العربيه|عربي).*(teacher|instructor|معلم|مدرس)|(teacher|instructor|معلم|مدرس).*(arabic|العربيه|عربي)/.test(t))return 42;
+     if(g.includes('math teacher')&&/(math|mathematics|رياضيات).*(teacher|instructor)|(teacher|instructor).*(math|mathematics)/.test(t))return 42;
+     continue;
+   }
  }
  const teacherProfile=['مدرس','معلم','تدريس','تعليم','teacher','teaching'].some(k=>o.includes(canonicalClean(k)));
  const teacherJob=['مدرس','معلم','تدريس','تعليم','teacher','teaching'].some(k=>t.includes(canonicalClean(k)));
@@ -174,11 +182,16 @@ function injectWorkerMatchCenter(){
  worker.appendChild(panel);
 
  // Reuse the existing button instead of injecting a duplicate with the same label.
- const existing=[...worker.querySelectorAll('button')].find(b=>
+ const matchButtons=[...worker.querySelectorAll('button')].filter(b=>
   String(b.textContent||'').includes('المطابقات ومسار التوظيف')
  );
+ const existing=matchButtons.shift();
+ // Keep one authoritative match button only; remove stale duplicate buttons.
+ matchButtons.forEach(b=>b.remove());
  if(existing){
+  existing.removeAttribute('onclick');
   existing.onclick=loadWorkerMatchCenter;
+  existing.setAttribute('aria-label','فتح المطابقات المهنية ومسار التوظيف');
  }else{
   const action=worker.querySelector('[onclick*="openAccount"]');
   if(action){
