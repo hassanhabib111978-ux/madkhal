@@ -169,13 +169,14 @@ async function loadWorkerMatchCenter(){
   });
  }
  if(publicMatches.length){
-  const h=document.createElement('div');h.className='notice success';h.style.marginTop='14px';h.textContent='🔎 أقرب الفرص المنشورة حاليًا — متاحة مجانًا';list.appendChild(h);
+  const generalFallback=publicMatches.every(x=>x.general);
+  const h=document.createElement('div');h.className='notice success';h.style.marginTop='14px';h.textContent=generalFallback?'📋 لم تظهر مطابقة مهنية فوق الحد المطلوب؛ هذه فرص منشورة عامة يمكنك مراجعتها يدويًا.':'🔎 أقرب الفرص المنشورة حاليًا — متاحة مجانًا';list.appendChild(h);
   publicMatches.forEach(x=>{
    const j=x.j,score=x.s;const card=document.createElement('div');card.className='worker-match-card';
-   card.innerHTML='<div class="candidate-top"><strong>'+esc(j.title)+'</strong><span class="match-score">'+score+'% ملاءمة</span></div>'+
+   card.innerHTML='<div class="candidate-top"><strong>'+esc(j.title)+'</strong><span class="match-score">'+(x.general?'فرصة عامة':score+'% ملاءمة')+'</span></div>'+
     '<div class="candidate-meta">🏢 '+esc(j.company||'—')+(j.location?' · 📍 '+esc(j.location):'')+(j.country?' · '+esc(j.country):'')+'</div>'+
     '<div class="candidate-meta">المصدر: '+esc(j.source_name||j.source||'مَدخَل')+'</div>'+
-    '<div class="notice">درجة الملاءمة تقديرية من بيانات الملف والفرصة، وليست وعدًا بالتوظيف.</div>'+
+    (x.general?'<div class="notice">هذه فرصة منشورة وليست مطابقة مهنية مؤكدة؛ راجع شروط الإعلان قبل التقديم.</div>':'<div class="notice">درجة الملاءمة تقديرية من بيانات الملف والفرصة، وليست وعدًا بالتوظيف.</div>')+
     '<div class="worker-match-actions"></div>';
    const ab=card.querySelector('.worker-match-actions');
    if(j.source_url){const link=document.createElement('a');link.href=j.source_url;link.target='_blank';link.rel='noopener noreferrer';link.className='primary-btn';link.style.textAlign='center';link.style.textDecoration='none';link.textContent='🔗 فتح الإعلان';ab.appendChild(link)}
