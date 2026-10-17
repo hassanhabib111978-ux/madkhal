@@ -28,8 +28,11 @@ function canonicalOccupationScore(occ,title){
  const teacherJob=['مدرس','معلم','تدريس','تعليم','teacher','teaching'].some(k=>t.includes(canonicalClean(k)));
  if(teacherProfile&&teacherJob)return 20;
  if(t.includes(o)||o.includes(t))return 45;
- const ow=canonicalWords(o),hits=ow.filter(w=>t.includes(w)).length;
- return ow.length?Math.min(35,Math.round(hits/Math.min(ow.length,3)*35)):0;
+ const stop=new Set(['مهندس','مهندسه','مهندسون','مدير','مديره','مسؤول','مسئول','مساعد','متخصص','اخصائي','اختصاصي','فني','موظف','عمل','وظيفه','فرصه','اعلان','شركة','شركه','the','and','for','with','from','job','jobs','senior','junior','assistant','specialist','officer','engineer','manager','professional']);
+ const ow=canonicalWords(o).filter(w=>!stop.has(w));
+ const hits=ow.filter(w=>t.includes(w)).length;
+ // Weak word overlap alone must not create a misleading 35% match.
+ return ow.length?Math.min(25,Math.round(hits/Math.min(ow.length,3)*25)):0;
 }
 function calculateCanonicalPublicJobMatchScore(job,p){
  const profile=p||{};
@@ -43,9 +46,14 @@ function calculateCanonicalPublicJobMatchScore(job,p){
  const profileHasSpecialty=specialtyTerms.some(k=>profileOcc&&canonicalClean(profileOcc).includes(canonicalClean(k)))||specialtyTerms.some(k=>profileSkills.includes(canonicalClean(k)));
  const occ=canonicalOccupationScore(profileOcc,title);
  let score=occ;
- if(explicitSpecialty&&!profileHasSpecialty)score=Math.min(20,occ);
+ if(explicitSpecialty&&!profileHasSpecialty)score=Math.min(15,occ);
  const sk=canonicalWords(profile.skills||'');
- if(sk.length)score+=Math.min(25,Math.round(sk.filter(w=>canonicalClean(text).includes(w)).length/Math.min(sk.length,5)*25));
+ if(sk.length)score+=Math.min(30,Math.round(sk.filter(w=>canonicalClean(text).includes(w)).length/Math.min(sk.length,5)*30));
+ // Education is supporting evidence only: it can strengthen an occupation-related result, never make an unrelated job look like a match.
+ const qualification=canonicalClean(profile.qualification||'');
+ const qualificationTerms=canonicalWords(qualification).filter(w=>w.length>=4&&!['degree','bachelor','master','diploma','university','college','علوم','علمي','جامعي','بكالوريوس','ماجستير','دبلوم'].includes(w));
+ const qualificationHits=qualificationTerms.filter(w=>canonicalClean(text).includes(w)).length;
+ if(occ>=15&&qualificationHits)score+=Math.min(15,Math.round(qualificationHits/Math.min(qualificationTerms.length,3)*15));
  const loc=canonicalClean(profile.location||'');
  const jobLoc=canonicalClean(job?.location||job?.country||'');
  if(loc&&jobLoc.includes(loc))score+=10;
