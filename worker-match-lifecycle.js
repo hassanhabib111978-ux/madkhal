@@ -94,15 +94,23 @@ async function loadCanonicalWorkerMatchData(profile){
 }
 window.loadCanonicalWorkerMatchData=loadCanonicalWorkerMatchData;
 
+function revealWorkerMatchPanel(panel){
+ try{
+  window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>{
+   panel.scrollIntoView({behavior:'smooth',block:'start'});
+  }));
+ }catch(e){console.warn('worker match scroll',e)}
+}
 async function loadWorkerMatchCenter(){
  const u=await sessionUser();if(!u){showToast('⚠️ سجّل الدخول أولًا.');return}
  const panel=$('workerMatchCenter');if(!panel)return;
  // Keep the match center aligned with the saved worker profile before calculating public matches.
- // loadProfileRemote preserves local fallback only when the remote profile cannot provide a value.
  try{if(typeof window.loadProfileRemote==='function')await window.loadProfileRemote()}catch(e){console.warn('canonical worker profile refresh',e)}
  const p=localProfile();
  panel.classList.remove('hidden');
+ panel.style.scrollMarginTop='90px';
  panel.innerHTML='<div class="notice">⏳ جارٍ تحديث مسار مَدخَل الموحد...</div>';
+ revealWorkerMatchPanel(panel);
  const data=await loadCanonicalWorkerMatchData(p);
  const allDirectMatches=data.directMatches||[];
  // لا نعرض الحالات النهائية القديمة داخل مركز المطابقات الحالي؛ تبقى محفوظة في السجل.
@@ -110,10 +118,10 @@ async function loadWorkerMatchCenter(){
  const rows=allDirectMatches.filter(x=>activeStatuses.has(String(x.status||'')));
  const publicMatches=data.publicMatches||[];
  if(data.directError&&!publicMatches.length){
-  panel.innerHTML='<div class="notice">⚠️ تعذر تحميل مسار المطابقات.</div>';return
+  panel.innerHTML='<div class="notice">⚠️ تعذر تحميل مسار المطابقات.</div>';revealWorkerMatchPanel(panel);return
  }
  if(!rows.length&&!publicMatches.length){
-  panel.innerHTML='<div class="notice">لا توجد مطابقة مهنية جديدة حاليًا. سيظهر المسار هنا عند العثور على فرصة مناسبة.</div>';return
+  panel.innerHTML='<div class="notice">لا توجد مطابقة مهنية جديدة حاليًا. سيظهر المسار هنا عند العثور على فرصة مناسبة.</div>';revealWorkerMatchPanel(panel);return
  }
  panel.innerHTML='<div class="match-center-head"><div><h3>🎯 المطابقات ومسار التوظيف</h3><p>المطابقة المباشرة والبحث عن الفرص متاحان مجانًا خلال مرحلة الإطلاق. الاشتراك مؤجل حاليًا.</p></div><button class="secondary-btn" id="closeWorkerMatches">إغلاق</button></div><div id="workerMatchList"></div>';
  $('closeWorkerMatches').onclick=()=>panel.classList.add('hidden');
@@ -154,6 +162,7 @@ async function loadWorkerMatchCenter(){
    list.appendChild(card);
   });
  }
+ revealWorkerMatchPanel(panel);
 }
 function injectWorkerMatchCenter(){
  const worker=$('workerScreen');
