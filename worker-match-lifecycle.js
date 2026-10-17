@@ -156,11 +156,33 @@ async function loadWorkerMatchCenter(){
  }
 }
 function injectWorkerMatchCenter(){
- const worker=$('workerScreen');if(!worker||$('workerMatchCenter'))return;
- const panel=document.createElement('div');panel.id='workerMatchCenter';panel.className='card hidden';panel.style.marginTop='14px';worker.appendChild(panel);
- const action=worker.querySelector('[onclick*="openAccount"]');
- if(action){const b=document.createElement('button');b.className='secondary-btn action-btn';b.textContent='🎯 المطابقات ومسار التوظيف';b.onclick=loadWorkerMatchCenter;action.parentElement.insertBefore(b,action.nextSibling)}
- const st=document.createElement('style');st.textContent='.match-center-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.worker-match-card{border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px;background:var(--card)}.worker-match-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.worker-match-actions button{flex:1;min-width:150px}.worker-match-actions .notice{width:100%}';document.head.appendChild(st);
+ const worker=$('workerScreen');
+ if(!worker||$('workerMatchCenter'))return;
+ const panel=document.createElement('div');
+ panel.id='workerMatchCenter';
+ panel.className='card hidden';
+ panel.style.marginTop='14px';
+ worker.appendChild(panel);
+
+ // Reuse the existing button instead of injecting a duplicate with the same label.
+ const existing=[...worker.querySelectorAll('button')].find(b=>
+  String(b.textContent||'').includes('المطابقات ومسار التوظيف')
+ );
+ if(existing){
+  existing.onclick=loadWorkerMatchCenter;
+ }else{
+  const action=worker.querySelector('[onclick*="openAccount"]');
+  if(action){
+   const b=document.createElement('button');
+   b.className='secondary-btn action-btn';
+   b.textContent='🎯 المطابقات ومسار التوظيف';
+   b.onclick=loadWorkerMatchCenter;
+   action.parentElement.insertBefore(b,action.nextSibling);
+  }
+ }
+ const st=document.createElement('style');
+ st.textContent='.match-center-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.worker-match-card{border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px;background:var(--card)}.worker-match-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.worker-match-actions button{flex:1;min-width:150px}.worker-match-actions .notice{width:100%}';
+ document.head.appendChild(st);
 }
 document.addEventListener('DOMContentLoaded',injectWorkerMatchCenter);
 window.openWorkerMatchCenter=loadWorkerMatchCenter;
