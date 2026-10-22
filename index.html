@@ -1145,9 +1145,44 @@ async function renderNotifications(){
 function jibranFormatOpportunity(x){
  const j=x&&x.j?x.j:(x||{});
  const place=j.location||j.country||"";
- const score=Number(x&&x.s);
- const kind=x&&x.general?"فرصة عامة":(Number.isFinite(score)&&score>0?Math.round(score)+"% ملاءمة":"فرصة منشورة");
- return [j.title||"فرصة عمل",j.company||"",place,kind].filter(Boolean).join(" — ");
+ const score=Number(x&&((x.s!==undefined)?x.s:x.match_score));
+ const kind=x&&x.general?"فرصة عامة":(Number.isFinite(score)&&score>0?Math.round(score)+"% مطابقة":"فرصة منشورة");
+ return [j.title||"فرصة عمل",j.company||j.company_name||"",place,kind].filter(Boolean).join(" — ");
+}
+function jibranActiveDirectMatches(data){
+ const rows=Array.isArray(data?.directMatches)?data.directMatches:[];
+ if(typeof window.getCanonicalWorkerDirectMatches==="function")return window.getCanonicalWorkerDirectMatches(rows);
+ const active=new Set(["matched","employer_interested","accepted","contact_opened","interview","offer"]);
+ return rows.filter(x=>active.has(String(x?.status||"")));
+}
+async function jibranGetClosestResults(profile){
+ if(typeof window.loadCanonicalWorkerMatchData!=="function")throw new Error("MATCH_ENGINE_UNAVAILABLE");
+ const data=await window.loadCanonicalWorkerMatchData(profile);
+ const direct=jibranActiveDirectMatches(data);
+ let publicMatches=Array.isArray(data?.publicMatches)?data.publicMatches:[];
+ // Use the same public-job scorer as the manual match center. If its first load returned no rows,
+ // retry the published feed once before telling the worker there are no opportunities.
+ if(!publicMatches.length){
+  let jobs=Array.isArray(allVisibleJobs)?allVisibleJobs:[];
+  if(!jobs.length&&typeof loadJobs==="function")jobs=await loadJobs(true);
+  if(typeof window.getCanonicalWorkerPublicMatches==="function"&&jobs.length){
+   publicMatches=window.getCanonicalWorkerPublicMatches(jobs,localProfile()||profile,10);
+  }
+ }
+ return {directMatches:direct,publicMatches};
+}
+function jibranComposeMatchAnswer(data,assessmentText=""){
+ const direct=(data?.directMatches||[]).slice(0,3);
+ const publicTop=(data?.publicMatches||[]).slice(0,3);
+ const parts=[];
+ if(direct.length)parts.push("المطابقات المباشرة مع أصحاب الفرص: "+direct.map(x=>jibranFormatOpportunity(x)).join("؛ ")+".");
+ if(publicTop.length){
+  const isGeneral=publicTop.every(x=>x.general);
+  parts.push((isGeneral?"فرص منشورة عامة للمراجعة وليست مطابقات مؤكدة: ":"أقرب الفرص المنشورة بحسب ملفك: ")+publicTop.map(jibranFormatOpportunity).join("؛ ")+".");
+ }
+ return parts.length
+  ?"بحسب ملفك"+assessmentText+"، "+parts.join(" ")
+  :"لا توجد مطابقة مباشرة نشطة أو فرص منشورة محمّلة الآن"+assessmentText+". افتح قسم «الفرص» ثم أعد المحاولة.";
 }
 function jibranNextStep(p){
  if(!p||!p.occupation_label)return "الخطوة التالية: أكمل ملفك المهني واحفظه، ثم افتح قسم «الفرص» لمراجعة الإعلانات المتاحة.";
@@ -1165,16 +1200,8 @@ async function askJibran(kind){
    else if(typeof window.loadCanonicalWorkerMatchData!=="function"){msg="افتح حسابك ثم أعد المحاولة لبدء المطابقة الرسمية.";}
    else{
      try{
-       const data=await window.loadCanonicalWorkerMatchData(p);
-       const direct=(data?.directMatches||[]).slice(0,3);
-       const publicTop=(data?.publicMatches||[]).slice(0,3);
-       msg=direct.length
-        ?"أقرب المطابقات المباشرة المسجلة: "+direct.map(x=>x.title||"فرصة").join("، ")+"."
-        :publicTop.length
-         ?(publicTop.every(x=>x.general)
-           ?"لا توجد مطابقة مهنية مباشرة مؤكدة الآن. هذه أقرب فرص منشورة يمكنك مراجعتها يدويًا وليست مطابقات مؤكدة: "+publicTop.map(jibranFormatOpportunity).join("؛ ")+". افتح قسم «الفرص» لمراجعة الشروط والتقديم."
-           :"لا توجد مطابقة مباشرة مع أصحاب الفرص مسجلة الآن. أقرب الفرص بحسب ملفك: "+publicTop.map(jibranFormatOpportunity).join("؛ ")+".")
-         :"لا توجد مطابقة مباشرة، ولم تُحمّل فرص عامة الآن. افتح قسم «الفرص» ثم أعد المحاولة.";
+       const data=await jibranGetClosestResults(p);
+       msg=jibranComposeMatchAnswer(data);
        }catch(e){msg="تعذر تحديث المطابقة الرسمية الآن. حاول مرة أخرى بعد قليل."}
    }
  }else if(kind==="next")msg=jibranNextStep(p);
@@ -1191,15 +1218,9 @@ async function askJibranUser(){
    else if(typeof window.loadCanonicalWorkerMatchData!=="function")ans="افتح حسابك ثم أعد المحاولة حتى أستدعي المطابقة الرسمية.";
    else{
      try{
-       const data=await window.loadCanonicalWorkerMatchData(p);
-       const direct=(data?.directMatches||[]).slice(0,3);
-       const publicTop=(data?.publicMatches||[]).slice(0,3);
-       const assessment=a&&Number(a.score)>0?" وتقييم ملفك الحالي "+Math.round(Number(a.score))+"/100":"";
-       ans=direct.length
-        ?"بحسب مسار المطابقة الرسمي"+assessment+"، أقرب المطابقات المباشرة لك: "+direct.map(x=>x.title||"فرصة").join("، ")+"."
-        :publicTop.length
-         ?"لا توجد مطابقة مهنية مباشرة مؤكدة الآن"+assessment+". أقرب الفرص المنشورة للمراجعة"+(publicTop.every(x=>x.general)?" (وليست مطابقات مؤكدة)":" بحسب بيانات ملفك")+": "+publicTop.map(jibranFormatOpportunity).join("؛ ")+". افتح قسم «الفرص» لقراءة التفاصيل والتقديم."
-         :"لا توجد مطابقة مباشرة"+assessment+"، ولم تُحمّل فرص عامة الآن. افتح قسم «الفرص» ثم أعد المحاولة.";
+       const data=await jibranGetClosestResults(p);
+       const assessment=a&&Number(a.score)>0?"، وتقييم ملفك الحالي "+Math.round(Number(a.score))+"/100":"";
+       ans=jibranComposeMatchAnswer(data,assessment);
        }catch(e){ans="تعذر تحديث المطابقة الرسمية الآن. حاول مرة أخرى بعد قليل."}
    }
  }else if(q.includes("وظيفة")||q.includes("فرصة"))ans="لدي مَدخَل فرص فعلية في سوريا والشرق الأوسط. افتح قسم الفرص وابحث ثم افتح التفاصيل قبل التقديم.";
@@ -1262,6 +1283,6 @@ document.addEventListener("DOMContentLoaded",async()=>{selectedSkills=getLS(LS.s
 <script src="./subscription-runtime.js"></script>
 <script src="./jibran.js?v=20261017-2"></script>
 <script src="./employer-flow-enhancement.js"></script>
-<script src="./worker-match-lifecycle.js?v=20261022-1"></script>
+<script src="./worker-match-lifecycle.js?v=20261022-2"></script>
 </body>
 </html>
