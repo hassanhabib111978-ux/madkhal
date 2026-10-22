@@ -88,8 +88,13 @@ function getCanonicalWorkerPublicMatches(jobs,p,limit=10){
  const result=matched.length?matched:ranked.map(x=>({...x,general:true}));
  return result.slice(0,Math.max(1,Number(limit)||10));
 }
+function getCanonicalWorkerDirectMatches(rows){
+ const activeStatuses=new Set(['matched','employer_interested','accepted','contact_opened','interview','offer']);
+ return (Array.isArray(rows)?rows:[]).filter(x=>activeStatuses.has(String(x?.status||'')));
+}
 window.calculateCanonicalPublicJobMatchScore=calculateCanonicalPublicJobMatchScore;
 window.getCanonicalWorkerPublicMatches=getCanonicalWorkerPublicMatches;
+window.getCanonicalWorkerDirectMatches=getCanonicalWorkerDirectMatches;
 
 async function subscriptionIsActive(){
  // مَدخَل في مرحلة الإطلاق المجاني: المطابقة الأساسية متاحة للجميع.
@@ -140,8 +145,7 @@ async function loadWorkerMatchCenter(){
  const data=await loadCanonicalWorkerMatchData(p);
  const allDirectMatches=data.directMatches||[];
  // لا نعرض الحالات النهائية القديمة داخل مركز المطابقات الحالي؛ تبقى محفوظة في السجل.
- const activeStatuses=new Set(['matched','employer_interested','accepted','contact_opened','interview','offer']);
- const rows=allDirectMatches.filter(x=>activeStatuses.has(String(x.status||'')));
+ const rows=window.getCanonicalWorkerDirectMatches?window.getCanonicalWorkerDirectMatches(allDirectMatches):allDirectMatches.filter(x=>['matched','employer_interested','accepted','contact_opened','interview','offer'].includes(String(x.status||'')));
  const publicMatches=data.publicMatches||[];
  if(data.directError&&!publicMatches.length){
   panel.innerHTML='<div class="notice">⚠️ تعذر تحميل مسار المطابقات.</div>';revealWorkerMatchPanel(panel);return
