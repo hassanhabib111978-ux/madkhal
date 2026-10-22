@@ -295,7 +295,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
     <div class="hero-actions hero-ref-actions"><button class="secondary-btn" onclick="openEmployer()">← &nbsp; لدي فرصة عمل</button><button class="primary-btn" onclick="openWorker()">أبحث عن عمل &nbsp; →</button></div>
   </div>
   <div class="card"><h3>مَدخَل</h3><p>منصة تربط الباحث عن العمل بالفرص المناسبة، وتربط صاحب الفرصة بالأشخاص الأقرب إلى متطلباتها. البحث الأساسي مجاني، والمتابعة المستمرة والتنبيهات ضمن الاشتراك.</p></div>
-  <div class="jibran"><div class="jibran-title">🤖 جبران — مساعد مَدخَل</div><div id="jibranHomeText" class="jibran-bubble">اسألني عن ملفك أو عن كيفية الوصول إلى فرصة مناسبة.</div><div class="jibran-actions"><button class="secondary-btn" onclick="askJibran('profile')">كيف أبني ملفي؟</button><button class="secondary-btn" onclick="askJibran('jobs')">كيف أجد فرصة؟</button></div></div>
+  <div class="jibran"><div class="jibran-title">🤖 جبران — مساعد مَدخَل</div><div id="jibranHomeText" class="jibran-bubble">اسألني عن ملفك أو عن كيفية الوصول إلى فرصة مناسبة.</div><div id="jibranHomeMatchResults" class="hidden" aria-live="polite"></div><div class="jibran-actions"><button class="secondary-btn" onclick="askJibran('profile')">كيف أبني ملفي؟</button><button class="secondary-btn" onclick="askJibran('jobs')">كيف أجد فرصة؟</button><button class="secondary-btn" onclick="askJibran('match')">🎯 الفرص الأنسب</button></div></div>
   <h2 class="section-title">رحلتك</h2>
   <div class="journey"><div class="journey-item"><span>👤</span>بياناتك</div><div class="journey-item"><span>🧠</span>مهاراتك</div><div class="journey-item"><span>🎯</span>المطابقة</div><div class="journey-item"><span>🔎</span>الفرص</div><div class="journey-item"><span>📩</span>التقديم</div><div class="journey-item"><span>🔔</span>المتابعة</div></div>
   <div class="premium"><span class="premium-badge">🎉 الإطلاق المجاني</span><h3 style="margin-top:10px">مَدخَل متاح مجانًا في المرحلة الأولى</h3><p><strong>يمكنك الآن إنشاء ملفك، استكشاف الفرص، التقييم، المطابقة والتقديم مجانًا.</strong> نركز في هذه المرحلة على بناء مجتمع حقيقي من الباحثين عن العمل وصانعي الفرص وزيادة الثقة والاستخدام.</p><div class="notice success">ستبقى المتابعة المدفوعة محفوظة في النظام، لكنها غير مفعلة حاليًا. سيُعلن مَدخَل عن تفعيلها لاحقًا.</div></div>
@@ -1187,7 +1187,7 @@ function jibranComposeMatchAnswer(data,assessmentText=""){
   :"لا توجد مطابقة مباشرة نشطة أو فرص منشورة محمّلة الآن"+assessmentText+". افتح قسم «الفرص» ثم أعد المحاولة.";
 }
 function jibranClearMatchResults(){
- ["jibranMatchResults","jibranAccountMatchResults"].forEach(id=>{
+ ["jibranHomeMatchResults","jibranMatchResults","jibranAccountMatchResults"].forEach(id=>{
   const box=document.getElementById(id);
   if(box){box.innerHTML="";box.classList.add("hidden")}
  });
@@ -1200,7 +1200,7 @@ function jibranOpenAllMatches(){
  },160);
 }
 function jibranRenderMatchResults(data){
- const targets=["jibranMatchResults","jibranAccountMatchResults"]
+ const targets=["jibranHomeMatchResults","jibranMatchResults","jibranAccountMatchResults"]
   .map(id=>document.getElementById(id)).filter(Boolean);
  if(!targets.length)return;
  const direct=(Array.isArray(data?.directMatches)?data.directMatches:[]).slice(0,3);
