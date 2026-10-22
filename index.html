@@ -1142,13 +1142,15 @@ async function renderNotifications(){
   if(!cleaned.length){box.innerHTML='<div class="empty">لا توجد تنبيهات جديدة.</div>';return}
   box.innerHTML=cleaned.slice(0,12).map(x=>'<div class="summary-box" style="margin-bottom:8px">🔔 '+escapeHtml(x.message||"تنبيه")+'<br><small>'+formatDate(x.created_at)+'</small></div>').join("");
 }
+function jibranFormatOpportunity(x){
+ const j=x&&x.j?x.j:(x||{});
+ const place=j.location||j.country||"";
+ const score=Number(x&&x.s);
+ const kind=x&&x.general?"فرصة عامة":(Number.isFinite(score)&&score>0?Math.round(score)+"% ملاءمة":"فرصة منشورة");
+ return [j.title||"فرصة عمل",j.company||"",place,kind].filter(Boolean).join(" — ");
+}
 async function askJibran(kind){
  const p=localProfile();let msg="";
- if(kind==="match" && typeof window.syncSubscriptionRemote==="function"){
-   const s=await window.syncSubscriptionRemote();
-   const active=!!(s&&s.status==="active"&&(!s.ends_at||new Date(s.ends_at)>new Date()));
-   if(!active){msg="المطابقة المستمرة والتنبيهات من مزايا اشتراك مَدخَل بقيمة 1 دولار شهريًا. يمكنك البحث عن الفرص والتقديم الأساسي مجانًا.";document.getElementById("jibranHomeText").textContent=msg;document.getElementById("jibranAccountText").textContent=msg;return;}
- }
  if(kind==="profile")msg=p.full_name?"ملفك موجود. راجع المهنة المعتمدة واسم الأم والمكان ونوع العمل ثم احفظ التعديلات.":"ابدأ بالملف المهني: الاسم، اسم الأم، المهنة المعتمدة، المكان ونوع العمل. بعد ذلك تصبح المطابقة أدق.";
  else if(kind==="jobs")msg=allVisibleJobs.length?"لدي مَدخَل "+allVisibleJobs.length+" فرصة فعلية ضمن نطاق سوريا والشرق الأوسط في هذه الجلسة. ابدأ بالبحث ثم افتح التفاصيل قبل التقديم.":"افتح قسم الفرص لتحميل الفرص الفعلية من قاعدة البيانات، ثم استخدم المهنة والمكان لتضييق النتائج.";
  else if(kind==="match"){
@@ -1157,9 +1159,16 @@ async function askJibran(kind){
    else{
      try{
        const data=await window.loadCanonicalWorkerMatchData(p);
-       const top=(data?.directMatches||[]).slice(0,3);
-       msg=top.length?"أقرب الفرص الرسمية الآن: "+top.map(x=>x.title||"فرصة").join("، "):"لا توجد مطابقة مهنية رسمية جديدة حاليًا. ستظهر هنا عند العثور على فرصة مناسبة.";
-     }catch(e){msg="تعذر تحديث المطابقة الرسمية الآن. حاول مرة أخرى بعد قليل."}
+       const direct=(data?.directMatches||[]).slice(0,3);
+       const publicTop=(data?.publicMatches||[]).slice(0,3);
+       msg=direct.length
+        ?"أقرب المطابقات المباشرة المسجلة: "+direct.map(x=>x.title||"فرصة").join("، ")+"."
+        :publicTop.length
+         ?(publicTop.every(x=>x.general)
+           ?"لا توجد مطابقة مهنية مباشرة مؤكدة الآن. هذه أقرب فرص منشورة يمكنك مراجعتها يدويًا وليست مطابقات مؤكدة: "+publicTop.map(jibranFormatOpportunity).join("؛ ")+". افتح قسم «الفرص» لمراجعة الشروط والتقديم."
+           :"لا توجد مطابقة مباشرة مع أصحاب الفرص مسجلة الآن. أقرب الفرص بحسب ملفك: "+publicTop.map(jibranFormatOpportunity).join("؛ ")+".")
+         :"لا توجد مطابقة مباشرة، ولم تُحمّل فرص عامة الآن. افتح قسم «الفرص» ثم أعد المحاولة.";
+       }catch(e){msg="تعذر تحديث المطابقة الرسمية الآن. حاول مرة أخرى بعد قليل."}
    }
  }else if(kind==="next")msg=p.occupation_label?"الخطوة التالية: راجع المطابقات الرسمية، افتح تفاصيل الفرصة، ثم قدّم وسجل طلبك. جميع هذه الخطوات متاحة مجانًا حاليًا.":"الخطوة التالية: أكمل ملفك واختر مهنة مرتبطة بفرصة فعلية.";
  document.getElementById("jibranHomeText").textContent=msg;document.getElementById("jibranAccountText").textContent=msg
@@ -1168,12 +1177,7 @@ async function askJibranUser(){
  const input=document.getElementById("jibranInput");const q=normalizeText(input.value);
  if(!q){showToast("✍️ اكتب سؤالك.");return}
  let ans="";const p=localProfile();const a=getLS(LS.assessment,null);
- const asksBest=q.includes("مناسبة")||q.includes("مناسب")||q.includes("الفرصة المناسبة")||q.includes("حسب ملفي")||q.includes("حسب تقييمي")||q.includes("تقييمي")||q.includes("ملفي");
- if(asksBest && typeof window.syncSubscriptionRemote==="function"){
-   const s=await window.syncSubscriptionRemote();
-   const active=!!(s&&s.status==="active"&&(!s.ends_at||new Date(s.ends_at)>new Date()));
-   if(!active){document.getElementById("jibranMainText").textContent="المطابقة المستمرة والتنبيهات من مزايا اشتراك مَدخَل بقيمة 1 دولار شهريًا. البحث عن الفرص والتصفح والتقديم الأساسي متاح مجانًا.";input.value="";return;}
- }
+ const asksBest=q.includes("مناسبة")||q.includes("مناسب")||q.includes("الفرصة المناسبة")||q.includes("حسب ملفي")||q.includes("حسب تقييمي")||q.includes("تقييمي")||q.includes("ملفي")||q.includes("فرصي")||q.includes("قرب")||q.includes("الفرص الأنسب");
  if(q.includes("اشتراك")||q.includes("دولار"))ans="الاشتراك دولار واحد شهريًا للمتابعة المستمرة والمطابقة والتنبيهات.";
  else if(asksBest){
    if(!p.full_name||!p.occupation_label)ans="أكمل ملفك المهني واختر المهنة أولًا، وبعدها تبدأ المطابقة الرسمية.";
@@ -1181,10 +1185,15 @@ async function askJibranUser(){
    else{
      try{
        const data=await window.loadCanonicalWorkerMatchData(p);
-       const top=(data?.directMatches||[]).slice(0,3);
-       const assessment=a&&Number(a.score)>0?" وتقييم ملفك الحالي "+Math.round(Number(a.score))+"/100":"، ولم يُحفظ تقييم محلي بعد";
-       ans=top.length?"بحسب مسار المطابقة الرسمي"+assessment+"، أقرب الفرص المباشرة لك: "+top.map(x=>x.title||"فرصة").join("، ")+"." :"لا توجد مطابقة مهنية رسمية جديدة حاليًا"+assessment+"؛ ستظهر هنا عند العثور على فرصة مناسبة.";
-     }catch(e){ans="تعذر تحديث المطابقة الرسمية الآن. حاول مرة أخرى بعد قليل."}
+       const direct=(data?.directMatches||[]).slice(0,3);
+       const publicTop=(data?.publicMatches||[]).slice(0,3);
+       const assessment=a&&Number(a.score)>0?" وتقييم ملفك الحالي "+Math.round(Number(a.score))+"/100":"";
+       ans=direct.length
+        ?"بحسب مسار المطابقة الرسمي"+assessment+"، أقرب المطابقات المباشرة لك: "+direct.map(x=>x.title||"فرصة").join("، ")+"."
+        :publicTop.length
+         ?"لا توجد مطابقة مهنية مباشرة مؤكدة الآن"+assessment+". أقرب الفرص المنشورة للمراجعة"+(publicTop.every(x=>x.general)?" (وليست مطابقات مؤكدة)":" بحسب بيانات ملفك")+": "+publicTop.map(jibranFormatOpportunity).join("؛ ")+". افتح قسم «الفرص» لقراءة التفاصيل والتقديم."
+         :"لا توجد مطابقة مباشرة"+assessment+"، ولم تُحمّل فرص عامة الآن. افتح قسم «الفرص» ثم أعد المحاولة.";
+       }catch(e){ans="تعذر تحديث المطابقة الرسمية الآن. حاول مرة أخرى بعد قليل."}
    }
  }else if(q.includes("وظيفة")||q.includes("فرصة"))ans="لدي مَدخَل فرص فعلية في سوريا والشرق الأوسط. افتح قسم الفرص وابحث ثم افتح التفاصيل قبل التقديم.";
  else if(q.includes("مطابق"))ans="يمكنني عرض المطابقة الرسمية بعد حفظ ملفك المهني.";
