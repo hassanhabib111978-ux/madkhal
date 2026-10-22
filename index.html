@@ -376,7 +376,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 <div class="card"><h3>🔔 التنبيهات</h3><div id="notificationsList"></div></div>
 <div class="card"><h3>📩 طلباتي</h3><div id="applicationsList"></div></div>
 <div class="card"><h3>🎉 المرحلة الأولى: مَدخَل مجاني</h3><p>جميع وظائف الباحث الأساسية متاحة مجانًا حاليًا: الملف، التقييم، الفرص العامة، المطابقات المهنية والتقديم.</p><div id="accountSubscriptionStatus" class="notice success">الاشتراك المدفوع محفوظ في النظام لكنه غير مفعّل خلال مرحلة الإطلاق المجاني.</div></div>
-<div class="jibran"><div class="jibran-title">🤖 جبران</div><div id="jibranAccountText" class="jibran-bubble">أخبرني بما تريد معرفته عن ملفك أو فرصك.</div><div class="jibran-actions"><button class="secondary-btn" onclick="askJibran('match')">ما فرصي الأقرب؟</button><button class="secondary-btn" onclick="askJibran('next')">ما الخطوة التالية؟</button></div></div>
+<div class="jibran"><div class="jibran-title">🤖 جبران</div><div id="jibranAccountText" class="jibran-bubble">أخبرني بما تريد معرفته عن ملفك أو فرصك.</div><div class="jibran-actions"><button class="secondary-btn" onclick="askJibran('match')">ما فرصي الأقرب؟</button><button class="secondary-btn" onclick="askJibran('next')">ما الخطوة التالية؟</button></div><div id="jibranAccountMatchResults" class="hidden" aria-live="polite"></div></div>
 </section>
 
 <section id="employerScreen" class="screen">
@@ -399,7 +399,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 
 <section id="jibranScreen" class="screen">
 <button class="back" onclick="showScreen('homeScreen')">→ العودة</button>
-<div class="jibran"><div class="jibran-title">🤖 جبران — مساعد مَدخَل</div><div id="jibranMainText" class="jibran-bubble">أرسل سؤالك وسأجيب من معلومات ملفك والفرص المتاحة على الجهاز.</div><div class="form-group"><input id="jibranInput" placeholder="اكتب سؤالك..."></div><button class="primary-btn" style="width:100%" onclick="askJibranUser()">إرسال</button></div>
+<div class="jibran"><div class="jibran-title">🤖 جبران — مساعد مَدخَل</div><div id="jibranMainText" class="jibran-bubble">أرسل سؤالك وسأجيب من معلومات ملفك والفرص المتاحة على الجهاز.</div><div id="jibranMatchResults" class="hidden" aria-live="polite"></div><div class="form-group"><input id="jibranInput" placeholder="اكتب سؤالك..."></div><button class="primary-btn" style="width:100%" onclick="askJibranUser()">إرسال</button><div class="jibran-actions" style="margin-top:8px"><button type="button" class="secondary-btn" onclick="jibranOpenAllMatches()">🎯 المطابقة الذاتية</button><button type="button" class="secondary-btn" onclick="openOpportunities()">🔎 جميع الفرص</button></div></div>
 <div id="jibranContext" class="card"><h3>السياق الحالي</h3><p>جبران يعمل داخل مَدخَل ويستفيد من ملفك والفرص المحملة، من دون إرسال بياناتك إلى خدمة خارجية.</p></div>
 </section>
 </main>
@@ -1184,6 +1184,131 @@ function jibranComposeMatchAnswer(data,assessmentText=""){
   ?"بحسب ملفك"+assessmentText+"، "+parts.join(" ")
   :"لا توجد مطابقة مباشرة نشطة أو فرص منشورة محمّلة الآن"+assessmentText+". افتح قسم «الفرص» ثم أعد المحاولة.";
 }
+function jibranClearMatchResults(){
+ ["jibranMatchResults","jibranAccountMatchResults"].forEach(id=>{
+  const box=document.getElementById(id);
+  if(box){box.innerHTML="";box.classList.add("hidden")}
+ });
+}
+function jibranOpenAllMatches(){
+ showScreen("workerScreen");
+ setTimeout(()=>{
+  if(typeof window.openWorkerMatchCenter==="function")window.openWorkerMatchCenter();
+  else showToast("تعذر فتح المطابقة الذاتية الآن. افتح «الباحث عن عمل» ثم «المطابقات ومسار التوظيف».");
+ },160);
+}
+function jibranRenderMatchResults(data){
+ const targets=["jibranMatchResults","jibranAccountMatchResults"]
+  .map(id=>document.getElementById(id)).filter(Boolean);
+ if(!targets.length)return;
+ const direct=(Array.isArray(data?.directMatches)?data.directMatches:[]).slice(0,3);
+ const publicTop=(Array.isArray(data?.publicMatches)?data.publicMatches:[]).slice(0,3);
+ targets.forEach(box=>{
+  box.innerHTML="";
+  box.classList.remove("hidden");
+  if(!direct.length&&!publicTop.length){
+   const note=document.createElement("div");
+   note.className="notice";
+   note.textContent="لم تظهر نتائج في هذه المحاولة. هذا لا يثبت عدم وجود فرص مناسبة؛ يمكنك تشغيل المطابقة الذاتية الرسمية مباشرة.";
+   box.appendChild(note);
+  }
+  if(direct.length){
+   const heading=document.createElement("div");
+   heading.className="notice success";
+   heading.textContent="🎯 مطابقات مهنية مباشرة";
+   box.appendChild(heading);
+   direct.forEach(row=>{
+    const card=document.createElement("div");
+    card.className="card";
+    card.style.marginTop="8px";
+    const title=document.createElement("strong");
+    title.textContent=row.title||row.opportunity_title||row.job_title||"مطابقة مهنية مباشرة";
+    const meta=document.createElement("div");
+    meta.className="candidate-meta";
+    meta.style.cssText="font-size:12px;line-height:1.8;margin-top:6px";
+    meta.textContent="🏢 "+(row.company_name||row.company||"جهة العمل")+(row.location?" · 📍 "+row.location:"");
+    const status=document.createElement("div");
+    status.className="notice";
+    const score=Number(row.match_score);
+    status.textContent=(Number.isFinite(score)&&score>0?Math.round(score)+"% توافق تقديري · ":"")+"حالة المتابعة: "+(row.status||"مطابقة مباشرة");
+    const btn=document.createElement("button");
+    btn.type="button";
+    btn.className="secondary-btn";
+    btn.style.cssText="width:100%;margin-top:8px";
+    btn.textContent="عرض تفاصيل المطابقات";
+    btn.addEventListener("click",jibranOpenAllMatches);
+    card.append(title,meta,status,btn);
+    box.appendChild(card);
+   });
+  }
+  if(publicTop.length){
+   const heading=document.createElement("div");
+   heading.className="notice success";
+   heading.style.marginTop="10px";
+   heading.textContent=publicTop.every(x=>x.general)?"🔎 فرص منشورة للمراجعة":"🥇 أقرب الفرص المنشورة بحسب ملفك";
+   box.appendChild(heading);
+   publicTop.forEach(item=>{
+    const job=item&&item.j?item.j:(item||{});
+    const card=document.createElement("div");
+    card.className="card";
+    card.style.marginTop="8px";
+    const top=document.createElement("div");
+    top.style.cssText="display:flex;align-items:flex-start;justify-content:space-between;gap:8px";
+    const title=document.createElement("strong");
+    title.style.cssText="font-size:14px;line-height:1.7";
+    title.textContent=job.title||"فرصة عمل";
+    const badge=document.createElement("span");
+    badge.style.cssText="flex:0 0 auto;border-radius:999px;padding:5px 8px;background:#e8f7f4;color:#0f766e;font-size:10px;font-weight:800";
+    const score=Number(item&&((item.s!==undefined)?item.s:item.match_score));
+    badge.textContent=item.general?"فرصة عامة":(Number.isFinite(score)&&score>0?Math.round(score)+"% ملاءمة":"فرصة منشورة");
+    top.append(title,badge);
+    const meta=document.createElement("div");
+    meta.style.cssText="font-size:12px;line-height:1.8;color:#657171;margin-top:6px";
+    meta.textContent="🏢 "+(job.company||job.company_name||"—")+(job.location?" · 📍 "+job.location:"")+(job.country?" · "+job.country:"");
+    const note=document.createElement("div");
+    note.className="notice";
+    note.textContent=item.general
+      ?"هذه فرصة منشورة عامة وليست مطابقة مؤكدة؛ راجع شروط الإعلان قبل التقديم."
+      :"هذه درجة ملاءمة تقديرية من بيانات الملف والفرصة، وليست وعدًا بالتوظيف.";
+    const actions=document.createElement("div");
+    actions.className="jibran-actions";
+    actions.style.marginTop="8px";
+    if(job.id!==undefined&&job.id!==null&&Array.isArray(allVisibleJobs)&&allVisibleJobs.some(j=>String(j.id)===String(job.id))){
+     const detail=document.createElement("button");
+     detail.type="button";
+     detail.className="primary-btn";
+     detail.textContent="📄 تفاصيل الفرصة";
+     detail.addEventListener("click",()=>openJobDetails(job.id));
+     actions.appendChild(detail);
+    }else if(job.source_url||job.canonical_url){
+     const link=document.createElement("a");
+     link.className="primary-btn";
+     link.style.cssText="text-align:center;text-decoration:none";
+     link.href=job.source_url||job.canonical_url;
+     link.target="_blank";
+     link.rel="noopener noreferrer";
+     link.textContent="🔗 فتح الإعلان";
+     actions.appendChild(link);
+    }
+    const more=document.createElement("button");
+    more.type="button";
+    more.className="secondary-btn";
+    more.textContent="🎯 المطابقة الذاتية";
+    more.addEventListener("click",jibranOpenAllMatches);
+    actions.appendChild(more);
+    card.append(top,meta,note,actions);
+    box.appendChild(card);
+   });
+  }
+  const footer=document.createElement("button");
+  footer.type="button";
+  footer.className="secondary-btn";
+  footer.style.cssText="width:100%;margin-top:10px";
+  footer.textContent="عرض جميع المطابقات";
+  footer.addEventListener("click",jibranOpenAllMatches);
+  box.appendChild(footer);
+ });
+}
 function jibranNextStep(p){
  if(!p||!p.occupation_label)return "الخطوة التالية: أكمل ملفك المهني واحفظه، ثم افتح قسم «الفرص» لمراجعة الإعلانات المتاحة.";
  const profileText=normalizeText([p.occupation_label,p.qualification,p.skills].filter(Boolean).join(" "));
@@ -1202,6 +1327,7 @@ async function askJibran(kind){
      try{
        const data=await jibranGetClosestResults(p);
        msg=jibranComposeMatchAnswer(data);
+       jibranRenderMatchResults(data);
        }catch(e){msg="تعذر تحديث المطابقة الرسمية الآن. حاول مرة أخرى بعد قليل."}
    }
  }else if(kind==="next")msg=jibranNextStep(p);
@@ -1210,8 +1336,10 @@ async function askJibran(kind){
 async function askJibranUser(){
  const input=document.getElementById("jibranInput");const q=normalizeText(input.value);
  if(!q){showToast("✍️ اكتب سؤالك.");return}
- let ans="";const p=localProfile();const a=getLS(LS.assessment,null);
- const asksBest=q.includes("مناسبة")||q.includes("مناسب")||q.includes("الفرصة المناسبة")||q.includes("حسب ملفي")||q.includes("حسب تقييمي")||q.includes("تقييمي")||q.includes("ملفي")||q.includes("فرصي")||q.includes("قرب")||q.includes("الفرص الأنسب");
+ jibranClearMatchResults();
+ let ans="",matchedData=null;const p=localProfile();const a=getLS(LS.assessment,null);
+ const asksBestTerms=["مناسبة","مناسب","الفرصة الانسب","الانسب","الاقرب","الافضل","حسب ملفي","حسب تقييمي","تقييمي","ملفي","فرصي","قرب","ما يناسبني","يناسبني","رشح لي","ترشيح","تناسب خبرتي","تناسب مؤهلي"];
+ const asksBest=asksBestTerms.some(term=>q.includes(normalizeText(term)));
  if(q.includes("اشتراك")||q.includes("دولار"))ans="الاشتراك دولار واحد شهريًا للمتابعة المستمرة والمطابقة والتنبيهات.";
  else if(asksBest){
    if(!p.full_name||!p.occupation_label)ans="أكمل ملفك المهني واختر المهنة أولًا، وبعدها تبدأ المطابقة الرسمية.";
@@ -1219,8 +1347,10 @@ async function askJibranUser(){
    else{
      try{
        const data=await jibranGetClosestResults(p);
+       matchedData=data;
        const assessment=a&&Number(a.score)>0?"، وتقييم ملفك الحالي "+Math.round(Number(a.score))+"/100":"";
-       ans=jibranComposeMatchAnswer(data,assessment);
+       const resultCount=(Array.isArray(data.directMatches)?data.directMatches.length:0)+(Array.isArray(data.publicMatches)?data.publicMatches.length:0);
+       ans=resultCount?"راجعت ملفك"+assessment+" والفرص المنشورة. أظهرت لك أدناه أقرب الفرص المتاحة ودرجة ملاءمتها التقديرية؛ افتح تفاصيل الإعلان وراجع شروطه قبل التقديم.":jibranComposeMatchAnswer(data,assessment);
        }catch(e){ans="تعذر تحديث المطابقة الرسمية الآن. حاول مرة أخرى بعد قليل."}
    }
  }else if(q.includes("وظيفة")||q.includes("فرصة"))ans="لدي مَدخَل فرص فعلية في سوريا والشرق الأوسط. افتح قسم الفرص وابحث ثم افتح التفاصيل قبل التقديم.";
@@ -1229,6 +1359,7 @@ async function askJibranUser(){
  else if(q.includes("ملف"))ans=p.full_name?"راجع المهنة المعتمدة واسم الأم والمكان ونوع العمل ثم احفظ التعديلات.":"ابدأ بالملف المهني: الاسم، اسم الأم، المهنة المعتمدة، المكان ونوع العمل.";
  else ans=p.full_name?"أستطيع مساعدتك في الملف والمطابقة والفرص والتقديم والاشتراك.":"ابدأ بملفك المهني، ثم ننتقل إلى المطابقة الرسمية.";
  if(ans)document.getElementById("jibranMainText").textContent=ans;
+ if(matchedData)jibranRenderMatchResults(matchedData);
  input.value="";
 }
 function renderJibranContext(){const p=localProfile();const el=document.getElementById("jibranContext");if(el)el.innerHTML="<h3>السياق الحالي</h3><p>"+escapeHtml(p.full_name?("ملف محفوظ باسم "+p.full_name+". المهنة: "+(p.occupation_label||"غير محددة")+"، المكان: "+(p.location||"غير محدد")+"."):"لا يوجد ملف محفوظ بعد.")+"</p>"}
