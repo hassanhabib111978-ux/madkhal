@@ -8,8 +8,8 @@ function canonicalOccupationScore(occ,title){
  const o=canonicalClean(occ),t=canonicalClean(title); if(!o||!t)return 0;
  // ICT / telecommunications systems and configuration-management occupations.
  // Treat close technical roles as related when the selected occupation explicitly belongs to this family.
- const ictProfile=/(تكنولوجيا المعلومات|تقنيه المعلومات|المعلومات والاتصالات|الاتصالات|information technology|information and communications|telecommunications|telecom|\\bict\\b|it systems|configuration manager)/.test(o);
- const ictJob=/(تكنولوجيا المعلومات|تقنيه المعلومات|المعلومات والاتصالات|الاتصالات|مهندس شبكات|مهندس اتصالات|مسؤول شبكات|مدير الشبكات|مسؤول انظمه|مسؤول نظم|اداره الانظمه|اداره نظم|تهيئه الانظمه|اعداد الانظمه|الدعم الفني|تقني المعلومات|information technology|information systems|\\bict\\b|\\btelecommunications?\\b|\\btelecom\\b|\\bnetwork (engineer|administrator|admin|manager|specialist)\\b|\\bsystems? (administrator|admin|engineer|manager|configuration|config)\\b|\\bconfiguration (manager|analyst|specialist|engineer)\\b|\\bit support\\b|\\btechnical support\\b|\\bsysadmin\\b)/.test(t);
+ const ictProfile=/(تكنولوجيا المعلومات|تقنيه المعلومات|المعلومات والاتصالات|الاتصالات|information technology|information and communications|telecommunications|telecom|\bict\b|it systems|configuration manager)/.test(o);
+ const ictJob=/(تكنولوجيا المعلومات|تقنيه المعلومات|المعلومات والاتصالات|الاتصالات|مهندس شبكات|مهندس اتصالات|مسؤول شبكات|مدير الشبكات|مسؤول انظمه|مسؤول نظم|اداره الانظمه|اداره نظم|تهيئه الانظمه|اعداد الانظمه|الدعم الفني|دعم فني|تقني المعلومات|information technology|information systems|\bict\b|\btelecommunications?\b|\btelecom\b|\bnetwork (engineer|administrator|admin|manager|specialist)\b|\bsystems? (administrator|admin|engineer|manager|configuration|config)\b|\bconfiguration (manager|analyst|specialist|engineer)\b|\bit support\b|\btechnical support\b|\bsysadmin\b)/.test(t);
  if(ictProfile&&ictJob)return 42;
  const groups=[
   ['مدرس أدب','مدرس الادب','معلم أدب','معلم الادب','literature teacher','arabic literature teacher'],
