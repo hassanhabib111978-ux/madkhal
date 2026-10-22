@@ -1152,7 +1152,7 @@ function jibranFormatOpportunity(x){
 function jibranNextStep(p){
  if(!p||!p.occupation_label)return "الخطوة التالية: أكمل ملفك المهني واحفظه، ثم افتح قسم «الفرص» لمراجعة الإعلانات المتاحة.";
  const profileText=normalizeText([p.occupation_label,p.qualification,p.skills].filter(Boolean).join(" "));
- const ict=/(اتصالات|تكنولوجيا المعلومات|تقنيه المعلومات|شبكات|telecom|telecommunications|information technology|information systems|\\bict\\b)/.test(profileText);
+ const ict=/(اتصالات|تكنولوجيا المعلومات|تقنيه المعلومات|شبكات|telecom|telecommunications|information technology|information systems|\bict\b)/.test(profileText);
  if(ict)return "الخطوة التالية: افتح قسم «الفرص» وابدأ بفرص تكنولوجيا المعلومات والاتصالات، وإدارة الأنظمة والشبكات، والتهيئة والدعم الفني. راجع المكان وشروط المؤهل والخبرة قبل التقديم. أضف إلى ملفك المهارات التي تتقنها فعلًا، مثل إدارة الشبكات أو تهيئة الأنظمة أو الدعم الفني، ثم احفظه وأعد المطابقة. لا توجد حاليًا مطابقة مباشرة مؤكدة؛ الفرص العامة تحتاج مراجعتك قبل التقديم.";
  return "الخطوة التالية: افتح قسم «الفرص» وراجع الإعلانات الأقرب إلى مهنتك ومكانك ونوع الدوام. إذا لم توجد مطابقة مباشرة، فراجع الفرص العامة يدويًا، وأضف مهاراتك العملية المحددة إلى الملف ثم احفظه وأعد المطابقة.";
 }
