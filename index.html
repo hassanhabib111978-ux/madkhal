@@ -1157,18 +1157,18 @@ function jibranActiveDirectMatches(data){
 }
 async function jibranGetClosestResults(profile){
  if(typeof window.loadCanonicalWorkerMatchData!=="function")throw new Error("MATCH_ENGINE_UNAVAILABLE");
+ // Refresh the published feed first: the manual match center may have been opened after the
+ // previous cached list was loaded, so Jibran must not answer from an older in-memory snapshot.
+ if(typeof loadJobs==="function")await loadJobs(true);
  const data=await window.loadCanonicalWorkerMatchData(profile);
  const direct=jibranActiveDirectMatches(data);
- let publicMatches=Array.isArray(data?.publicMatches)?data.publicMatches:[];
- // Use the same public-job scorer as the manual match center. If its first load returned no rows,
- // retry the published feed once before telling the worker there are no opportunities.
- if(!publicMatches.length){
-  let jobs=Array.isArray(allVisibleJobs)?allVisibleJobs:[];
-  if(!jobs.length&&typeof loadJobs==="function")jobs=await loadJobs(true);
-  if(typeof window.getCanonicalWorkerPublicMatches==="function"&&jobs.length){
-   publicMatches=window.getCanonicalWorkerPublicMatches(jobs,localProfile()||profile,10);
-  }
- }
+ // Recalculate using exactly the same public-job scoring function as the manual match center,
+ // against the freshest loaded job list, rather than trusting an old result snapshot.
+ const currentProfile=localProfile()||profile;
+ const jobs=Array.isArray(allVisibleJobs)?allVisibleJobs:[];
+ const publicMatches=typeof window.getCanonicalWorkerPublicMatches==="function"
+  ?window.getCanonicalWorkerPublicMatches(jobs,currentProfile,10)
+  :(Array.isArray(data?.publicMatches)?data.publicMatches:[]);
  return {directMatches:direct,publicMatches};
 }
 function jibranComposeMatchAnswer(data,assessmentText=""){
@@ -1283,6 +1283,6 @@ document.addEventListener("DOMContentLoaded",async()=>{selectedSkills=getLS(LS.s
 <script src="./subscription-runtime.js"></script>
 <script src="./jibran.js?v=20261017-2"></script>
 <script src="./employer-flow-enhancement.js"></script>
-<script src="./worker-match-lifecycle.js?v=20261022-2"></script>
+<script src="./worker-match-lifecycle.js?v=20261022-3"></script>
 </body>
 </html>
