@@ -1162,14 +1162,16 @@ async function jibranGetClosestResults(profile){
  if(typeof loadJobs==="function")await loadJobs(true);
  const data=await window.loadCanonicalWorkerMatchData(profile);
  const direct=jibranActiveDirectMatches(data);
- // Recalculate using exactly the same public-job scoring function as the manual match center,
- // against the freshest loaded job list, rather than trusting an old result snapshot.
- const currentProfile=localProfile()||profile;
- const jobs=Array.isArray(allVisibleJobs)?allVisibleJobs:[];
- const publicMatches=typeof window.getCanonicalWorkerPublicMatches==="function"
-  ?window.getCanonicalWorkerPublicMatches(jobs,currentProfile,10)
-  :(Array.isArray(data?.publicMatches)?data.publicMatches:[]);
- return {directMatches:direct,publicMatches};
+ // Use the exact public matches returned by the canonical matcher. That function refreshes
+ // the saved profile and loads published jobs itself, just as the manual match center does.
+ // Do not replace its valid results with allVisibleJobs: that UI cache may be empty or stale.
+ let publicMatches=Array.isArray(data?.publicMatches)?data.publicMatches:null;
+ if(!publicMatches && typeof window.getCanonicalWorkerPublicMatches==="function"){
+  const currentProfile=localProfile()||profile;
+  const jobs=Array.isArray(allVisibleJobs)?allVisibleJobs:[];
+  publicMatches=window.getCanonicalWorkerPublicMatches(jobs,currentProfile,10);
+ }
+ return {directMatches:direct,publicMatches:publicMatches||[]};
 }
 function jibranComposeMatchAnswer(data,assessmentText=""){
  const direct=(data?.directMatches||[]).slice(0,3);
