@@ -1149,6 +1149,13 @@ function jibranFormatOpportunity(x){
  const kind=x&&x.general?"فرصة عامة":(Number.isFinite(score)&&score>0?Math.round(score)+"% ملاءمة":"فرصة منشورة");
  return [j.title||"فرصة عمل",j.company||"",place,kind].filter(Boolean).join(" — ");
 }
+function jibranNextStep(p){
+ if(!p||!p.occupation_label)return "الخطوة التالية: أكمل ملفك المهني واحفظه، ثم افتح قسم «الفرص» لمراجعة الإعلانات المتاحة.";
+ const profileText=normalizeText([p.occupation_label,p.qualification,p.skills].filter(Boolean).join(" "));
+ const ict=/(اتصالات|تكنولوجيا المعلومات|تقنيه المعلومات|شبكات|telecom|telecommunications|information technology|information systems|\\bict\\b)/.test(profileText);
+ if(ict)return "الخطوة التالية: افتح قسم «الفرص» وابدأ بفرص تكنولوجيا المعلومات والاتصالات، وإدارة الأنظمة والشبكات، والتهيئة والدعم الفني. راجع المكان وشروط المؤهل والخبرة قبل التقديم. أضف إلى ملفك المهارات التي تتقنها فعلًا، مثل إدارة الشبكات أو تهيئة الأنظمة أو الدعم الفني، ثم احفظه وأعد المطابقة. لا توجد حاليًا مطابقة مباشرة مؤكدة؛ الفرص العامة تحتاج مراجعتك قبل التقديم.";
+ return "الخطوة التالية: افتح قسم «الفرص» وراجع الإعلانات الأقرب إلى مهنتك ومكانك ونوع الدوام. إذا لم توجد مطابقة مباشرة، فراجع الفرص العامة يدويًا، وأضف مهاراتك العملية المحددة إلى الملف ثم احفظه وأعد المطابقة.";
+}
 async function askJibran(kind){
  const p=localProfile();let msg="";
  if(kind==="profile")msg=p.full_name?"ملفك موجود. راجع المهنة المعتمدة واسم الأم والمكان ونوع العمل ثم احفظ التعديلات.":"ابدأ بالملف المهني: الاسم، اسم الأم، المهنة المعتمدة، المكان ونوع العمل. بعد ذلك تصبح المطابقة أدق.";
@@ -1170,7 +1177,7 @@ async function askJibran(kind){
          :"لا توجد مطابقة مباشرة، ولم تُحمّل فرص عامة الآن. افتح قسم «الفرص» ثم أعد المحاولة.";
        }catch(e){msg="تعذر تحديث المطابقة الرسمية الآن. حاول مرة أخرى بعد قليل."}
    }
- }else if(kind==="next")msg=p.occupation_label?"الخطوة التالية: راجع المطابقات الرسمية، افتح تفاصيل الفرصة، ثم قدّم وسجل طلبك. جميع هذه الخطوات متاحة مجانًا حاليًا.":"الخطوة التالية: أكمل ملفك واختر مهنة مرتبطة بفرصة فعلية.";
+ }else if(kind==="next")msg=jibranNextStep(p);
  document.getElementById("jibranHomeText").textContent=msg;document.getElementById("jibranAccountText").textContent=msg
 }
 async function askJibranUser(){
@@ -1197,7 +1204,7 @@ async function askJibranUser(){
    }
  }else if(q.includes("وظيفة")||q.includes("فرصة"))ans="لدي مَدخَل فرص فعلية في سوريا والشرق الأوسط. افتح قسم الفرص وابحث ثم افتح التفاصيل قبل التقديم.";
  else if(q.includes("مطابق"))ans="يمكنني عرض المطابقة الرسمية بعد حفظ ملفك المهني.";
- else if(q.includes("خطوة"))ans=p.occupation_label?"الخطوة التالية: راجع المطابقات الرسمية، افتح تفاصيل الفرصة، ثم قدّم وسجل طلبك. جميع هذه الخطوات متاحة مجانًا حاليًا.":"الخطوة التالية: أكمل ملفك المهني أولًا.";
+ else if(q.includes("خطوة"))ans=jibranNextStep(p);
  else if(q.includes("ملف"))ans=p.full_name?"راجع المهنة المعتمدة واسم الأم والمكان ونوع العمل ثم احفظ التعديلات.":"ابدأ بالملف المهني: الاسم، اسم الأم، المهنة المعتمدة، المكان ونوع العمل.";
  else ans=p.full_name?"أستطيع مساعدتك في الملف والمطابقة والفرص والتقديم والاشتراك.":"ابدأ بملفك المهني، ثم ننتقل إلى المطابقة الرسمية.";
  if(ans)document.getElementById("jibranMainText").textContent=ans;
@@ -1255,6 +1262,6 @@ document.addEventListener("DOMContentLoaded",async()=>{selectedSkills=getLS(LS.s
 <script src="./subscription-runtime.js"></script>
 <script src="./jibran.js?v=20261017-2"></script>
 <script src="./employer-flow-enhancement.js"></script>
-<script src="./worker-match-lifecycle.js?v=20261017-6"></script>
+<script src="./worker-match-lifecycle.js?v=20261022-1"></script>
 </body>
 </html>
