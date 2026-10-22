@@ -1327,7 +1327,8 @@ async function askJibran(kind){
    else{
      try{
        const data=await jibranGetClosestResults(p);
-       msg=jibranComposeMatchAnswer(data);
+       const resultCount=(Array.isArray(data.directMatches)?data.directMatches.length:0)+(Array.isArray(data.publicMatches)?data.publicMatches.length:0);
+       msg=resultCount?"راجعت ملفك والفرص الحالية. تظهر أدناه أقرب الفرص مع درجة الملاءمة التقديرية وأزرار فتح التفاصيل.":jibranComposeMatchAnswer(data);
        jibranRenderMatchResults(data);
        }catch(e){msg="تعذر تحديث المطابقة الرسمية الآن. حاول مرة أخرى بعد قليل."}
    }
