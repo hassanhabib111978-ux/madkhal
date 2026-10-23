@@ -35,9 +35,9 @@ jobs:
               ("worker-match-lifecycle.js", '<script src="./worker-match-lifecycle.js"></script>')
           ]
           for filename, tag in scripts:
-              pattern = r'<script\\b[^>]*\\bsrc=["\\'](?:\\./)?' + re.escape(filename) + r'(?:\\?[^"\\']*)?["\\'][^>]*>\\s*</script>'
-              if not re.search(pattern, s):
-                  s = s.replace("</body>", "    " + tag + "\\n</body>")
+              pattern = re.compile(r"""<script\b[^>]*\bsrc=["'](?:\./)?""" + re.escape(filename) + r"""(?:\?[^"']*)?["'][^>]*>\s*</script>""", re.IGNORECASE)
+              if not pattern.search(s):
+                  s = s.replace("</body>", "    " + tag + "\n</body>")
           p.write_text(s, encoding="utf-8")
           PY
 
