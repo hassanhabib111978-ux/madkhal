@@ -299,7 +299,8 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <div class="jibran"><div class="jibran-title">🤖 جبران — مساعد مَدخَل</div><div id="jibranHomeText" class="jibran-bubble">اسألني عن ملفك أو عن كيفية الوصول إلى فرصة مناسبة.</div><div id="jibranHomeMatchResults" class="hidden" aria-live="polite"></div><div class="jibran-actions"><button class="secondary-btn" onclick="askJibran('profile')">كيف أبني ملفي؟</button><button class="secondary-btn" onclick="askJibran('jobs')">كيف أجد فرصة؟</button><button class="secondary-btn" onclick="askJibran('match')">🎯 الفرص الأنسب</button></div></div>
   <h2 class="section-title">رحلتك</h2>
   <div class="journey"><div class="journey-item"><span>👤</span>بياناتك</div><div class="journey-item"><span>🧠</span>مهاراتك</div><div class="journey-item"><span>🎯</span>المطابقة</div><div class="journey-item"><span>🔎</span>الفرص</div><div class="journey-item"><span>📩</span>التقديم</div><div class="journey-item"><span>🔔</span>المتابعة</div></div>
-  <div class="premium"><span class="premium-badge">🎉 البحث الأساسي مجاني</span><h3 style="margin-top:10px">مَدخَل — البحث والمتابعة الذكية</h3><p><strong>يمكنك إنشاء ملفك، استكشاف الفرص، التقييم، المطابقة الأساسية والتقديم مجانًا.</strong> والاشتراك اختياري لمن يريد المتابعة المستمرة والتنبيهات عند ظهور فرص جديدة مناسبة.</p><div class="notice success">💵 المتابعة الذكية: دولار واحد شهريًا. تسجيل الطلب متاح، أما التفعيل فيتم بعد التحقق من الدفع.</div><button class="primary-btn" style="width:100%;margin-top:10px" onclick="openSubscription()">🔔 الاشتراك الشهري — $1</button></div>
+  <div class="premium" id="subscriptionOfferCard"><span class="premium-badge">🎉 البحث الأساسي مجاني</span><h3 style="margin-top:10px">مَدخَل — البحث والمتابعة الذكية</h3><p><strong>يمكنك إنشاء ملفك، استكشاف الفرص، التقييم، المطابقة الأساسية والتقديم مجانًا.</strong> والاشتراك اختياري لمن يريد المتابعة المستمرة والتنبيهات عند ظهور فرص جديدة مناسبة.</p><div class="notice success">💵 المتابعة الذكية: دولار واحد شهريًا. تسجيل الطلب متاح، أما التفعيل فيتم بعد التحقق من الدفع.</div><button class="primary-btn" style="width:100%;margin-top:10px" onclick="openSubscription()">🔔 الاشتراك الشهري — $1</button></div>
+  <div id="subscriptionPausedNotice" class="card hidden"><h3>⏸️ الاشتراك الشهري متوقف مؤقتًا</h3><p>جميع وظائف مَدخَل الأساسية متاحة مجانًا خلال هذه المرحلة، بما فيها الملف المهني والتقييم والبحث والمطابقة الأساسية والتقديم. سنعيد خيار الاشتراك عند تفعيله لاحقًا.</p></div>
 </section>
 
 <section id="workerScreen" class="screen">
@@ -409,6 +410,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 <div id="toast" class="toast"></div>
 
 <script>
+window.MADKHAL_MONTHLY_SUBSCRIPTION_ENABLED = false; // أعده إلى true لإظهار الاشتراك مجددًا
 "use strict";
 
 const SUPABASE_URL="https://qbufsdpdobuicpljnssr.supabase.co";
@@ -495,8 +497,8 @@ function ensureAccountAssessment(){
   const hasProfile=Object.values(p).some(v=>String(v??"").trim().length>0);
   if(!hasProfile)return;
 }
-function showScreen(id,focusId){const target=document.getElementById(id);if(!target)return;currentScreen=id;document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id));updateNav(id);if(id==="accountScreen"){ensureAccountAssessment();loadAccount();setTimeout(()=>{try{ensureAccountAssessment();const p=localProfile()||{};if(Object.values(p).some(v=>String(v??"").trim().length>0)){const a=calculateAutomaticAssessmentInstant(p);if(a&&Number.isFinite(Number(a.score)))renderAutomaticAssessment(a)}}catch(e){console.warn("account assessment visible fallback",e)}},250);}if(id==="opportunitiesScreen"){renderCategories();renderOpportunities()}if(id==="subscriptionScreen"){renderSubscription();syncSubscriptionStatus();}if(id==="jibranScreen")renderJibranContext();scrollToActive(id,focusId)}
-function openSubscription(){showScreen("subscriptionScreen","subscriptionScreen")}
+function showScreen(id,focusId){if(id==="subscriptionScreen"&&window.MADKHAL_MONTHLY_SUBSCRIPTION_ENABLED===false){if(typeof showToast==="function")showToast("⏸️ الاشتراك الشهري متوقف مؤقتًا؛ وظائف مَدخَل الأساسية مجانية.");id="homeScreen";focusId="homeScreen"}const target=document.getElementById(id);if(!target)return;currentScreen=id;document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id));updateNav(id);if(id==="accountScreen"){ensureAccountAssessment();loadAccount();setTimeout(()=>{try{ensureAccountAssessment();const p=localProfile()||{};if(Object.values(p).some(v=>String(v??"").trim().length>0)){const a=calculateAutomaticAssessmentInstant(p);if(a&&Number.isFinite(Number(a.score)))renderAutomaticAssessment(a)}}catch(e){console.warn("account assessment visible fallback",e)}},250);}if(id==="opportunitiesScreen"){renderCategories();renderOpportunities()}if(id==="subscriptionScreen"){renderSubscription();syncSubscriptionStatus();}if(id==="jibranScreen")renderJibranContext();scrollToActive(id,focusId)}
+function openSubscription(){if(window.MADKHAL_MONTHLY_SUBSCRIPTION_ENABLED===false){if(typeof showToast==="function")showToast("⏸️ الاشتراك الشهري متوقف مؤقتًا.");return}showScreen("subscriptionScreen","subscriptionScreen")}
 function openWorker(){showScreen("workerScreen","workerScreen")}
 async function openProfile(){showScreen("profileScreen","workerFirstName");await loadProfile()}
 function openEmployer(){showScreen("employerScreen","employerName")}
@@ -1424,6 +1426,20 @@ window.addEventListener("appinstalled",()=>{installPromptEvent=null;document.get
 async function installMadkhal(){if(!installPromptEvent){showToast("📱 استخدم قائمة المتصفح ثم اختر إضافة إلى الشاشة الرئيسية.");return}installPromptEvent.prompt();try{await installPromptEvent.userChoice}catch(e){}installPromptEvent=null;document.getElementById("installBar").classList.add("hidden")}
 
 document.addEventListener("DOMContentLoaded",async()=>{selectedSkills=getLS(LS.selectedSkills,[]);await loadJobs();updateJobCounter();await loadProfileRemote();generateLocalMatches();renderCategories();renderOpportunities();renderSkills();await loadAccount();ensureAccountAssessment();await renderNotifications();initOccupationPickers();if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js",{scope:"./"}).catch(()=>{});});
+
+function updateSubscriptionFeatureVisibility(){
+  const enabled=window.MADKHAL_MONTHLY_SUBSCRIPTION_ENABLED===true;
+  const offer=document.getElementById("subscriptionOfferCard");
+  const paused=document.getElementById("subscriptionPausedNotice");
+  const payment=document.getElementById("madkhalPaymentMethods");
+  const screen=document.getElementById("subscriptionScreen");
+  const activation=screen ? screen.querySelector("[onclick=\"startSubscriptionRequest()\"]") : null;
+  if(offer)offer.style.display=enabled?"":"none";
+  if(paused)paused.classList.toggle("hidden",enabled);
+  if(payment)payment.style.display=enabled?"":"none";
+  if(activation)activation.disabled=!enabled;
+}
+document.addEventListener("DOMContentLoaded",updateSubscriptionFeatureVisibility);
 </script>
 <script src="./subscription-runtime.js?v=20261023-1"></script>
 <script src="./jibran.js?v=20261023-1"></script>
