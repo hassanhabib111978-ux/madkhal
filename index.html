@@ -1158,21 +1158,23 @@ function jibranActiveDirectMatches(data){
 }
 async function jibranGetClosestResults(profile){
  if(typeof window.loadCanonicalWorkerMatchData!=="function")throw new Error("MATCH_ENGINE_UNAVAILABLE");
- // Refresh the published feed first: the manual match center may have been opened after the
- // previous cached list was loaded, so Jibran must not answer from an older in-memory snapshot.
- if(typeof loadJobs==="function")await loadJobs(true);
- const data=await window.loadCanonicalWorkerMatchData(profile);
+ // Use the same saved profile as the manual match center before applying any local guards.
+ try{if(typeof window.loadProfileRemote==="function")await window.loadProfileRemote()}catch(e){console.warn("Jibran profile refresh",e)}
+ const currentProfile=localProfile()||profile||{};
+ const data=await window.loadCanonicalWorkerMatchData(currentProfile);
  const direct=jibranActiveDirectMatches(data);
- // Use the exact public matches returned by the canonical matcher. That function refreshes
- // the saved profile and loads published jobs itself, just as the manual match center does.
- // Do not replace its valid results with allVisibleJobs: that UI cache may be empty or stale.
  let publicMatches=Array.isArray(data?.publicMatches)?data.publicMatches:null;
- if(!publicMatches && typeof window.getCanonicalWorkerPublicMatches==="function"){
-  const currentProfile=localProfile()||profile;
-  const jobs=Array.isArray(allVisibleJobs)?allVisibleJobs:[];
-  publicMatches=window.getCanonicalWorkerPublicMatches(jobs,currentProfile,10);
+ // An empty array is a valid array but not a result. If the canonical call returned no public
+ // results while the published-job cache contains jobs, rank those jobs through the same matcher.
+ if((!publicMatches||!publicMatches.length)&&typeof window.getCanonicalWorkerPublicMatches==="function"){
+  let jobs=Array.isArray(allVisibleJobs)?allVisibleJobs:[];
+  if(!jobs.length&&typeof loadJobs==="function"){
+   try{const refreshed=await loadJobs(true);if(Array.isArray(refreshed))jobs=refreshed}catch(e){console.warn("Jibran job refresh",e)}
+  }
+  const fallback=window.getCanonicalWorkerPublicMatches(jobs,localProfile()||currentProfile,10);
+  if(Array.isArray(fallback)&&fallback.length)publicMatches=fallback;
  }
- return {directMatches:direct,publicMatches:publicMatches||[]};
+ return {directMatches:direct,publicMatches:Array.isArray(publicMatches)?publicMatches:[]};
 }
 function jibranComposeMatchAnswer(data,assessmentText=""){
  const direct=(data?.directMatches||[]).slice(0,3);
@@ -1321,6 +1323,9 @@ function jibranNextStep(p){
 }
 async function askJibran(kind){
  if(kind==="match")jibranClearMatchResults();
+ if(kind==="match"&&typeof window.loadProfileRemote==="function"){
+  try{await window.loadProfileRemote()}catch(e){console.warn("Jibran profile refresh",e)}
+ }
  const p=localProfile();let msg="";
  if(kind==="profile")msg=p.full_name?"ملفك موجود. راجع المهنة المعتمدة واسم الأم والمكان ونوع العمل ثم احفظ التعديلات.":"ابدأ بالملف المهني: الاسم، اسم الأم، المهنة المعتمدة، المكان ونوع العمل. بعد ذلك تصبح المطابقة أدق.";
  else if(kind==="jobs")msg=allVisibleJobs.length?"لدي مَدخَل "+allVisibleJobs.length+" فرصة فعلية ضمن نطاق سوريا والشرق الأوسط في هذه الجلسة. ابدأ بالبحث ثم افتح التفاصيل قبل التقديم.":"افتح قسم الفرص لتحميل الفرص الفعلية من قاعدة البيانات، ثم استخدم المهنة والمكان لتضييق النتائج.";
@@ -1342,9 +1347,13 @@ async function askJibranUser(){
  const input=document.getElementById("jibranInput");const q=normalizeText(input.value);
  if(!q){showToast("✍️ اكتب سؤالك.");return}
  jibranClearMatchResults();
- let ans="",matchedData=null;const p=localProfile();const a=getLS(LS.assessment,null);
+ let ans="",matchedData=null;const a=getLS(LS.assessment,null);
  const asksBestTerms=["مناسبة","مناسب","الفرصة الانسب","الانسب","الاقرب","الافضل","حسب ملفي","حسب تقييمي","تقييمي","ملفي","فرصي","قرب","ما يناسبني","يناسبني","رشح لي","ترشيح","تناسب خبرتي","تناسب مؤهلي"];
  const asksBest=asksBestTerms.some(term=>q.includes(normalizeText(term)));
+ if(asksBest&&typeof window.loadProfileRemote==="function"){
+  try{await window.loadProfileRemote()}catch(e){console.warn("Jibran profile refresh",e)}
+ }
+ const p=localProfile();
  if(q.includes("اشتراك")||q.includes("دولار"))ans="الاشتراك دولار واحد شهريًا للمتابعة المستمرة والمطابقة والتنبيهات.";
  else if(asksBest){
    if(!p.full_name||!p.occupation_label)ans="أكمل ملفك المهني واختر المهنة أولًا، وبعدها تبدأ المطابقة الرسمية.";
@@ -1416,9 +1425,9 @@ async function installMadkhal(){if(!installPromptEvent){showToast("📱 استخ
 
 document.addEventListener("DOMContentLoaded",async()=>{selectedSkills=getLS(LS.selectedSkills,[]);await loadJobs();updateJobCounter();await loadProfileRemote();generateLocalMatches();renderCategories();renderOpportunities();renderSkills();await loadAccount();ensureAccountAssessment();await renderNotifications();initOccupationPickers();if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js",{scope:"./"}).catch(()=>{});});
 </script>
-<script src="./subscription-runtime.js"></script>
-<script src="./jibran.js?v=20261017-2"></script>
+<script src="./subscription-runtime.js?v=20261023-1"></script>
+<script src="./jibran.js?v=20261023-1"></script>
 <script src="./employer-flow-enhancement.js"></script>
-<script src="./worker-match-lifecycle.js?v=20261022-3"></script>
+<script src="./worker-match-lifecycle.js?v=20261023-1"></script>
 </body>
 </html>
