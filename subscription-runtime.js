@@ -49,6 +49,14 @@
     const screen=document.getElementById("subscriptionScreen");
     const statusBox=document.getElementById("subscriptionStatus");
     const accountBox=document.getElementById("accountSubscriptionStatus");
+    if(window.MADKHAL_MONTHLY_SUBSCRIPTION_ENABLED===false){
+      if(statusBox)statusBox.textContent="⏸️ الاشتراك الشهري متوقف مؤقتًا؛ يمكنك استخدام وظائف مَدخَل الأساسية مجانًا.";
+      if(accountBox)accountBox.textContent="الاشتراك الشهري متوقف مؤقتًا. الملف المهني والتقييم والفرص والمطابقة الأساسية والتقديم متاحة مجانًا.";
+      const payButton=document.getElementById("paymentContinueButton");if(payButton)payButton.disabled=true;
+      const activation=screen ? screen.querySelector("[onclick=\"startSubscriptionRequest()\"]") : null;if(activation)activation.disabled=true;
+      const paymentCard=document.getElementById("madkhalPaymentMethods");if(paymentCard)paymentCard.style.display="none";
+      return false;
+    }
     const s=remote||null;
     const active=isActive(s);
     const requested=s?.status==="requested";
@@ -87,6 +95,7 @@
   }
 
   async function startSubscriptionRequest(){
+    if(window.MADKHAL_MONTHLY_SUBSCRIPTION_ENABLED===false){if(typeof showToast==="function")showToast("⏸️ الاشتراك الشهري متوقف مؤقتًا.");return false;}
     const confirmed=lsGet(PROFILE_CONFIRM_KEY,"")==="1" ||
       lsGet("madkhal_worker_confirmation_version","")==="dastoor-v2";
     if(!confirmed){
@@ -149,6 +158,7 @@
   }
 
   async function startLocalPayment(){
+    if(window.MADKHAL_MONTHLY_SUBSCRIPTION_ENABLED===false){if(typeof showToast==="function")showToast("⏸️ الدفع والاشتراك متوقفان مؤقتًا.");return;}
     const method=lsGet(PAYMENT_KEY,"");
     if(!method){
       if(typeof showToast==="function")showToast("اختر وسيلة الدفع أولًا.");
