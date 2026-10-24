@@ -66,6 +66,7 @@ No source ingestion was rebuilt or deleted in this batch. Payment activation rem
 ## 2026-10-24 — Geographic opportunity filter correction
 - Fixed the English location boundary expression in the client-side opportunity filter; it previously contained an over-escaped word-boundary pattern and could miss location-only values such as “Syria” or “Middle East”.
 - Fixed Jibran's best-opportunity intent detection to normalize Arabic `ة`/`ه` spelling variants only for intent matching and recognize standalone `الأنسب`/`أفضل`, so a prompt like `إيجاد الفرصه الأنسب` reaches the canonical matching engine instead of falling through to a generic answer.
+- Removed broad standalone `ملفي` and `تقييمي` triggers from the match-intent list; those words alone no longer route ordinary profile/evaluation questions into the job-matching flow.
 - Made the canonical `OUTSIDE_SCOPE` classification take precedence over fallback region/country/location hints, preventing contradictory metadata from admitting out-of-scope opportunities.
 - Kept the change limited to client-side visibility filtering. No job-source ingestion code, job rows, schemas, or matching-score thresholds were changed.
 - Verification: checked the live `public.jobs` schema and current status distribution; ran focused cases for Syria/MENA location-only matches and contradictory `OUTSIDE_SCOPE` metadata. A full browser/device regression still needs to be run before merging.
