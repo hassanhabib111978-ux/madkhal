@@ -1346,12 +1346,12 @@ async function askJibran(kind){
  document.getElementById("jibranHomeText").textContent=msg;document.getElementById("jibranAccountText").textContent=msg
 }
 async function askJibranUser(){
- const input=document.getElementById("jibranInput");const q=normalizeText(input.value);
+ const input=document.getElementById("jibranInput");const q=normalizeText(input.value);const intentQ=q.replace(/ة/g,"ه");
  if(!q){showToast("✍️ اكتب سؤالك.");return}
  jibranClearMatchResults();
  let ans="",matchedData=null;const a=getLS(LS.assessment,null);
  const asksBestTerms=["مناسبة","مناسب","الفرصة الانسب","الانسب","الاقرب","الافضل","حسب ملفي","حسب تقييمي","تقييمي","ملفي","فرصي","قرب","ما يناسبني","يناسبني","رشح لي","ترشيح","تناسب خبرتي","تناسب مؤهلي"];
- const asksBest=asksBestTerms.some(term=>q.includes(normalizeText(term)));
+ const asksBest=asksBestTerms.some(term=>intentQ.includes(normalizeText(term).replace(/ة/g,"ه")))||intentQ.split(" ").some(term=>["الانسب","انسب","الافضل","افضل"].includes(term));
  if(asksBest&&typeof window.loadProfileRemote==="function"){
   try{await window.loadProfileRemote()}catch(e){console.warn("Jibran profile refresh",e)}
  }
