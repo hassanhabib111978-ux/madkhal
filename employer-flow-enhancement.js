@@ -46,9 +46,100 @@ async function initEmployerOccupationChoice(){
   const title=byId('vacancyTitle');if(title&&!title.value.trim())title.value=o.label;
  };
 }
-function injectEmployerFields(){const form=byId('submitVacancyButton')?.closest('.card');if(!form||byId('employerContactPhone'))return;const desc=byId('vacancyDescription');if(!desc)return;const g=document.createElement('div');g.className='form-group';g.innerHTML='<label>رقم التواصل</label><input id="employerContactPhone" type="tel" inputmode="tel" placeholder="رقم الهاتف للتواصل معك بشأن المرشحين"><div class="occupation-status">لن يظهر للباحثين في مرحلة المطابقة؛ يستخدمه مَدخَل لإدارة تواصل صاحب الفرصة.</div>';desc.parentElement.insertAdjacentElement('afterend',g);const note=byId('employerStatus');if(note)note.textContent='ستُحفظ الفرصة كفرصة خاصة، ثم يبدأ مَدخَل المطابقة مع الباحثين المؤهلين.';const b=byId('submitVacancyButton');if(b)b.textContent='📩 نشر الفرصة وبدء المطابقة'}
+
+function ensureMyEmployerVacanciesPanel(){
+  const formCard=byId('submitVacancyButton')?.closest('.card');
+  if(!formCard)return;
+  let panel=byId('myEmployerVacanciesPanel');
+  if(!panel){
+    panel=document.createElement('section');
+    panel.className='card';
+    panel.id='myEmployerVacanciesPanel';
+    panel.style.marginTop='14px';
+    panel.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><h3 style="margin:0">📌 فرصي المنشورة</h3><button type="button" class="secondary-btn" id="refreshMyEmployerVacancies">↻ تحديث القائمة</button></div><p class="occupation-status" style="margin:8px 0">قائمة خاصة بحسابك: لا تظهر فرصك كإعلانات عامة، ويقتصر عرض المرشحين على مسار المطابقة المصرّح به.</p><div id="myEmployerVacanciesStatus" class="notice">جارٍ تحميل فرصك...</div><div id="myEmployerVacanciesList" style="display:grid;gap:10px;margin-top:10px"></div>';
+    formCard.insertAdjacentElement('afterend',panel);
+    const refresh=byId('refreshMyEmployerVacancies');
+    if(refresh)refresh.addEventListener('click',()=>loadMyEmployerVacancies());
+  }
+  if(!byId('employerCandidates')){
+    const candidates=document.createElement('section');
+    candidates.className='card';
+    candidates.id='employerCandidates';
+    candidates.innerHTML='<h3>🎯 المرشحون المطابقون</h3><p class="occupation-status">اختر «عرض المرشحين» من إحدى فرصك المنشورة لعرض المطابقات المصرح بها.</p>';
+    panel.insertAdjacentElement('afterend',candidates);
+  }
+}
+async function loadMyEmployerVacancies(){
+  ensureMyEmployerVacanciesPanel();
+  const status=byId('myEmployerVacanciesStatus');
+  const list=byId('myEmployerVacanciesList');
+  if(!status||!list)return;
+  status.textContent='⏳ جارٍ تحديث الفرص المسجلة في حسابك...';
+  list.replaceChildren();
+  try{
+    const user=await sessionUser();
+    if(!user){status.textContent='سجّل الدخول بحساب صاحب الفرصة لعرض فرصك المنشورة.';return}
+    const profile=await supabaseClient.from('profiles').select('id').eq('auth_user_id',user.id).maybeSingle();
+    if(profile.error)throw profile.error;
+    if(!profile.data?.id){status.textContent='لم يُعثر على ملف صاحب الفرصة لهذا الحساب بعد.';return}
+    const result=await supabaseClient.from('employer_vacancies')
+      .select('id,title,company_name,location,country,status,expires_at,created_at,number_needed')
+      .eq('employer_id',profile.data.id).order('created_at',{ascending:false}).limit(25);
+    if(result.error)throw result.error;
+    const rows=Array.isArray(result.data)?result.data:[];
+    if(!rows.length){status.textContent='لا توجد فرص منشورة من هذا الحساب حتى الآن. عند نشر أول فرصة ستظهر هنا.';return}
+    const counted=await Promise.all(rows.map(async vacancy=>{
+      try{
+        const q=await supabaseClient.from('match_requests').select('id',{count:'exact',head:true}).eq('vacancy_id',vacancy.id);
+        return {...vacancy, candidateCount:q.error?null:Number(q.count||0)};
+      }catch(e){return {...vacancy,candidateCount:null}}
+    }));
+    const labels={open:'مفتوحة',matching:'قيد المطابقة',screening:'قيد الفرز',closed:'مغلقة',filled:'تم شغلها',expired:'منتهية'};
+    status.textContent='عدد فرصك المعروضة هنا: '+rows.length+' — هذه القائمة خاصة بحسابك.';
+    counted.forEach(v=>{
+      const card=document.createElement('article');
+      card.style.cssText='border:1px solid var(--border-color,#ddd);border-radius:12px;padding:12px;display:grid;gap:7px';
+      const heading=document.createElement('strong');
+      heading.textContent=v.title||'فرصة دون عنوان';
+      card.appendChild(heading);
+      const meta=document.createElement('div');
+      meta.className='candidate-meta';
+      meta.textContent=[v.company_name,v.location,v.country].filter(Boolean).join(' · ')||'الموقع غير محدد';
+      card.appendChild(meta);
+      const state=document.createElement('div');
+      state.className='candidate-meta';
+      state.textContent='الحالة: '+(labels[v.status]||v.status||'غير محددة')+' · عدد المطلوب: '+(v.number_needed||1);
+      card.appendChild(state);
+      const count=document.createElement('div');
+      count.className='candidate-meta';
+      count.textContent='المطابقات/طلبات المتابعة: '+(v.candidateCount===null?'تعذر تحميل العدد':v.candidateCount);
+      card.appendChild(count);
+      const date=document.createElement('div');
+      date.className='candidate-meta';
+      date.textContent='تاريخ النشر: '+(v.created_at?new Date(v.created_at).toLocaleDateString('ar-EG'):'—')+(v.expires_at?' · الانتهاء المسجل: '+new Date(v.expires_at).toLocaleDateString('ar-EG'):'');
+      card.appendChild(date);
+      const action=document.createElement('button');
+      action.type='button';
+      action.className='primary-btn';
+      action.textContent='🎯 عرض المرشحين';
+      action.addEventListener('click',async()=>{
+        localStorage.setItem('madkhal_last_employer_vacancy',v.id);
+        await renderEmployerCandidates(v.id);
+        const candidateBox=byId('employerCandidates');
+        if(candidateBox)candidateBox.scrollIntoView({behavior:'smooth',block:'start'});
+      });
+      card.appendChild(action);
+      list.appendChild(card);
+    });
+  }catch(e){
+    console.warn('Madkhal employer vacancy list',e);
+    status.textContent='⚠️ تعذر تحميل فرصك الآن. تأكد من تسجيل الدخول ثم اضغط «تحديث القائمة».';
+  }
+}
+
+function injectEmployerFields(){const form=byId('submitVacancyButton')?.closest('.card');if(!form||byId('employerContactPhone'))return;const desc=byId('vacancyDescription');if(!desc)return;const g=document.createElement('div');g.className='form-group';g.innerHTML='<label>رقم التواصل</label><input id="employerContactPhone" type="tel" inputmode="tel" placeholder="رقم الهاتف للتواصل معك بشأن المرشحين"><div class="occupation-status">لن يظهر للباحثين في مرحلة المطابقة؛ يستخدمه مَدخَل لإدارة تواصل صاحب الفرصة.</div>';desc.parentElement.insertAdjacentElement('afterend',g);const note=byId('employerStatus');if(note)note.textContent='ستُحفظ الفرصة كفرصة خاصة، ثم يبدأ مَدخَل المطابقة مع الباحثين المؤهلين.';const b=byId('submitVacancyButton');if(b)b.textContent='📩 نشر الفرصة وبدء المطابقة';ensureMyEmployerVacanciesPanel()}
 async function fixedEmployerProfileId(user,fullName){if(!user)return null;try{const q=await supabaseClient.from('profiles').select('id,full_name,role').eq('auth_user_id',user.id).maybeSingle();if(q.error)throw q.error;if(q.data){const patch={};if(fullName&&q.data.full_name!==fullName)patch.full_name=fullName;if(q.data.role!=='employer')patch.role='employer';if(Object.keys(patch).length){const u=await supabaseClient.from('profiles').update(patch).eq('id',q.data.id).eq('auth_user_id',user.id);if(u.error)throw u.error}return q.data.id}const id=(typeof crypto!=='undefined'&&crypto.randomUUID)?crypto.randomUUID():('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0,v=c==='x'?r:(r&3|8);return v.toString(16)}));const ins=await supabaseClient.from('profiles').insert({id,full_name:fullName||'مستخدم مَدخَل',role:'employer',auth_user_id:user.id}).select('id').maybeSingle();if(ins.error)throw ins.error;return ins.data?.id||id}catch(e){console.error('Madkhal employer profile error',e);throw e}}
-async function submitEmployerVacancyEnhanced(){const company=byId('employerName')?.value.trim()||'';const occUri=byId('employerOccupationUri')?.value.trim()||'';const occLabel=byId('employerOccupationLabel')?.value.trim()||'';const title=byId('vacancyTitle')?.value.trim()||'';const country=byId('vacancyCountry')?.value.trim()||'';const location=byId('vacancyLocation')?.value.trim()||'';const work=byId('vacancyWorkType')?.value||'';const skills=byId('vacancySkills')?.value.trim()||'';const qualification=byId('vacancyQualification')?.value.trim()||'';const number=Number(byId('vacancyNumber')?.value||1);const salaryText=byId('vacancySalary')?.value.trim()||'';const description=byId('vacancyDescription')?.value.trim()||'';const phone=byId('employerContactPhone')?.value.trim()||'';if(!company||!occUri||!title||!country||!location||!work||!skills||!description||!phone){showToast('⚠️ أكمل بيانات الفرصة ورقم التواصل واختر المهنة.');return}if(number<1){showToast('⚠️ العدد يجب أن يكون واحدًا على الأقل.');return}const btn=byId('submitVacancyButton');if(btn){btn.disabled=true;btn.textContent='⏳ جارٍ نشر الفرصة وبدء المطابقة...'}try{const user=await sessionUser();if(!user)throw new Error('NO_USER');const pid=await fixedEmployerProfileId(user,company);if(!pid)throw new Error('NO_PROFILE');await supabaseClient.from('profiles').update({phone,full_name:company,role:'employer'}).eq('id',pid).eq('auth_user_id',user.id);const sal=parseSalary(salaryText);const ins=await supabaseClient.from('employer_vacancies').insert({employer_id:pid,title,company_name:company,description,location,country,job_type:work,category:occLabel,required_skills:skills,required_qualification:qualification||null,salary_min:sal.min,salary_max:sal.max,salary_currency:sal.currency,number_needed:number,status:'open',visibility:'private_match_only',expires_at:null,occupation_uri:occUri,occupation_label:occLabel,confirmation_at:new Date().toISOString(),confirmation_version:'employer-flow-v2',updated_at:new Date().toISOString()}).select('id,confirmation_at,confirmation_version').maybeSingle();if(ins.error)throw ins.error;const vacancyId=ins.data?.id;if(!vacancyId)throw new Error('NO_VACANCY_ID');const confirmationAt=ins.data?.confirmation_at||new Date().toISOString();if(!ins.data?.confirmation_at){const cu=await supabaseClient.from('employer_vacancies').update({confirmation_at:confirmationAt,confirmation_version:'employer-flow-v2',updated_at:new Date().toISOString()}).eq('id',vacancyId).eq('employer_id',pid).select('id,confirmation_at,confirmation_version').maybeSingle();if(cu.error)throw cu.error;if(!cu.data?.confirmation_at)throw new Error('CONFIRMATION_SAVE_FAILED')}await supabaseClient.from('employer_vacancies').update({status:'matching',updated_at:new Date().toISOString()}).eq('id',vacancyId).eq('employer_id',pid);let matched=0;try{const mr=await supabaseClient.rpc('process_my_employer_matches',{p_vacancy_id:vacancyId,p_limit:200});if(!mr.error)matched=Number(mr.data)||0}catch(e){}const countQ=await supabaseClient.from('match_requests').select('id,match_score,status',{count:'exact',head:true}).eq('vacancy_id',vacancyId);const count=Number(countQ.count||0);const finalCount=Math.max(count,matched);const status=byId('employerStatus');if(status){status.className='notice success';status.innerHTML='✅ تم نشر الفرصة بنجاح.<br>🎯 بدأ مَدخَل المطابقة الآلية مع الباحثين المؤهلين.<br>📊 عدد المطابقات المسجلة حتى الآن: <strong>'+finalCount+'</strong><br><small>الفرصة خاصة ولا تظهر كإعلان عام؛ تُستخدم لإيجاد المرشحين الأقرب.</small>'}localStorage.setItem('madkhal_last_employer_vacancy',vacancyId);showToast('🎉 تم نشر الفرصة وبدء المطابقة.');try{await renderEmployerCandidates(vacancyId)}catch(e){console.warn('candidate panel refresh',e)}}catch(e){const status=byId('employerStatus');if(status){status.className='notice';status.textContent='⚠️ تعذر حفظ الفرصة الآن. تحقق من الاتصال ثم أعد المحاولة'}console.error('Madkhal vacancy publish error',e);showToast('❌ لم تُحفظ الفرصة. '+(e?.message||''))}finally{if(btn){btn.disabled=false;btn.textContent='📩 نشر الفرصة وبدء المطابقة'}}}
+async function submitEmployerVacancyEnhanced(){const company=byId('employerName')?.value.trim()||'';const occUri=byId('employerOccupationUri')?.value.trim()||'';const occLabel=byId('employerOccupationLabel')?.value.trim()||'';const title=byId('vacancyTitle')?.value.trim()||'';const country=byId('vacancyCountry')?.value.trim()||'';const location=byId('vacancyLocation')?.value.trim()||'';const work=byId('vacancyWorkType')?.value||'';const skills=byId('vacancySkills')?.value.trim()||'';const qualification=byId('vacancyQualification')?.value.trim()||'';const number=Number(byId('vacancyNumber')?.value||1);const salaryText=byId('vacancySalary')?.value.trim()||'';const description=byId('vacancyDescription')?.value.trim()||'';const phone=byId('employerContactPhone')?.value.trim()||'';if(!company||!occUri||!title||!country||!location||!work||!skills||!description||!phone){showToast('⚠️ أكمل بيانات الفرصة ورقم التواصل واختر المهنة.');return}if(number<1){showToast('⚠️ العدد يجب أن يكون واحدًا على الأقل.');return}const btn=byId('submitVacancyButton');if(btn){btn.disabled=true;btn.textContent='⏳ جارٍ نشر الفرصة وبدء المطابقة...'}try{const user=await sessionUser();if(!user)throw new Error('NO_USER');const pid=await fixedEmployerProfileId(user,company);if(!pid)throw new Error('NO_PROFILE');await supabaseClient.from('profiles').update({phone,full_name:company,role:'employer'}).eq('id',pid).eq('auth_user_id',user.id);const sal=parseSalary(salaryText);const ins=await supabaseClient.from('employer_vacancies').insert({employer_id:pid,title,company_name:company,description,location,country,job_type:work,category:occLabel,required_skills:skills,required_qualification:qualification||null,salary_min:sal.min,salary_max:sal.max,salary_currency:sal.currency,number_needed:number,status:'open',visibility:'private_match_only',expires_at:null,occupation_uri:occUri,occupation_label:occLabel,confirmation_at:new Date().toISOString(),confirmation_version:'employer-flow-v2',updated_at:new Date().toISOString()}).select('id,confirmation_at,confirmation_version').maybeSingle();if(ins.error)throw ins.error;const vacancyId=ins.data?.id;if(!vacancyId)throw new Error('NO_VACANCY_ID');const confirmationAt=ins.data?.confirmation_at||new Date().toISOString();if(!ins.data?.confirmation_at){const cu=await supabaseClient.from('employer_vacancies').update({confirmation_at:confirmationAt,confirmation_version:'employer-flow-v2',updated_at:new Date().toISOString()}).eq('id',vacancyId).eq('employer_id',pid).select('id,confirmation_at,confirmation_version').maybeSingle();if(cu.error)throw cu.error;if(!cu.data?.confirmation_at)throw new Error('CONFIRMATION_SAVE_FAILED')}await supabaseClient.from('employer_vacancies').update({status:'matching',updated_at:new Date().toISOString()}).eq('id',vacancyId).eq('employer_id',pid);let matched=0;try{const mr=await supabaseClient.rpc('process_my_employer_matches',{p_vacancy_id:vacancyId,p_limit:200});if(!mr.error)matched=Number(mr.data)||0}catch(e){}const countQ=await supabaseClient.from('match_requests').select('id,match_score,status',{count:'exact',head:true}).eq('vacancy_id',vacancyId);const count=Number(countQ.count||0);const finalCount=Math.max(count,matched);const status=byId('employerStatus');if(status){status.className='notice success';status.innerHTML='✅ تم نشر الفرصة بنجاح.<br>🎯 بدأ مَدخَل المطابقة الآلية مع الباحثين المؤهلين.<br>📊 عدد المطابقات المسجلة حتى الآن: <strong>'+finalCount+'</strong><br><small>الفرصة خاصة ولا تظهر كإعلان عام؛ تُستخدم لإيجاد المرشحين الأقرب.</small>'}localStorage.setItem('madkhal_last_employer_vacancy',vacancyId);showToast('🎉 تم نشر الفرصة وبدء المطابقة.');try{await renderEmployerCandidates(vacancyId);await loadMyEmployerVacancies()}catch(e){console.warn('candidate panel refresh',e)}}catch(e){const status=byId('employerStatus');if(status){status.className='notice';status.textContent='⚠️ تعذر حفظ الفرصة الآن. تحقق من الاتصال ثم أعد المحاولة'}console.error('Madkhal vacancy publish error',e);showToast('❌ لم تُحفظ الفرصة. '+(e?.message||''))}finally{if(btn){btn.disabled=false;btn.textContent='📩 نشر الفرصة وبدء المطابقة'}}}
 async function renderEmployerCandidates(vacancyId){
   const box=byId('employerCandidates'); if(!box||!vacancyId)return;
   box.innerHTML='<div class="notice">⏳ جارٍ تحميل المرشحين المطابقين...</div>';
@@ -139,6 +230,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
   injectEmployerFields();
   initEmployerOccupationChoice();
+  loadMyEmployerVacancies();
   installFreeLaunchMode();
 });
 })();
