@@ -1,5 +1,13 @@
 # مَدخَل — سجل التغييرات
 
+## 2026-10-24 — Daily deadline monitor and employer vacancy dashboard
+- Added a private, scheduled Supabase database monitor that expires opportunities with elapsed source `expires_at` timestamps or clearly labeled, unambiguous application deadlines in Arabic/English descriptions.
+- Added a database write guard so source upserts cannot reactivate an opportunity whose explicit deadline has already passed.
+- The monitor is scheduled daily and records a private audit row with the number scanned and expiration counts; expired records are retained rather than deleted.
+- Added a signed-in employer-only “فرصي المنشورة” dashboard with status, publication date, candidate/match count, and a shortcut to the existing authorized candidate workflow.
+- Employer vacancies remain `private_match_only`; no public job sources, source import schedules, matching scores, subscription behavior, or worker profile visibility were changed.
+- Verification: deadline parser passed six focused cases (English/Arabic labels and month names, ISO dates, ambiguous numeric date rejection, and unlabeled date rejection). Initial monitor run inspected 2,318 active jobs and expired 14 whose timestamps/deadlines had elapsed. Browser/device interaction still requires a live user-side smoke test.
+
 ## 2026-10-24 — Explicit application deadline guard
 - Added a conservative, source-agnostic parser for clearly labeled application deadlines in English and Arabic within existing job descriptions.
 - Excluded public opportunities from the shared loaded list after their explicit deadline has passed; this also removes them from public matching that consumes that list.
