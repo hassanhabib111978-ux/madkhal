@@ -1202,6 +1202,7 @@ async function renderNotifications(){
       const q=await supabaseClient.from("notifications")
         .select("id,title,body,opportunity_type,opportunity_id,created_at,read_at,delivery_status")
         .eq("user_id",user.id)
+        .neq("delivery_status","expired")
         .order("created_at",{ascending:false}).limit(30);
       if(!q.error&&Array.isArray(q.data)){
         const remote=q.data.map(x=>({

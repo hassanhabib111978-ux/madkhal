@@ -1,5 +1,10 @@
 # مَدخَل — سجل التغييرات
 
+## 2026-10-24 — Hide expired external-job notifications
+- Extended the daily deadline monitor to mark only notifications linked to expired public external jobs as `expired`.
+- Updated the notification inbox query to omit those retired notifications while preserving subscription notices and employer-vacancy workflow notifications.
+- The monitor records how many notifications it retires in its private audit log; no job-source or matching-score logic changed.
+
 ## 2026-10-24 — Daily deadline monitor and employer vacancy dashboard
 - Added a private, scheduled Supabase database monitor that expires opportunities with elapsed source `expires_at` timestamps or clearly labeled, unambiguous application deadlines in Arabic/English descriptions.
 - Added a database write guard so source upserts cannot reactivate an opportunity whose explicit deadline has already passed.
