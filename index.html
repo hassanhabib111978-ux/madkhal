@@ -848,14 +848,112 @@ async function searchOccupations(inputId,resultId,statusId,uriId,labelId,timerTy
 function loadOccupationSkills(uri){const box=document.getElementById("skillAssessmentBox");const list=document.getElementById("skillAssessmentList");const status=document.getElementById("skillAssessmentStatus");if(!uri||!box||!list)return;box.classList.remove("hidden");status.textContent="جاري تحميل المهارات...";supabaseClient.rpc("get_madkhal_occupation_skills",{occupation_uri_input:uri,result_limit:12}).then(res=>{if(res.error)throw res.error;list.innerHTML="";(res.data||[]).forEach((s,idx)=>{const card=document.createElement("div");card.className="skill-card";let radios="";for(let n=0;n<=5;n++)radios+='<label><input type="radio" name="occ_skill_'+idx+'" value="'+n+'" data-skill-uri="'+escapeHtml(s.skill_uri)+'" data-skill-label="'+escapeHtml(s.skill_label)+'">'+n+"</label>";card.innerHTML='<div class="skill-name">'+escapeHtml(s.skill_label)+'</div><div class="skill-scale">'+radios+'</div>';list.appendChild(card)});status.textContent=(res.data||[]).length?"لم تُقيّم المهارات بعد. يمكنك تقييم أي مهارة من 0 إلى 5 ثم حفظ الملف.":"لا توجد مهارات مرتبطة بهذه المهنة حاليًا."}).catch(e=>{status.textContent="تعذر تحميل المهارات حاليًا."})}
 function selectedOccupation(){return {uri:document.getElementById("occupationUri")?.value.trim()||"",label:document.getElementById("occupationLabel")?.value.trim()||""}}
 
-async function loadJobs(force){if(jobsLoading&&!force)return jobsLoading;if(jobsLoaded&&!force)return allVisibleJobs;if(!supabaseClient)return[];jobsLoading=(async()=>{try{const rows=[];let from=0;const size=1000;while(true){const q=await supabaseClient.from("jobs").select("id,source,source_job_id,title,company,description,location,country,job_type,category,salary_min,salary_max,salary_currency,source_url,canonical_url,posted_at,updated_at,expires_at,status,geo_class,geo_region,created_at").eq("status","active").order("created_at",{ascending:false}).range(from,from+size-1);if(q.error)throw q.error;const page=q.data||[];rows.push(...page);if(page.length<size)break;from+=size}const menaCountries=new Set(["سوريا","syria","الأردن","الاردن","jordan","لبنان","lebanon","فلسطين","palestine","العراق","iraq","قطر","qatar","الإمارات العربية المتحدة","الامارات العربية المتحدة","united arab emirates","uae","السعودية","السعوديه","saudi arabia","الكويت","kuwait","البحرين","bahrain","عمان","oman","اليمن","yemen","مصر","egypt","السودان","sudan","ليبيا","libya","تونس","tunisia","الجزائر","algeria","المغرب","morocco","موريتانيا","mauritania"]);const nowMs=Date.now();const seen=new Set();allVisibleJobs=rows.filter(j=>!j.expires_at||Date.parse(j.expires_at)>=nowMs).filter(j=>{const cls=String(j.geo_class||"").toUpperCase();const reg=normalizeText(j.geo_region||"");const country=normalizeText(j.country||"");const location=normalizeText(j.location||"");if(cls==="OUTSIDE_SCOPE")return false;return cls==="SYRIA"||cls==="MENA"||["middle east","middle east & north africa","syria","mena"].includes(reg)||menaCountries.has(country)||/\b(syria|levant|middle east|mena)\b/.test(location)||location.includes("سوريا")||location.includes("الشرق الاوسط");}).filter(j=>{const key=String(j.canonical_url||j.source_url||j.id);if(seen.has(key))return false;seen.add(key);return true}).map(j=>({...j,source_name:sourceName(j.source)}));jobsLoaded=true;return allVisibleJobs}catch(e){console.warn("loadJobs",e);jobsLoaded=false;allVisibleJobs=[];return[]}finally{jobsLoading=null}})();return jobsLoading}
+async function loadJobs(force){if(jobsLoading&&!force)return jobsLoading;if(jobsLoaded&&!force)return allVisibleJobs;if(!supabaseClient)return[];jobsLoading=(async()=>{try{const rows=[];let from=0;const size=1000;while(true){const q=await supabaseClient.from("jobs").select("id,source,source_job_id,title,company,description,location,country,job_type,category,salary_min,salary_max,salary_currency,source_url,canonical_url,posted_at,updated_at,expires_at,status,geo_class,geo_region,created_at").eq("status","active").order("created_at",{ascending:false}).range(from,from+size-1);if(q.error)throw q.error;const page=q.data||[];rows.push(...page);if(page.length<size)break;from+=size}const menaCountries=new Set(["سوريا","syria","الأردن","الاردن","jordan","لبنان","lebanon","فلسطين","palestine","العراق","iraq","قطر","qatar","الإمارات العربية المتحدة","الامارات العربية المتحدة","united arab emirates","uae","السعودية","السعوديه","saudi arabia","الكويت","kuwait","البحرين","bahrain","عمان","oman","اليمن","yemen","مصر","egypt","السودان","sudan","ليبيا","libya","تونس","tunisia","الجزائر","algeria","المغرب","morocco","موريتانيا","mauritania"]);const nowMs=Date.now();const seen=new Set();allVisibleJobs=rows.filter(j=>(!j.expires_at||Date.parse(j.expires_at)>=nowMs)&&!applicationDeadlinePassed(j)).filter(j=>{const cls=String(j.geo_class||"").toUpperCase();const reg=normalizeText(j.geo_region||"");const country=normalizeText(j.country||"");const location=normalizeText(j.location||"");if(cls==="OUTSIDE_SCOPE")return false;return cls==="SYRIA"||cls==="MENA"||["middle east","middle east & north africa","syria","mena"].includes(reg)||menaCountries.has(country)||/\b(syria|levant|middle east|mena)\b/.test(location)||location.includes("سوريا")||location.includes("الشرق الاوسط");}).filter(j=>{const key=String(j.canonical_url||j.source_url||j.id);if(seen.has(key))return false;seen.add(key);return true}).map(j=>({...j,source_name:sourceName(j.source)}));jobsLoaded=true;return allVisibleJobs}catch(e){console.warn("loadJobs",e);jobsLoaded=false;allVisibleJobs=[];return[]}finally{jobsLoading=null}})();return jobsLoading}
 function sourceName(s){const m={"himalayas":"Himalayas","gulfjobs":"GulfJobs","myself.ae":"myself.ae","worklink":"WorkLink","jobicy":"Jobicy","fao":"FAO","UN Careers":"UN Careers","1QatarJobs":"1QatarJobs","akhtaboot":"Akhtaboot","Jobs of Oman":"Jobs of Oman","jobsofoman":"Jobs of Oman"};return m[String(s||"").trim()]||String(s||"المصدر الأصلي")}
+function deadlineDigits(v){
+ return String(v||"").replace(/[٠-٩۰-۹]/g,ch=>String(ch.charCodeAt(0)-(ch>="۰"&&ch<="۹"?0x06F0:0x0660)));
+}
+function deadlineDateIso(y,m,d){
+ y=Number(y);m=Number(m);d=Number(d);
+ if(!Number.isInteger(y)||y<2000||y>2100||!Number.isInteger(m)||m<1||m>12||!Number.isInteger(d)||d<1||d>31)return "";
+ const dt=new Date(Date.UTC(y,m-1,d));
+ if(dt.getUTCFullYear()!==y||dt.getUTCMonth()!==m-1||dt.getUTCDate()!==d)return "";
+ return String(y).padStart(4,"0")+"-"+String(m).padStart(2,"0")+"-"+String(d).padStart(2,"0");
+}
+function parseLabeledDeadlineDate(value){
+ const raw=deadlineDigits(value);
+ let m=raw.match(/\b(20\d{2})[-/](\d{1,2})[-/](\d{1,2})\b/);
+ if(m)return deadlineDateIso(m[1],m[2],m[3]);
+ // Avoid ambiguous numeric dates such as 10/08/2026.
+ m=raw.match(/\b(\d{1,2})\/(\d{1,2})\/(20\d{2})\b/);
+ if(m&&Number(m[1])>12)return deadlineDateIso(m[3],m[2],m[1]);
+ const englishMonths=[
+  {n:1,a:["January","Jan"]},{n:2,a:["February","Feb"]},{n:3,a:["March","Mar"]},
+  {n:4,a:["April","Apr"]},{n:5,a:["May"]},{n:6,a:["June","Jun"]},
+  {n:7,a:["July","Jul"]},{n:8,a:["August","Aug"]},{n:9,a:["September","Sep","Sept"]},
+  {n:10,a:["October","Oct"]},{n:11,a:["November","Nov"]},{n:12,a:["December","Dec"]}
+ ];
+ const englishNames=englishMonths.flatMap(x=>x.a).sort((a,b)=>b.length-a.length).join("|");
+ const dayMonth=new RegExp("\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+("+englishNames+")\\.?\\s*,?\\s*(20\\d{2})\\b","i");
+ const monthDay=new RegExp("\\b("+englishNames+")\\.?\\s+(\\d{1,2})(?:st|nd|rd|th)?\\s*,?\\s*(20\\d{2})\\b","i");
+ m=raw.match(dayMonth);
+ if(m){
+  const mn=englishMonths.find(x=>x.a.some(a=>a.toLowerCase()===m[2].toLowerCase()));
+  if(mn)return deadlineDateIso(m[3],mn.n,m[1]);
+ }
+ m=raw.match(monthDay);
+ if(m){
+  const mn=englishMonths.find(x=>x.a.some(a=>a.toLowerCase()===m[1].toLowerCase()));
+  if(mn)return deadlineDateIso(m[3],mn.n,m[2]);
+ }
+ const arabicMonths=[
+  {n:1,a:["يناير","كانون الثاني"]},{n:2,a:["فبراير","شباط"]},{n:3,a:["مارس","اذار"]},
+  {n:4,a:["ابريل","نيسان"]},{n:5,a:["مايو","ايار"]},{n:6,a:["يونيو","حزيران"]},
+  {n:7,a:["يوليو","تموز"]},{n:8,a:["اغسطس","اب"]},{n:9,a:["سبتمبر","ايلول"]},
+  {n:10,a:["اكتوبر","تشرين الاول"]},{n:11,a:["نوفمبر","تشرين الثاني"]},{n:12,a:["ديسمبر","كانون الاول"]}
+ ];
+ const normalized=normalizeText(raw);
+ const arabicNames=arabicMonths.flatMap(x=>x.a).sort((a,b)=>b.length-a.length).join("|");
+ m=normalized.match(new RegExp("(?:^|\\s)(\\d{1,2})\\s+("+arabicNames+")\\s+(20\\d{2})(?:\\s|$)"));
+ if(m){
+  const mn=arabicMonths.find(x=>x.a.includes(m[2]));
+  if(mn)return deadlineDateIso(m[3],mn.n,m[1]);
+ }
+ m=normalized.match(new RegExp("(?:^|\\s)("+arabicNames+")\\s+(\\d{1,2})\\s+(20\\d{2})(?:\\s|$)"));
+ if(m){
+  const mn=arabicMonths.find(x=>x.a.includes(m[1]));
+  if(mn)return deadlineDateIso(m[3],mn.n,m[2]);
+ }
+ return "";
+}
+function applicationDeadlineDate(job){
+ const text=deadlineDigits(cleanJobText(job&&job.description||""));
+ const labels=[
+  /application\s+deadline\s*[:\-–]?/ig,
+  /deadline\s+for\s+applications?\s*[:\-–]?/ig,
+  /closing\s+date(?:\s+for\s+applications?)?\s*[:\-–]?/ig,
+  /last\s+date\s+(?:to\s+apply|for\s+applications?)\s*[:\-–]?/ig,
+  /applications?\s+(?:close|closes|closing)(?:\s+on)?\s*[:\-–]?/ig,
+  /[اأإآ]خر\s+موعد\s+(?:(?:ال)?نهائي\s+)?للتقديم\s*[:\-–]?/ig,
+  /[اأإآ]خر\s+موعد\s+(?:(?:ال)?نهائي\s+)?للتقدم\s*[:\-–]?/ig,
+  /[اأإآ]خر\s+تاريخ\s+للتقديم\s*[:\-–]?/ig,
+  /تاريخ\s+انتهاء\s+التقديم\s*[:\-–]?/ig,
+  /موعد\s+انتهاء\s+التقديم\s*[:\-–]?/ig,
+  /ينتهي\s+التقديم\s*(?:في|بتاريخ|حتى)?\s*[:\-–]?/ig,
+  /التقديم\s+حتى\s*[:\-–]?/ig
+ ];
+ for(const label of labels){
+  label.lastIndex=0;
+  let match;
+  while((match=label.exec(text))){
+   const tail=text.slice(match.index+match[0].length,match.index+match[0].length+180);
+   const clause=(tail.split(/[.!?؟;\n\r]/,1)[0]||"").trim();
+   const date=parseLabeledDeadlineDate(clause);
+   if(date)return date;
+  }
+ }
+ return "";
+}
+function applicationDeadlinePassed(job){
+ const deadline=applicationDeadlineDate(job);
+ if(!deadline)return false;
+ const d=new Date();
+ const today=String(d.getFullYear()).padStart(4,"0")+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+ return deadline<today;
+}
+function formatDeadlineLabel(value){
+ if(!value)return "";
+ const parts=String(value).split("-").map(Number);
+ if(parts.length!==3||parts.some(n=>!Number.isFinite(n)))return String(value);
+ try{return new Date(Date.UTC(parts[0],parts[1]-1,parts[2],12)).toLocaleDateString("ar-EG",{year:"numeric",month:"long",day:"numeric",timeZone:"UTC"})}
+ catch(e){return String(value)}
+}
 function cleanJobText(v){let s=String(v??"").replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi,"$1").replace(/<[^>]*>/g," ");for(let i=0;i<3;i++){s=s.replace(/&amp;/gi,"&").replace(/&nbsp;|&#160;|&ensp;|&emsp;/gi," ").replace(/&quot;|&#34;/gi,'"').replace(/&#39;|&#x27;/gi,"'").replace(/&lt;/gi,"<").replace(/&gt;/gi,">")}return s.replace(/\s+/g," ").trim()}
 function cleanSalaryCurrency(v){return cleanJobText(v)}
 function validSalaryNumber(v){const n=Number(v);return Number.isFinite(n)&&n>=0&&n<=10000000?n:null}
 function salaryText(j){let a=validSalaryNumber(j.salary_min),b=validSalaryNumber(j.salary_max),c=cleanSalaryCurrency(j.salary_currency);if(a===0&&b===0){a=null;b=null}if(a===0)a=null;if(b===0)b=null;if(a!=null&&b!=null&&a>b){const x=a;a=b;b=x}if(a!=null&&b!=null)return a+" - "+b+(c?" "+c:"");if(a!=null)return "من "+a+(c?" "+c:"");if(b!=null)return "حتى "+b+(c?" "+c:"");return "حسب المصدر"}
 function workType(t){const x=cleanJobText(t);return ({full_time:"دوام كامل",part_time:"دوام جزئي",remote:"عن بُعد",freelance:"عمل حر",any:"أي نوع"})[x]||x||"غير محدد"}
-function categoryFor(j){const t=normalizeText([j.title,j.category,j.description].filter(Boolean).join(" "));if(t.includes("محاسب")||t.includes("محاسبة")||t.includes("account"))return "🧮 المحاسبة";if(t.includes("برمج")||t.includes("developer")||t.includes("engineer")||t.includes("software"))return "💻 التقنية";if(t.includes("تصميم")||t.includes("designer")||t.includes("graphic"))return "🎨 التصميم";if(t.includes("تسويق")||t.includes("marketing")||t.includes("مبيعات")||t.includes("sales"))return "📣 التسويق والمبيعات";if(t.includes("سكرت")||t.includes("secretary")||t.includes("admin"))return "🗂️ الإدارة";if(t.includes("خدمة العملاء")||t.includes("customer service"))return "🗣️ خدمة العملاء";if(t.includes("driver")||t.includes("سائق"))return "🚚 النقل";if(t.includes("تعليم")||t.includes("teacher")||t.includes("مدرس"))return "📚 التعليم";return "🔧 أخرى"}function visibleJob(j){return {id:j.id,title:cleanJobText(j.title)||"فرصة",company:cleanJobText(j.company)||"حسب المصدر",location:cleanJobText(j.location||j.country)||"غير محدد",country:cleanJobText(j.country),type:workType(j.job_type),category:categoryFor(j),description:cleanJobText(j.description)||"تفاصيل الوظيفة موجودة في المصدر الأصلي.",salary:salaryText(j),source:cleanJobText(j.source),source_name:cleanJobText(j.source_name),external_link:String(j.source_url||j.canonical_url||""),canonical_link:String(j.canonical_url||j.source_url||""),posted_at:j.posted_at||null,expires_at:j.expires_at||null}}
+function categoryFor(j){const t=normalizeText([j.title,j.category,j.description].filter(Boolean).join(" "));if(t.includes("محاسب")||t.includes("محاسبة")||t.includes("account"))return "🧮 المحاسبة";if(t.includes("برمج")||t.includes("developer")||t.includes("engineer")||t.includes("software"))return "💻 التقنية";if(t.includes("تصميم")||t.includes("designer")||t.includes("graphic"))return "🎨 التصميم";if(t.includes("تسويق")||t.includes("marketing")||t.includes("مبيعات")||t.includes("sales"))return "📣 التسويق والمبيعات";if(t.includes("سكرت")||t.includes("secretary")||t.includes("admin"))return "🗂️ الإدارة";if(t.includes("خدمة العملاء")||t.includes("customer service"))return "🗣️ خدمة العملاء";if(t.includes("driver")||t.includes("سائق"))return "🚚 النقل";if(t.includes("تعليم")||t.includes("teacher")||t.includes("مدرس"))return "📚 التعليم";return "🔧 أخرى"}function visibleJob(j){return {id:j.id,title:cleanJobText(j.title)||"فرصة",company:cleanJobText(j.company)||"حسب المصدر",location:cleanJobText(j.location||j.country)||"غير محدد",country:cleanJobText(j.country),type:workType(j.job_type),category:categoryFor(j),description:cleanJobText(j.description)||"تفاصيل الوظيفة موجودة في المصدر الأصلي.",salary:salaryText(j),source:cleanJobText(j.source),source_name:cleanJobText(j.source_name),external_link:String(j.source_url||j.canonical_url||""),canonical_link:String(j.canonical_url||j.source_url||""),posted_at:j.posted_at||null,expires_at:j.expires_at||null,application_deadline:applicationDeadlineDate(j)}}
 function generateLocalMatches(){
  // المطابقة المهنية ليست وظيفة محلية في الواجهة.
  // المصدر الرسمي هو مسار Supabase الموحد؛ الفرص العامة تبقى للبحث والعرض فقط.
@@ -903,11 +1001,13 @@ async function renderOpportunities(){
     const d=document.createElement("div");
     d.className="opportunity";
     const cleanDescription=String(j.description||"").replace(/https?:\/\/\S+/gi," ").replace(/\s+/g," ").trim();
+    const deadlineLine=j.application_deadline?'<div class="opportunity-meta">⏳ آخر موعد للتقديم: '+escapeHtml(formatDeadlineLabel(j.application_deadline))+'</div>':"";
     d.innerHTML=`<div class="opportunity-top">
       <div>
         <h3>💼 ${escapeHtml(j.title)}</h3>
         <div style="font-weight:800">${escapeHtml(j.company)}</div>
         <div class="opportunity-meta">📍 ${escapeHtml(j.location)} · 💼 ${escapeHtml(j.type)}</div>
+        ${deadlineLine}
         <span class="tag">${escapeHtml(j.category)}</span>
         <span class="tag">🌐 ${escapeHtml(j.source_name)}</span>
       </div>
@@ -936,6 +1036,7 @@ function openJobDetails(id){
     <p style="font-weight:800;color:#334">${escapeHtml(currentJob.company)}</p>
     <div class="info-strip">📍 ${escapeHtml(currentJob.location)} · 💼 ${escapeHtml(currentJob.type)} · ${escapeHtml(currentJob.source_name)}</div>
     <div class="info-strip">💰 ${escapeHtml(currentJob.salary)}</div>
+    ${currentJob.application_deadline?'<div class="info-strip">⏳ آخر موعد للتقديم: '+escapeHtml(formatDeadlineLabel(currentJob.application_deadline))+'</div>':""}
     <h3 style="margin-top:16px">التفاصيل</h3>
     <p>${escapeHtml(currentJob.description)}</p>
     <div class="notice">هذه فرصة من المصدر الأصلي. عند التقديم سيسجل مَدخَل طلبك في سجل المتابعة ثم يفتح الرابط الأصلي للتقديم.</div>
@@ -951,7 +1052,7 @@ function openJobDetails(id){
   details.appendChild(btn);
 }
 
-async function applyToCurrentJob(){if(!currentJob)return;const p=localProfile();if(!p.full_name||!p.occupation_uri){showToast("👤 أكمل ملفك المهني واختيار المهنة أولًا.");setTimeout(()=>openProfile(),500);return}const user=await sessionUser();if(!user){showToast("🔐 سجّل الدخول قبل التقديم.");return}const apps=getLS(LS.applications,[]);const existing=await supabaseClient.from("madkhal_applications").select("id,status").eq("user_id",user.id).eq("job_id",currentJob.id).eq("opportunity_type","external").maybeSingle();if(!existing.error&&existing.data){showToast("ℹ️ سبق تسجيل هذا الطلب.");return}const wp=await supabaseClient.from("worker_profiles").select("id").eq("user_id",user.id).maybeSingle();if(wp.error||!wp.data){showToast("⚠️ احفظ ملفك المهني أولًا.");setTimeout(()=>openProfile(),300);return}const official=await supabaseClient.rpc("calculate_external_opportunity_match",{p_job_id:currentJob.id,p_worker_profile_id:wp.data.id});if(official.error||!official.data){showToast("⚠️ تعذر حساب المطابقة الرسمية قبل تسجيل الطلب.");return}const officialScore=Number(official.data.overall_score??0);const item={id:"app_"+Date.now(),job_id:currentJob.id,title:currentJob.title,company:currentJob.company,location:currentJob.location,source:currentJob.source,status:"applied",created_at:now(),source_url:currentJob.external_link,match_score:officialScore};const row={user_id:user.id,worker_profile_id:wp.data.id,opportunity_type:"external",job_id:currentJob.id,vacancy_id:null,title:currentJob.title,company:currentJob.company||null,location:currentJob.location||null,match_score:officialScore,status:"applied",source_url:currentJob.external_link||currentJob.canonical_link||null,applied_at:now(),created_at:now(),updated_at:now()};const ins=await supabaseClient.from("madkhal_applications").insert(row).select("id").single();if(ins.error){showToast("❌ تعذر تسجيل الطلب في المتابعة.");return}item.id=ins.data.id;apps.unshift(item);setLS(LS.applications,apps);addLocalNotification("📩 تم تسجيل طلب التقديم على "+currentJob.title,currentJob.id);showToast("✅ تم تسجيل طلبك وفتح المصدر الأصلي.");setTimeout(()=>{if(currentJob.external_link)window.open(currentJob.external_link,"_blank","noopener,noreferrer")},250);setTimeout(()=>showScreen("accountScreen"),650)}
+async function applyToCurrentJob(){if(!currentJob)return;const currentDeadline=currentJob.application_deadline||applicationDeadlineDate(currentJob);if(currentDeadline&&applicationDeadlinePassed({description:"Application deadline: "+currentDeadline})){showToast("⛔ انتهى موعد التقديم على هذه الفرصة في "+formatDeadlineLabel(currentDeadline)+"؛ لم نسجل طلبًا.");return}const p=localProfile();if(!p.full_name||!p.occupation_uri){showToast("👤 أكمل ملفك المهني واختيار المهنة أولًا.");setTimeout(()=>openProfile(),500);return}const user=await sessionUser();if(!user){showToast("🔐 سجّل الدخول قبل التقديم.");return}const apps=getLS(LS.applications,[]);const existing=await supabaseClient.from("madkhal_applications").select("id,status").eq("user_id",user.id).eq("job_id",currentJob.id).eq("opportunity_type","external").maybeSingle();if(!existing.error&&existing.data){showToast("ℹ️ سبق تسجيل هذا الطلب.");return}const wp=await supabaseClient.from("worker_profiles").select("id").eq("user_id",user.id).maybeSingle();if(wp.error||!wp.data){showToast("⚠️ احفظ ملفك المهني أولًا.");setTimeout(()=>openProfile(),300);return}const official=await supabaseClient.rpc("calculate_external_opportunity_match",{p_job_id:currentJob.id,p_worker_profile_id:wp.data.id});if(official.error||!official.data){showToast("⚠️ تعذر حساب المطابقة الرسمية قبل تسجيل الطلب.");return}const officialScore=Number(official.data.overall_score??0);const item={id:"app_"+Date.now(),job_id:currentJob.id,title:currentJob.title,company:currentJob.company,location:currentJob.location,source:currentJob.source,status:"applied",created_at:now(),source_url:currentJob.external_link,match_score:officialScore};const row={user_id:user.id,worker_profile_id:wp.data.id,opportunity_type:"external",job_id:currentJob.id,vacancy_id:null,title:currentJob.title,company:currentJob.company||null,location:currentJob.location||null,match_score:officialScore,status:"applied",source_url:currentJob.external_link||currentJob.canonical_link||null,applied_at:now(),created_at:now(),updated_at:now()};const ins=await supabaseClient.from("madkhal_applications").insert(row).select("id").single();if(ins.error){showToast("❌ تعذر تسجيل الطلب في المتابعة.");return}item.id=ins.data.id;apps.unshift(item);setLS(LS.applications,apps);addLocalNotification("📩 تم تسجيل طلب التقديم على "+currentJob.title,currentJob.id);showToast("✅ تم تسجيل طلبك وفتح المصدر الأصلي.");setTimeout(()=>{if(currentJob.external_link)window.open(currentJob.external_link,"_blank","noopener,noreferrer")},250);setTimeout(()=>showScreen("accountScreen"),650)}
 
 
 function selectPaymentMethod(method){setLS("madkhal_payment_method",method);const names={sham_cash:"شام كاش",syriatel_cash:"سيرياتل كاش",mtn_cash:"MTN كاش"};const box=document.getElementById("paymentMethodStatus");if(box)box.textContent="تم اختيار "+(names[method]||method)+" — سنكمل التفعيل بعد ربط حساب مَدخَل التجاري بمزود الدفع."}
