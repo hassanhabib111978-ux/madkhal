@@ -1,5 +1,12 @@
 # مَدخَل — سجل التغييرات
 
+## 2026-10-24 — Explicit application deadline guard
+- Added a conservative, source-agnostic parser for clearly labeled application deadlines in English and Arabic within existing job descriptions.
+- Excluded public opportunities from the shared loaded list after their explicit deadline has passed; this also removes them from public matching that consumes that list.
+- Displayed parsed future/current deadlines on opportunity cards and details, and added a final client-side deadline check before logging an application.
+- Ambiguous numeric date formats and descriptions without a clearly labeled, parseable date remain unchanged to avoid false expiry.
+- No database rows/schema, ingestion integrations, source jobs, match-score formulas, subscriptions, alerts, or employer-created vacancy workflow were changed.
+
 ## 2026-10-08 — Product integrity batch
 - Updated `worker-match-lifecycle.js` so subscription state is refreshed from the authoritative Supabase subscription record before continuous matching is processed.
 - Kept public opportunity browsing free and separated it visually from paid continuous matching.
