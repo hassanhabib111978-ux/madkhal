@@ -714,7 +714,6 @@ CREATE TRIGGER trg_prevent_profile_admin_escalation
 BEFORE INSERT OR UPDATE OF role ON public.profiles
 FOR EACH ROW EXECUTE FUNCTION public.prevent_profile_admin_escalation();
 
-REVOKE EXECUTE ON FUNCTION public.prevent_profile_admin_escalation() FROM PUBLIC, anon, authenticated;
 REVOKE EXECUTE ON FUNCTION public.calculate_external_opportunity_match(uuid, uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.calculate_external_opportunity_match(uuid, uuid) TO authenticated, service_role;
 REVOKE EXECUTE ON FUNCTION public.process_external_opportunity_matches(integer) FROM PUBLIC, anon, authenticated;
