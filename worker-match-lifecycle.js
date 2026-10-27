@@ -2,6 +2,8 @@
 'use strict';
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function safeHttpUrl(value){try{const u=new URL(String(value??'').trim(),window.location.href);return (u.protocol==='https:'||u.protocol==='http:')?u.href:''}catch(e){return ''}}
+function cleanExternalLabel(value){return String(value??'').replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g,'$1').replace(/<[^>]*>/g,' ').replace(/&amp;/gi,'&').replace(/&nbsp;|&#160;/gi,' ').replace(/&quot;/gi,'"').replace(/&#39;|&apos;/gi,"'").replace(/&lt;/gi,'<').replace(/&gt;/gi,'>').replace(/\s+/g,' ').trim()}
 function canonicalClean(v){return String(v??'').toLowerCase().replace(/[ًٌٍَُِّْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/&nbsp;|&#160;/gi,' ').replace(/[^\p{L}\p{N}]+/gu,' ').replace(/\s+/g,' ').trim()}
 function canonicalWords(s){return canonicalClean(s).split(/\s+/).filter(x=>x.length>=3)}
 function canonicalOccupationScore(occ,title){
@@ -120,7 +122,37 @@ async function loadCanonicalWorkerMatchData(profile){
  }catch(e){directError=e}
  let publicJobs=[];
  try{if(typeof loadJobs==='function')publicJobs=await loadJobs(false)}catch(e){console.warn('worker public jobs',e)}
- const publicMatches=window.getCanonicalWorkerPublicMatches?window.getCanonicalWorkerPublicMatches(publicJobs,p,10):[];
+ let publicMatches=window.getCanonicalWorkerPublicMatches?window.getCanonicalWorkerPublicMatches(publicJobs,p,10):[];
+ // Prefer persisted, server-calculated external recommendations when available; retain the current public-job fallback if RPC fails.
+ try{
+  if(typeof supabaseClient!=='undefined'&&supabaseClient&&typeof supabaseClient.rpc==='function'){
+   const recommendationResult=await supabaseClient.rpc('get_my_opportunity_recommendations',{p_limit:100});
+   if(!recommendationResult?.error&&Array.isArray(recommendationResult?.data)){
+    const official=recommendationResult.data
+     .filter(x=>x&&x.opportunity_type==='external'&&Number(x.overall_score)>=60)
+     .map(x=>{
+      const title=cleanExternalLabel(x.title);
+      if(!title)return null;
+      return {
+       j:{
+        id:x.opportunity_id,
+        title,
+        company:cleanExternalLabel(x.organization),
+        location:cleanExternalLabel(x.location),
+        country:cleanExternalLabel(x.country),
+        job_type:cleanExternalLabel(x.job_type),
+        category:cleanExternalLabel(x.category),
+        source_url:safeHttpUrl(x.canonical_url)||safeHttpUrl(x.source_url),
+        source_name:'مصدر خارجي'
+       },
+       s:Math.round(Number(x.overall_score)||0),
+       official:true
+      };
+     }).filter(Boolean);
+    if(official.length)publicMatches=official.slice(0,10);
+   }else if(recommendationResult?.error){console.warn('official external recommendations',recommendationResult.error)}
+  }
+ }catch(e){console.warn('official external recommendations',e)}
  return {directMatches,publicMatches,directError,paid};
 }
 window.loadCanonicalWorkerMatchData=loadCanonicalWorkerMatchData;
@@ -179,16 +211,18 @@ async function loadWorkerMatchCenter(){
  }
  if(publicMatches.length){
   const generalFallback=publicMatches.every(x=>x.general);
-  const h=document.createElement('div');h.className='notice success';h.style.marginTop='14px';h.textContent=generalFallback?'📋 لم تظهر مطابقة مهنية فوق الحد المطلوب؛ هذه فرص منشورة عامة يمكنك مراجعتها يدويًا.':'🔎 أقرب الفرص المنشورة حاليًا — متاحة مجانًا';list.appendChild(h);
+  const hasOfficialMatches=publicMatches.some(x=>x.official);
+  const h=document.createElement('div');h.className='notice success';h.style.marginTop='14px';h.textContent=generalFallback?'📋 لم تظهر مطابقة مهنية فوق الحد المطلوب؛ هذه فرص منشورة عامة يمكنك مراجعتها يدويًا.':(hasOfficialMatches?'🎯 مطابقات مهنية محسوبة من بيانات مَدخَل — متاحة مجانًا':'🔎 أقرب الفرص المنشورة حاليًا — متاحة مجانًا');list.appendChild(h);
   publicMatches.forEach(x=>{
    const j=x.j,score=x.s;const card=document.createElement('div');card.className='worker-match-card';
    card.innerHTML='<div class="candidate-top"><strong>'+esc(j.title)+'</strong><span class="match-score">'+(x.general?'فرصة عامة':score+'% ملاءمة')+'</span></div>'+
     '<div class="candidate-meta">🏢 '+esc(j.company||'—')+(j.location?' · 📍 '+esc(j.location):'')+(j.country?' · '+esc(j.country):'')+'</div>'+
     '<div class="candidate-meta">المصدر: '+esc(j.source_name||j.source||'مَدخَل')+'</div>'+
-    (x.general?'<div class="notice">هذه فرصة منشورة وليست مطابقة مهنية مؤكدة؛ راجع شروط الإعلان قبل التقديم.</div>':'<div class="notice">درجة الملاءمة تقديرية من بيانات الملف والفرصة، وليست وعدًا بالتوظيف.</div>')+
+    (x.official?'<div class="notice">درجة المطابقة المهنية محسوبة من بيانات المهنة والفرصة في مَدخَل؛ وهي مؤشر مساعد وليست ضمانًا للتوظيف.</div>':(x.general?'<div class="notice">هذه فرصة منشورة وليست مطابقة مهنية مؤكدة؛ راجع شروط الإعلان قبل التقديم.</div>':'<div class="notice">درجة الملاءمة تقديرية من بيانات الملف والفرصة، وليست وعدًا بالتوظيف.</div>'))+
     '<div class="worker-match-actions"></div>';
    const ab=card.querySelector('.worker-match-actions');
-   if(j.source_url){const link=document.createElement('a');link.href=j.source_url;link.target='_blank';link.rel='noopener noreferrer';link.className='primary-btn';link.style.textAlign='center';link.style.textDecoration='none';link.textContent='🔗 فتح الإعلان';ab.appendChild(link)}
+   const externalHref=safeHttpUrl(j.source_url);
+   if(externalHref){const link=document.createElement('a');link.href=externalHref;link.target='_blank';link.rel='noopener noreferrer';link.className='primary-btn';link.style.textAlign='center';link.style.textDecoration='none';link.textContent='🔗 فتح الإعلان';ab.appendChild(link)}
    else{const btn=document.createElement('button');btn.className='secondary-btn';btn.textContent='🔎 عرض الفرص';btn.onclick=()=>openOpportunities();ab.appendChild(btn)}
    list.appendChild(card);
   });
