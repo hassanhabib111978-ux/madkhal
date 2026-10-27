@@ -90,3 +90,12 @@ No source ingestion was rebuilt or deleted in this batch. Payment activation rem
 - Made the canonical `OUTSIDE_SCOPE` classification take precedence over fallback region/country/location hints, preventing contradictory metadata from admitting out-of-scope opportunities.
 - Kept the change limited to client-side visibility filtering. No job-source ingestion code, job rows, schemas, or matching-score thresholds were changed.
 - Verification: checked the live `public.jobs` schema and current status distribution; ran focused cases for Syria/MENA location-only matches and contradictory `OUTSIDE_SCOPE` metadata. Post-merge GitHub Actions validation and Pages deployment succeeded; a manual browser/device smoke test remains unverified and should be completed during the next real-device check.
+
+
+## 2026-10-27 — Official external match recommendations and matching security
+- Connected the worker match center and Jibran's canonical matching path to prefer server-calculated external recommendations from \`get_my_opportunity_recommendations\`; if the RPC is unavailable, the existing public-opportunity fallback remains in place.
+- Added safe HTTP(S)-only validation before rendering external application links, and cleaned XML/CDATA wrappers from external title labels returned by feeds.
+- Synced the live free-launch matching changes into \`supabase/migrations/20261027_free_launch_matching_security_hardening.sql\`, including the free-launch gate, capped processing batches, occupation-relevance v5 scoring, and table write restrictions for match requests and professional evaluations.
+- Recomputed the active external job/worker pairs for the four confirmed worker profiles. The current persisted set has 9,464 updated pairs, including 147 scores at or above the recommendation threshold.
+- Verified that the live recommendation RPC returns qualifying results under simulated authenticated ownership for each confirmed worker; verified negative scoring cases for unrelated job titles and verified the external score RPC rejects a different user's worker profile.
+- Browser/device smoke testing and GitHub Pages deployment verification remain pending.
