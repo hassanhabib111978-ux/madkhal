@@ -709,6 +709,11 @@ GRANT SELECT ON TABLE public.professional_evaluations TO authenticated;
 DROP POLICY IF EXISTS professional_evaluations_party_insert ON public.professional_evaluations;
 DROP POLICY IF EXISTS professional_evaluations_party_update ON public.professional_evaluations;
 
+DROP TRIGGER IF EXISTS trg_prevent_profile_admin_escalation ON public.profiles;
+CREATE TRIGGER trg_prevent_profile_admin_escalation
+BEFORE INSERT OR UPDATE OF role ON public.profiles
+FOR EACH ROW EXECUTE FUNCTION public.prevent_profile_admin_escalation();
+
 REVOKE EXECUTE ON FUNCTION public.prevent_profile_admin_escalation() FROM PUBLIC, anon, authenticated;
 REVOKE EXECUTE ON FUNCTION public.calculate_external_opportunity_match(uuid, uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.calculate_external_opportunity_match(uuid, uuid) TO authenticated, service_role;
