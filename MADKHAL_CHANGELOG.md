@@ -99,3 +99,10 @@ No source ingestion was rebuilt or deleted in this batch. Payment activation rem
 - Recomputed the active external job/worker pairs for the four confirmed worker profiles. The current persisted set has 9,464 updated pairs, including 147 scores at or above the recommendation threshold.
 - Verified that the live recommendation RPC returns qualifying results under simulated authenticated ownership for each confirmed worker; verified negative scoring cases for unrelated job titles and verified the external score RPC rejects a different user's worker profile.
 - Browser/device smoke testing and GitHub Pages deployment verification remain pending.
+
+
+## 2026-10-28 — Profile-role guard consistency
+- Synced the security-hardening migration with the stricter live role guard: existing-profile role changes are rejected for non-admin clients, client-created admin roles remain blocked, and trusted service-role operations retain their server-side path.
+- Updated worker profile synchronization to change the display name only on an existing profile rather than attempting a client-side role change.
+- Updated employer onboarding to avoid silently changing an existing profile role. Existing non-employer profiles now receive a clear message; selecting the employer role is still permitted on initial profile creation.
+- Added a cache-busting version to the employer flow script. Browser/device smoke tests are still required before calling the release fully verified.
