@@ -85,3 +85,19 @@ WHERE lower(trim(j.status)) = 'inactive';
 -- * An archive table in the same database separates workloads but does not necessarily reduce
 --   total database storage. External export plus verified deletion is required to reclaim it.
 -- * Do not normalize source labels until importer upsert/deduplication behavior is reviewed.
+
+
+-- 6) Active rows whose source freshness may need attention.
+-- A stale last_checked_at does not prove a job is closed; it flags it for verification.
+SELECT
+  source,
+  count(*) AS active_rows,
+  count(*) FILTER (WHERE last_checked_at IS NULL) AS never_checked,
+  count(*) FILTER (WHERE last_checked_at < now() - interval '7 days' OR last_checked_at IS NULL) AS not_checked_7d,
+  count(*) FILTER (WHERE last_checked_at < now() - interval '30 days' OR last_checked_at IS NULL) AS not_checked_30d,
+  min(last_checked_at) AS oldest_check,
+  max(last_checked_at) AS newest_check
+FROM public.jobs
+WHERE lower(trim(status)) = 'active'
+GROUP BY source
+ORDER BY not_checked_7d DESC, active_rows DESC;
