@@ -87,15 +87,15 @@ jobs:
               title = clean(job.get("title"))
               company = clean(job.get("company"))
 
-              if not reference or not title:
+              if reference and reference in seen_references:
                   continue
-
-              if reference in seen_references:
-                  continue
-              seen_references.add(reference)
 
               canonical_url = clean(job.get("canonical_link"))
               source_url = clean(job.get("link")) or canonical_url
+
+              if not reference or not title or not source_url:
+                  continue
+              seen_references.add(reference)
 
               description = clean(job.get("snippet"))
               location = clean(job.get("location"))
@@ -175,22 +175,55 @@ jobs:
                   if row.get("source_job_id") is not None
               )
 
+          existing_rows_to_refresh = [
+              row for row in rows
+              if row["source_job_id"] in existing_references
+          ]
           new_rows = [
               row for row in rows
               if row["source_job_id"] not in existing_references
           ]
-          skipped_existing = len(rows) - len(new_rows)
-          print(f"Existing source records skipped: {skipped_existing}")
+          print(f"Existing source records to refresh: {len(existing_rows_to_refresh)}")
           print(f"New source records to import: {len(new_rows)}")
 
-          if not new_rows:
-              print("Import completed: no new source records; no duplicates inserted.")
-              raise SystemExit(0)
-
           api_url = f"{SUPABASE_URL}/rest/v1/jobs"
+          updated = 0
+          inserted = 0
+
+          # Refresh only rows included in the current feed. Preserve non-empty
+          # stored values when the source omits optional fields, and never
+          # reset the original created_at timestamp.
+          for row in existing_rows_to_refresh:
+              params = urllib.parse.urlencode({
+                  "source": "eq.myself.ae",
+                  "source_job_id": "eq." + row["source_job_id"]
+              })
+              update_payload = {
+                  key: value for key, value in row.items()
+                  if key != "created_at" and value not in (None, "")
+              }
+              update_payload["status"] = "active"
+              update_request = urllib.request.Request(
+                  f"{api_url}?{params}",
+                  data=json.dumps(update_payload).encode("utf-8"),
+                  headers={
+                      "apikey": SUPABASE_KEY,
+                      "Authorization": f"Bearer {SUPABASE_KEY}",
+                      "Content-Type": "application/json",
+                      "Prefer": "return=minimal"
+                  },
+                  method="PATCH"
+              )
+              with urllib.request.urlopen(update_request, timeout=60) as response:
+                  if response.status not in (200, 204):
+                      raise RuntimeError(
+                          f"Refresh failed for source_job_id={row['source_job_id']}: HTTP {response.status}"
+                      )
+              updated += 1
+
+          print(f"Existing source records refreshed: {updated}")
 
           batch_size = 50
-          inserted = 0
 
           for i in range(0, len(new_rows), batch_size):
               batch = new_rows[i:i + batch_size]
@@ -221,5 +254,5 @@ jobs:
                   print(body)
                   raise
 
-          print(f"Import completed successfully: {inserted} new rows imported; {skipped_existing} existing rows skipped.")
+          print(f"Import completed successfully: {inserted} new rows imported; {updated} existing source rows refreshed.")
           PY
