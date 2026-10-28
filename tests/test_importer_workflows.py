@@ -88,6 +88,15 @@ class ImporterWorkflowContracts(unittest.TestCase):
                 script = textwrap.dedent("\n".join(lines[start + 1:ends[0]]))
                 ast.parse(script, filename=filename)
 
+    def test_pages_deployment_is_gated_by_prelaunch_checks(self):
+        source = self.read_workflow("deploy-madkhal-fixed.yml")
+        check = source.index("Run pre-deployment regression checks")
+        inject = source.index("Inject stable enhancements")
+        deploy = source.index("Deploy to GitHub Pages")
+        self.assertIn("python -m unittest discover -s tests -v", source)
+        self.assertLess(check, inject)
+        self.assertLess(check, deploy)
+
     def test_import_workflows_use_read_only_github_token_permissions(self):
         for filename in ("myself-jobs.yml", "un-jobs.yml", "un-careers.yml"):
             with self.subTest(filename=filename):
