@@ -5,9 +5,13 @@ on:
   schedule:
     - cron: "0 */6 * * *"
 
+permissions:
+  contents: read
+
 jobs:
   import-himalayas:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Import Himalayas jobs
@@ -17,13 +21,19 @@ jobs:
 
         run: |
           python - <<'PY'
+          import os
           import json
           import urllib.request
           import urllib.parse
           import hashlib
 
-          SUPABASE_URL = "https://qbufsdpdobuicpljnssr.supabase.co"
-          SUPABASE_KEY = "${SUPABASE_KEY}"
+          SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
+          SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
+
+          if not SUPABASE_URL:
+              raise SystemExit("ERROR: SUPABASE_URL is missing")
+          if not SUPABASE_KEY:
+              raise SystemExit("ERROR: SUPABASE_SERVICE_ROLE_KEY secret is missing")
 
           API_URL = "https://himalayas.app/jobs/api"
 
@@ -48,6 +58,7 @@ jobs:
 
           inserted = 0
           skipped = 0
+          failed = 0
 
           for job in jobs:
 
@@ -181,11 +192,15 @@ jobs:
                   print(
                       f"Insert failed: {title} - {error}"
                   )
-                  skipped += 1
+                  failed += 1
 
           print("--------------------------------")
-          print("Himalayas import completed")
+          print("Himalayas import summary")
           print(f"Inserted: {inserted}")
-          print(f"Skipped: {skipped}")
+          print(f"Skipped (invalid or already present): {skipped}")
+          print(f"Failed: {failed}")
           print("--------------------------------")
+
+          if failed:
+              raise SystemExit(1)
           PY
