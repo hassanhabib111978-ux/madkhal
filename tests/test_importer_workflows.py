@@ -66,19 +66,27 @@ class ImporterWorkflowContracts(unittest.TestCase):
                 self.assertIn('"last_checked_at": datetime.now(timezone.utc).isoformat()', source)
 
     def test_changed_python_importers_have_valid_python_syntax(self):
-        heredoc = re.compile(
-            r"""(?ms)^[ \\t]*python[ \\t]+-[ \\t]+<<['"]PY['"][ \\t]*\\n(.*?)^[ \\t]*PY[ \\t]*$"""
-        )
         for filename in ("myself-jobs.yml", "un-jobs.yml", "un-careers.yml"):
             with self.subTest(filename=filename):
                 source = self.read_workflow(filename)
-                scripts = heredoc.findall(source)
+                lines = source.splitlines()
+                starts = [
+                    index for index, line in enumerate(lines)
+                    if line.strip() == "python - <<'PY'"
+                ]
                 self.assertEqual(
-                    len(scripts),
+                    len(starts),
                     1,
-                    f"Expected exactly one Python heredoc in {filename}, found {len(scripts)}",
+                    f"Expected exactly one Python heredoc in {filename}, found {len(starts)}",
                 )
-                ast.parse(textwrap.dedent(scripts[0]), filename=filename)
+                start = starts[0]
+                ends = [
+                    index for index in range(start + 1, len(lines))
+                    if lines[index].strip() == "PY"
+                ]
+                self.assertTrue(ends, f"Missing heredoc terminator in {filename}")
+                script = textwrap.dedent("\\n".join(lines[start + 1:ends[0]]))
+                ast.parse(script, filename=filename)
 
     def test_import_workflows_use_read_only_github_token_permissions(self):
         for filename in ("myself-jobs.yml", "un-jobs.yml", "un-careers.yml"):
