@@ -88,6 +88,14 @@ class ImporterWorkflowContracts(unittest.TestCase):
                 script = textwrap.dedent("\n".join(lines[start + 1:ends[0]]))
                 ast.parse(script, filename=filename)
 
+    def test_profile_summary_survives_local_and_remote_reload(self):
+        index = (ROOT / "index.html").read_text(encoding="utf-8")
+        self.assertIn("workerSummary:p.summary||p.professional_summary||p.work_field||\"\"", index)
+        self.assertIn(
+            "summary:prefer(q.data.professional_summary,prefer(q.data.work_field,old.summary||old.professional_summary||old.work_field))",
+            index,
+        )
+
     def test_jibran_subscription_answer_respects_free_launch_flag(self):
         index = (ROOT / "index.html").read_text(encoding="utf-8")
         self.assertIn("MADKHAL_MONTHLY_SUBSCRIPTION_ENABLED===false?", index)
