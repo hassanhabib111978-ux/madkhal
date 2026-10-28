@@ -121,6 +121,21 @@ class ImporterWorkflowContracts(unittest.TestCase):
         self.assertLess(check, inject)
         self.assertLess(check, deploy)
 
+    def test_deployment_injected_scripts_exist_in_repository(self):
+        source = self.read_workflow("deploy-madkhal-fixed.yml")
+        script_names = (
+            "subscription-install-link.js",
+            "payment-flexible-layer.js",
+            "subscription-runtime.js",
+            "employer-flow-enhancement.js",
+            "employer-dashboard-polish.js",
+            "worker-match-lifecycle.js",
+        )
+        for filename in script_names:
+            with self.subTest(filename=filename):
+                self.assertTrue((ROOT / filename).is_file(), f"Missing injected script: {filename}")
+                self.assertIn(f'("{filename}",', source)
+
     def test_import_workflows_use_read_only_github_token_permissions(self):
         for filename in ("myself-jobs.yml", "un-jobs.yml", "un-careers.yml"):
             with self.subTest(filename=filename):
