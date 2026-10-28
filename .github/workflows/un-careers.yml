@@ -3,9 +3,13 @@ name: UN Careers Import
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   import-un-jobs:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Import UN Careers jobs
@@ -15,15 +19,22 @@ jobs:
 
         run: |
           python - <<'PY'
+          import os
           import json
           import urllib.request
           import urllib.parse
           import hashlib
           import xml.etree.ElementTree as ET
           import re
+          from datetime import datetime, timezone
 
-          SUPABASE_URL = "https://qbufsdpdobuicpljnssr.supabase.co"
-          SUPABASE_KEY = "${SUPABASE_KEY}"
+          SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
+          SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
+
+          if not SUPABASE_URL:
+              raise SystemExit("ERROR: SUPABASE_URL is missing")
+          if not SUPABASE_KEY:
+              raise SystemExit("ERROR: SUPABASE_SERVICE_ROLE_KEY secret is missing")
 
           FEED_URL = "https://careers.un.org/jobfeed?isPage=true"
 
@@ -70,7 +81,9 @@ jobs:
               )
 
           inserted = 0
+          updated = 0
           skipped = 0
+          failed = 0
 
           def text(item, tag):
               node = item.find(tag)
@@ -187,10 +200,6 @@ jobs:
                       f"Supabase check failed: {error}"
                   )
 
-              if existing:
-                  skipped += 1
-                  continue
-
               payload = {
                   "source": "UN Careers",
                   "source_job_id": job_id,
@@ -205,45 +214,66 @@ jobs:
                   "canonical_url": source_url,
                   "status": "active",
                   "confidence": 1.0,
-                  "dedupe_hash": dedupe_hash
+                  "dedupe_hash": dedupe_hash,
+                  "last_checked_at": datetime.now(timezone.utc).isoformat()
               }
+              payload_to_write = {
+                  key: value for key, value in payload.items()
+                  if value not in (None, "")
+              }
+              params = urllib.parse.urlencode({
+                  "source": "eq.UN Careers",
+                  "source_job_id": "eq." + job_id
+              })
 
-              body = json.dumps(
-                  payload
-              ).encode("utf-8")
-
-              insert_request = urllib.request.Request(
-                  f"{SUPABASE_URL}/rest/v1/jobs",
-                  data=body,
-                  method="POST",
-                  headers={
-                      "apikey": SUPABASE_KEY,
-                      "Authorization": f"Bearer {SUPABASE_KEY}",
-                      "Content-Type": "application/json",
-                      "Prefer": "return=minimal"
-                  }
-              )
+              if existing:
+                  write_request = urllib.request.Request(
+                      f"{SUPABASE_URL}/rest/v1/jobs?{params}",
+                      data=json.dumps(payload_to_write).encode("utf-8"),
+                      method="PATCH",
+                      headers={
+                          "apikey": SUPABASE_KEY,
+                          "Authorization": f"Bearer {SUPABASE_KEY}",
+                          "Content-Type": "application/json",
+                          "Prefer": "return=minimal"
+                      }
+                  )
+              else:
+                  write_request = urllib.request.Request(
+                      f"{SUPABASE_URL}/rest/v1/jobs",
+                      data=json.dumps(payload_to_write).encode("utf-8"),
+                      method="POST",
+                      headers={
+                          "apikey": SUPABASE_KEY,
+                          "Authorization": f"Bearer {SUPABASE_KEY}",
+                          "Content-Type": "application/json",
+                          "Prefer": "return=minimal"
+                      }
+                  )
 
               try:
-                  with urllib.request.urlopen(
-                      insert_request,
-                      timeout=30
-                  ) as response:
-
-                      if response.status in (200, 201, 204):
-                          inserted += 1
+                  with urllib.request.urlopen(write_request, timeout=30) as response:
+                      if response.status not in (200, 201, 204):
+                          raise RuntimeError(
+                              f"Unexpected Supabase status {response.status}"
+                          )
+                      if existing:
+                          updated += 1
                       else:
-                          skipped += 1
-
+                          inserted += 1
               except Exception as error:
-                  print(
-                      f"Insert failed for {title}: {error}"
-                  )
-                  skipped += 1
+                  action = "Refresh" if existing else "Insert"
+                  print(f"{action} failed for {title}: {error}")
+                  failed += 1
 
           print("--------------------------------")
-          print("UN Careers import completed")
+          print("UN Careers import summary")
           print(f"Inserted: {inserted}")
-          print(f"Skipped: {skipped}")
+          print(f"Refreshed existing live jobs: {updated}")
+          print(f"Skipped (invalid records): {skipped}")
+          print(f"Failed: {failed}")
           print("--------------------------------")
+
+          if failed:
+              raise SystemExit(1)
           PY

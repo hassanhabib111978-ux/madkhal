@@ -299,7 +299,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   <div class="jibran"><div class="jibran-title">🤖 جبران — مساعد مَدخَل</div><div id="jibranHomeText" class="jibran-bubble">اسألني عن ملفك أو عن كيفية الوصول إلى فرصة مناسبة.</div><div id="jibranHomeMatchResults" class="hidden" aria-live="polite"></div><div class="jibran-actions"><button class="secondary-btn" onclick="askJibran('profile')">كيف أبني ملفي؟</button><button class="secondary-btn" onclick="askJibran('jobs')">كيف أجد فرصة؟</button><button class="secondary-btn" onclick="jibranOpenAllMatches()">🎯 الفرص الأنسب</button></div></div>
   <h2 class="section-title">رحلتك</h2>
   <div class="journey"><div class="journey-item"><span>👤</span>بياناتك</div><div class="journey-item"><span>🧠</span>مهاراتك</div><div class="journey-item"><span>🎯</span>المطابقة</div><div class="journey-item"><span>🔎</span>الفرص</div><div class="journey-item"><span>📩</span>التقديم</div><div class="journey-item"><span>🔔</span>المتابعة</div></div>
-  <div class="premium" id="subscriptionOfferCard"><span class="premium-badge">🎉 البحث الأساسي مجاني</span><h3 style="margin-top:10px">مَدخَل — البحث والمتابعة الذكية</h3><p><strong>يمكنك إنشاء ملفك، استكشاف الفرص، التقييم، المطابقة الأساسية والتقديم مجانًا.</strong> والاشتراك اختياري لمن يريد المتابعة المستمرة والتنبيهات عند ظهور فرص جديدة مناسبة.</p><div class="notice success">💵 المتابعة الذكية: دولار واحد شهريًا. تسجيل الطلب متاح، أما التفعيل فيتم بعد التحقق من الدفع.</div><button class="primary-btn" style="width:100%;margin-top:10px" onclick="openSubscription()">🔔 الاشتراك الشهري — $1</button></div>
+  <div class="premium" id="subscriptionOfferCard" style="display:none"><span class="premium-badge">🎉 البحث الأساسي مجاني</span><h3 style="margin-top:10px">مَدخَل — البحث والمتابعة الذكية</h3><p><strong>يمكنك إنشاء ملفك، استكشاف الفرص، التقييم، المطابقة الأساسية والتقديم مجانًا.</strong> والاشتراك اختياري لمن يريد المتابعة المستمرة والتنبيهات عند ظهور فرص جديدة مناسبة.</p><div class="notice success">💵 المتابعة الذكية: دولار واحد شهريًا. تسجيل الطلب متاح، أما التفعيل فيتم بعد التحقق من الدفع.</div><button class="primary-btn" style="width:100%;margin-top:10px" onclick="openSubscription()">🔔 الاشتراك الشهري — $1</button></div>
   <div id="subscriptionPausedNotice" class="card hidden"><h3>⏸️ الاشتراك الشهري متوقف مؤقتًا</h3><p>جميع وظائف مَدخَل الأساسية متاحة مجانًا خلال هذه المرحلة، بما فيها الملف المهني والتقييم والبحث والمطابقة الأساسية والتقديم. سنعيد خيار الاشتراك عند تفعيله لاحقًا.</p></div>
 </section>
 
@@ -411,6 +411,10 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 
 <script>
 window.MADKHAL_MONTHLY_SUBSCRIPTION_ENABLED = false; // أعده إلى true لإظهار الاشتراك مجددًا
+(function(){
+  const card=document.getElementById("subscriptionOfferCard");
+  if(card)card.style.display=window.MADKHAL_MONTHLY_SUBSCRIPTION_ENABLED===true?"":"none";
+})();
 "use strict";
 
 const SUPABASE_URL="https://qbufsdpdobuicpljnssr.supabase.co";
@@ -531,7 +535,7 @@ async function publicProfileId(user,fullName,role="user"){
 }
 function localProfile(){return getLS(LS.profile,{})}
 function fullNameFromFields(){return [document.getElementById("workerFirstName")?.value.trim(),document.getElementById("workerFatherName")?.value.trim(),document.getElementById("workerFamilyName")?.value.trim()].filter(Boolean).join(" ")}
-async function loadProfile(){const p=localProfile();const map={workerFirstName:p.first_name||"",workerFatherName:p.father_name||"",workerFamilyName:p.family_name||"",workerMotherName:p.mother_name||"",workerBirthDate:p.birth_date||"",workerQualification:p.qualification||"",occupationSearch:p.occupation_label||"",occupationUri:p.occupation_uri||"",occupationLabel:p.occupation_label||"",workerLocation:p.location||"",workerWorkType:p.work_type||"",workerExperienceYears:p.experience_years??"",workerSkillsExtra:p.skills||"",workerSummary:p.summary||""};Object.keys(map).forEach(id=>{const e=document.getElementById(id);if(e)e.value=map[id]});renderExistingProfileStatus(p);if(p.occupation_uri)loadOccupationSkills(p.occupation_uri)}
+async function loadProfile(){const p=localProfile();const map={workerFirstName:p.first_name||"",workerFatherName:p.father_name||"",workerFamilyName:p.family_name||"",workerMotherName:p.mother_name||"",workerBirthDate:p.birth_date||"",workerQualification:p.qualification||"",occupationSearch:p.occupation_label||"",occupationUri:p.occupation_uri||"",occupationLabel:p.occupation_label||"",workerLocation:p.location||"",workerWorkType:p.work_type||"",workerExperienceYears:p.experience_years??"",workerSkillsExtra:p.skills||"",workerSummary:p.summary||p.professional_summary||p.work_field||""};Object.keys(map).forEach(id=>{const e=document.getElementById(id);if(e)e.value=map[id]});renderExistingProfileStatus(p);if(p.occupation_uri)loadOccupationSkills(p.occupation_uri)}
 async function loadProfileRemote(){
  const user=await sessionUser();
  if(!user)return;
@@ -572,7 +576,7 @@ async function loadProfileRemote(){
    work_type:prefer(q.data.work_type,old.work_type),
    experience_years:prefer(q.data.experience_years,old.experience_years),
    skills:prefer(q.data.skills,old.skills),
-   summary:prefer(q.data.professional_summary,prefer(q.data.work_field,old.summary)),
+   summary:prefer(q.data.professional_summary,prefer(q.data.work_field,old.summary||old.professional_summary||old.work_field)),
    professional_summary:prefer(q.data.professional_summary,old.professional_summary??old.summary),
    full_name:prefer(q.data.full_name,remoteFull||old.full_name)
   };
@@ -1476,7 +1480,7 @@ async function askJibranUser(){
   try{await window.loadProfileRemote()}catch(e){console.warn("Jibran profile refresh",e)}
  }
  const p=localProfile();
- if(q.includes("اشتراك")||q.includes("دولار"))ans="الاشتراك دولار واحد شهريًا للمتابعة المستمرة والمطابقة والتنبيهات.";
+ if(q.includes("اشتراك")||q.includes("دولار"))ans=window.MADKHAL_MONTHLY_SUBSCRIPTION_ENABLED===false?"الاشتراك الشهري متوقف مؤقتًا أثناء الإطلاق؛ البحث والتصفح والمطابقة الأساسية والتقديم متاحة مجانًا. لا يوجد حاليًا اشتراك مطلوب.":"الاشتراك دولار واحد شهريًا للمتابعة المستمرة والمطابقة والتنبيهات.";
  else if(asksBest){
    if(!p.full_name||!p.occupation_label)ans="أكمل ملفك المهني واختر المهنة أولًا، وبعدها تبدأ المطابقة الرسمية.";
    else if(typeof window.loadCanonicalWorkerMatchData!=="function")ans="افتح حسابك ثم أعد المحاولة حتى أستدعي المطابقة الرسمية.";

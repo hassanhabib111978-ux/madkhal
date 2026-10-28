@@ -19,6 +19,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Set up Python for release checks
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run pre-deployment regression checks
+        run: python -m unittest discover -s tests -v
       - name: Inject stable enhancements
         run: |
           python3 - <<'PY'
@@ -40,6 +46,9 @@ jobs:
                   s = s.replace("</body>", "    " + tag + "\n</body>")
           p.write_text(s, encoding="utf-8")
           PY
+
+      - name: Verify final release after script injection
+        run: python -m unittest discover -s tests -v
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
