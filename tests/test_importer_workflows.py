@@ -96,6 +96,15 @@ class ImporterWorkflowContracts(unittest.TestCase):
             index,
         )
 
+    def test_monthly_offer_is_hidden_until_subscription_is_reenabled(self):
+        index = (ROOT / "index.html").read_text(encoding="utf-8")
+        self.assertIn('window.MADKHAL_MONTHLY_SUBSCRIPTION_ENABLED = false', index)
+        self.assertIn(
+            'card.style.display=window.MADKHAL_MONTHLY_SUBSCRIPTION_ENABLED===true?"":"none"',
+            index,
+        )
+        self.assertIn('id="subscriptionOfferCard"', index)
+
     def test_jibran_subscription_answer_respects_free_launch_flag(self):
         index = (ROOT / "index.html").read_text(encoding="utf-8")
         self.assertIn("MADKHAL_MONTHLY_SUBSCRIPTION_ENABLED===false?", index)
