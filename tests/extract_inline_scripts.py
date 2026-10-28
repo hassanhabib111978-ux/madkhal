@@ -3,7 +3,7 @@ import re
 
 root = Path(__file__).resolve().parents[1]
 html = (root / "index.html").read_text(encoding="utf-8")
-pattern = re.compile(r'<script(?![^>]*\\bsrc=)[^>]*>([\\s\\S]*?)</script\\s*>', re.I)
+pattern = re.compile(r'<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)</script\s*>', re.I)
 out = Path("/tmp/madkhal-inline-scripts")
 out.mkdir(parents=True, exist_ok=True)
 for old in out.glob("*.js"):
