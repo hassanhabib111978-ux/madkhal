@@ -5,9 +5,13 @@ on:
   schedule:
     - cron: "15 * * * *"
 
+permissions:
+  contents: read
+
 jobs:
   import-myself-jobs:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Import jobs from myself.ae
@@ -22,18 +26,22 @@ jobs:
           import urllib.request
           import urllib.error
           import hashlib
+          import urllib.parse
           from datetime import datetime, timezone
 
           SUPABASE_URL = os.environ["SUPABASE_URL"]
           SUPABASE_KEY = os.environ["SUPABASE_KEY"]
           FEED_URL = os.environ["FEED_URL"]
 
+          if not SUPABASE_URL or not SUPABASE_KEY or not FEED_URL:
+              raise SystemExit("ERROR: required importer configuration is missing")
+
           headers = {
               "User-Agent": "Madkhal-Jobs-Importer/1.0",
               "apikey": SUPABASE_KEY,
               "Authorization": f"Bearer {SUPABASE_KEY}",
               "Content-Type": "application/json",
-              "Prefer": "resolution=merge-duplicates"
+              "Prefer": "return=minimal"
           }
 
           print("Downloading myself.ae feed...")
@@ -72,6 +80,7 @@ jobs:
                   return None
 
           rows = []
+          seen_references = set()
 
           for job in jobs:
               reference = clean(job.get("reference"))
@@ -80,6 +89,10 @@ jobs:
 
               if not reference or not title:
                   continue
+
+              if reference in seen_references:
+                  continue
+              seen_references.add(reference)
 
               canonical_url = clean(job.get("canonical_link"))
               source_url = clean(job.get("link")) or canonical_url
@@ -104,7 +117,6 @@ jobs:
 
               rows.append({
                   "source": "myself.ae",
-                  "source_id": reference,
                   "source_job_id": reference,
                   "company": company,
                   "title": title,
@@ -131,13 +143,57 @@ jobs:
               print("No valid rows to insert.")
               raise SystemExit(0)
 
+          # Check existing source IDs before any writes. This prevents each
+          # hourly run from inserting duplicate rows for the same feed items.
+          existing_references = set()
+          for offset in range(0, len(rows), 50):
+              reference_batch = [
+                  row["source_job_id"] for row in rows[offset:offset + 50]
+              ]
+              quoted_references = ",".join(
+                  '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
+                  for value in reference_batch
+              )
+              params = urllib.parse.urlencode({
+                  "select": "source_job_id",
+                  "source": "eq.myself.ae",
+                  "source_job_id": "in.(" + quoted_references + ")"
+              })
+              check_request = urllib.request.Request(
+                  f"{SUPABASE_URL}/rest/v1/jobs?{params}",
+                  headers={
+                      "apikey": SUPABASE_KEY,
+                      "Authorization": f"Bearer {SUPABASE_KEY}",
+                      "Accept": "application/json"
+                  }
+              )
+              with urllib.request.urlopen(check_request, timeout=60) as response:
+                  existing_rows = json.loads(response.read().decode("utf-8"))
+              existing_references.update(
+                  str(row.get("source_job_id"))
+                  for row in existing_rows
+                  if row.get("source_job_id") is not None
+              )
+
+          new_rows = [
+              row for row in rows
+              if row["source_job_id"] not in existing_references
+          ]
+          skipped_existing = len(rows) - len(new_rows)
+          print(f"Existing source records skipped: {skipped_existing}")
+          print(f"New source records to import: {len(new_rows)}")
+
+          if not new_rows:
+              print("Import completed: no new source records; no duplicates inserted.")
+              raise SystemExit(0)
+
           api_url = f"{SUPABASE_URL}/rest/v1/jobs"
 
           batch_size = 50
           inserted = 0
 
-          for i in range(0, len(rows), batch_size):
-              batch = rows[i:i + batch_size]
+          for i in range(0, len(new_rows), batch_size):
+              batch = new_rows[i:i + batch_size]
 
               request = urllib.request.Request(
                   api_url,
@@ -165,5 +221,5 @@ jobs:
                   print(body)
                   raise
 
-          print(f"Import completed successfully: {inserted} rows processed.")
+          print(f"Import completed successfully: {inserted} new rows imported; {skipped_existing} existing rows skipped.")
           PY
