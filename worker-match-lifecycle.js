@@ -123,36 +123,9 @@ async function loadCanonicalWorkerMatchData(profile){
  let publicJobs=[];
  try{if(typeof loadJobs==='function')publicJobs=await loadJobs(false)}catch(e){console.warn('worker public jobs',e)}
  let publicMatches=window.getCanonicalWorkerPublicMatches?window.getCanonicalWorkerPublicMatches(publicJobs,p,10):[];
- // Prefer persisted, server-calculated external recommendations when available; retain the current public-job fallback if RPC fails.
- try{
-  if(typeof supabaseClient!=='undefined'&&supabaseClient&&typeof supabaseClient.rpc==='function'){
-   const recommendationResult=await supabaseClient.rpc('get_my_opportunity_recommendations',{p_limit:100});
-   if(!recommendationResult?.error&&Array.isArray(recommendationResult?.data)){
-    const official=recommendationResult.data
-     .filter(x=>x&&x.opportunity_type==='external'&&Number(x.overall_score)>=60)
-     .map(x=>{
-      const title=cleanExternalLabel(x.title);
-      if(!title)return null;
-      return {
-       j:{
-        id:x.opportunity_id,
-        title,
-        company:cleanExternalLabel(x.organization),
-        location:cleanExternalLabel(x.location),
-        country:cleanExternalLabel(x.country),
-        job_type:cleanExternalLabel(x.job_type),
-        category:cleanExternalLabel(x.category),
-        source_url:safeHttpUrl(x.canonical_url)||safeHttpUrl(x.source_url),
-        source_name:'مصدر خارجي'
-       },
-       s:Math.round(Number(x.overall_score)||0),
-       official:true
-      };
-     }).filter(Boolean);
-    if(official.length)publicMatches=official.slice(0,10);
-   }else if(recommendationResult?.error){console.warn('official external recommendations',recommendationResult.error)}
-  }
- }catch(e){console.warn('official external recommendations',e)}
+ // Re-rank published jobs from the latest saved profile on every match request.
+ // Do not replace these fresh scores with persisted recommendation rows: those rows may
+ // have been calculated for the worker's previous occupation and the RPC has no score timestamp.
  return {directMatches,publicMatches,directError,paid};
 }
 window.loadCanonicalWorkerMatchData=loadCanonicalWorkerMatchData;
