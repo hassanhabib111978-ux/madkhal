@@ -4,18 +4,40 @@ CREATE OR REPLACE FUNCTION public.prevent_profile_admin_escalation()
  RETURNS trigger
  LANGUAGE plpgsql
  SECURITY DEFINER
- SET search_path TO 'public', 'pg_temp'
+ SET search_path TO 'pg_catalog', 'public', 'pg_temp'
 AS $function$
+DECLARE
+  v_actor_is_admin boolean := false;
 BEGIN
-  -- Preserve legitimate role selection (for example, employer onboarding),
-  -- while preventing a client from assigning itself the privileged admin role.
-  IF lower(coalesce(NEW.role, '')) = 'admin' THEN
-    IF lower(coalesce((
-      SELECT p.role
+  -- Trusted service-role operations may manage roles server-side.
+  IF coalesce(auth.role(), '') = 'service_role' THEN
+    RETURN NEW;
+  END IF;
+
+  -- A client cannot change the role of an existing profile. Only an existing admin may do so.
+  IF TG_OP = 'UPDATE' AND NEW.role IS DISTINCT FROM OLD.role THEN
+    SELECT EXISTS (
+      SELECT 1
       FROM public.profiles p
-      WHERE p.id = NEW.id
-        AND p.auth_user_id = auth.uid()
-    ), '')) <> 'admin' THEN
+      WHERE p.auth_user_id = auth.uid()
+        AND lower(coalesce(p.role, '')) = 'admin'
+    ) INTO v_actor_is_admin;
+
+    IF NOT v_actor_is_admin THEN
+      RAISE EXCEPTION 'profile_role_change_requires_admin';
+    END IF;
+  END IF;
+
+  -- Initial non-admin role selection remains available during account creation.
+  IF TG_OP = 'INSERT' AND lower(coalesce(NEW.role, '')) = 'admin' THEN
+    SELECT EXISTS (
+      SELECT 1
+      FROM public.profiles p
+      WHERE p.auth_user_id = auth.uid()
+        AND lower(coalesce(p.role, '')) = 'admin'
+    ) INTO v_actor_is_admin;
+
+    IF NOT v_actor_is_admin THEN
       RAISE EXCEPTION 'admin_role_not_client_assignable';
     END IF;
   END IF;
