@@ -85,7 +85,7 @@ class ImporterWorkflowContracts(unittest.TestCase):
                     if lines[index].strip() == "PY"
                 ]
                 self.assertTrue(ends, f"Missing heredoc terminator in {filename}")
-                script = textwrap.dedent("\\n".join(lines[start + 1:ends[0]]))
+                script = textwrap.dedent("\n".join(lines[start + 1:ends[0]]))
                 ast.parse(script, filename=filename)
 
     def test_import_workflows_use_read_only_github_token_permissions(self):
