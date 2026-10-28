@@ -88,6 +88,13 @@ class ImporterWorkflowContracts(unittest.TestCase):
                 script = textwrap.dedent("\n".join(lines[start + 1:ends[0]]))
                 ast.parse(script, filename=filename)
 
+    def test_jibran_subscription_answer_respects_free_launch_flag(self):
+        index = (ROOT / "index.html").read_text(encoding="utf-8")
+        self.assertIn("MADKHAL_MONTHLY_SUBSCRIPTION_ENABLED===false?", index)
+        self.assertIn("الاشتراك الشهري متوقف مؤقتًا أثناء الإطلاق", index)
+        self.assertIn("لا يوجد حاليًا اشتراك مطلوب", index)
+        self.assertIn("الاشتراك دولار واحد شهريًا للمتابعة المستمرة", index)
+
     def test_pages_deployment_is_gated_by_prelaunch_checks(self):
         source = self.read_workflow("deploy-madkhal-fixed.yml")
         check = source.index("Run pre-deployment regression checks")
