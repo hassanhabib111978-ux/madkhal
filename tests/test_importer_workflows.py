@@ -1,6 +1,8 @@
 """Regression checks for production job-import workflows."""
 from pathlib import Path
+import ast
 import re
+import textwrap
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -49,6 +51,34 @@ class ImporterWorkflowContracts(unittest.TestCase):
         self.assertIn("failed += 1", source)
         self.assertIn("if failed:", source)
         self.assertIn("raise SystemExit(1)", source)
+
+    def test_live_feed_rows_are_refreshed_instead_of_permanently_skipped(self):
+        expectations = {
+            "myself-jobs.yml": ("source_job_id", "method=\"PATCH\"", "Existing source records refreshed"),
+            "un-jobs.yml": ('"source_job_id": "eq." + job_id', 'method="PATCH"', "Refreshed existing live jobs"),
+            "un-careers.yml": ('"source_job_id": "eq." + job_id', 'method="PATCH"', "Refreshed existing live jobs"),
+        }
+        for filename, snippets in expectations.items():
+            with self.subTest(filename=filename):
+                source = self.read_workflow(filename)
+                for snippet in snippets:
+                    self.assertIn(snippet, source)
+                self.assertIn('"last_checked_at": datetime.now(timezone.utc).isoformat()', source)
+
+    def test_changed_python_importers_have_valid_python_syntax(self):
+        heredoc = re.compile(
+            r"""(?ms)^[ \\t]*python[ \\t]+-[ \\t]+<<['"]PY['"][ \\t]*\\n(.*?)^[ \\t]*PY[ \\t]*$"""
+        )
+        for filename in ("myself-jobs.yml", "un-jobs.yml", "un-careers.yml"):
+            with self.subTest(filename=filename):
+                source = self.read_workflow(filename)
+                scripts = heredoc.findall(source)
+                self.assertEqual(
+                    len(scripts),
+                    1,
+                    f"Expected exactly one Python heredoc in {filename}, found {len(scripts)}",
+                )
+                ast.parse(textwrap.dedent(scripts[0]), filename=filename)
 
     def test_import_workflows_use_read_only_github_token_permissions(self):
         for filename in ("myself-jobs.yml", "un-jobs.yml", "un-careers.yml"):
