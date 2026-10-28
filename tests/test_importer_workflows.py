@@ -36,6 +36,13 @@ class ImporterWorkflowContracts(unittest.TestCase):
         self.assertIn('"source_job_id": "in.(" + quoted_references + ")"', source)
         self.assertIn("if not SUPABASE_URL or not SUPABASE_KEY or not FEED_URL:", source)
 
+    def test_myself_refresh_does_not_reactivate_expired_listings(self):
+        source = self.read_workflow("myself-jobs.yml")
+        self.assertIn("def is_expired(value):", source)
+        self.assertIn('"status": "expired" if is_expired(expires_at) else "active"', source)
+        self.assertNotIn('update_payload["status"] = "active"', source)
+        self.assertIn("dt <= datetime.now(timezone.utc)", source)
+
     def test_himalayas_uses_environment_secret_and_surfaces_write_failures(self):
         source = self.read_workflow("un-jobs.yml")
         self.assertIn('SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")', source)
