@@ -75,9 +75,23 @@ jobs:
 
               try:
                   dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+                  if dt.tzinfo is None:
+                      dt = dt.replace(tzinfo=timezone.utc)
                   return dt.isoformat()
               except Exception:
                   return None
+
+          def is_expired(value):
+              if not value:
+                  return False
+              try:
+                  dt = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+                  if dt.tzinfo is None:
+                      dt = dt.replace(tzinfo=timezone.utc)
+                  return dt <= datetime.now(timezone.utc)
+              except Exception:
+                  # An unparseable date must not silently expire a valid listing.
+                  return False
 
           rows = []
           seen_references = set()
@@ -129,7 +143,7 @@ jobs:
                   "created_at": datetime.now(timezone.utc).isoformat(),
                   "last_checked_at": datetime.now(timezone.utc).isoformat(),
                   "confidence": 1.0,
-                  "status": "active",
+                  "status": "expired" if is_expired(expires_at) else "active",
                   "expires_at": expires_at,
                   "updated_at": updated_at,
                   "posted_at": posted_at,
@@ -202,7 +216,6 @@ jobs:
                   key: value for key, value in row.items()
                   if key != "created_at" and value not in (None, "")
               }
-              update_payload["status"] = "active"
               update_request = urllib.request.Request(
                   f"{api_url}?{params}",
                   data=json.dumps(update_payload).encode("utf-8"),
