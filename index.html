@@ -531,7 +531,7 @@ async function publicProfileId(user,fullName,role="user"){
 }
 function localProfile(){return getLS(LS.profile,{})}
 function fullNameFromFields(){return [document.getElementById("workerFirstName")?.value.trim(),document.getElementById("workerFatherName")?.value.trim(),document.getElementById("workerFamilyName")?.value.trim()].filter(Boolean).join(" ")}
-async function loadProfile(){const p=localProfile();const map={workerFirstName:p.first_name||"",workerFatherName:p.father_name||"",workerFamilyName:p.family_name||"",workerMotherName:p.mother_name||"",workerBirthDate:p.birth_date||"",workerQualification:p.qualification||"",occupationSearch:p.occupation_label||"",occupationUri:p.occupation_uri||"",occupationLabel:p.occupation_label||"",workerLocation:p.location||"",workerWorkType:p.work_type||"",workerExperienceYears:p.experience_years??"",workerSkillsExtra:p.skills||"",workerSummary:p.summary||""};Object.keys(map).forEach(id=>{const e=document.getElementById(id);if(e)e.value=map[id]});renderExistingProfileStatus(p);if(p.occupation_uri)loadOccupationSkills(p.occupation_uri)}
+async function loadProfile(){const p=localProfile();const map={workerFirstName:p.first_name||"",workerFatherName:p.father_name||"",workerFamilyName:p.family_name||"",workerMotherName:p.mother_name||"",workerBirthDate:p.birth_date||"",workerQualification:p.qualification||"",occupationSearch:p.occupation_label||"",occupationUri:p.occupation_uri||"",occupationLabel:p.occupation_label||"",workerLocation:p.location||"",workerWorkType:p.work_type||"",workerExperienceYears:p.experience_years??"",workerSkillsExtra:p.skills||"",workerSummary:p.summary||p.professional_summary||p.work_field||""};Object.keys(map).forEach(id=>{const e=document.getElementById(id);if(e)e.value=map[id]});renderExistingProfileStatus(p);if(p.occupation_uri)loadOccupationSkills(p.occupation_uri)}
 async function loadProfileRemote(){
  const user=await sessionUser();
  if(!user)return;
@@ -572,7 +572,7 @@ async function loadProfileRemote(){
    work_type:prefer(q.data.work_type,old.work_type),
    experience_years:prefer(q.data.experience_years,old.experience_years),
    skills:prefer(q.data.skills,old.skills),
-   summary:prefer(q.data.professional_summary,prefer(q.data.work_field,old.summary)),
+   summary:prefer(q.data.professional_summary,prefer(q.data.work_field,old.summary||old.professional_summary||old.work_field)),
    professional_summary:prefer(q.data.professional_summary,old.professional_summary??old.summary),
    full_name:prefer(q.data.full_name,remoteFull||old.full_name)
   };
