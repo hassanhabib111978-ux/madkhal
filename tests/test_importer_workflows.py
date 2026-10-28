@@ -103,7 +103,13 @@ class ImporterWorkflowContracts(unittest.TestCase):
             'card.style.display=window.MADKHAL_MONTHLY_SUBSCRIPTION_ENABLED===true?"":"none"',
             index,
         )
-        self.assertIn('id="subscriptionOfferCard"', index)
+        self.assertIn('id="subscriptionOfferCard" style="display:none"', index)
+
+    def test_removed_government_jobs_link_does_not_return_to_homepage(self):
+        index = (ROOT / "index.html").read_text(encoding="utf-8")
+        self.assertNotIn("وظائف حكومية", index)
+        self.assertNotIn("الوظائف الحكومية", index)
+        self.assertNotIn("government jobs", index.lower())
 
     def test_jibran_subscription_answer_respects_free_launch_flag(self):
         index = (ROOT / "index.html").read_text(encoding="utf-8")
