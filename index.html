@@ -510,7 +510,25 @@ function clearJobSearch(){const e=document.getElementById("jobSearch");if(e){e.v
 function openAccount(){showScreen("accountScreen");ensureAccountAssessment();loadAccount()}
 
 async function sessionUser(){try{const g=await supabaseClient.auth.getSession();if(g.data&&g.data.session&&g.data.session.user)return g.data.session.user}catch(e){}try{const a=await supabaseClient.auth.signInAnonymously();return a.data&&a.data.user?a.data.user:null}catch(e){return null}}
-async function publicProfileId(user,fullName,role="user"){if(!user)return null;try{const q=await supabaseClient.from("profiles").select("id,full_name,role").eq("auth_user_id",user.id).maybeSingle();if(q.data){const patch={};if(fullName&&q.data.full_name!==fullName)patch.full_name=fullName;if(role&&q.data.role!==role)patch.role=role;if(Object.keys(patch).length)await supabaseClient.from("profiles").update(patch).eq("id",q.data.id);return q.data.id}const ins=await supabaseClient.from("profiles").insert({full_name:fullName||"مستخدم مَدخَل",role:role||"user",auth_user_id:user.id}).select("id").maybeSingle();if(ins.error)return null;return ins.data?ins.data.id:null}catch(e){return null}}
+async function publicProfileId(user,fullName,role="user"){
+ if(!user)return null;
+ try{
+  const q=await supabaseClient.from("profiles").select("id,full_name,role").eq("auth_user_id",user.id).maybeSingle();
+  if(q.error)throw q.error;
+  if(q.data){
+   const patch={};
+   if(fullName&&q.data.full_name!==fullName)patch.full_name=fullName;
+   if(Object.keys(patch).length){
+    const u=await supabaseClient.from("profiles").update(patch).eq("id",q.data.id).eq("auth_user_id",user.id);
+    if(u.error)throw u.error;
+   }
+   return q.data.id;
+  }
+  const ins=await supabaseClient.from("profiles").insert({full_name:fullName||"مستخدم مَدخَل",role:role||"user",auth_user_id:user.id}).select("id").maybeSingle();
+  if(ins.error)return null;
+  return ins.data?ins.data.id:null;
+ }catch(e){console.warn("public profile sync",e);return null}
+}
 function localProfile(){return getLS(LS.profile,{})}
 function fullNameFromFields(){return [document.getElementById("workerFirstName")?.value.trim(),document.getElementById("workerFatherName")?.value.trim(),document.getElementById("workerFamilyName")?.value.trim()].filter(Boolean).join(" ")}
 async function loadProfile(){const p=localProfile();const map={workerFirstName:p.first_name||"",workerFatherName:p.father_name||"",workerFamilyName:p.family_name||"",workerMotherName:p.mother_name||"",workerBirthDate:p.birth_date||"",workerQualification:p.qualification||"",occupationSearch:p.occupation_label||"",occupationUri:p.occupation_uri||"",occupationLabel:p.occupation_label||"",workerLocation:p.location||"",workerWorkType:p.work_type||"",workerExperienceYears:p.experience_years??"",workerSkillsExtra:p.skills||"",workerSummary:p.summary||""};Object.keys(map).forEach(id=>{const e=document.getElementById(id);if(e)e.value=map[id]});renderExistingProfileStatus(p);if(p.occupation_uri)loadOccupationSkills(p.occupation_uri)}
@@ -1545,7 +1563,7 @@ document.addEventListener("DOMContentLoaded",updateSubscriptionFeatureVisibility
 </script>
 <script src="./subscription-runtime.js?v=20261023-1"></script>
 <script src="./jibran.js?v=20261023-1"></script>
-<script src="./employer-flow-enhancement.js"></script>
-<script src="./worker-match-lifecycle.js?v=20261023-1"></script>
+<script src="./employer-flow-enhancement.js?v=20261028-role-guard-v1"></script>
+<script src="./worker-match-lifecycle.js?v=20261027-official-v5"></script>
 </body>
 </html>

@@ -90,3 +90,19 @@ No source ingestion was rebuilt or deleted in this batch. Payment activation rem
 - Made the canonical `OUTSIDE_SCOPE` classification take precedence over fallback region/country/location hints, preventing contradictory metadata from admitting out-of-scope opportunities.
 - Kept the change limited to client-side visibility filtering. No job-source ingestion code, job rows, schemas, or matching-score thresholds were changed.
 - Verification: checked the live `public.jobs` schema and current status distribution; ran focused cases for Syria/MENA location-only matches and contradictory `OUTSIDE_SCOPE` metadata. Post-merge GitHub Actions validation and Pages deployment succeeded; a manual browser/device smoke test remains unverified and should be completed during the next real-device check.
+
+
+## 2026-10-27 — Official external match recommendations and matching security
+- Connected the worker match center and Jibran's canonical matching path to prefer server-calculated external recommendations from \`get_my_opportunity_recommendations\`; if the RPC is unavailable, the existing public-opportunity fallback remains in place.
+- Added safe HTTP(S)-only validation before rendering external application links, and cleaned XML/CDATA wrappers from external title labels returned by feeds.
+- Synced the live free-launch matching changes into \`supabase/migrations/20261027_free_launch_matching_security_hardening.sql\`, including the free-launch gate, capped processing batches, occupation-relevance v5 scoring, and table write restrictions for match requests and professional evaluations.
+- Recomputed the active external job/worker pairs for the four confirmed worker profiles. The current persisted set has 9,464 updated pairs, including 147 scores at or above the recommendation threshold.
+- Verified that the live recommendation RPC returns qualifying results under simulated authenticated ownership for each confirmed worker; verified negative scoring cases for unrelated job titles and verified the external score RPC rejects a different user's worker profile.
+- Browser/device smoke testing and GitHub Pages deployment verification remain pending.
+
+
+## 2026-10-28 — Profile-role guard consistency
+- Synced the security-hardening migration with the stricter live role guard: existing-profile role changes are rejected for non-admin clients, client-created admin roles remain blocked, and trusted service-role operations retain their server-side path.
+- Updated worker profile synchronization to change the display name only on an existing profile rather than attempting a client-side role change.
+- Updated employer onboarding to avoid silently changing an existing profile role. Existing non-employer profiles now receive a clear message; selecting the employer role is still permitted on initial profile creation.
+- Added a cache-busting version to the employer flow script. Browser/device smoke tests are still required before calling the release fully verified.
