@@ -3,9 +3,13 @@ name: UN Careers Import
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   import-un-jobs:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Import UN Careers jobs
@@ -15,6 +19,7 @@ jobs:
 
         run: |
           python - <<'PY'
+          import os
           import json
           import urllib.request
           import urllib.parse
@@ -22,8 +27,13 @@ jobs:
           import xml.etree.ElementTree as ET
           import re
 
-          SUPABASE_URL = "https://qbufsdpdobuicpljnssr.supabase.co"
-          SUPABASE_KEY = "${SUPABASE_KEY}"
+          SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
+          SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
+
+          if not SUPABASE_URL:
+              raise SystemExit("ERROR: SUPABASE_URL is missing")
+          if not SUPABASE_KEY:
+              raise SystemExit("ERROR: SUPABASE_SERVICE_ROLE_KEY secret is missing")
 
           FEED_URL = "https://careers.un.org/jobfeed?isPage=true"
 
@@ -71,6 +81,7 @@ jobs:
 
           inserted = 0
           skipped = 0
+          failed = 0
 
           def text(item, tag):
               node = item.find(tag)
@@ -239,11 +250,15 @@ jobs:
                   print(
                       f"Insert failed for {title}: {error}"
                   )
-                  skipped += 1
+                  failed += 1
 
           print("--------------------------------")
-          print("UN Careers import completed")
+          print("UN Careers import summary")
           print(f"Inserted: {inserted}")
-          print(f"Skipped: {skipped}")
+          print(f"Skipped (invalid or already present): {skipped}")
+          print(f"Failed: {failed}")
           print("--------------------------------")
+
+          if failed:
+              raise SystemExit(1)
           PY
