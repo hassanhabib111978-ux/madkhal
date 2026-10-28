@@ -578,7 +578,8 @@ async function loadProfileRemote(){
    skills:prefer(q.data.skills,old.skills),
    summary:prefer(q.data.professional_summary,prefer(q.data.work_field,old.summary||old.professional_summary||old.work_field)),
    professional_summary:prefer(q.data.professional_summary,old.professional_summary??old.summary),
-   full_name:prefer(q.data.full_name,remoteFull||old.full_name)
+   full_name:prefer(q.data.full_name,remoteFull||old.full_name),
+   updated_at:prefer(q.data.updated_at,old.updated_at)
   };
   setLS(LS.profile,p);
   await loadProfile();
