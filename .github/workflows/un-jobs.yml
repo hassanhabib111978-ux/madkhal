@@ -26,6 +26,7 @@ jobs:
           import urllib.request
           import urllib.parse
           import hashlib
+          from datetime import datetime, timezone
 
           SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
           SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
@@ -57,6 +58,7 @@ jobs:
           print(f"Jobs received: {len(jobs)}")
 
           inserted = 0
+          updated = 0
           skipped = 0
           failed = 0
 
@@ -142,10 +144,6 @@ jobs:
                       response.read().decode("utf-8")
                   )
 
-              if existing:
-                  skipped += 1
-                  continue
-
               payload = {
                   "source": "himalayas",
                   "source_job_id": job_id,
@@ -160,44 +158,63 @@ jobs:
                   "canonical_url": source_url,
                   "status": "active",
                   "confidence": 1.0,
-                  "dedupe_hash": dedupe_hash
+                  "dedupe_hash": dedupe_hash,
+                  "last_checked_at": datetime.now(timezone.utc).isoformat()
               }
+              payload_to_write = {
+                  key: value for key, value in payload.items()
+                  if value not in (None, "")
+              }
+              params = urllib.parse.urlencode({
+                  "source": "eq.himalayas",
+                  "source_job_id": "eq." + job_id
+              })
 
-              body = json.dumps(payload).encode("utf-8")
-
-              insert_request = urllib.request.Request(
-                  f"{SUPABASE_URL}/rest/v1/jobs",
-                  data=body,
-                  method="POST",
-                  headers={
-                      "apikey": SUPABASE_KEY,
-                      "Authorization": f"Bearer {SUPABASE_KEY}",
-                      "Content-Type": "application/json",
-                      "Prefer": "return=minimal"
-                  }
-              )
+              if existing:
+                  write_request = urllib.request.Request(
+                      f"{SUPABASE_URL}/rest/v1/jobs?{params}",
+                      data=json.dumps(payload_to_write).encode("utf-8"),
+                      method="PATCH",
+                      headers={
+                          "apikey": SUPABASE_KEY,
+                          "Authorization": f"Bearer {SUPABASE_KEY}",
+                          "Content-Type": "application/json",
+                          "Prefer": "return=minimal"
+                      }
+                  )
+              else:
+                  write_request = urllib.request.Request(
+                      f"{SUPABASE_URL}/rest/v1/jobs",
+                      data=json.dumps(payload_to_write).encode("utf-8"),
+                      method="POST",
+                      headers={
+                          "apikey": SUPABASE_KEY,
+                          "Authorization": f"Bearer {SUPABASE_KEY}",
+                          "Content-Type": "application/json",
+                          "Prefer": "return=minimal"
+                      }
+                  )
 
               try:
-                  with urllib.request.urlopen(
-                      insert_request,
-                      timeout=30
-                  ) as response:
-
-                      if response.status in (200, 201, 204):
-                          inserted += 1
+                  with urllib.request.urlopen(write_request, timeout=30) as response:
+                      if response.status not in (200, 201, 204):
+                          raise RuntimeError(
+                              f"Unexpected Supabase status {response.status}"
+                          )
+                      if existing:
+                          updated += 1
                       else:
-                          skipped += 1
-
+                          inserted += 1
               except Exception as error:
-                  print(
-                      f"Insert failed: {title} - {error}"
-                  )
+                  action = "Refresh" if existing else "Insert"
+                  print(f"{action} failed: {title} - {error}")
                   failed += 1
 
           print("--------------------------------")
           print("Himalayas import summary")
           print(f"Inserted: {inserted}")
-          print(f"Skipped (invalid or already present): {skipped}")
+          print(f"Refreshed existing live jobs: {updated}")
+          print(f"Skipped (invalid records): {skipped}")
           print(f"Failed: {failed}")
           print("--------------------------------")
 
