@@ -411,6 +411,10 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 
 <script>
 window.MADKHAL_MONTHLY_SUBSCRIPTION_ENABLED = false; // أعده إلى true لإظهار الاشتراك مجددًا
+(function(){
+  const card=document.getElementById("subscriptionOfferCard");
+  if(card)card.style.display=window.MADKHAL_MONTHLY_SUBSCRIPTION_ENABLED===true?"":"none";
+})();
 "use strict";
 
 const SUPABASE_URL="https://qbufsdpdobuicpljnssr.supabase.co";
