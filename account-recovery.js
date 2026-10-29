@@ -186,7 +186,7 @@
   }
 
   function validEmail(email) {
-    return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(String(email || "").trim());
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
   }
 
   function lockButton(id, locked, waitText) {
