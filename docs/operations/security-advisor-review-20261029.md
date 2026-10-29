@@ -48,3 +48,40 @@ Guidance: https://supabase.com/docs/guides/auth/password-security#password-stren
 5. Enable leaked-password protection and test registration/reset behavior.
 
 This snapshot does not certify the whole platform as secure; it records advisor findings requiring a controlled review.
+
+## Additional function-level review — 2026-10-29
+
+The following checks were made with read-only catalog queries and function-definition inspection. No database writes or permission changes were performed.
+
+### Public occupation RPCs: review indicates limited read-only data
+
+The three `anon`-callable functions were inspected:
+- `search_madkhal_occupations(text, integer)` reads the public ESCO occupation labels, alternative labels and ISCO group; its result limit is capped at 50.
+- `get_madkhal_occupation_skills(text, integer)` reads ESCO skill labels and occupation-skill relations; its result limit is capped at 30.
+- `madkhal_occupation_has_live_opportunity(text)` returns a boolean based on public active jobs and open employer vacancies.
+
+They do not write records or return a user's private profile in the inspected definitions. Their `SECURITY DEFINER` status still merits least-privilege review, but the current evidence does not support an indiscriminate revoke that could break occupation search for public visitors.
+
+### Authenticated mutating RPCs: checks observed in inspected definitions
+
+Ownership or role checks were present in the inspected definitions for core operations including `advance_match_request`, `apply_to_employer_vacancy`, `calculate_external_opportunity_match`, `process_my_worker_matches`, `process_my_employer_matches`, `record_external_job_application`, `save_external_job_application`, and `update_external_job_application`. The admin metrics function checks the caller's `profiles.role` for `admin`. The professional evaluation RPC verifies that the evaluator is a party to a completed/closed match, and the table itself enforces an overall rating range of 1–5.
+
+These observations lower the apparent immediate risk of the inspected functions, but do not substitute for end-to-end authorization tests against each RPC and RLS policy.
+
+### 5. Payment-intent RPC is not gated by the current UI pause
+
+**Observed configuration at review time:** `index.html` sets `window.MADKHAL_MONTHLY_SUBSCRIPTION_ENABLED = false`; the live `public.madkhal_launch_config` row reports `free_launch = true`.
+
+The live definition of `public.create_subscription_payment_intent()`:
+- is a `SECURITY DEFINER` function executable by `authenticated`;
+- checks only that `auth.uid()` is not null;
+- inserts a $1 USD `subscription` payment intent with `pending` status and a 30-minute expiry;
+- does not check `madkhal_launch_config.free_launch`, a server-side subscription feature flag, an existing active/requested subscription, or an existing unexpired pending intent.
+
+Because the app enables anonymous sign-in, a visitor with an anonymous authenticated session can call an exposed authenticated RPC directly even when the subscription UI is hidden. This does **not** by itself prove that any payment can be charged or a subscription activated: the inspected function only creates a pending intent and does not mark it paid. It does allow the paused flow to be initiated outside the UI and may permit repeated pending-intent creation.
+
+**Recommended disposition:** before making the payment screen available again, put a server-side feature/launch gate inside this RPC and make pending-intent creation idempotent or rate-limited. Keep provider verification as the only path to a paid status. Do not change `free_launch` merely to silence this finding: it also participates in free-launch matching and notification rules. A narrow, CLI-generated migration should be reviewed and tested before application. No change was applied to production during this audit.
+
+### Related performance advisories
+
+The live advisor also reports 11 unindexed foreign keys, 15 RLS policies that re-evaluate auth/current-setting expressions, 35 unused indexes, and multiple permissive SELECT policies on `match_requests`. These are not all security vulnerabilities. Review query plans and policy semantics first; do not remove unused indexes or combine permissive policies without evidence that behavior remains equivalent.
