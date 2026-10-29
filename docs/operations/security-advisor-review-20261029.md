@@ -85,3 +85,17 @@ Because the app enables anonymous sign-in, a visitor with an anonymous authentic
 ### Related performance advisories
 
 The live advisor also reports 11 unindexed foreign keys, 15 RLS policies that re-evaluate auth/current-setting expressions, 35 unused indexes, and multiple permissive SELECT policies on `match_requests`. These are not all security vulnerabilities. Review query plans and policy semantics first; do not remove unused indexes or combine permissive policies without evidence that behavior remains equivalent.
+
+### 6. Migration history is not reconciled with version-controlled files
+
+The live Supabase migration ledger returned **105 applied versions** (from `20260910212925` through `20261028111849`), while the repository's `supabase/migrations/` directory currently contains **8 SQL files**. Several checked-in files appear to be grouped/snapshot hardening scripts, so this count alone does not prove that exactly 97 migrations are missing; it does show that the live ledger and checked-in file set are not a one-file-per-version history.
+
+**Release risk:** a fresh environment, disaster recovery, or a future migration deploy may not be reproducible from the tracked SQL files alone. This should be treated as an operational release blocker until the ledger and source files are reconciled.
+
+**Safe next steps:**
+1. Export/list the complete live migration ledger and identify which applied versions are represented by each tracked SQL file.
+2. Produce a canonical schema snapshot from the live database and compare it with a fresh disposable database built from repository migrations.
+3. Restore missing historical migration files or establish a documented, checksummed baseline/squash strategy with an explicit starting version. Do not edit already-applied migration files to make the ledger appear aligned.
+4. Validate the plan in a non-production Supabase branch/project before changing production migration history.
+
+No migration ledger or schema change was applied as part of this read-only review.
