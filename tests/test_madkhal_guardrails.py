@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 index = (ROOT / "index.html").read_text(encoding="utf-8")
 match_lifecycle = (ROOT / "worker-match-lifecycle.js").read_text(encoding="utf-8")
+account_recovery = (ROOT / "account-recovery.js").read_text(encoding="utf-8")
 agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
 
 checks = [
@@ -22,6 +23,12 @@ checks = [
     ("remote profile merge preserves revision timestamp", "updated_at:prefer(q.data.updated_at,old.updated_at)" in index),
     ("occupation picker clears hidden canonical values on input", 'document.getElementById("occupationUri").value=""' in index),
     ("occupation picker uses live opportunities", "allVisibleJobs" in index and "search_madkhal_occupations" in index),
+    ("account recovery module is loaded from the account screen", 'src="./account-recovery.js?v=20261029-1"' in index and 'id="accountScreen"' in index),
+    ("account recovery links email to the current identity", "auth.updateUser(" in account_recovery and "emailRedirectTo: recoveryRedirectUrl()" in account_recovery),
+    ("account recovery requires a confirmed email before setting a password", "user.email || !isConfirmed(user)" in account_recovery and "auth.updateUser({ password })" in account_recovery),
+    ("account recovery supports sign-in and password reset", "auth.signInWithPassword({ email, password })" in account_recovery and "auth.resetPasswordForEmail(email" in account_recovery),
+    ("account recovery blocks cross-account local-data mixing", "madkhalHasLocalRecoveryData()" in account_recovery and "لم نحذفها ولم نخلطها بحساب آخر" in account_recovery),
+    ("account recovery never stores passwords in browser storage", "localStorage.setItem" not in account_recovery and ".setItem(" not in account_recovery),
     ("constitution is present", "Codex is the engineering agent for مَدخَل" in agents),
 ]
 
