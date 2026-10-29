@@ -22,6 +22,7 @@ checks = [
     ("remote profile merge preserves revision timestamp", "updated_at:prefer(q.data.updated_at,old.updated_at)" in index),
     ("occupation picker clears hidden canonical values on input", 'document.getElementById("occupationUri").value=""' in index),
     ("occupation picker uses live opportunities", "allVisibleJobs" in index and "search_madkhal_occupations" in index),
+    ("empty worker profile does not show a fabricated assessment", "أنشئ ملفك المهني أولًا ليظهر تقييم مبني على بياناتك الفعلية." in index and "score:52,level:\"ملف قابل للتحسين\"" not in index and "تقييم مبدئي احتياطي — سيُستبدل تلقائيًا" not in index),
     ("constitution is present", "Codex is the engineering agent for مَدخَل" in agents),
 ]
 
