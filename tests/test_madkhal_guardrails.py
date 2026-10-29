@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 index = (ROOT / "index.html").read_text(encoding="utf-8")
 match_lifecycle = (ROOT / "worker-match-lifecycle.js").read_text(encoding="utf-8")
+service_worker = (ROOT / "service-worker.js").read_text(encoding="utf-8")
 agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
 
 checks = [
@@ -22,6 +23,9 @@ checks = [
     ("remote profile merge preserves revision timestamp", "updated_at:prefer(q.data.updated_at,old.updated_at)" in index),
     ("occupation picker clears hidden canonical values on input", 'document.getElementById("occupationUri").value=""' in index),
     ("occupation picker uses live opportunities", "allVisibleJobs" in index and "search_madkhal_occupations" in index),
+    ("service worker only deletes Madkhal-owned caches", '.filter(name => name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME)' in service_worker and 'names.map(name => caches.delete(name))' not in service_worker),
+    ("service worker stores successful navigations for network fallback", "await cache.put(request, response.clone())" in service_worker and "await cache.match(request)" in service_worker),
+    ("service worker cache failures do not block page navigation", "Caching is best-effort" in service_worker),
     ("constitution is present", "Codex is the engineering agent for مَدخَل" in agents),
 ]
 
