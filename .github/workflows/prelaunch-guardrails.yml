@@ -22,5 +22,8 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Check account recovery JavaScript syntax
+        run: node --check account-recovery.js
+
       - name: Run repository regression checks
         run: python -m unittest discover -s tests -v
