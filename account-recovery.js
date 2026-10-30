@@ -1,58 +1,22 @@
-/* Madkhal account continuity: link the current anonymous identity, then permit sign-in/recovery. */
+/* Madkhal account continuity and sign-in panels for seeker, employer and account screens. */
 (function () {
   "use strict";
 
   const byId = (id) => document.getElementById(id);
-  let cardReady = false;
+  const roots = [];
+  let authListenerBound = false;
 
-  function addCard() {
-    if (cardReady || !byId("accountScreen")) return;
-    const account = byId("accountScreen");
-    const card = document.createElement("div");
-    card.className = "card";
-    card.id = "accountRecoveryCard";
-    card.innerHTML = [
-      '<h3>🔐 حفظ حسابك واستعادته</h3>',
-      '<p>اربط بريدك بالحساب الحالي كي يبقى ملفك وطلباتك مرتبطين بك عند تبديل الجهاز. لا تكتب كلمة المرور إلا في هذه الواجهة الرسمية.</p>',
-      '<div id="accountRecoveryStatus" class="notice" role="status" aria-live="polite">جارٍ التحقق من حالة الحساب…</div>',
-      '<div id="recoveryLinkPanel" class="hidden">',
-        '<div class="form-group"><label for="recoveryLinkEmail">بريد إلكتروني تملكه</label>',
-        '<input id="recoveryLinkEmail" type="email" autocomplete="email" inputmode="email" placeholder="name@example.com"></div>',
-        '<button id="recoveryLinkButton" type="button" class="primary-btn" style="width:100%">ربط البريد بالحساب الحالي</button>',
-        '<p class="notice">سنرسل رسالة تأكيد. افتحها ثم ارجع إلى مَدخَل لتعيين كلمة المرور. يجب أن يكون ربط الهويات اليدوي مفعّلًا في إعدادات Supabase.</p>',
-      '</div>',
-      '<div id="recoveryPasswordPanel" class="hidden">',
-        '<div class="form-group"><label for="recoveryNewPassword">كلمة المرور الجديدة (8 أحرف على الأقل)</label>',
-        '<input id="recoveryNewPassword" type="password" autocomplete="new-password" minlength="8" placeholder="كلمة مرور قوية"></div>',
-        '<div class="form-group"><label for="recoveryConfirmPassword">تأكيد كلمة المرور</label>',
-        '<input id="recoveryConfirmPassword" type="password" autocomplete="new-password" minlength="8" placeholder="أعد كتابة كلمة المرور"></div>',
-        '<button id="recoverySetPasswordButton" type="button" class="primary-btn" style="width:100%">حفظ كلمة المرور</button>',
-      '</div>',
-      '<div id="recoveryLoginPanel" class="hidden">',
-        '<hr style="border:0;border-top:1px solid var(--line);margin:16px 0">',
-        '<h4 style="margin:0 0 10px">لديك حساب محفوظ مسبقًا؟</h4>',
-        '<div class="form-group"><label for="recoveryLoginEmail">البريد الإلكتروني</label>',
-        '<input id="recoveryLoginEmail" type="email" autocomplete="username" inputmode="email" placeholder="name@example.com"></div>',
-        '<div class="form-group"><label for="recoveryLoginPassword">كلمة المرور</label>',
-        '<input id="recoveryLoginPassword" type="password" autocomplete="current-password" placeholder="كلمة المرور"></div>',
-        '<button id="recoveryLoginButton" type="button" class="secondary-btn" style="width:100%">تسجيل الدخول إلى حسابي</button>',
-        '<button id="recoveryForgotButton" type="button" class="secondary-btn" style="width:100%;margin-top:8px">نسيت كلمة المرور؟ أرسل رابط استعادة</button>',
-        '<p class="notice">لن نخلط بيانات جلسة مؤقتة محفوظة على هذا الجهاز مع حساب آخر. إذا كان لديك ملف محلي غير مربوط، سنوقف تسجيل الدخول بدلًا من دمج بيانات قد تخص حسابين مختلفين.</p>',
-      '</div>'
-    ].join("");
-    const anchor = account.querySelector(".card");
-    if (anchor) anchor.insertAdjacentElement("afterend", card);
-    else account.prepend(card);
-    cardReady = true;
-
-    byId("recoveryLinkButton").addEventListener("click", linkCurrentEmail);
-    byId("recoverySetPasswordButton").addEventListener("click", setCurrentPassword);
-    byId("recoveryLoginButton").addEventListener("click", signInExistingAccount);
-    byId("recoveryForgotButton").addEventListener("click", sendPasswordRecovery);
+  function field(root, name) {
+    return root ? root.querySelector('[data-field="' + name + '"]') : null;
   }
 
-  function setStatus(message, kind) {
-    const box = byId("accountRecoveryStatus");
+  function panel(root, name, visible) {
+    const node = root && root.querySelector('[data-panel="' + name + '"]');
+    if (node) node.classList.toggle("hidden", !visible);
+  }
+
+  function setStatus(root, message, kind) {
+    const box = field(root, "status");
     if (!box) return;
     box.textContent = message;
     box.className = kind === "success" ? "notice success" : "notice";
@@ -67,11 +31,6 @@
     }
   }
 
-  function toggle(id, visible) {
-    const node = byId(id);
-    if (node) node.classList.toggle("hidden", !visible);
-  }
-
   function isConfirmed(user) {
     return !!(user && (user.email_confirmed_at || user.confirmed_at));
   }
@@ -83,7 +42,7 @@
     return String(value).trim() !== "";
   }
 
-  // This is a guard only: it never deletes or overwrites local values.
+  // Guard only: never deletes or overwrites local values from a previous identity.
   function madkhalHasLocalRecoveryData() {
     const keys = [
       "madkhal_clean_profile_v1",
@@ -106,7 +65,6 @@
         return hasMeaningfulValue(parsed);
       });
     } catch (_) {
-      // If storage cannot be inspected, fail closed rather than risk mixing accounts.
       return true;
     }
   }
@@ -118,24 +76,68 @@
     return url.toString();
   }
 
-  function renderPanels(user, customMessage) {
+  function validEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
+  }
+
+  function lockButton(button, locked, waitText) {
+    if (!button) return;
+    if (locked) {
+      if (!button.dataset.originalText) button.dataset.originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = waitText || "جارٍ التنفيذ…";
+    } else {
+      button.disabled = false;
+      if (button.dataset.originalText) button.textContent = button.dataset.originalText;
+    }
+  }
+
+  function friendlyAuthError(error, action) {
+    const message = String(error && error.message || "").toLowerCase();
+    if (/manual linking|identity linking|linking is disabled|not allowed to link/.test(message)) {
+      return "إعداد ربط الهويات غير مفعّل في Supabase. لم نغيّر بياناتك؛ يجب تفعيل Allow manual linking ثم المحاولة مجددًا.";
+    }
+    if (/already registered|already been registered|already exists|duplicate|identity.*exists|email.*taken/.test(message)) {
+      return "هذا البريد مرتبط بحساب موجود. لم ندمج بيانات الحسابين تلقائيًا؛ سجّل الدخول من جهاز لا يحتوي ملفًا محليًا غير مربوط.";
+    }
+    if (/invalid login credentials|invalid credentials/.test(message)) {
+      return "تعذر تسجيل الدخول بهذه البيانات. تحقق من البريد وكلمة المرور أو اطلب رابط استعادة.";
+    }
+    if (/rate limit|too many requests/.test(message)) {
+      return "تم تجاوز حد المحاولات مؤقتًا. انتظر قليلًا ثم أعد المحاولة.";
+    }
+    if (/redirect.*(allow|url)|url.*not allowed/.test(message)) {
+      return "عنوان العودة غير مسموح في إعدادات Supabase. أضف رابط تطبيق مَدخَل إلى قائمة Redirect URLs ثم أعد المحاولة.";
+    }
+    if (/password/.test(message) && /weak|short|length|characters/.test(message)) {
+      return "كلمة المرور ضعيفة أو أقصر من الحد المطلوب. استخدم كلمة مرور أطول.";
+    }
+    return action === "link"
+      ? "تعذر إرسال تأكيد البريد الآن. تحقق من البريد وإعدادات المصادقة والبريد الصادر؛ بقي ملفك كما هو."
+      : "تعذر إكمال العملية الآن. لم نحذف بيانات الملف المحلي؛ تحقق من الاتصال وإعدادات المصادقة ثم أعد المحاولة.";
+  }
+
+  function renderPanel(root, user, customMessage) {
     const isAnonymous = !user || user.is_anonymous === true;
     const confirmed = isConfirmed(user);
-    toggle("recoveryLinkPanel", !user || isAnonymous || !user.email);
-    toggle("recoveryLoginPanel", isAnonymous);
-    toggle("recoveryPasswordPanel", !!user && !isAnonymous && !!user.email && confirmed);
+    const permanentWithEmail = !!user && !isAnonymous && !!user.email;
+
+    panel(root, "link", !user || isAnonymous || !user.email);
+    panel(root, "login", isAnonymous);
+    panel(root, "password", permanentWithEmail && confirmed);
+    panel(root, "signed", permanentWithEmail && confirmed);
 
     if (customMessage) return;
     if (!user) {
-      setStatus("لا توجد جلسة نشطة بعد. يمكنك استعادة حساب محفوظ، أو ربط بريد بعد تهيئة الجلسة الحالية.");
+      setStatus(root, "لا توجد جلسة نشطة بعد. اربط بريدك بالحساب الحالي أو سجّل الدخول إلى حساب محفوظ.");
     } else if (isAnonymous) {
-      setStatus("أنت تستخدم جلسة مؤقتة. اربط بريدك هنا على هذه الجلسة قبل تبديل الجهاز حتى يبقى الملف المهني وطلبات التقديم مرتبطين بالحساب نفسه.");
+      setStatus(root, "أنت تستخدم جلسة مؤقتة. ثبّت هذا الحساب ببريد تملكه حتى يبقى ملفك وطلباتك مرتبطين بك عند تغيير الجهاز.");
     } else if (user.email && !confirmed) {
-      setStatus("طلب ربط البريد قيد التأكيد. افتح رسالة التأكيد أولًا؛ لن نسمح بتعيين كلمة مرور قبل تأكيد البريد.");
+      setStatus(root, "أرسلنا طلب تأكيد البريد إلى " + user.email + ". افتح رسالة التأكيد ثم ارجع إلى مَدخَل لتعيين كلمة المرور.");
     } else if (user.email && confirmed) {
-      setStatus("حسابك مربوط ببريد مؤكد: " + user.email + ". احفظ كلمة المرور لتتمكن من استعادته على جهاز آخر.", "success");
+      setStatus(root, "حسابك مثبت ببريد مؤكد: " + user.email + ". يمكنك الآن تعيين كلمة مرور أو تحديثها وتسجيل الدخول من جهاز آخر.", "success");
     } else {
-      setStatus("اربط بريدًا تملكه بالحساب الحالي لتمكين الاستعادة.");
+      setStatus(root, "اربط بريدًا تملكه بالحساب الحالي لتمكين الاستعادة.");
     }
   }
 
@@ -160,65 +162,35 @@
     return user;
   }
 
-  function friendlyAuthError(error, action) {
-    const message = String(error && error.message || "").toLowerCase();
-    if (/manual linking|identity linking|linking is disabled|not allowed to link/.test(message)) {
-      return "إعداد ربط الهويات غير مفعّل في Supabase. لم نغيّر بياناتك؛ يجب على مدير المشروع تفعيل Allow manual linking ثم المحاولة مجددًا.";
-    }
-    if (/already registered|already been registered|already exists|duplicate|identity.*exists|email.*taken/.test(message)) {
-      return "هذا البريد مرتبط بحساب موجود. لا نحاول دمجه تلقائيًا مع الجلسة الحالية؛ استخدم استعادة الحساب من جهاز أو متصفح لا يحتوي ملفًا محليًا غير مربوط.";
-    }
-    if (/invalid login credentials|invalid credentials/.test(message)) {
-      return "تعذر تسجيل الدخول بهذه البيانات. تحقق من البريد وكلمة المرور أو اطلب رابط استعادة.";
-    }
-    if (/rate limit|too many requests/.test(message)) {
-      return "تم تجاوز حد المحاولات مؤقتًا. انتظر قليلًا ثم أعد المحاولة.";
-    }
-    if (/redirect.*(allow|url)|url.*not allowed/.test(message)) {
-      return "عنوان العودة غير مسموح في إعدادات Supabase. أضف رابط تطبيق مَدخَل إلى قائمة Redirect URLs ثم أعد المحاولة.";
-    }
-    if (/password/.test(message) && /weak|short|length|characters/.test(message)) {
-      return "كلمة المرور ضعيفة أو أقصر من الحد المطلوب. استخدم كلمة مرور أطول.";
-    }
-    return action === "link"
-      ? "تعذر إرسال تأكيد البريد الآن. تحقق من البريد وإعدادات المصادقة والبريد الصادر في Supabase؛ لم نحذف ملفك."
-      : "تعذر إكمال العملية الآن. لم نحذف بيانات الملف المحلي؛ تحقق من الاتصال وإعدادات المصادقة ثم أعد المحاولة.";
-  }
-
-  function validEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
-  }
-
-  function lockButton(id, locked, waitText) {
-    const button = byId(id);
-    if (!button) return;
-    if (locked) {
-      if (!button.dataset.originalText) button.dataset.originalText = button.textContent;
-      button.disabled = true;
-      button.textContent = waitText || "جارٍ التنفيذ…";
-    } else {
-      button.disabled = false;
-      if (button.dataset.originalText) button.textContent = button.dataset.originalText;
+  async function refreshAfterLogin() {
+    try {
+      if (typeof loadProfileRemote === "function") await loadProfileRemote();
+      if (typeof loadAccount === "function") await loadAccount();
+      if (typeof renderNotifications === "function") await renderNotifications();
+      if (typeof loadMyEmployerVacancies === "function") await loadMyEmployerVacancies();
+    } catch (error) {
+      console.warn("Madkhal account refresh", error);
     }
   }
 
-  async function linkCurrentEmail() {
-    const email = String(byId("recoveryLinkEmail").value || "").trim().toLowerCase();
+  async function linkCurrentEmail(root) {
+    const email = String(field(root, "link-email")?.value || "").trim().toLowerCase();
+    const button = field(root, "link-button");
     if (!validEmail(email)) {
-      setStatus("أدخل بريدًا إلكترونيًا صحيحًا تملكه.", "warning");
+      setStatus(root, "أدخل بريدًا إلكترونيًا صحيحًا تملكه.", "warning");
       return;
     }
-    lockButton("recoveryLinkButton", true, "جارٍ إرسال طلب التأكيد…");
+    lockButton(button, true, "جارٍ إرسال طلب التأكيد…");
     try {
       if (typeof supabaseClient === "undefined" || !supabaseClient) throw new Error("client unavailable");
       const user = await ensureSessionUser();
       if (!user) {
-        setStatus("تعذّر إنشاء جلسة للمستخدم. أعد تحميل الصفحة بعد التحقق من الاتصال.", "warning");
+        setStatus(root, "تعذّر إنشاء جلسة للمستخدم. أعد تحميل الصفحة بعد التحقق من الاتصال.", "warning");
         return;
       }
       if (!user.is_anonymous && user.email && isConfirmed(user)) {
-        setStatus("هذا الحساب مربوط بالفعل ببريد مؤكد. استخدم قسم كلمة المرور أدناه.", "success");
-        renderPanels(user, "keep");
+        setStatus(root, "هذا الحساب مثبت بالفعل ببريد مؤكد. استخدم قسم كلمة المرور أدناه.", "success");
+        renderPanel(root, user, "keep");
         return;
       }
       const { data, error } = await supabaseClient.auth.updateUser(
@@ -226,120 +198,193 @@
         { emailRedirectTo: recoveryRedirectUrl() }
       );
       if (error) throw error;
-      const confirmedUser = data && data.user ? data.user : user;
-      renderPanels(confirmedUser, "keep");
-      setStatus("أرسلنا طلب تأكيد إلى " + email + ". افتح الرسالة على هذا الجهاز أو ارجع إلى مَدخَل بعد التأكيد، ثم عيّن كلمة المرور. إذا لم تصل، افحص البريد غير المرغوب فيه وإعدادات SMTP.", "success");
+      const updatedUser = data && data.user ? data.user : user;
+      renderPanel(root, updatedUser, "keep");
+      setStatus(root, "أرسلنا رسالة تأكيد إلى " + email + ". افتحها من صندوق الوارد، ثم ارجع إلى مَدخَل واحفظ كلمة المرور. إذا لم تصل، افحص الرسائل غير المرغوب فيها.", "success");
     } catch (error) {
-      setStatus(friendlyAuthError(error, "link"), "warning");
+      setStatus(root, friendlyAuthError(error, "link"), "warning");
     } finally {
-      lockButton("recoveryLinkButton", false);
+      lockButton(button, false);
     }
   }
 
-  async function setCurrentPassword() {
-    const password = String(byId("recoveryNewPassword").value || "");
-    const confirm = String(byId("recoveryConfirmPassword").value || "");
+  async function setCurrentPassword(root) {
+    const password = String(field(root, "new-password")?.value || "");
+    const confirm = String(field(root, "confirm-password")?.value || "");
     if (password.length < 8) {
-      setStatus("استخدم كلمة مرور لا تقل عن 8 أحرف.", "warning");
+      setStatus(root, "استخدم كلمة مرور لا تقل عن 8 أحرف.", "warning");
       return;
     }
     if (password !== confirm) {
-      setStatus("كلمتا المرور غير متطابقتين.", "warning");
+      setStatus(root, "كلمتا المرور غير متطابقتين.", "warning");
       return;
     }
-    lockButton("recoverySetPasswordButton", true, "جارٍ حفظ كلمة المرور…");
+    const button = field(root, "password-button");
+    lockButton(button, true, "جارٍ حفظ كلمة المرور…");
     try {
       const user = await readSessionUser();
       if (!user || user.is_anonymous || !user.email || !isConfirmed(user)) {
-        setStatus("أكد البريد الإلكتروني أولًا ثم أعد المحاولة. لا يمكن حفظ كلمة المرور لحساب مجهول أو غير مؤكد.", "warning");
+        setStatus(root, "أكد البريد الإلكتروني أولًا ثم أعد المحاولة. لا يمكن حفظ كلمة المرور لحساب مجهول أو غير مؤكد.", "warning");
         return;
       }
       const { error } = await supabaseClient.auth.updateUser({ password });
       if (error) throw error;
-      byId("recoveryNewPassword").value = "";
-      byId("recoveryConfirmPassword").value = "";
-      setStatus("تم حفظ كلمة المرور. احتفظ بها؛ ستحتاجها لاستعادة حسابك من جهاز آخر.", "success");
+      field(root, "new-password").value = "";
+      field(root, "confirm-password").value = "";
+      setStatus(root, "تم حفظ كلمة المرور بأمان لدى نظام الحسابات. لا تُحفظ في المتصفح.", "success");
     } catch (error) {
-      setStatus(friendlyAuthError(error, "password"), "warning");
+      setStatus(root, friendlyAuthError(error, "password"), "warning");
     } finally {
-      lockButton("recoverySetPasswordButton", false);
+      lockButton(button, false);
     }
   }
 
-  async function signInExistingAccount() {
-    const email = String(byId("recoveryLoginEmail").value || "").trim().toLowerCase();
-    const password = String(byId("recoveryLoginPassword").value || "");
+  async function signInExistingAccount(root) {
+    const email = String(field(root, "login-email")?.value || "").trim().toLowerCase();
+    const password = String(field(root, "login-password")?.value || "");
     if (!validEmail(email) || !password) {
-      setStatus("أدخل البريد الإلكتروني وكلمة المرور.", "warning");
+      setStatus(root, "أدخل البريد الإلكتروني وكلمة المرور.", "warning");
       return;
     }
-    lockButton("recoveryLoginButton", true, "جارٍ تسجيل الدخول…");
+    const button = field(root, "login-button");
+    lockButton(button, true, "جارٍ تسجيل الدخول…");
     try {
       const user = await readSessionUser();
       if ((!user || user.is_anonymous) && madkhalHasLocalRecoveryData()) {
-        setStatus("أوقفنا تسجيل الدخول لأن هذا المتصفح يحتوي بيانات محلية من جلسة مؤقتة. لم نحذفها ولم نخلطها بحساب آخر. اربط البريد بالحساب الحالي أو استعد الحساب من متصفح/جهاز لا يحتوي بيانات محلية غير مربوطة.", "warning");
+        setStatus(root, "أوقفنا تسجيل الدخول لأن هذا المتصفح يحتوي بيانات محلية من جلسة مؤقتة. لم نحذفها ولم نخلطها بحساب آخر. اربط البريد بالحساب الحالي أو استخدم جهازًا لا يحتوي بيانات محلية غير مربوطة.", "warning");
         return;
       }
       const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      byId("recoveryLoginPassword").value = "";
-      renderPanels(data && data.user ? data.user : null, "keep");
-      setStatus("تم تسجيل الدخول. جارٍ استرجاع ملفك المهني والبيانات المرتبطة بهذا الحساب…", "success");
-      try {
-        if (typeof loadProfileRemote === "function") await loadProfileRemote();
-        if (typeof loadAccount === "function") await loadAccount();
-        if (typeof renderNotifications === "function") await renderNotifications();
-      } catch (refreshError) {
-        console.warn("Madkhal account recovery refresh", refreshError);
-      }
-      const current = await readSessionUser();
-      renderPanels(current, "keep");
-      setStatus("تم تسجيل الدخول. افحص الملف المهني والطلبات بعد استرجاع البيانات.", "success");
+      field(root, "login-password").value = "";
+      renderPanel(root, data && data.user ? data.user : null, "keep");
+      setStatus(root, "تم تسجيل الدخول. جارٍ استرجاع ملفك وطلباتك المرتبطة بهذا الحساب…", "success");
+      await refreshAfterLogin();
+      renderPanel(root, await readSessionUser());
     } catch (error) {
-      setStatus(friendlyAuthError(error, "login"), "warning");
+      setStatus(root, friendlyAuthError(error, "login"), "warning");
     } finally {
-      lockButton("recoveryLoginButton", false);
+      lockButton(button, false);
     }
   }
 
-  async function sendPasswordRecovery() {
-    const email = String(byId("recoveryLoginEmail").value || "").trim().toLowerCase();
+  async function sendPasswordRecovery(root) {
+    const email = String(field(root, "login-email")?.value || "").trim().toLowerCase();
     if (!validEmail(email)) {
-      setStatus("أدخل البريد المرتبط بحسابك أولًا.", "warning");
+      setStatus(root, "أدخل البريد المرتبط بحسابك أولًا.", "warning");
       return;
     }
-    lockButton("recoveryForgotButton", true, "جارٍ إرسال رابط الاستعادة…");
+    const button = field(root, "forgot-button");
+    lockButton(button, true, "جارٍ إرسال رابط الاستعادة…");
     try {
       const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
         redirectTo: recoveryRedirectUrl()
       });
       if (error) throw error;
-      setStatus("إن كان البريد مرتبطًا بحساب، فستصلك رسالة استعادة. افتحها للعودة إلى مَدخَل ثم احفظ كلمة مرور جديدة. تحقق من مجلد الرسائل غير المرغوب فيها إن تأخرت.", "success");
+      setStatus(root, "إن كان البريد مرتبطًا بحساب، فستصلك رسالة استعادة. افتحها للعودة إلى مَدخَل ثم احفظ كلمة مرور جديدة.", "success");
     } catch (error) {
-      setStatus(friendlyAuthError(error, "reset"), "warning");
+      setStatus(root, friendlyAuthError(error, "reset"), "warning");
     } finally {
-      lockButton("recoveryForgotButton", false);
+      lockButton(button, false);
     }
   }
 
+  function mountCard(containerId, prefix, heading, description) {
+    const container = byId(containerId);
+    if (!container || byId(prefix + "AccountCard")) return;
+    const card = document.createElement("div");
+    card.className = "card madkhal-account-card";
+    card.id = prefix + "AccountCard";
+    card.innerHTML = [
+      "<h3>" + heading + "</h3>",
+      "<p>" + description + "</p>",
+      '<div data-field="status" class="notice" role="status" aria-live="polite">جارٍ التحقق من حالة الحساب…</div>',
+      '<div data-panel="link" class="hidden">',
+        '<div class="form-group"><label>البريد الإلكتروني لتثبيت الحساب والتواصل</label>',
+        '<input data-field="link-email" type="email" autocomplete="email" inputmode="email" placeholder="name@example.com"></div>',
+        '<button data-field="link-button" type="button" class="primary-btn" style="width:100%">تثبيت حسابي بهذا البريد</button>',
+        '<p class="notice">سنرسل رسالة تأكيد إلى بريدك. بعد تأكيده ستتمكن من تعيين كلمة المرور. هذا البريد لا يظهر تلقائيًا في بطاقات الفرص العامة.</p>',
+      "</div>",
+      '<div data-panel="password" class="hidden">',
+        '<div class="form-group"><label>كلمة المرور الجديدة (8 أحرف على الأقل)</label>',
+        '<input data-field="new-password" type="password" autocomplete="new-password" minlength="8" placeholder="كلمة مرور قوية"></div>',
+        '<div class="form-group"><label>تأكيد كلمة المرور</label>',
+        '<input data-field="confirm-password" type="password" autocomplete="new-password" minlength="8" placeholder="أعد كتابة كلمة المرور"></div>',
+        '<button data-field="password-button" type="button" class="primary-btn" style="width:100%">حفظ كلمة المرور</button>',
+      "</div>",
+      '<div data-panel="login" class="hidden">',
+        '<hr style="border:0;border-top:1px solid var(--line);margin:16px 0">',
+        '<h4 style="margin:0 0 10px">لديك حساب مثبت مسبقًا؟</h4>',
+        '<div class="form-group"><label>البريد الإلكتروني</label>',
+        '<input data-field="login-email" type="email" autocomplete="username" inputmode="email" placeholder="name@example.com"></div>',
+        '<div class="form-group"><label>كلمة المرور</label>',
+        '<input data-field="login-password" type="password" autocomplete="current-password" placeholder="كلمة المرور"></div>',
+        '<button data-field="login-button" type="button" class="secondary-btn" style="width:100%">تسجيل الدخول واستعادة ملفي</button>',
+        '<button data-field="forgot-button" type="button" class="secondary-btn" style="width:100%;margin-top:8px">نسيت كلمة المرور؟ أرسل رابط استعادة</button>',
+        '<p class="notice">لن نخلط بيانات جلسة مؤقتة بحساب آخر. إذا كان هذا الجهاز يحتوي ملفًا غير مربوط، سنوقف تسجيل الدخول بدلًا من نقل بياناته تلقائيًا.</p>',
+      "</div>"
+    ].join("");
+
+    const anchor = container.querySelector(".card");
+    if (anchor) anchor.insertAdjacentElement("afterend", card);
+    else container.prepend(card);
+    roots.push(card);
+
+    field(card, "link-button").addEventListener("click", () => linkCurrentEmail(card));
+    field(card, "password-button").addEventListener("click", () => setCurrentPassword(card));
+    field(card, "login-button").addEventListener("click", () => signInExistingAccount(card));
+    field(card, "forgot-button").addEventListener("click", () => sendPasswordRecovery(card));
+    readSessionUser().then((user) => renderPanel(card, user)).catch(() => renderPanel(card, null));
+  }
+
+  function renderAll(user) {
+    roots.forEach((root) => renderPanel(root, user));
+  }
+
   function init() {
-    addCard();
+    mountCard(
+      "workerScreen",
+      "worker",
+      "🔐 تثبيت حساب الباحث",
+      "أضف بريدك الإلكتروني وكلمة مرور لتثبيت حسابك، والعودة إلى ملفك وطلباتك من أي جهاز. البريد مخصص لهوية الدخول والتواصل المرتبط بحسابك."
+    );
+    mountCard(
+      "employerScreen",
+      "employer",
+      "🔐 تثبيت حساب صاحب الفرصة",
+      "أضف بريدك الإلكتروني وثبّت حسابك حتى تتمكن من الدخول مجددًا وإدارة فرصك والرد على الباحثين من أي جهاز."
+    );
+    mountCard(
+      "accountScreen",
+      "accountRecovery",
+      "🔐 حفظ حسابك واستعادته",
+      "اربط بريدك بالحساب الحالي كي يبقى ملفك وطلباتك مرتبطين بك عند تبديل الجهاز."
+    );
+
     if (typeof supabaseClient === "undefined" || !supabaseClient || !supabaseClient.auth) {
-      renderPanels(null, "keep");
-      setStatus("تعذّر الاتصال بنظام الحسابات حاليًا. بقي الملف المحلي كما هو.", "warning");
+      renderAll(null);
+      roots.forEach((root) => setStatus(root, "تعذّر الاتصال بنظام الحسابات حاليًا. بقي ملفك المحلي كما هو.", "warning"));
       return;
     }
+
     supabaseClient.auth.getSession().then(({ data, error }) => {
-      if (error) setStatus("تعذّر قراءة جلسة الحساب. لم نغيّر الملف المحلي.", "warning");
-      renderPanels(data && data.session ? data.session.user : null);
-    }).catch(() => renderPanels(null));
-    try {
-      supabaseClient.auth.onAuthStateChange((_event, session) => {
-        renderPanels(session ? session.user : null);
-      });
-    } catch (_) {}
+      if (error) {
+        roots.forEach((root) => setStatus(root, "تعذّر قراءة جلسة الحساب. لم نغيّر الملف المحلي.", "warning"));
+      }
+      renderAll(data && data.session ? data.session.user : null);
+    }).catch(() => renderAll(null));
+
+    if (!authListenerBound) {
+      try {
+        supabaseClient.auth.onAuthStateChange((_event, session) => {
+          renderAll(session ? session.user : null);
+        });
+        authListenerBound = true;
+      } catch (_) {}
+    }
+
     window.addEventListener("pageshow", () => {
-      readSessionUser().then((user) => renderPanels(user)).catch(() => {});
+      readSessionUser().then(renderAll).catch(() => {});
     });
   }
 
