@@ -17,6 +17,7 @@ tamara_sync = (ROOT / "supabase/migrations/20261030112557_add_tamara_greenhouse_
 job_visibility = (ROOT / "supabase/migrations/20261030112116_restrict_public_job_visibility.sql").read_text(encoding="utf-8")
 agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
 private_grants = (ROOT / "supabase/migrations/20261030114500_restrict_sensitive_view_grants.sql").read_text(encoding="utf-8")
+anon_api_hardening = (ROOT / "supabase/migrations/20261030125500_harden_anon_api_privileges.sql").read_text(encoding="utf-8")
 
 checks = [
     ("one occupation search implementation", index.count("async function searchOccupations(") == 1),
@@ -70,6 +71,12 @@ checks = [
     ("sensitive match and admin views are not directly readable by anon/authenticated roles", "REVOKE SELECT ON TABLE public.worker_opportunity_recommendations FROM anon, authenticated" in private_grants and "REVOKE SELECT ON TABLE public.madkhal_investor_metrics FROM anon, authenticated" in private_grants and "REVOKE SELECT ON TABLE public.professional_match_results FROM anon, authenticated" in private_grants),
     ("personal views lose only the pre-auth anon grant", "public.external_opportunity_match_results" in private_grants and "public.professional_record_summary" in private_grants and "public.worker_subscription_status" in private_grants and "FROM anon;" in private_grants),
     ("public job and ESCO catalog grants remain explicitly verified", "public.jobs" in private_grants and "public.esco_occupation_picker" in private_grants and "public_job_discovery_grant_missing" in private_grants),
+    ("unauthenticated table and sequence grants are revoked by default", "REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM anon" in anon_api_hardening and "REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM anon" in anon_api_hardening),
+    ("anonymous SQL role retains only the public jobs and ESCO catalog surface", "public.jobs" in anon_api_hardening and "public.esco_occupation_picker" in anon_api_hardening and "unneeded_anon_table_privilege_remains" in anon_api_hardening),
+    ("private match RPCs are not executable by the unauthenticated role", "REVOKE EXECUTE ON ALL FUNCTIONS IN SCHEMA public FROM PUBLIC, anon" in anon_api_hardening and "private_match_rpc_still_callable_by_anon" in anon_api_hardening),
+    ("authenticated users retain app RPCs after public execute is revoked", "GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO authenticated, service_role" in anon_api_hardening and "authenticated_dashboard_rpc_missing" in anon_api_hardening),
+    ("postgres-owned future objects do not inherit anonymous grants", "ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public" in anon_api_hardening and "REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC" in anon_api_hardening),
+
     ("public REST job reads expose only active non-expired opportunities", "DROP POLICY IF EXISTS jobs_public_read" in job_visibility and "CREATE POLICY jobs_public_read_active" in job_visibility and "TO anon, authenticated" in job_visibility and "status =" in job_visibility and "expires_at IS NULL OR expires_at > now()" in job_visibility),
     ("public job visibility hardening does not alter ingestion data", "DELETE FROM public.jobs" not in job_visibility and "UPDATE public.jobs" not in job_visibility and "TRUNCATE" not in job_visibility),
     ("WorkLink feed cursor wraps to page one after page 88", "CASE WHEN f.page >= 88 THEN 1 ELSE f.page + 1 END" in worklink_feed_cycle),
