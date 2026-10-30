@@ -980,7 +980,7 @@ function cleanSalaryCurrency(v){return cleanJobText(v)}
 function validSalaryNumber(v){const n=Number(v);return Number.isFinite(n)&&n>=0&&n<=10000000?n:null}
 function salaryText(j){let a=validSalaryNumber(j.salary_min),b=validSalaryNumber(j.salary_max),c=cleanSalaryCurrency(j.salary_currency);if(a===0&&b===0){a=null;b=null}if(a===0)a=null;if(b===0)b=null;if(a!=null&&b!=null&&a>b){const x=a;a=b;b=x}if(a!=null&&b!=null)return a+" - "+b+(c?" "+c:"");if(a!=null)return "من "+a+(c?" "+c:"");if(b!=null)return "حتى "+b+(c?" "+c:"");return "حسب المصدر"}
 function workType(t){const x=cleanJobText(t);return ({full_time:"دوام كامل",part_time:"دوام جزئي",remote:"عن بُعد",freelance:"عمل حر",any:"أي نوع"})[x]||x||"غير محدد"}
-function categoryFor(j){const t=normalizeText([j.title,j.category,j.description].filter(Boolean).join(" "));if(t.includes("محاسب")||t.includes("محاسبة")||t.includes("account"))return "🧮 المحاسبة";if(t.includes("برمج")||t.includes("developer")||t.includes("engineer")||t.includes("software"))return "💻 التقنية";if(t.includes("تصميم")||t.includes("designer")||t.includes("graphic"))return "🎨 التصميم";if(t.includes("تسويق")||t.includes("marketing")||t.includes("مبيعات")||t.includes("sales"))return "📣 التسويق والمبيعات";if(t.includes("سكرت")||t.includes("secretary")||t.includes("admin"))return "🗂️ الإدارة";if(t.includes("خدمة العملاء")||t.includes("customer service"))return "🗣️ خدمة العملاء";if(t.includes("driver")||t.includes("سائق"))return "🚚 النقل";if(t.includes("تعليم")||t.includes("teacher")||t.includes("مدرس"))return "📚 التعليم";return "🔧 أخرى"}function visibleJob(j){return {id:j.id,title:cleanJobText(j.title)||"فرصة",company:cleanJobText(j.company)||"جهة العمل غير معلنة في المصدر",location:cleanJobText(j.location||j.country)||"غير محدد",country:cleanJobText(j.country),type:workType(j.job_type),category:categoryFor(j),description:cleanJobText(j.description)||"تفاصيل الوظيفة موجودة في المصدر الأصلي.",salary:salaryText(j),source:cleanJobText(j.source),source_name:cleanJobText(j.source_name),external_link:String(j.source_url||j.canonical_url||""),canonical_link:String(j.canonical_url||j.source_url||""),posted_at:j.posted_at||null,last_checked_at:j.last_checked_at||null,expires_at:j.expires_at||null,application_deadline:applicationDeadlineDate(j)}}
+function categoryFor(j){const t=normalizeText([j.title,j.category,j.description].filter(Boolean).join(" "));if(t.includes("محاسب")||t.includes("محاسبة")||t.includes("account"))return "🧮 المحاسبة";if(t.includes("برمج")||t.includes("developer")||t.includes("engineer")||t.includes("software"))return "💻 التقنية";if(t.includes("تصميم")||t.includes("designer")||t.includes("graphic"))return "🎨 التصميم";if(t.includes("تسويق")||t.includes("marketing")||t.includes("مبيعات")||t.includes("sales"))return "📣 التسويق والمبيعات";if(t.includes("سكرت")||t.includes("secretary")||t.includes("admin"))return "🗂️ الإدارة";if(t.includes("خدمة العملاء")||t.includes("customer service"))return "🗣️ خدمة العملاء";if(t.includes("driver")||t.includes("سائق"))return "🚚 النقل";if(t.includes("تعليم")||t.includes("teacher")||t.includes("مدرس"))return "📚 التعليم";return "🔧 أخرى"}function visibleJob(j){return {id:j.id,title:cleanJobText(j.title)||"فرصة",company:cleanJobText(j.company)||"جهة العمل غير معلنة في المصدر",location:cleanJobText(j.location||j.country)||"غير محدد",country:cleanJobText(j.country),type:workType(j.job_type),category:categoryFor(j),description:cleanJobText(j.description)||"تفاصيل الوظيفة موجودة في المصدر الأصلي.",description_missing:!cleanJobText(j.description),salary:salaryText(j),source:cleanJobText(j.source),source_name:cleanJobText(j.source_name),external_link:String(j.source_url||j.canonical_url||""),canonical_link:String(j.canonical_url||j.source_url||""),posted_at:j.posted_at||null,last_checked_at:j.last_checked_at||null,expires_at:j.expires_at||null,application_deadline:applicationDeadlineDate(j)}}
 function sourceDateLabel(value){
  const timestamp=Date.parse(value||"");
  if(!Number.isFinite(timestamp))return "";
@@ -989,6 +989,10 @@ function sourceDateLabel(value){
 function jobPublishedDateLine(job){
  if(!job||!job.posted_at)return '<div class="opportunity-meta" role="note">🗓️ تاريخ النشر غير متوفر في بيانات المصدر؛ تحقق من تاريخ الإعلان في الموقع الأصلي.</div>';
  return '<div class="opportunity-meta">🗓️ تاريخ النشر حسب المصدر: '+escapeHtml(sourceDateLabel(job.posted_at))+'</div>';
+}
+function jobDescriptionLine(job){
+ if(job&&job.description_missing)return '<div class="notice" role="note">⚠️ الوصف التفصيلي غير متوفر في بيانات المصدر؛ راجع الإعلان الأصلي قبل التقديم.</div>';
+ return '<p>'+escapeHtml(job&&job.description||"تفاصيل الوظيفة موجودة في المصدر الأصلي.")+'</p>';
 }
 function jobFreshnessLine(job){
  const raw=job&&job.last_checked_at;
@@ -1089,7 +1093,7 @@ ${jobPublishedDateLine(currentJob)}
     <div class="info-strip">💰 ${escapeHtml(currentJob.salary)}</div>
     ${currentJob.application_deadline?'<div class="info-strip">⏳ آخر موعد للتقديم: '+escapeHtml(formatDeadlineLabel(currentJob.application_deadline))+'</div>':""}
     <h3 style="margin-top:16px">التفاصيل</h3>
-    <p>${escapeHtml(currentJob.description)}</p>
+    ${jobDescriptionLine(currentJob)}
     <div class="notice">هذه فرصة من المصدر الأصلي. عند التقديم سيسجل مَدخَل طلبك في سجل المتابعة ثم يفتح الرابط الأصلي للتقديم.</div>
   </div>`;
   const details=box.firstElementChild;
