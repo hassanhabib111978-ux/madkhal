@@ -342,6 +342,10 @@
   }
 
   function init() {
+    // Keep account identity/recovery tooling in the repository for the paid phase,
+    // but do not expose email or password fields during the free-launch workflow.
+    if (window.MADKHAL_ACCOUNT_EMAIL_UI_ENABLED !== true) return;
+
     mountCard(
       "workerScreen",
       "worker",

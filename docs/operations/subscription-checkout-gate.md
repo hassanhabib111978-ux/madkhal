@@ -9,7 +9,8 @@
 
 ## Request behavior
 
-- The RPC requires a permanent, non-anonymous Supabase Auth user; anonymous sessions must link an email and confirm it before checkout can ever be enabled.
+- The RPC currently requires a permanent, non-anonymous Supabase Auth user. It does not require an email address or confirmed email during the free-launch phase; email is intentionally absent from the current user workflow.
+- Before paid activation, extend the server-side gate to require a confirmed email (auth.users.email_confirmed_at) and a recorded opt-in for job-alert emails. Do not rely on a client-side check alone. See email-notifications-rollout.md.
 - A live active worker subscription is rejected rather than creating another charge request.
 - Repeated or simultaneous requests for the same user reuse one unexpired pending intent. A transaction-scoped advisory lock serializes requests for that user.
 - Expired or non-pending intents are not reused.
