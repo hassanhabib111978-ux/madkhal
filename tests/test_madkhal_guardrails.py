@@ -19,6 +19,7 @@ agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
 private_grants = (ROOT / "supabase/migrations/20261030114500_restrict_sensitive_view_grants.sql").read_text(encoding="utf-8")
 anon_api_hardening = (ROOT / "supabase/migrations/20261030125500_harden_anon_api_privileges.sql").read_text(encoding="utf-8")
 anon_esco_revoke = (ROOT / "supabase/migrations/20261030130500_revoke_anon_esco_table_reads.sql").read_text(encoding="utf-8")
+auth_definer_hardening = (ROOT / "supabase/migrations/20261030131500_limit_authenticated_definer_rpcs.sql").read_text(encoding="utf-8")
 
 checks = [
     ("one occupation search implementation", index.count("async function searchOccupations(") == 1),
@@ -75,6 +76,10 @@ checks = [
     ("unauthenticated table and sequence grants are revoked by default", "REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM anon" in anon_api_hardening and "REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM anon" in anon_api_hardening),
     ("anonymous SQL role retains only the public jobs and ESCO catalog surface", "public.jobs" in anon_api_hardening and "public.esco_occupation_picker" in anon_api_hardening and "unneeded_anon_table_privilege_remains" in anon_api_hardening),
     ("ESCO catalogs are served through bounded public RPCs, not direct anon table reads", "REVOKE SELECT ON TABLE" in anon_esco_revoke and "direct_esco_catalog_read_still_granted_to_anon" in anon_esco_revoke and "bounded_public_esco_catalog_rpcs_missing" in anon_esco_revoke),
+    ("authenticated SECURITY DEFINER access is limited to the reviewed allowlist", "v_auth_definer_count <> 23" in auth_definer_hardening and "REVOKE EXECUTE ON FUNCTION %s FROM authenticated" in auth_definer_hardening),
+    ("payment activation remains unavailable to client roles", "payment_activation_rpc_must_not_be_client_callable" in auth_definer_hardening),
+    ("future postgres-owned privileged functions require explicit authenticated grants", "ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public" in auth_definer_hardening and "REVOKE EXECUTE ON FUNCTIONS FROM authenticated" in auth_definer_hardening),
+
 
     ("private match RPCs are not executable by the unauthenticated role", "REVOKE EXECUTE ON ALL FUNCTIONS IN SCHEMA public FROM PUBLIC, anon" in anon_api_hardening and "private_match_rpc_still_callable_by_anon" in anon_api_hardening),
     ("authenticated users retain app RPCs after public execute is revoked", "GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO authenticated, service_role" in anon_api_hardening and "authenticated_dashboard_rpc_missing" in anon_api_hardening),
