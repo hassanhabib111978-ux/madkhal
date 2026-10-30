@@ -13,6 +13,7 @@ subscription_gate = (ROOT / "supabase/migrations/20261030084600_secure_subscript
 account_recovery = (ROOT / "account-recovery.js").read_text(encoding="utf-8")
 service_worker = (ROOT / "service-worker.js").read_text(encoding="utf-8")
 worklink_feed_cycle = (ROOT / "supabase/migrations/20261030113000_restart_worklink_feed_cycle.sql").read_text(encoding="utf-8")
+tamara_sync = (ROOT / "supabase/migrations/20261030112557_add_tamara_greenhouse_feed_sync.sql").read_text(encoding="utf-8")
 job_visibility = (ROOT / "supabase/migrations/20261030112116_restrict_public_job_visibility.sql").read_text(encoding="utf-8")
 agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
 
@@ -55,6 +56,10 @@ checks = [
     ("service worker caches successful same-origin navigations for fallback", "await cache.put(request, response.clone())" in service_worker and "await cache.match(request)" in service_worker),
     ("service worker cache failure never blocks successful navigation", "Caching is best-effort" in service_worker),
 
+    ("Tamara feed uses the official public Greenhouse endpoint", "boards-api.greenhouse.io/v1/boards/tamara/jobs?content=true" in tamara_sync and "net.http_get" in tamara_sync),
+    ("Tamara feed completeness is verified before deactivating absent jobs", "v_expected_count <= 0" in tamara_sync and "v_array_count <> v_expected_count" in tamara_sync and "v_unique_count <> v_expected_count" in tamara_sync and "NOT (source_job_id = ANY(v_feed_ids))" in tamara_sync),
+    ("Tamara feed upserts current jobs and refreshes checked timestamp", "ON CONFLICT (source, source_job_id) DO UPDATE" in tamara_sync and "last_checked_at = now()" in tamara_sync),
+    ("Tamara feed cron remains separate from the paused paid subscription", "madkhal-tamara-fetch" in tamara_sync and "madkhal-tamara-import" in tamara_sync and "subscriptions_enabled" not in tamara_sync),
     ("public REST job reads expose only active non-expired opportunities", "DROP POLICY IF EXISTS jobs_public_read" in job_visibility and "CREATE POLICY jobs_public_read_active" in job_visibility and "TO anon, authenticated" in job_visibility and "status =" in job_visibility and "expires_at IS NULL OR expires_at > now()" in job_visibility),
     ("public job visibility hardening does not alter ingestion data", "DELETE FROM public.jobs" not in job_visibility and "UPDATE public.jobs" not in job_visibility and "TRUNCATE" not in job_visibility),
     ("WorkLink feed cursor wraps to page one after page 88", "CASE WHEN f.page >= 88 THEN 1 ELSE f.page + 1 END" in worklink_feed_cycle),
