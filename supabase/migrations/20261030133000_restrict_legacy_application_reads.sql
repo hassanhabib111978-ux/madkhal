@@ -2,6 +2,7 @@
 -- Employers receive the minimized candidate data through get_my_vacancy_candidates(),
 -- not direct access to the full applications row.
 DROP POLICY IF EXISTS applications_select_allowed ON public.applications;
+DROP POLICY IF EXISTS applications_select_own_seeker ON public.applications;
 
 CREATE POLICY applications_select_own_seeker
 ON public.applications
