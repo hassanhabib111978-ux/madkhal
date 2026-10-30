@@ -36,7 +36,7 @@ checks = [
     ("subscription checkout function grants exclude public and anon", "FROM PUBLIC, anon" in subscription_gate and "TO authenticated, service_role" in subscription_gate),
     ("subscription checkout operations document provider verification prerequisites", "provider integration" in (ROOT / "docs/operations/subscription-checkout-gate.md").read_text(encoding="utf-8")),
 
-    ("empty worker profile never shows a fabricated assessment", "أنشئ ملفك المهني أولًا ليظهر تقييم مبني على بياناتك الفعلية." in index and "score:52,level:\\"ملف قابل للتحسين\\"" not in index and "تقييم مبدئي احتياطي" not in index),
+    ("empty worker profile never shows a fabricated assessment", "أنشئ ملفك المهني أولًا ليظهر تقييم مبني على بياناتك الفعلية." in index and "score:52,level:" not in index and "تقييم مبدئي احتياطي" not in index),
     ("account recovery module is loaded from the account screen", 'src="./account-recovery.js?v=20261030-release-v1"' in index and 'id="accountScreen"' in index),
     ("account recovery links email to current identity", "auth.updateUser(" in account_recovery and "emailRedirectTo: recoveryRedirectUrl()" in account_recovery),
     ("account recovery requires confirmed email before setting password", "user.email || !isConfirmed(user)" in account_recovery and "auth.updateUser({ password })" in account_recovery),
