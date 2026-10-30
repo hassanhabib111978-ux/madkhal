@@ -39,6 +39,7 @@ DECLARE
   v_location text;
   v_country text;
   v_category text;
+  v_description text;
   v_posted_at timestamptz;
   v_deadline timestamptz;
 BEGIN
@@ -123,13 +124,26 @@ BEGIN
       ) INTO v_category;
       v_posted_at := coalesce(nullif(j->>'first_published', '')::timestamptz, nullif(j->>'updated_at', '')::timestamptz, now());
       v_deadline := nullif(j->>'application_deadline', '')::timestamptz;
+      v_description := coalesce(j->>'content', '');
+      v_description := replace(v_description, '&amp;nbsp;', ' ');
+      v_description := replace(v_description, '&nbsp;', ' ');
+      v_description := replace(v_description, '&amp;amp;', '&');
+      v_description := replace(v_description, '&amp;lt;', '<');
+      v_description := replace(v_description, '&amp;gt;', '>');
+      v_description := replace(v_description, '&amp;', '&');
+      v_description := replace(v_description, '&quot;', '"');
+      v_description := replace(v_description, '&#39;', chr(39));
+      v_description := replace(v_description, '&lt;', '<');
+      v_description := replace(v_description, '&gt;', '>');
+      v_description := regexp_replace(v_description, '<[^>]*>', ' ', 'g');
+      v_description := nullif(btrim(regexp_replace(v_description, '[[:space:]]+', ' ', 'g')), '');
       INSERT INTO public.jobs (
         source, source_job_id, title, company, description, location, country,
         category, source_url, canonical_url, posted_at, expires_at, status,
         confidence, dedupe_hash, last_checked_at, updated_at
       ) VALUES (
         'tamara', v_job_id, v_title, coalesce(nullif(trim(j->>'company_name'), ''), 'Tamara'),
-        nullif(j->>'content', ''), v_location, v_country, v_category,
+        v_description, v_location, v_country, v_category,
         v_url, v_url, v_posted_at, v_deadline,
         CASE WHEN v_deadline IS NOT NULL AND v_deadline <= now() THEN 'inactive' ELSE 'active' END,
         0.98, md5('tamara|' || v_job_id), now(), now()
