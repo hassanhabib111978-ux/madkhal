@@ -45,7 +45,7 @@ checks = [
     ("account auth panels support password recovery", "auth.resetPasswordForEmail(email" in account_recovery),
     ("account auth panels use separate password fields and never persist passwords", 'data-field="login-password"' in account_recovery and 'data-field="new-password"' in account_recovery and "localStorage.setItem" not in account_recovery and ".setItem(" not in account_recovery),
     ("account recovery links email to current identity", "auth.updateUser(" in account_recovery and "emailRedirectTo: recoveryRedirectUrl()" in account_recovery),
-    ("account recovery requires confirmed email before setting password", "user.email || !isConfirmed(user)" in account_recovery and "auth.updateUser({ password })" in account_recovery),
+    ("account recovery requires confirmed email before setting password", "if (!user || user.is_anonymous || !user.email || !isConfirmed(user))" in account_recovery and "auth.updateUser({ password })" in account_recovery),
     ("account recovery supports password login and reset", "auth.signInWithPassword({ email, password })" in account_recovery and "auth.resetPasswordForEmail(email" in account_recovery),
     ("account recovery prevents mixing local data between identities", "madkhalHasLocalRecoveryData()" in account_recovery and "لم نحذفها ولم نخلطها بحساب آخر" in account_recovery),
     ("account recovery does not persist passwords in browser storage", "localStorage.setItem" not in account_recovery and ".setItem(" not in account_recovery),
