@@ -12,6 +12,7 @@ match_lifecycle = (ROOT / "worker-match-lifecycle.js").read_text(encoding="utf-8
 subscription_gate = (ROOT / "supabase/migrations/20261030084600_secure_subscription_checkout_gate.sql").read_text(encoding="utf-8")
 account_recovery = (ROOT / "account-recovery.js").read_text(encoding="utf-8")
 service_worker = (ROOT / "service-worker.js").read_text(encoding="utf-8")
+worklink_feed_cycle = (ROOT / "supabase/migrations/20261030113000_restart_worklink_feed_cycle.sql").read_text(encoding="utf-8")
 agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
 
 checks = [
@@ -46,6 +47,12 @@ checks = [
     ("service worker only deletes Madkhal-owned caches", '.filter(name => name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME)' in service_worker and 'names.map(name => caches.delete(name))' not in service_worker),
     ("service worker caches successful same-origin navigations for fallback", "await cache.put(request, response.clone())" in service_worker and "await cache.match(request)" in service_worker),
     ("service worker cache failure never blocks successful navigation", "Caching is best-effort" in service_worker),
+
+    ("WorkLink feed cursor wraps to page one after page 88", "CASE WHEN f.page >= 88 THEN 1 ELSE f.page + 1 END" in worklink_feed_cycle),
+    ("WorkLink feed pagination follows last requested page, not max page", "ORDER BY f.requested_at DESC, f.id DESC" in worklink_feed_cycle),
+    ("WorkLink feed refreshes an existing page slot instead of no-op upsert", "ON CONFLICT (page) DO UPDATE" in worklink_feed_cycle and "request_id = EXCLUDED.request_id" in worklink_feed_cycle and "processed_at = NULL" in worklink_feed_cycle),
+    ("WorkLink feed keeps source deduplication on source and source job id", "ON CONFLICT (source, source_job_id) DO UPDATE" in worklink_feed_cycle),
+    ("WorkLink feed does not delete or bulk-reactivate historical jobs", "DELETE FROM public.jobs" not in worklink_feed_cycle and "UPDATE public.jobs" not in worklink_feed_cycle),
     ("constitution is present", "Codex is the engineering agent for مَدخَل" in agents),
 ]
 
