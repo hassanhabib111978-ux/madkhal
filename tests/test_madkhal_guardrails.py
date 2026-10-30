@@ -16,6 +16,7 @@ worklink_feed_cycle = (ROOT / "supabase/migrations/20261030113000_restart_workli
 tamara_sync = (ROOT / "supabase/migrations/20261030112557_add_tamara_greenhouse_feed_sync.sql").read_text(encoding="utf-8")
 job_visibility = (ROOT / "supabase/migrations/20261030112116_restrict_public_job_visibility.sql").read_text(encoding="utf-8")
 agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+private_grants = (ROOT / "supabase/migrations/20261030114500_restrict_sensitive_view_grants.sql").read_text(encoding="utf-8")
 
 checks = [
     ("one occupation search implementation", index.count("async function searchOccupations(") == 1),
@@ -66,6 +67,9 @@ checks = [
     ("job listings disclose source publication date and warn when last observation is older than 14 days", "function jobFreshnessLine(job)" in index and "ageDays>14" in index and "تاريخ النشر حسب المصدر" in index and "تحقق من المصدر الأصلي قبل التقديم" in index),
     ("missing source publication dates and undisclosed employers are identified explicitly", "function jobPublishedDateLine(job)" in index and "تاريخ النشر غير متوفر في بيانات المصدر" in index and "جهة العمل غير معلنة في المصدر" in index),
     ("job details repeat the source freshness notice", "jobFreshnessLine(currentJob)" in index),
+    ("sensitive match and admin views are not directly readable by anon/authenticated roles", "REVOKE SELECT ON TABLE public.worker_opportunity_recommendations FROM anon, authenticated" in private_grants and "REVOKE SELECT ON TABLE public.madkhal_investor_metrics FROM anon, authenticated" in private_grants and "REVOKE SELECT ON TABLE public.professional_match_results FROM anon, authenticated" in private_grants),
+    ("personal views lose only the pre-auth anon grant", "public.external_opportunity_match_results" in private_grants and "public.professional_record_summary" in private_grants and "public.worker_subscription_status" in private_grants and "FROM anon;" in private_grants),
+    ("public job and ESCO catalog grants remain explicitly verified", "public.jobs" in private_grants and "public.esco_occupation_picker" in private_grants and "public_job_discovery_grant_missing" in private_grants),
     ("public REST job reads expose only active non-expired opportunities", "DROP POLICY IF EXISTS jobs_public_read" in job_visibility and "CREATE POLICY jobs_public_read_active" in job_visibility and "TO anon, authenticated" in job_visibility and "status =" in job_visibility and "expires_at IS NULL OR expires_at > now()" in job_visibility),
     ("public job visibility hardening does not alter ingestion data", "DELETE FROM public.jobs" not in job_visibility and "UPDATE public.jobs" not in job_visibility and "TRUNCATE" not in job_visibility),
     ("WorkLink feed cursor wraps to page one after page 88", "CASE WHEN f.page >= 88 THEN 1 ELSE f.page + 1 END" in worklink_feed_cycle),
