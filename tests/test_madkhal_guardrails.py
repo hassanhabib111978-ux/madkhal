@@ -41,6 +41,7 @@ checks = [
     ("future email rollout documents confirmed-email and explicit-alert-consent requirements", "email_confirmed_at" in (ROOT / "docs/operations/email-notifications-rollout.md").read_text(encoding="utf-8") and "unsubscribe" in (ROOT / "docs/operations/email-notifications-rollout.md").read_text(encoding="utf-8")),
 
     ("empty worker profile never shows a fabricated assessment", "أنشئ ملفك المهني أولًا ليظهر تقييم مبني على بياناتك الفعلية." in index and "score:52,level:" not in index and "تقييم مبدئي احتياطي" not in index),
+    ("temporary anonymous session limitation is disclosed on seeker employer and account screens", index.count("تنبيه حساب المرحلة المجانية") == 3 and "لا تمسح بيانات الموقع" in index and "قد يمنعك من استعادة ملفك وطلباتك" in index),
     ("account email UI remains disabled during free launch", "window.MADKHAL_ACCOUNT_EMAIL_UI_ENABLED = false;" in index and "if (window.MADKHAL_ACCOUNT_EMAIL_UI_ENABLED !== true) return;" in account_recovery),
     ("account recovery module remains versioned and dormant for future paid activation", 'src="./account-recovery.js?v=20261030-email-deferred-v1"' in index and 'id="accountScreen"' in index),
     ("account recovery retains reusable seeker and employer identity panels behind the feature gate", 'mountCard(\n      "workerScreen"' in account_recovery and 'mountCard(\n      "employerScreen"' in account_recovery),

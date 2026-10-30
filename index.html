@@ -306,6 +306,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 <section id="workerScreen" class="screen">
 <button class="back" onclick="showScreen('homeScreen')">→ العودة</button>
 <div class="card"><h2>💼 الباحث عن عمل</h2><p>أكمل ملفك مرة واحدة. بعد الحفظ يحلل مَدخَل بياناتك تلقائيًا ويعرض تقييمك، ثم يعرض لك الفرص العامة والمطابقات المهنية كلٌّ في مساره الصحيح.</p></div>
+<div class="notice" role="note"><strong>تنبيه حساب المرحلة المجانية:</strong> يستخدم مَدخَل حالياً جلسة مؤقتة مرتبطة بهذا المتصفح والجهاز. لا تسجّل الخروج ولا تمسح بيانات الموقع ولا تنتقل إلى جهاز أو متصفح آخر قبل توفر وسيلة استعادة الحساب؛ فقد تفقد إمكانية الوصول إلى ملفك وطلباتك.</div>
 <div class="card action-stack">
 <button class="primary-btn action-btn" onclick="openProfile()">👤 ابدأ ملفك</button>
 <button class="secondary-btn action-btn" onclick="openOpportunities()">🔎 الفرص العامة</button>
@@ -374,6 +375,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 
 <section id="accountScreen" class="screen">
 <div class="card"><h2>👤 حسابي</h2><p id="accountStatus">لم يتم إنشاء الملف بعد.</p><div id="accountSummary" style="margin-top:12px"></div></div>
+<div class="notice" role="note"><strong>تنبيه حساب المرحلة المجانية:</strong> حسابك مرتبط حالياً بجلسة مؤقتة على هذا المتصفح والجهاز. تسجيل الخروج أو مسح بيانات الموقع أو تغيير الجهاز والمتصفح قد يمنعك من استعادة ملفك وطلباتك. سيُضاف خيار استعادة الحساب في مرحلة لاحقة.</div>
 <div class="card"><h3>📊 تقييم مَدخَل</h3><div id="savedAssessmentText">⏳ جارٍ حساب تقييم مَدخَل...</div><button class="secondary-btn" style="width:100%;margin-top:10px" onclick="recalculateAccountAssessment()">🔄 إعادة حساب التقييم</button></div>
 <div class="card"><h3>🔔 التنبيهات</h3><div id="notificationsList"></div></div>
 <div class="card"><h3>📩 طلباتي</h3><div id="applicationsList"></div></div>
@@ -384,6 +386,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 <section id="employerScreen" class="screen">
 <button class="back" onclick="showScreen('homeScreen')">→ العودة</button>
 <div class="card"><h2>🏢 صاحب العمل</h2><p>أنشئ الفرصة، ثم يتولى مَدخَل المطابقة مع الباحثين المناسبين. الفرصة ليست قائمة عامة للتصفح.</p></div>
+<div class="notice" role="note"><strong>تنبيه حساب المرحلة المجانية:</strong> يستخدم مَدخَل حالياً جلسة مؤقتة مرتبطة بهذا المتصفح والجهاز. لا تسجّل الخروج ولا تمسح بيانات الموقع ولا تنتقل إلى جهاز أو متصفح آخر قبل توفر وسيلة استعادة الحساب؛ فقد تفقد إمكانية الوصول إلى فرصك وبيانات إدارتها.</div>
 <div class="card">
 <div class="form-group"><label>اسم الشركة أو صاحب العمل</label><input id="employerName" autocomplete="organization"></div>
 <div class="form-group occupation-box"><label>المهنة المطلوبة</label><input id="employerOccupationSearch" type="text" autocomplete="off" placeholder="اختر المهنة من القائمة — لا تكتبها يدويًا"><input id="employerOccupationUri" type="hidden"><input id="employerOccupationLabel" type="hidden"><div id="employerOccupationResults" class="occupation-results"></div><div id="employerOccupationStatus" class="occupation-status">اختر مهنة مرتبطة بفرص العمل الفعلية.</div></div>

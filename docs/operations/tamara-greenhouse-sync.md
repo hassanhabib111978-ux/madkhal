@@ -20,7 +20,7 @@
 - A direct request to the official public board returned HTTP 200 on 2026-10-30.
 - The feed contained 40 jobs, 40 unique IDs, and `meta.total = 40`.
 - At the pre-sync database audit, 30 Tamara rows were active, 14 of those IDs were absent from the official board, and 24 IDs were new to Madkhal.
-- No previous Tamara rows were removed during feed discovery. The first scheduled import is expected to reconcile the 40 current IDs and mark absent prior IDs inactive.
+- Production import completed successfully on 2026-10-30 at 11:30:54 UTC: 40 current IDs are active and checked, and the 14 previously stored active rows absent from the official feed are now inactive (not deleted). The table retains 54 Tamara rows in total.
 
 ## Operational checks
 
