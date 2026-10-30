@@ -410,7 +410,8 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 <div id="toast" class="toast"></div>
 
 <script>
-window.MADKHAL_MONTHLY_SUBSCRIPTION_ENABLED = false; // أعده إلى true لإظهار الاشتراك مجددًا
+window.MADKHAL_MONTHLY_SUBSCRIPTION_ENABLED = false; // أعده إلى true بعد جاهزية بوابة الدفع والتحقق.
+window.MADKHAL_ACCOUNT_EMAIL_UI_ENABLED = false; // البريد خارج سير العمل المجاني؛ يحتفظ الكود جاهزًا لمرحلة الاشتراك المدفوع.
 (function(){
   const card=document.getElementById("subscriptionOfferCard");
   if(card)card.style.display=window.MADKHAL_MONTHLY_SUBSCRIPTION_ENABLED===true?"":"none";
@@ -1564,6 +1565,6 @@ document.addEventListener("DOMContentLoaded",updateSubscriptionFeatureVisibility
 <script src="./jibran.js?v=20261023-1"></script>
 <script src="./employer-flow-enhancement.js?v=20261028-role-guard-v1"></script>
 <script src="./worker-match-lifecycle.js?v=20261027-official-v5"></script>
-<script src="./account-recovery.js?v=20261030-auth-panels-v1"></script>
+<script src="./account-recovery.js?v=20261030-email-deferred-v1"></script>
 </body>
 </html>
