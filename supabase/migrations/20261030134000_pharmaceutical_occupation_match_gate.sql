@@ -11,7 +11,7 @@ $old$;
   elsif profile_occ ~ '(صيدلاني|صيدلانية|صيدلة|pharmaceutical|pharmacist|pharmacy)'
      OR qualification_text ~ '(صيدلة|pharmacy|pharmaceutical)'
      OR skills_text ~ '(صناعة الادوية|صناعة الأدوية|تصنيع الادوية|تصنيع الأدوية|drug manufacturing|pharmaceutical manufacturing)' then
-    -- A relevant occupation must be stated in the job title, not only its category.
+    -- Pharmaceutical specialty gate: require the specialty in the job title, not only its category.
     IF lower(coalesce(j.title,'')) ~
        '(صيدلاني|صيدلانية|صيدلة|pharmaceutical|pharma|pharmacist|pharmacy|drug manufacturing|drug production|medicine manufacturing|medicines production|pharmacovigilance|pharmaceutical production|pharmaceutical manufacturing|pharmaceutical quality|pharmaceutical sales|drug safety|medicinal products|formulation scientist|formulation engineer)' THEN
       occupation_score := 90;
