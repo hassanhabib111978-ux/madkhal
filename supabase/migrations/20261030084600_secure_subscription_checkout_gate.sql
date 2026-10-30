@@ -22,6 +22,7 @@ CREATE OR REPLACE FUNCTION public.create_subscription_payment_intent()
 AS $function$
 DECLARE
   v_user uuid := auth.uid();
+  v_is_anonymous boolean;
   v_id uuid;
   v_amount numeric;
   v_currency text;
@@ -32,6 +33,16 @@ DECLARE
 BEGIN
   IF v_user IS NULL THEN
     RAISE EXCEPTION 'authentication_required';
+  END IF;
+
+  -- Anonymous sessions must first be converted to a recoverable account.
+  SELECT u.is_anonymous
+    INTO v_is_anonymous
+  FROM auth.users AS u
+  WHERE u.id = v_user;
+
+  IF NOT FOUND OR COALESCE(v_is_anonymous, true) THEN
+    RAISE EXCEPTION 'permanent_account_required';
   END IF;
 
   -- Fail closed unless an operator explicitly enables checkout server-side.
