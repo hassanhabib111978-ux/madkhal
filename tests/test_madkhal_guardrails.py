@@ -21,6 +21,7 @@ anon_api_hardening = (ROOT / "supabase/migrations/20261030125500_harden_anon_api
 anon_esco_revoke = (ROOT / "supabase/migrations/20261030130500_revoke_anon_esco_table_reads.sql").read_text(encoding="utf-8")
 auth_definer_hardening = (ROOT / "supabase/migrations/20261030131500_limit_authenticated_definer_rpcs.sql").read_text(encoding="utf-8")
 legacy_applications_privacy = (ROOT / "supabase/migrations/20261030133000_restrict_legacy_application_reads.sql").read_text(encoding="utf-8")
+pharmaceutical_match_gate = (ROOT / "supabase/migrations/20261030134000_pharmaceutical_occupation_match_gate.sql").read_text(encoding="utf-8")
 
 checks = [
     ("one occupation search implementation", index.count("async function searchOccupations(") == 1),
@@ -83,6 +84,9 @@ checks = [
     ("payment activation remains unavailable to client roles", "payment_activation_rpc_must_not_be_client_callable" in auth_definer_hardening),
     ("future postgres-owned privileged functions require explicit authenticated grants", "ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public" in auth_definer_hardening and "REVOKE EXECUTE ON FUNCTIONS FROM authenticated" in auth_definer_hardening),
     ("legacy employer application reads cannot expose applicant mother name or birth date", "DROP POLICY IF EXISTS applications_select_allowed" in legacy_applications_privacy and "applications_select_own_seeker" in legacy_applications_privacy and "p.auth_user_id = (SELECT auth.uid())" in legacy_applications_privacy),
+    ("pharmaceutical profiles cannot receive generic engineer matches", "pharmaceutical specialty" in pharmaceutical_match_gate and "lower(coalesce(j.title,''))" in pharmaceutical_match_gate and "occupation_score := 90" in pharmaceutical_match_gate),
+    ("existing external match rows are reprocessed under the new occupation revision", "occupation-relevance-v6-pharmaceutical-specialty-gate" in pharmaceutical_match_gate and "v_old_batch" in pharmaceutical_match_gate and "external_match_batch_recalculation_marker_not_updated" in pharmaceutical_match_gate),
+
 
 
 
