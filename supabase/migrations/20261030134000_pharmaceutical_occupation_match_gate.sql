@@ -1,4 +1,4 @@
--- A pharmaceutical engineer/pharmacy profile must not match every generic engineer
+-- Enforce a pharmaceutical specialty gate: a pharmaceutical engineer/pharmacy profile must not match every generic engineer
 -- role. Require an explicit pharmacy/pharmaceutical signal in the job title itself;
 -- source categories can contain polluted XML and must not establish specialty.
 DO $migration$
