@@ -10,6 +10,8 @@ ROOT = Path(__file__).resolve().parents[1]
 index = (ROOT / "index.html").read_text(encoding="utf-8")
 match_lifecycle = (ROOT / "worker-match-lifecycle.js").read_text(encoding="utf-8")
 subscription_gate = (ROOT / "supabase/migrations/20261030084600_secure_subscription_checkout_gate.sql").read_text(encoding="utf-8")
+account_recovery = (ROOT / "account-recovery.js").read_text(encoding="utf-8")
+service_worker = (ROOT / "service-worker.js").read_text(encoding="utf-8")
 agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
 
 checks = [
@@ -33,6 +35,17 @@ checks = [
     ("subscription checkout RPC does not mark payment as paid", "verified_at" not in subscription_gate and "UPDATE public.payment_intents" not in subscription_gate),
     ("subscription checkout function grants exclude public and anon", "FROM PUBLIC, anon" in subscription_gate and "TO authenticated, service_role" in subscription_gate),
     ("subscription checkout operations document provider verification prerequisites", "provider integration" in (ROOT / "docs/operations/subscription-checkout-gate.md").read_text(encoding="utf-8")),
+
+    ("empty worker profile never shows a fabricated assessment", "أنشئ ملفك المهني أولًا ليظهر تقييم مبني على بياناتك الفعلية." in index and "score:52,level:\\"ملف قابل للتحسين\\"" not in index and "تقييم مبدئي احتياطي" not in index),
+    ("account recovery module is loaded from the account screen", 'src="./account-recovery.js?v=20261030-release-v1"' in index and 'id="accountScreen"' in index),
+    ("account recovery links email to current identity", "auth.updateUser(" in account_recovery and "emailRedirectTo: recoveryRedirectUrl()" in account_recovery),
+    ("account recovery requires confirmed email before setting password", "user.email || !isConfirmed(user)" in account_recovery and "auth.updateUser({ password })" in account_recovery),
+    ("account recovery supports password login and reset", "auth.signInWithPassword({ email, password })" in account_recovery and "auth.resetPasswordForEmail(email" in account_recovery),
+    ("account recovery prevents mixing local data between identities", "madkhalHasLocalRecoveryData()" in account_recovery and "لم نحذفها ولم نخلطها بحساب آخر" in account_recovery),
+    ("account recovery does not persist passwords in browser storage", "localStorage.setItem" not in account_recovery and ".setItem(" not in account_recovery),
+    ("service worker only deletes Madkhal-owned caches", '.filter(name => name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME)' in service_worker and 'names.map(name => caches.delete(name))' not in service_worker),
+    ("service worker caches successful same-origin navigations for fallback", "await cache.put(request, response.clone())" in service_worker and "await cache.match(request)" in service_worker),
+    ("service worker cache failure never blocks successful navigation", "Caching is best-effort" in service_worker),
     ("constitution is present", "Codex is the engineering agent for مَدخَل" in agents),
 ]
 
