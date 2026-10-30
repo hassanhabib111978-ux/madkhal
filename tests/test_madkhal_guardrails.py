@@ -25,6 +25,7 @@ checks = [
     ("occupation picker uses live opportunities", "allVisibleJobs" in index and "search_madkhal_occupations" in index),
     ("subscription checkout remains disabled by default on the server", "subscriptions_enabled boolean NOT NULL DEFAULT false" in subscription_gate),
     ("subscription checkout has a backend fail-closed feature gate", "subscription_checkout_disabled" in subscription_gate and "lc.subscriptions_enabled" in subscription_gate),
+    ("subscription checkout rejects anonymous Auth identities", "FROM auth.users" in subscription_gate and "is_anonymous" in subscription_gate and "permanent_account_required" in subscription_gate),
     ("subscription checkout gate does not read or change the free-launch matching flag", "SELECT lc.free_launch" not in subscription_gate and "UPDATE public.madkhal_launch_config" not in subscription_gate),
     ("subscription checkout serializes requests per user", "pg_advisory_xact_lock" in subscription_gate and "hashtextextended" in subscription_gate),
     ("subscription checkout reuses an existing unexpired pending intent", "pi.status" in subscription_gate and "pending" in subscription_gate and "pi.expires_at > pg_catalog.now()" in subscription_gate and "FOR UPDATE" in subscription_gate),
