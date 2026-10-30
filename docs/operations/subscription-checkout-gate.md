@@ -9,10 +9,11 @@
 
 ## Request behavior
 
-- The RPC still requires an authenticated Supabase user.
+- The RPC requires a permanent, non-anonymous Supabase Auth user; anonymous sessions must link an email and confirm it before checkout can ever be enabled.
 - A live active worker subscription is rejected rather than creating another charge request.
 - Repeated or simultaneous requests for the same user reuse one unexpired pending intent. A transaction-scoped advisory lock serializes requests for that user.
 - Expired or non-pending intents are not reused.
+- The permanent-account check is enforced inside the database function, not trusted to the browser.
 - The RPC only creates a pending intent. It never marks payment as paid and never activates a subscription.
 
 ## Important: checkout must remain disabled
