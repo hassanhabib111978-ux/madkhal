@@ -20,6 +20,7 @@ private_grants = (ROOT / "supabase/migrations/20261030114500_restrict_sensitive_
 anon_api_hardening = (ROOT / "supabase/migrations/20261030125500_harden_anon_api_privileges.sql").read_text(encoding="utf-8")
 anon_esco_revoke = (ROOT / "supabase/migrations/20261030130500_revoke_anon_esco_table_reads.sql").read_text(encoding="utf-8")
 auth_definer_hardening = (ROOT / "supabase/migrations/20261030131500_limit_authenticated_definer_rpcs.sql").read_text(encoding="utf-8")
+gulfjobs_feed_hardening = (ROOT / "supabase/migrations/20261030135000_harden_gulfjobs_feed_import.sql").read_text(encoding="utf-8")
 legacy_applications_privacy = (ROOT / "supabase/migrations/20261030133000_restrict_legacy_application_reads.sql").read_text(encoding="utf-8")
 pharmaceutical_match_gate = (ROOT / "supabase/migrations/20261030134000_pharmaceutical_occupation_match_gate.sql").read_text(encoding="utf-8")
 
@@ -81,6 +82,10 @@ checks = [
     ("anonymous SQL role retains only the public jobs and ESCO catalog surface", "public.jobs" in anon_api_hardening and "public.esco_occupation_picker" in anon_api_hardening and "unneeded_anon_table_privilege_remains" in anon_api_hardening),
     ("ESCO catalogs are served through bounded public RPCs, not direct anon table reads", "REVOKE SELECT ON TABLE" in anon_esco_revoke and "direct_esco_catalog_read_still_granted_to_anon" in anon_esco_revoke and "bounded_public_esco_catalog_rpcs_missing" in anon_esco_revoke),
     ("authenticated SECURITY DEFINER access is limited to the reviewed allowlist", "v_auth_definer_count <> 23" in auth_definer_hardening and "REVOKE EXECUTE ON FUNCTION %s FROM authenticated" in auth_definer_hardening),
+    ("GulfJobs XML fields are extracted as plain text", "string(//*[local-name()=\"item\"]" in gulfjobs_feed_hardening and "gulfjobs_text_extraction_anchor_missing" in gulfjobs_feed_hardening),
+    ("GulfJobs importer filters only explicit promotional spam while retaining ordinary housemaid jobs", "occult" in gulfjobs_feed_hardening and "مكتب شغلات بالشهر" in gulfjobs_feed_hardening and "Housemaid" not in gulfjobs_feed_hardening),
+    ("GulfJobs spam is deactivated without deleting historical records", "UPDATE public.jobs" in gulfjobs_feed_hardening and "status='inactive'" in gulfjobs_feed_hardening and "DELETE FROM public.jobs" not in gulfjobs_feed_hardening),
+
     ("payment activation remains unavailable to client roles", "payment_activation_rpc_must_not_be_client_callable" in auth_definer_hardening),
     ("future postgres-owned privileged functions require explicit authenticated grants", "ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public" in auth_definer_hardening and "REVOKE EXECUTE ON FUNCTIONS FROM authenticated" in auth_definer_hardening),
     ("legacy employer application reads cannot expose applicant mother name or birth date", "DROP POLICY IF EXISTS applications_select_allowed" in legacy_applications_privacy and "applications_select_own_seeker" in legacy_applications_privacy and "p.auth_user_id = (SELECT auth.uid())" in legacy_applications_privacy),
